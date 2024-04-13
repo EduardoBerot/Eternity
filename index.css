@@ -117,3 +117,54 @@ form button {
 form button:hover {
     background-color: rgb(21, 128, 128);
 }
+
+@media (max-width:476px){
+    body{
+        height: auto;
+    }
+
+    header p{
+        height: auto;
+        text-align: center;
+    }
+
+    main{
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding-bottom: 16px;
+    }
+    nav{
+        width: 100%;
+        gap: 8px;
+        font-size: medium;
+    }
+
+    #app{
+        width: 100%;
+        gap: 0px;
+    }
+
+    form{
+        padding-top: 8px;
+        gap: 8px;
+    }
+
+    form button{
+        margin: 8px;
+        width: 80%;
+    }
+
+    form input, form select{
+        width: 80%;
+    }
+
+    .content{
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .content p{
+        text-align: left;
+    }
+}
