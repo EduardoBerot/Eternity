@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eternity</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <header>
+        <h1 class="title">Eternity</h1>
+        <p>Seja bem vindo ao site do Clã ETY</p>
+    </header>
+    <main>
+        <nav>
+            <a class="itens" id="item1">Discord</a>
+            <a class="itens" id="item2">Juntar-se</a>
+            <a class="itens" id="item3">Sobre nos</a>
+            <a class="itens" id="item4">Cidade</a>
+        </nav>
+        <section id="app" class="content"></section>
+    </main>
+    <script>
+        const app = document.getElementById('app');
+        const item1 = document.getElementById('item1');
+        const item2 = document.getElementById('item2');
+        const item3 = document.getElementById('item3');
+        const item4 = document.getElementById('item4');
+        const itens = document.querySelector('itens')
+        function renderizarPagina1() {
+            app.innerHTML = '<h1>Acesse nosso discord</h1></br><p>Para acessar nosso servidor discord basta clicar no botão abaixo, lá você podera se manter atualizado quanto as novidades do Clã.</p>';
+        }
+
+        function renderizarPagina2() {
+            app.innerHTML = '<h1>Junte-se a Eternidade </h1></br><p>Junte-se ao Clã Eternity, um lugar acolhedor para jogar Minecraft. Valorizamos amizade, colaboração e diversão. Venha construir, explorar e criar memórias inesquecíveis conosco</p></br><form><input type="text" placeholder="Nick"><input type="text" placeholder="Idade"><select><option value="" disabled selected>Selecionar Foco</option><option value="PvP">PvP</option><option value="Torneio">Torneio</option><option value="Build">Build</option><option value="Farm">Farm</option></select><button>Solicitar Recrutamento</button></form>';
+        }
+
+        function renderizarPagina3() {
+            app.innerHTML = '<h1>Missão, propósito e valores</h1></br><p>Desde 2020, o Clã Eternity tem sido uma comunidade calorosa no Minecraft, unindo jogadores para construir, explorar e crescer juntos. Evoluindo ao longo dos anos, nossa visão resultou em uma cidade vibrante, o coração do servidor.</p><p>Valorizamos a cooperação e o trabalho em equipe, mantendo farms comunitárias para garantir recursos compartilhados. Essa abordagem promove solidariedade e uma comunidade unida.</p><p>Nossos valores - união, respeito e honestidade - são a base de nossa comunidade, construindo confiança e um ambiente acolhedor para todos.</p>';
+        }
+
+        function renderizarPagina4() {
+            app.innerHTML = '<h1>Conheça nossa cidade</h1></br><p>Em nosso servidor de sobrevivência, construímos uma cidade que é mais do que simplesmente uma coleção de blocos e estruturas. É um lar para nossos membros, um refúgio onde todos são bem-vindos para contribuir e fazer parte de algo maior do que eles próprios. Desde as ruas sinuosas até os majestosos edifícios, cada pedra e tijolo conta uma história de cooperação e criatividade.</p>';
+        }
+
+        item1.addEventListener('click', function () {
+            renderizarPagina1();
+            item1.classList.add('select');
+            item2.classList.remove('select')
+            item3.classList.remove('select')
+            item4.classList.remove('select')
+            
+        });
+
+        item2.addEventListener('click', function () {
+            renderizarPagina2();
+            item1.classList.remove('select');
+            item2.classList.add('select')
+            item3.classList.remove('select')
+            item4.classList.remove('select')
+        });
+
+        item3.addEventListener('click', function () {
+            renderizarPagina3();
+            item1.classList.remove('select');
+            item2.classList.remove('select')
+            item3.classList.add('select')
+            item4.classList.remove('select')
+        });
+
+        item4.addEventListener('click', function () {
+            renderizarPagina4();
+            item1.classList.remove('select');
+            item2.classList.remove('select')
+            item3.classList.remove('select')
+            item4.classList.add('select')
+        });
+    </script>
+</body>
+
+</html>

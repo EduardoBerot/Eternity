@@ -1,0 +1,119 @@
+@font-face {
+    font-family: Conthax;
+    src: url(/fonts/conthrax_sb.ttf);
+}
+
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    font-family: Conthax;
+}
+
+body {
+    background-image: url(./imgs/BodyBG.png);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    backdrop-filter: blur(5px);
+    padding: 0 32px;
+    height: 100vh;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    height: 20vh;
+    gap: 12px;
+}
+
+main {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    height: 70vh;
+
+}
+
+nav {
+    width: 30%;
+    display: flex;  
+    flex-direction: column;
+    border: 2px solid black;
+    border-radius: 0px 12px 0% 12px;
+    padding: 16px;
+    gap: 30px;
+    background-color: rgba(0, 0, 0, 0.1);
+    font-size: 20px;
+}
+
+nav a {
+    text-decoration: none;
+    color: black;
+}
+
+nav a:hover{
+    color: aqua;
+    cursor: pointer;
+}
+
+.select {
+    color: aqua;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    border: 2px solid black;
+    border-radius: 0px 12px 0% 12px;
+    padding: 0 36px;
+    background-color: rgba(0, 0, 0, 0.1);
+    align-items: center;
+    gap: 10px;
+}
+
+.content h1 {
+    margin: 16px 0;
+}
+
+.content p {
+    text-align: justify;
+    line-height: 20px;
+}
+
+
+form {
+    padding-top: 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+form input, form select {
+    width: 30%;
+    border-radius: 6px 0 6px 0;
+    padding-inline-start: 6px;
+    height: 24px;
+    color: gray;
+}
+
+form button {
+    width: 40%;
+    height: 50px;
+    margin-top: 36px;
+    border-radius: 0 6px 0 6px;
+    background-color: aqua;
+    transition: 0.2s ease-out;
+
+}
+
+form button:hover {
+    background-color: rgb(21, 128, 128);
+}
