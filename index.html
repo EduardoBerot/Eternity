@@ -19,6 +19,7 @@
             <a class="itens" id="item2">Juntar-se</a>
             <a class="itens" id="item3">Sobre nós</a>
             <a class="itens" id="item4">Cidade</a>
+            <a class="itens" id="item5">Whatsapp</a>
         </nav>
         <section id="app" class="content"></section>
     </main>
@@ -58,7 +59,7 @@
         }
 
         function renderizarPagina5() {
-            app.innerHTML = '<h1>Solicitação enviada!</h1></br><p></p>';
+            app.innerHTML = '<h1>Participe do nosso grupo de WhatsApp!</h1></br><p>Entre no nosso grupo de Whatsapp clicando no botão abaixo!</p></br><button class="button"><a href="https://chat.whatsapp.com/L3P1OvMnrVpJ3cj849ZoIw">Acesse já</a></button>';
         }
         
         item1.addEventListener('click', function () {
@@ -78,6 +79,11 @@
         
         item4.addEventListener('click', function () {
             renderizarPagina4();
+            selectItem(item4);
+        });
+
+        item5.addEventListener('click', function () {
+            renderizarPagina5();
             selectItem(item4);
         });
 
