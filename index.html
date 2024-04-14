@@ -29,7 +29,7 @@
         const item3 = document.getElementById('item3');
         const item4 = document.getElementById('item4');
         const item5 = document.getElementById('item5');
-        const recruitbutton = document.getElementById('recruitbutton')
+        const itens = document.querySelectorAll('.itens');
 
         function selectItem(itemSelect){
             for (item of itens){
@@ -46,7 +46,7 @@
         }
         
         function renderizarPagina2() {
-            app.innerHTML = '<h1>Junte-se a Eternidade </h1></br><p>Junte-se ao Clã Eternity, um lugar acolhedor para jogar Minecraft. Valorizamos amizade, colaboração e diversão. Venha construir, explorar e criar memórias inesquecíveis conosco</p></br><form onsubmit="send(event)"><input type="text" id="nick" placeholder="Nick" required><input type="number" id="idade" placeholder="Idade" step="1" required><select id="foco" required><option value="" disabled selected>Selecionar Foco</option><option value="PvP">PvP</option><option value="Torneio">Torneio</option><option value="Build">Build</option><option value="Farm">Farm</option></select><button id="recruitbutton">Solicitar Recrutamento</button></form>';
+            app.innerHTML = '<h1>Junte-se a Eternidade </h1></br><p id="msg">Junte-se ao Clã Eternity, um lugar acolhedor para jogar Minecraft. Valorizamos amizade, colaboração e diversão. Venha construir, explorar e criar memórias inesquecíveis conosco.</p></br><form onsubmit="send(event)"><input type="text" id="nick" placeholder="Nick" required><input type="number" id="idade" placeholder="Idade" step="1" required><select id="foco" required><option value="" disabled selected>Selecionar Foco</option><option value="PvP">PvP</option><option value="Torneio">Torneio</option><option value="Build">Build</option><option value="Farm">Farm</option></select><button>Solicitar Recrutamento</button></form>';
         }
         
         function renderizarPagina3() {
@@ -80,10 +80,7 @@
             renderizarPagina4();
             selectItem(item4);
         });
-        
-        recruitbutton.addEventListener('click', function () {
-            renderizarPagina5();
-        });
+
         renderizarPagina1();
         </script>
 
