@@ -124,7 +124,7 @@ form input, form select {
     color: black;
 }
 
-.gallery {
+#gallery {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -132,7 +132,7 @@ form input, form select {
     margin-top: 16px;
 }
 
-.gallery a {
+#gallery a {
     width: 25%;
 }
 
@@ -189,7 +189,7 @@ form input, form select {
         text-align: left;
     }
 
-    .gallery {
+    #gallery {
         display: flex;
         flex-direction: column;
         align-items: center;
