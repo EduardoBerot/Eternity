@@ -18,10 +18,10 @@
         </header>
         <main>
             <nav>
-                <a class="itens select" id="item1">Discord</a>
+                <a class="itens" id="item1">Sobre nos</a>
                 <a class="itens" id="item2">Juntar-se</a>
-                <a class="itens" id="item3">Sobre nós</a>
-                <a class="itens" id="item4">Cidade</a>
+                <a class="itens" id="item3">Cidade</a>
+                <a class="itens" id="item4">Discord</a>
                 <a class="itens" id="item5">Whatsapp</a>
             </nav>
             <section id="app" class="content"></section>
@@ -45,10 +45,17 @@
                 }
             }
 
+            function renderizarHome() {
+                app.innerHTML =
+                    '<h1>Como usar nosso site?</h1></br><p>Use o menu de navegação ao lado para solicitar recrutamento, acessar nossos meios de comunicação e saber mais sobre nos</p></br><h1 style="margin-top:150px">Uni-vos pela Eternidade!</h1>';
+            }
+
+
             function renderizarPagina1() {
                 app.innerHTML =
-                    '<h1>Acesse nosso discord</h1></br><p>Para acessar nosso servidor discord basta clicar no botão abaixo, lá você podera se manter atualizado quanto as novidades do Clã.</p></br><button class="button"><a href="https://discord.gg/MTfE7MmXT6">Acesse já</a></button>';
+                    "<h1>Missão, propósito e valores</h1></br><p>Desde 2020, o Clã Eternity tem sido uma comunidade calorosa no Minecraft, unindo jogadores para construir, explorar e crescer juntos. Evoluindo ao longo dos anos, nossa visão resultou em uma cidade vibrante, o coração do servidor.</p><p>Valorizamos a cooperação e o trabalho em equipe, mantendo farms comunitárias para garantir recursos compartilhados. Essa abordagem promove solidariedade e uma comunidade unida.</p><p>Nossos valores - união, respeito e honestidade - são a base de nossa comunidade, construindo confiança e um ambiente acolhedor para todos.</p>";
             }
+
 
             function renderizarPagina2() {
                 app.innerHTML =
@@ -57,13 +64,14 @@
 
             function renderizarPagina3() {
                 app.innerHTML =
-                    "<h1>Missão, propósito e valores</h1></br><p>Desde 2020, o Clã Eternity tem sido uma comunidade calorosa no Minecraft, unindo jogadores para construir, explorar e crescer juntos. Evoluindo ao longo dos anos, nossa visão resultou em uma cidade vibrante, o coração do servidor.</p><p>Valorizamos a cooperação e o trabalho em equipe, mantendo farms comunitárias para garantir recursos compartilhados. Essa abordagem promove solidariedade e uma comunidade unida.</p><p>Nossos valores - união, respeito e honestidade - são a base de nossa comunidade, construindo confiança e um ambiente acolhedor para todos.</p>";
+                    '<h1>Conheça nossa cidade</h1></br><p>Nossa cidade no servidor de sobrevivência é mais do que apenas blocos e estruturas. É um lar acolhedor, onde todos contribuem para algo maior. Cada pedra conta uma história de cooperação e criatividade.</p><div id="gallery"><a href="/imgs/City00.jpg"><img class="cityimgs" src="/imgs/City00.jpg" alt="city00"></a><a href="/imgs/City01.jpg"><img class="cityimgs" src="/imgs/City01.jpg" alt="city01"></a><a href="/imgs/City02.jpg"><img class="cityimgs" src="/imgs/City02.jpg" alt="city02"></a><a href="/imgs/City03.jpg"><img class="cityimgs" src="/imgs/City03.jpg" alt="city03"></a><a href="/imgs/City04.jpg"><img class="cityimgs" src="/imgs/City04.jpg" alt="city04"></a><a href="/imgs/City05.jpg"><img class="cityimgs" src="/imgs/City05.jpg" alt="city05"></a></div>';
             }
 
             function renderizarPagina4() {
                 app.innerHTML =
-                    '<h1>Conheça nossa cidade</h1></br><p>Nossa cidade no servidor de sobrevivência é mais do que apenas blocos e estruturas. É um lar acolhedor, onde todos contribuem para algo maior. Cada pedra conta uma história de cooperação e criatividade.</p><div id="gallery"><a href="/imgs/City00.jpg"><img class="cityimgs" src="/imgs/City00.jpg" alt="city00"></a><a href="/imgs/City01.jpg"><img class="cityimgs" src="/imgs/City01.jpg" alt="city01"></a><a href="/imgs/City02.jpg"><img class="cityimgs" src="/imgs/City02.jpg" alt="city02"></a><a href="/imgs/City03.jpg"><img class="cityimgs" src="/imgs/City03.jpg" alt="city03"></a><a href="/imgs/City04.jpg"><img class="cityimgs" src="/imgs/City04.jpg" alt="city04"></a><a href="/imgs/City05.jpg"><img class="cityimgs" src="/imgs/City05.jpg" alt="city05"></a></div>';
+                    '<h1>Acesse nosso discord</h1></br><p>Para acessar nosso servidor discord basta clicar no botão abaixo, lá você podera se manter atualizado quanto as novidades do Clã.</p></br><button class="button"><a href="https://discord.gg/MTfE7MmXT6">Acesse já</a></button>';
             }
+
 
             function renderizarPagina5() {
                 app.innerHTML =
@@ -98,7 +106,7 @@
                 selectItem(item5);
             });
 
-            renderizarPagina1();
+            renderizarHome();
         </script>
 
         <script src="index.js"></script>
