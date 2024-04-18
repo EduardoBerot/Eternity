@@ -41,7 +41,6 @@ async function send (event){
             // console.error(error);
         }
     }else{
-        console.log('teste');
         alert('Você já realizou o seu cadastro! Tente novamente mais tarde.')
         goHome()
     }
@@ -70,8 +69,6 @@ function checkCookie() {
 }
 
 function goHome() {
-    item2.classList.remove('select');
-    item1.classList.add('select');
-
-    app.innerHTML = '<h1>Acesse nosso discord</h1></br><p>Para acessar nosso servidor discord basta clicar no botão abaixo, lá você podera se manter atualizado quanto as novidades do Clã.</p>';
+    join.classList.remove('select');
+    app.innerHTML = pages_content.home;
 }
