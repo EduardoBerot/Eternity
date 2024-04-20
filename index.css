@@ -91,7 +91,6 @@ nav a:hover{
     line-height: 20px;
 }
 
-
 form {
     padding-top: 36px;
     display: flex;
@@ -145,12 +144,9 @@ form input, form select {
     border-radius: 0px 12px 0px 12px;
 }
 
-
-
-
 @media (max-width:840px){
     body{
-        height: 10vh;
+        height: 100vh;
     }
 
     header p{
