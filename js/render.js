@@ -35,10 +35,8 @@ function render(event) {
 }
 
 function renderGallery(id) {
-    if (id == "city" && window.innerWidth > 476) {
-        lightGallery(document.getElementById("gallery"));
-    } else {
-        lightGallery = null;
+    if (id == "city" ) {
+        lightGallery(document.getElementById("gallery"),{download:false});
     }
 }
 
