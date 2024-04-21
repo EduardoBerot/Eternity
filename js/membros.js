@@ -53,7 +53,7 @@ const dataUrl = 'https://eternity-crud.onrender.com/api/membros';
 // ID da tabela onde os dados serão exibidos
 const tableId = 'membros';
 // Propriedades dos objetos que você deseja exibir
-const propertiesToShow = ['nick', 'foco', 'cargo', 'status'];
+const propertiesToShow = ['nick', 'cargo', 'data_entrada'];
 
 // Chamar a função
 fetchDataAndRenderTable(dataUrl, tableId, propertiesToShow);

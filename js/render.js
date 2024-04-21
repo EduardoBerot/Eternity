@@ -12,7 +12,7 @@ function selectItem(itemSelect) {
 };
 
 const pages_content = {
-    home: '<h1>Como usar nosso site?</h1></br><p>Use o menu de navegação ao lado para solicitar recrutamento, acessar nossos meios de comunicação e saber mais sobre nos</p></br><h1 style="margin-top:150px">Uni-vos pela Eternidade!</h1>',
+    home: '<h1>Como usar nosso site?</h1></br><p>Use o menu de navegação para solicitar recrutamento, acessar nossos meios de comunicação e saber mais sobre nos</p></br><h1 style="margin-top:150px">Uni-vos pela Eternidade!</h1>',
 
     about: "<h1>Missão, propósito e valores</h1></br><p>Desde 2020, o Clã Eternity tem sido uma comunidade calorosa no Minecraft, unindo jogadores para construir, explorar e crescer juntos. Evoluindo ao longo dos anos, nossa visão resultou em uma cidade vibrante, o coração do servidor.</p><p>Valorizamos a cooperação e o trabalho em equipe, mantendo farms comunitárias para garantir recursos compartilhados. Essa abordagem promove solidariedade e uma comunidade unida.</p><p>Nossos valores - união, respeito e honestidade - são a base de nossa comunidade, construindo confiança e um ambiente acolhedor para todos.</p>",
 
@@ -71,5 +71,12 @@ function renderDate() {
         const formattedDate = yyyy + '-' + mm + '-' + dd;
         document.getElementById('data_entrada').value = formattedDate;
 }
+
+const staffMembers = [
+    'Ducred22',
+    'Ov3r5y5t3m',
+    'XeKeMaTe',
+    'Sir_Felipee',
+]
 
 app.innerHTML = pages_content.home;
