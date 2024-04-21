@@ -1,10 +1,14 @@
+// const URL_DISCORD_INTEGRATION = "https://discord.com/api/webhooks/1228837417688109179/8LEi6HLNmY-nHpn0rB9oKk2fBrC0QzFQ334CToKoFnVOZxDmk8Vko0odRdjC34P6bSzE"
 const URL_DISCORD_INTEGRATION = "https://discord.com/api/webhooks/1228845807550074900/HwKlDWuMZqONWv1HumZnjIoBPJnYmuDKnWziKJbImSe2EuWf6PsvswlCHPLYph24FWvH"
+
+// const URL_BASE = "http://localhost:5000/api/membro"
+const URL_BASE = "https://eternity-crud.onrender.com/api/membros"
 
 async function send (event){
     event.preventDefault();
 
     if (!checkCookie()){
-        data = `nick: ${nick.value}\nidade: ${idade.value}\n foco: ${foco.value}`;
+        data = getData();
     
         const body = {
             content: "Mensagem Recebida",
@@ -12,25 +16,38 @@ async function send (event){
             color: "white",
             embeds: [
                 {
-                    title: "Formulário de Contato",
-                    description: data,
+                    title: "Formulário de Cadastro",
+                    description: JSON.stringify(data,null,'\t'),
                 },
             ],
         };
     
         try {
-            const response = await fetch(URL_DISCORD_INTEGRATION,
+            let response = await fetch(URL_BASE,
                 {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(body),
+                    body: JSON.stringify(data),
                 }
             );
     
             if (!response.ok) {
                 throw new Error("Network response was not ok");
+            }else{
+                response = await fetch(URL_DISCORD_INTEGRATION,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(body),
+                    }
+                );
+                if (!response.ok) {
+                    throw new Error(response.statusText);
+                }
             }
     
             // const data = await response.json();
@@ -38,13 +55,27 @@ async function send (event){
             msg.innerText="Cadastro Realizado com sucesso!"
             
         } catch (error) {
-            // console.error(error);
+            alert("Não foi possível realizar o cadastro. Verifique se já não exite solicitações para esse nick e tente mais tarde novamente.")
         }
     }else{
         alert('Você já realizou o seu cadastro! Tente novamente mais tarde.')
         goHome()
     }
 };
+
+function getData() {
+    const data = {
+        uuid: document.getElementById('uuid').value,
+        nick: document.getElementById('nick').value,
+        idade: document.getElementById('idade').value,
+        foco: document.getElementById('foco').value,
+        recrutador: document.getElementById('recrutador').value,
+        cargo: document.getElementById('cargo').value,
+        data_entrada: document.getElementById('data_entrada').value,
+        status: document.getElementById('status').value,
+    }
+    return data
+}
 
 function setCookie() {
     const expiry = new Date();

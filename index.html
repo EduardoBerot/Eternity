@@ -9,6 +9,22 @@
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.0/css/lightgallery.min.css"
         />
+        <style>
+            #loading {
+                display: block;
+                font-size: 24px;
+                font-family: Arial, sans-serif;
+                color: #333;
+            }
+            .loading-dot {
+                animation: blink 1s linear infinite;
+            }
+            @keyframes blink {
+                50% {
+                    opacity: 0;
+                }
+            }
+        </style>
     </head>
 
     <body>
@@ -28,8 +44,8 @@
             <section id="app" class="content"></section>
         </main>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.0/js/lightgallery.min.js"></script>
-        <script src="js/lg-zoom.js"></script>
-        <script src="js/lg-autoplay.js"></script>
+        <script src="js/plugins/lg-zoom.js"></script>
+        <script src="js/plugins/lg-autoplay.js"></script>
         <script src="js/render.js"></script>
         <script src="js/auth.js"></script>
     </body>

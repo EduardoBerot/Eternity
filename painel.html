@@ -1,10 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel</title>
+    <title>Eternity | Membros</title>
     <link rel="stylesheet" href="./css/painel.css">
+    <style>
+        #loading {
+            display: block;
+            font-size: 24px;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+        .loading-dot {
+            animation: blink 1s linear infinite;
+        }
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+    </style>
 </head>
 <body>
     <main> 
@@ -17,26 +33,10 @@
             </div>
         </nav>
         <section class="content">
-            <table>
-                <thead>
-                    <th>Nick</th>
-                    <th>Cargo ou Titulo</th>
-                    <th>Membro desde</th>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Teste</td>
-                        <td>Dono</td>
-                        <td>25/04/2024</td>
-                    </tr>
-                    <tr>
-                        <td>Teste</td>
-                        <td>Dono</td>
-                        <td>25/04/2024</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div id="loading">Carregando<span class="loading-dot">...</span></div>
+            <table id="membros"></table>
         </section>
     </main>
+    <script src="js/membros.js"></script>
 </body>
 </html>
