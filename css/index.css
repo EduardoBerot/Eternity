@@ -1,6 +1,6 @@
 @font-face {
     font-family: Conthax;
-    src: url(/fonts/conthrax_sb.ttf);
+    src: url(../fonts/conthrax_sb.ttf);
 }
 
 * {
@@ -11,7 +11,7 @@
 }
 
 body {
-    background-image: url(./imgs/BodyBG.png);
+    background-image: url(../imgs/BodyBG.png);
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
