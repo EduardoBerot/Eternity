@@ -51,7 +51,7 @@ function renderForm(id) {
                 }
                 return response.json();
             })
-            .then(data => {
+            .then(_ => {
                 document.getElementById('loading').style.display = 'none';
                 document.querySelector('form').style.display = 'flex';
                 renderDate();
