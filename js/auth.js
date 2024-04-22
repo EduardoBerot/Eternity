@@ -8,7 +8,7 @@ async function send (event){
     event.preventDefault();
 
     if (!checkCookie()){
-        data = getData();
+        data = getFormData();
     
         const body = {
             content: "Mensagem Recebida",
@@ -63,7 +63,7 @@ async function send (event){
     }
 };
 
-function getData() {
+function getFormData() {
     const data = {
         uuid: document.getElementById('uuid').value,
         nick: document.getElementById('nick').value,
