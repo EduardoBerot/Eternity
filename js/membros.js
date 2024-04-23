@@ -9,12 +9,30 @@ function fetchDataAndRenderTable(url, tableId, properties) {
         })
         .then(data => {
             document.getElementById('loading').style.display = 'none';
+            data = formatData(data);
             renderTable(data, tableId, properties);
         })
         .catch(error => {
             console.error('There has been a problem with your fetch operation:', error);
         });
 }
+
+function formatData(data) {
+    return data.map(item => {
+        // Supondo que 'data_entrada' esteja no formato ISO 8601 (YYYY-MM-DD)
+        const date = new Date(item.data_entrada);
+        // Formata a data no formato desejado
+        const formattedDate = date.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+        // Retorna o objeto com a data formatada
+        return { ...item, data_entrada: formattedDate };
+    });
+}
+
+
 
 // Função que cria e preenche a tabela com dados
 function renderTable(data, tableId, properties) {
