@@ -1,4 +1,23 @@
-// Função que busca dados e renderiza uma tabela
+const ETY_ADM_COOKIE = 'eternity-adm'
+
+function index() {
+    authenticate();
+    const dataUrl = 'https://eternity-crud.onrender.com/api/membros';
+    const tableId = 'membros';
+    const propertiesToShow = ['nick', 'cargo', 'data_entrada'];
+    
+    fetchDataAndRenderTable(dataUrl, tableId, propertiesToShow);
+}
+
+function authenticate() {
+    if(checkCookie(ETY_ADM_COOKIE)){
+        
+    }else{
+        alert('Faça login na seção "Administração".')
+        window.location.href = '/';
+    }
+}
+
 function fetchDataAndRenderTable(url, tableId, properties) {
     fetch(url)
         .then(response => {
@@ -19,20 +38,16 @@ function fetchDataAndRenderTable(url, tableId, properties) {
 
 function formatData(data) {
     return data.map(item => {
-        // Supondo que 'data_entrada' esteja no formato ISO 8601 (YYYY-MM-DD)
         const date = new Date(item.data_entrada);
-        // Formata a data no formato desejado
         const formattedDate = date.toLocaleDateString('pt-BR', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'
         });
-        // Retorna o objeto com a data formatada
         return { ...item, data_entrada: formattedDate };
     });
 }
 
-// Função que cria e preenche a tabela com dados
 function renderTable(data, tableId, properties) {
     const table = document.getElementById(tableId);
     if (!table) {
@@ -40,10 +55,8 @@ function renderTable(data, tableId, properties) {
         return;
     }
 
-    // Limpar tabela existente
     table.innerHTML = '';
 
-    // Criar cabeçalho da tabela
     const thead = table.createTHead();
     const row = thead.insertRow();
     for (const prop of properties) {
@@ -52,7 +65,6 @@ function renderTable(data, tableId, properties) {
         row.appendChild(th);
     }
 
-    // Criar corpo da tabela
     const tbody = table.createTBody();
     data.forEach(item => {
         const row = tbody.insertRow();
@@ -63,14 +75,4 @@ function renderTable(data, tableId, properties) {
     });
 }
 
-// Exemplo de uso
-// URL de onde os dados serão obtidos
-const dataUrl = 'https://eternity-crud.onrender.com/api/membros';
-// ID da tabela onde os dados serão exibidos
-const tableId = 'membros';
-// Propriedades dos objetos que você deseja exibir
-const propertiesToShow = ['nick', 'cargo', 'data_entrada'];
-
-// Chamar a função
-fetchDataAndRenderTable(dataUrl, tableId, propertiesToShow);
-
+index();

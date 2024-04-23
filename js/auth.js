@@ -1,7 +1,10 @@
 async function send (event){
     event.preventDefault();
 
-    if (!checkCookie()){
+    const ETY_FORM_COOKIE = 'eternity-form';
+    const ETY_FORM_TIME = 10; /* tempo em minutos */
+
+    if (!checkCookie(ETY_FORM_COOKIE)){
         data = getFormData();
     
         const body = {
@@ -45,7 +48,7 @@ async function send (event){
             }
     
             // const data = await response.json();
-            setCookie();
+            setCookie(ETY_FORM_COOKIE, ETY_FORM_TIME);
             msg.innerText="Cadastro Realizado com sucesso!"
             
         } catch (error) {
@@ -69,28 +72,6 @@ function getFormData() {
         status: document.getElementById('status').value,
     }
     return data
-}
-
-function setCookie() {
-    const expiry = new Date();
-    expiry.setTime(expiry.getTime() + (10 * 60 * 1000)); // 10 minutos
-    document.cookie = "eternity-form=true; expires=" + expiry.toGMTString() + "; path=/";
-}
-
-function checkCookie() {
-    const cookieName = "eternity-form=";
-    const decodedCookie = decodeURIComponent(document.cookie);
-    const cookies = decodedCookie.split(';');
-    for(let i = 0; i < cookies.length; i++) {
-        let c = cookies[i];
-        while (c.charAt(0) == ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(cookieName) == 0) {
-            return true;
-        }
-    }
-    return false;
 }
 
 function goHome() {
