@@ -3,6 +3,7 @@ async function send (event){
 
     const ETY_FORM_COOKIE = 'eternity-form';
     const ETY_FORM_TIME = 10; /* tempo em minutos */
+    const URL_MEMBERS = `${URL_BASE}/api/membros`
 
     if (!checkCookie(ETY_FORM_COOKIE)){
         data = getFormData();
@@ -20,7 +21,7 @@ async function send (event){
         };
     
         try {
-            let response = await fetch(URL_BASE,
+            let response = await fetch(URL_MEMBERS,
                 {
                     method: "POST",
                     headers: {

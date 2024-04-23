@@ -25,7 +25,7 @@ const pages_content = {
 
     zap: '<h1>Participe do nosso grupo de WhatsApp!</h1></br><p>Entre no nosso grupo de Whatsapp clicando no botão abaixo!</p></br><button class="button"><a href="https://chat.whatsapp.com/L3P1OvMnrVpJ3cj849ZoIw">Entre no grupo</a></button>',
 
-    administracao: '<h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button>',
+    administracao: '<form onsubmit="validationLogin(event)"><h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>',
 };
 
 function render(event) {
@@ -38,14 +38,14 @@ function render(event) {
 }
 
 function renderGallery(id) {
-    if (id == "city" ) {
-        lightGallery(document.getElementById("gallery"),{download:false});
+    if (id == "city") {
+        lightGallery(document.getElementById("gallery"), { download: false });
     }
 }
 
 function renderForm(id) {
     const url = 'https://eternity-crud.onrender.com'
-    if (id == 'join'){
+    if (id == 'join') {
         fetch(url)
             .then(response => {
                 if (!response.ok) {
@@ -53,7 +53,7 @@ function renderForm(id) {
                 }
                 document.getElementById('loading').style.display = 'none';
                 document.querySelector('form').style.display = 'flex';
-                renderSelect(STAFFMEMBERS,'recrutador');
+                renderSelect(STAFFMEMBERS, 'recrutador');
                 renderDate();
             })
             .catch(error => {
@@ -65,7 +65,7 @@ function renderForm(id) {
 function renderSelect(values, id) {
     const selectElement = document.getElementById(id);
 
-    values.forEach(function(value) {
+    values.forEach(function (value) {
         const option = document.createElement("option");
         option.text = value; // Definir o texto da opção
         option.value = value; // Definir o valor da opção
@@ -74,15 +74,46 @@ function renderSelect(values, id) {
     });
 }
 
-
 function renderDate() {
-        const today = new Date();
-        const dd = String(today.getDate()).padStart(2, '0');
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const yyyy = today.getFullYear();
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const yyyy = today.getFullYear();
 
-        const formattedDate = yyyy + '-' + mm + '-' + dd;
-        document.getElementById('data_entrada').value = formattedDate;
+    const formattedDate = yyyy + '-' + mm + '-' + dd;
+    document.getElementById('data_entrada').value = formattedDate;
+}
+
+async function validationLogin(event) {
+    event.preventDefault();
+
+    const URL_LOGIN = `${URL_BASE}/api/login`
+    const login = document.querySelector('#login').value;
+    const senha = document.querySelector('#senha').value;
+    const dados = {login,senha}
+
+    try {
+        const response = await fetch(URL_LOGIN, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(dados)
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro na requisição');
+        }
+
+        const {token} = await response.json();
+        const DOIS_DIAS_EM_MINUTOS = 60*24*2;
+
+        setCookie(ETY_ADM_COOKIE, DOIS_DIAS_EM_MINUTOS, token);
+
+        window.location.href = '/painel.html';
+
+    } catch (error) {
+        console.error('Erro ao enviar os dados:', error);
+    }
+
 }
 
 app.innerHTML = pages_content.home;
