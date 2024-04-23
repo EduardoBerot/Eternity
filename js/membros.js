@@ -32,8 +32,6 @@ function formatData(data) {
     });
 }
 
-
-
 // Função que cria e preenche a tabela com dados
 function renderTable(data, tableId, properties) {
     const table = document.getElementById(tableId);
@@ -75,3 +73,4 @@ const propertiesToShow = ['nick', 'cargo', 'data_entrada'];
 
 // Chamar a função
 fetchDataAndRenderTable(dataUrl, tableId, propertiesToShow);
+
