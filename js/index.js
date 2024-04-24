@@ -1,12 +1,5 @@
 const app = document.getElementById("app");
 
-const staffMembers = [
-    'Ducred22',
-    'Ov3r5y5t3m',
-    'XeKeMaTe',
-    'Sir_Felipee',
-]
-
 function selectItem(itemSelect) {
     const itens = document.querySelectorAll(".itens");
     for (const item of itens) {
@@ -23,7 +16,7 @@ const pages_content = {
 
     about: "<h1>Missão, propósito e valores</h1></br><p>Desde 2020, o Clã Eternity tem sido uma comunidade calorosa no Minecraft, unindo jogadores para construir, explorar e crescer juntos. Evoluindo ao longo dos anos, nossa visão resultou em uma cidade vibrante, o coração do servidor.</p><p>Valorizamos a cooperação e o trabalho em equipe, mantendo farms comunitárias para garantir recursos compartilhados. Essa abordagem promove solidariedade e uma comunidade unida.</p><p>Nossos valores - união, respeito e honestidade - são a base de nossa comunidade, construindo confiança e um ambiente acolhedor para todos.</p>",
 
-    join: '<h1>Junte-se a Eternidade </h1></br><p id="msg">Junte-se ao Clã Eternity, um lugar acolhedor para jogar Minecraft. Valorizamos amizade, colaboração e diversão. Venha construir, explorar e criar memórias inesquecíveis conosco.</p></br><div id="loading">Carregando<span class="loading-dot">...</span></div><form onsubmit="send(event)" style="display:none;"><input type="text" id="uuid" placeholder="UUID" style="display:none;"><input type="text" id="nick" placeholder="Nick" required><input type="number" id="idade" placeholder="Idade" step="1" required><select id="foco" required><option value="" disabled selected>Selecionar Foco</option><option value="PvP">PvP</option><option value="Torneio">Torneio</option><option value="Build">Build</option><option value="Farm">Farm</option></select><select id="recrutador" required></select><input type="text" id="cargo" value="Membro" style="display:none;" readonly><input type="text" id="data_entrada" style="display:none;" readonly><input type="text" id="status" value="Pendente" style="display:none;" readonly><button class="button">Solicitar Recrutamento</button></form>',
+    join: '<h1>Junte-se a Eternidade </h1></br><p id="msg">Junte-se ao Clã Eternity, um lugar acolhedor para jogar Minecraft. Valorizamos amizade, colaboração e diversão. Venha construir, explorar e criar memórias inesquecíveis conosco.</p></br><div id="loading">Carregando<span class="loading-dot">...</span></div><form onsubmit="send(event)" style="display:none;"><input type="text" id="uuid" placeholder="UUID" style="display:none;"><input type="text" id="nick" placeholder="Nick" required><input type="number" id="idade" placeholder="Idade" step="1" required><select id="foco" required><option value="" disabled selected>Selecionar Foco</option><option value="PvP">PvP</option><option value="Torneio">Torneio</option><option value="Build">Build</option><option value="Farm">Farm</option></select><select id="recrutador" style="display:none;"></select><input type="text" id="cargo" value="Membro" style="display:none;" readonly><input type="text" id="data_entrada" style="display:none;" readonly><input type="text" id="status" value="Pendente" style="display:none;" readonly><button class="button">Solicitar Recrutamento</button></form>',
 
     city: `<h1>Conheça nossa cidade</h1></br><p>Nossa cidade no servidor de sobrevivência é mais do que apenas blocos e estruturas. É um lar acolhedor, onde todos contribuem para algo maior. Cada pedra conta uma história de cooperação e criatividade.</p><div id="gallery"><a href="/imgs/City00.jpg"><img class="cityimgs" src="/imgs/City00.jpg" alt="city00"></a><a href="/imgs/City01.jpg"><img class="cityimgs" src="/imgs/City01.jpg" alt="city01"></a><a href="/imgs/City02.jpg"><img class="cityimgs" src="/imgs/City02.jpg" alt="city02"></a><a href="/imgs/City03.jpg"><img class="cityimgs" src="/imgs/City03.jpg" alt="city03"></a><a href="/imgs/City04.jpg"><img class="cityimgs" src="/imgs/City04.jpg" alt="city04"></a><a href="/imgs/City05.jpg"><img class="cityimgs" src="/imgs/City05.jpg" alt="city05"></a></div>`,
 
@@ -31,6 +24,8 @@ const pages_content = {
         '<h1>Acesse nosso discord</h1></br><p>Para acessar nosso servidor discord basta clicar no botão abaixo, lá você podera se manter atualizado quanto as novidades do Clã.</p></br><button class="button"><a href="https://discord.gg/MTfE7MmXT6">Acesse já</a></button>',
 
     zap: '<h1>Participe do nosso grupo de WhatsApp!</h1></br><p>Entre no nosso grupo de Whatsapp clicando no botão abaixo!</p></br><button class="button"><a href="https://chat.whatsapp.com/L3P1OvMnrVpJ3cj849ZoIw">Entre no grupo</a></button>',
+
+    administracao: '<form onsubmit="validationLogin(event)"><h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>',
 };
 
 function render(event) {
@@ -43,14 +38,14 @@ function render(event) {
 }
 
 function renderGallery(id) {
-    if (id == "city" ) {
-        lightGallery(document.getElementById("gallery"),{download:false});
+    if (id == "city") {
+        lightGallery(document.getElementById("gallery"), { download: false });
     }
 }
 
 function renderForm(id) {
     const url = 'https://eternity-crud.onrender.com'
-    if (id == 'join'){
+    if (id == 'join') {
         fetch(url)
             .then(response => {
                 if (!response.ok) {
@@ -58,7 +53,7 @@ function renderForm(id) {
                 }
                 document.getElementById('loading').style.display = 'none';
                 document.querySelector('form').style.display = 'flex';
-                renderSelect(staffMembers,'recrutador');
+                renderSelect(STAFFMEMBERS, 'recrutador');
                 renderDate();
             })
             .catch(error => {
@@ -70,7 +65,7 @@ function renderForm(id) {
 function renderSelect(values, id) {
     const selectElement = document.getElementById(id);
 
-    values.forEach(function(value) {
+    values.forEach(function (value) {
         const option = document.createElement("option");
         option.text = value; // Definir o texto da opção
         option.value = value; // Definir o valor da opção
@@ -79,15 +74,46 @@ function renderSelect(values, id) {
     });
 }
 
-
 function renderDate() {
-        const today = new Date();
-        const dd = String(today.getDate()).padStart(2, '0');
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const yyyy = today.getFullYear();
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const yyyy = today.getFullYear();
 
-        const formattedDate = yyyy + '-' + mm + '-' + dd;
-        document.getElementById('data_entrada').value = formattedDate;
+    const formattedDate = yyyy + '-' + mm + '-' + dd;
+    document.getElementById('data_entrada').value = formattedDate;
+}
+
+async function validationLogin(event) {
+    event.preventDefault();
+
+    const URL_LOGIN = `${URL_BASE}/api/login`
+    const login = document.querySelector('#login').value;
+    const senha = document.querySelector('#senha').value;
+    const dados = {login,senha}
+
+    try {
+        const response = await fetch(URL_LOGIN, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(dados)
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro na requisição');
+        }
+
+        const {token} = await response.json();
+        const DOIS_DIAS_EM_MINUTOS = 60*24*2;
+
+        setCookie(ETY_ADM_COOKIE, DOIS_DIAS_EM_MINUTOS, token);
+
+        window.location.href = '/painel.html';
+
+    } catch (error) {
+        console.error('Erro ao enviar os dados:', error);
+    }
+
 }
 
 app.innerHTML = pages_content.home;

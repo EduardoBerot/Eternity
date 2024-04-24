@@ -1,51 +1,40 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Eternity</title>
-        <link rel="stylesheet" href="./css/index.css" />
-        <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.0/css/lightgallery.min.css"
-        />
-        <style>
-            #loading {
-                display: block;
-                font-size: 24px;
-                font-family: Arial, sans-serif;
-                color: #333;
-            }
-            .loading-dot {
-                animation: blink 1s linear infinite;
-            }
-            @keyframes blink {
-                50% {
-                    opacity: 0;
-                }
-            }
-        </style>
-    </head>
 
-    <body>
-        <header>
-            <h1 class="title">Eternity</h1>
-            <p>Seja bem vindo ao site do Clã ETY</p>
-        </header>
-        <main>
-            <nav>
-                <a class="itens" id="about" onclick="render(event)">Sobre nos</a>
-                <a class="itens" id="join" onclick="render(event)">Juntar-se</a>
-                <a class="itens" id="city" onclick="render(event)">Cidade</a>
-                <a class="itens" id="discord" onclick="render(event)">Discord</a>
-                <a class="itens" id="zap" onclick="render(event)">Whatsapp</a>
-            </nav>
-            <section id="app" class="content"></section>
-        </main>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.0/js/lightgallery.min.js"></script>
-        <script src="js/plugins/lg-zoom.js"></script>
-        <script src="js/plugins/lg-autoplay.js"></script>
-        <script src="js/render.js"></script>
-        <script src="js/auth.js"></script>
-    </body>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eternity</title>
+    <link rel="stylesheet" href="./css/index.css" />
+    <!-- Substituir o arquivo favicon.ico pela logo da ETY -->
+    <!-- Eu pensei em uma logo baseada no banner da ETY -->
+    <link rel="icon" href="imgs/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.0/css/lightgallery.min.css" />
+</head>
+
+<body>
+    <header>
+        <h1 class="title">Eternity</h1>
+        <p>Seja bem vindo ao site do Clã ETY</p>
+    </header>
+    <main>
+        <nav>
+            <a class="itens" id="about" onclick="render(event)">Sobre nos</a>
+            <a class="itens" id="join" onclick="render(event)">Juntar-se</a>
+            <a class="itens" id="city" onclick="render(event)">Cidade</a>
+            <a class="itens" id="discord" onclick="render(event)">Discord</a>
+            <a class="itens" id="zap" onclick="render(event)">Whatsapp</a>
+            <a class="itens" id="administracao" onclick="render(event)">Administração</a>
+        </nav>
+        <section id="app" class="content"></section>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.0/js/lightgallery.min.js"></script>
+    <script src="js/plugins/lg-zoom.js"></script>
+    <script src="js/plugins/lg-autoplay.js"></script>
+    <script src="js/global.js"></script>
+    <script src="js/index.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+
 </html>

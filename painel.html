@@ -1,37 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eternity | Membros</title>
+    <!-- Substituir o arquivo favicon.ico pela logo da ETY -->
+    <!-- Eu pensei em uma logo baseada no banner da ETY -->
+    <link rel="icon" href="imgs/favicon.ico" type="image/x-icon">
+    <title>Eternity | Administração</title>
     <link rel="stylesheet" href="./css/painel.css">
-    <style>
-        #loading {
-            display: block;
-            font-size: 24px;
-            font-family: Arial, sans-serif;
-            color: #333;
-        }
-        .loading-dot {
-            animation: blink 1s linear infinite;
-        }
-        @keyframes blink {
-            50% {
-                opacity: 0;
-            }
-        }
-    </style>
 </head>
+
 <body>
-    <main> 
+    <main>
         <nav>
             <d>
-                <a href="./index.html">Voltar</a> 
+                <a href="./index.html">Voltar</a>
             </d>
             <div>
-                <a href="./login.html">Login</a>  <!--Disponivel para todos verem, menos quando tiver logado -->
                 <a href="">Solicitações</a> <!--Disponivel para ver depois de logado-->
-                <a href="">Membros</a> <!--So ver dps de logado, puxa a msm tabela de membros porem adiciona infos, como por quem foi recrutado, além de adicionar opçoes de excluir da lista ou mudar status-->
+                <a href="">Membros</a>
+                <!--So ver dps de logado, puxa a msm tabela de membros porem adiciona infos, como por quem foi recrutado, além de adicionar opçoes de excluir da lista ou mudar status-->
             </div>
         </nav>
         <section class="content">
@@ -39,6 +28,8 @@
             <table id="membros"></table>
         </section>
     </main>
-    <script src="js/membros.js"></script>
+    <script src="js/global.js"></script>
+    <script src="js/painel.js"></script>
 </body>
+
 </html>

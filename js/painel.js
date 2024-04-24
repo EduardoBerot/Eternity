@@ -1,4 +1,45 @@
-// Função que busca dados e renderiza uma tabela
+
+const URL_VERIFY_LOGIN = `${URL_BASE}/api/verifyLogin`;
+
+async function index() {
+    await authenticate();
+    const dataUrl = 'https://eternity-crud.onrender.com/api/membros';
+    const tableId = 'membros';
+    const propertiesToShow = ['nick', 'cargo', 'data_entrada'];
+
+    fetchDataAndRenderTable(dataUrl, tableId, propertiesToShow);
+}
+
+async function authenticate() {
+    const MSG = 'Faça login na seção "Administração".';
+    
+    try {
+        if (checkCookie(ETY_ADM_COOKIE)) {
+            const token = getCookie(ETY_ADM_COOKIE);
+
+            const response = await fetch(URL_VERIFY_LOGIN, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({token})
+        });
+
+            if (!response.ok) {
+                throw new Error('Erro na requisição');
+            }
+
+            const {valid} = await response.json();
+            !(valid == 'false' || valid == false) || alert(MSG) && deleteCookie(ETY_ADM_COOKIE);
+        } else {
+            alert(MSG);
+            window.location.href = '/';
+        }
+    } catch (error) {
+        console.error('Erro ao verificar autenticação:', error);
+        alert(MSG);
+        window.location.href = '/';
+    }
+}
+
 function fetchDataAndRenderTable(url, tableId, properties) {
     fetch(url)
         .then(response => {
@@ -19,22 +60,16 @@ function fetchDataAndRenderTable(url, tableId, properties) {
 
 function formatData(data) {
     return data.map(item => {
-        // Supondo que 'data_entrada' esteja no formato ISO 8601 (YYYY-MM-DD)
         const date = new Date(item.data_entrada);
-        // Formata a data no formato desejado
         const formattedDate = date.toLocaleDateString('pt-BR', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'
         });
-        // Retorna o objeto com a data formatada
         return { ...item, data_entrada: formattedDate };
     });
 }
 
-
-
-// Função que cria e preenche a tabela com dados
 function renderTable(data, tableId, properties) {
     const table = document.getElementById(tableId);
     if (!table) {
@@ -42,10 +77,8 @@ function renderTable(data, tableId, properties) {
         return;
     }
 
-    // Limpar tabela existente
     table.innerHTML = '';
 
-    // Criar cabeçalho da tabela
     const thead = table.createTHead();
     const row = thead.insertRow();
     for (const prop of properties) {
@@ -54,7 +87,6 @@ function renderTable(data, tableId, properties) {
         row.appendChild(th);
     }
 
-    // Criar corpo da tabela
     const tbody = table.createTBody();
     data.forEach(item => {
         const row = tbody.insertRow();
@@ -65,13 +97,4 @@ function renderTable(data, tableId, properties) {
     });
 }
 
-// Exemplo de uso
-// URL de onde os dados serão obtidos
-const dataUrl = 'https://eternity-crud.onrender.com/api/membros';
-// ID da tabela onde os dados serão exibidos
-const tableId = 'membros';
-// Propriedades dos objetos que você deseja exibir
-const propertiesToShow = ['nick', 'cargo', 'data_entrada'];
-
-// Chamar a função
-fetchDataAndRenderTable(dataUrl, tableId, propertiesToShow);
+index();
