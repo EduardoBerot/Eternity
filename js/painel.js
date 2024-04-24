@@ -3,7 +3,7 @@ const URL_VERIFY_LOGIN = `${URL_BASE}/api/verifyLogin`;
 
 async function index() {
     await authenticate();
-    const dataUrl = 'https://eternity-crud.onrender.com/api/membros';
+    const dataUrl = 'https://eternity-crud.onrender.com/api/membro';
     const tableId = 'membros';
     const propertiesToShow = ['nick', 'cargo', 'data_entrada'];
 

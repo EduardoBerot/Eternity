@@ -3,7 +3,7 @@ async function send (event){
 
     const ETY_FORM_COOKIE = 'eternity-form';
     const ETY_FORM_TIME = 10; /* tempo em minutos */
-    const URL_MEMBERS = `${URL_BASE}/api/membros`
+    const URL_MEMBERS = `${URL_BASE}/api/membro`
 
     if (!checkCookie(ETY_FORM_COOKIE)){
         data = getFormData();
