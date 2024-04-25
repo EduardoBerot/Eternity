@@ -50,8 +50,8 @@ async function send (event){
     
             // const data = await response.json();
             setCookie(ETY_FORM_COOKIE, ETY_FORM_TIME);
-            msg.innerText="Cadastro Realizado com sucesso!"
-            
+            alert("Cadastro Realizado com sucesso!");
+            msg.innerText="Cadastro Realizado com sucesso!";
         } catch (error) {
             alert("Não foi possível realizar o cadastro. Verifique se já não exite solicitações para esse nick e tente mais tarde novamente.")
         }
