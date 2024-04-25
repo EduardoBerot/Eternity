@@ -25,7 +25,7 @@ const pages_content = {
 
     zap: '<h1>Participe do nosso grupo de WhatsApp!</h1></br><p>Entre no nosso grupo de Whatsapp clicando no botão abaixo!</p></br><button class="button"><a href="https://chat.whatsapp.com/L3P1OvMnrVpJ3cj849ZoIw">Entre no grupo</a></button>',
 
-    administracao: '<form onsubmit="validationLogin(event)"><h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>',
+    administracao: '<div id="loading">Carregando<span class="loading-dot">...</span></div><form onsubmit="validationLogin(event)" style="display:none;"><h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>',
 };
 
 function render(event) {
@@ -34,7 +34,8 @@ function render(event) {
     selectItem(event.target);
 
     renderGallery(id);
-    renderForm(id);
+    renderFormJoin(id);
+    renderFormAdmin(id);
 }
 
 function renderGallery(id) {
@@ -43,10 +44,25 @@ function renderGallery(id) {
     }
 }
 
-function renderForm(id) {
-    const url = 'https://eternity-crud.onrender.com'
+function renderFormAdmin(id) {
+    if (id == 'administracao') {
+        fetch(URL_BASE)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                document.getElementById('loading').style.display = 'none';
+                document.querySelector('form').style.display = 'flex';
+            })
+            .catch(error => {
+                console.error('There has been a problem with your fetch operation:', error);
+            });
+    }
+}
+
+function renderFormJoin(id) {
     if (id == 'join') {
-        fetch(url)
+        fetch(URL_BASE)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -67,8 +83,8 @@ function renderSelect(values, id) {
 
     values.forEach(function (value) {
         const option = document.createElement("option");
-        option.text = value; // Definir o texto da opção
-        option.value = value; // Definir o valor da opção
+        option.text = value;
+        option.value = value;
 
         selectElement.add(option);
     });

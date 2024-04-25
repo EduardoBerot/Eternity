@@ -7,7 +7,7 @@ async function send (event){
 
     if (!checkCookie(ETY_FORM_COOKIE)){
         data = getFormData();
-    
+        
         const body = {
             content: "Mensagem Recebida",
             tts: false,
@@ -19,7 +19,7 @@ async function send (event){
                 },
             ],
         };
-    
+
         try {
             let response = await fetch(URL_MEMBERS,
                 {
