@@ -1,4 +1,3 @@
-
 const URL_VERIFY_LOGIN = `${URL_BASE}/api/verifyLogin`;
 
 async function index() {
@@ -28,7 +27,11 @@ async function authenticate() {
             }
 
             const {valid} = await response.json();
-            !(valid == 'false' || valid == false) || alert(MSG) && deleteCookie(ETY_ADM_COOKIE);
+            if (!valid){
+                alert(MSG);
+                deleteCookie(ETY_ADM_COOKIE);
+                window.location.href = '/';
+            }
         } else {
             alert(MSG);
             window.location.href = '/';

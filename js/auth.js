@@ -1,6 +1,6 @@
 async function send (event){
     event.preventDefault();
-
+    
     const ETY_FORM_COOKIE = 'eternity-form';
     const ETY_FORM_TIME = 10; /* tempo em minutos */
     const URL_MEMBERS = `${URL_BASE}/api/membro`
@@ -47,7 +47,7 @@ async function send (event){
                     throw new Error(response.statusText);
                 }
             }
-    
+            
             // const data = await response.json();
             setCookie(ETY_FORM_COOKIE, ETY_FORM_TIME);
             alert("Cadastro Realizado com sucesso!");
