@@ -42,6 +42,10 @@ nav {
     width: 90%;
 }
 
+nav div a:last-child{
+    margin-left: 30px;
+}
+
 nav a:hover{
     color: aqua;
     cursor: pointer;
@@ -59,6 +63,7 @@ nav a:hover{
     padding-top: 30px;
     gap: 10px;
     height: 80%;
+    overflow: auto; 
 }
 
 table {
