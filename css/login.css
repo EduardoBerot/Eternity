@@ -1,25 +1,3 @@
-@font-face {
-    font-family: Conthax;
-    src: url(../fonts/conthrax_sb.ttf);
-}
-
-* {
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
-    font-family: Conthax;
-}
-
-body {
-    background-image: url(../imgs/BodyBG.png);
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    backdrop-filter: blur(5px);
-    padding: 0 32px;
-    height: 100vh;
-}
 
 main {
     width: 100%;

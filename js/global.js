@@ -5,7 +5,7 @@ const URL_BASE = "https://eternity-crud.onrender.com"
 
 const ETY_ADM_COOKIE = 'eternity-adm';
 
-const STAFFMEMBERS = ['Ducred22', 'Ov3r5y5t3m', 'XeKeMaTe', 'Sir_Felipee']
+const STAFFMEMBERS = ['Ducred22', 'Ov3r5y5t3m', 'XeKeMaTe', 'Sir_Felipee', 'DRAGON_SDK', "DarkMelissa"]
 
 function setCookie(name, time, value='') {
     const expiry = new Date();
