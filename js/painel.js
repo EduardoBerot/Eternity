@@ -1,4 +1,5 @@
 const URL_VERIFY_LOGIN = `${URL_BASE}/api/verifyLogin`;
+let nick;
 
 async function index() {
     await authenticate();
@@ -26,8 +27,11 @@ async function authenticate() {
                 throw new Error('Erro na requisição');
             }
 
-            const {valid} = await response.json();
-            if (!valid){
+            const {isValid} = await response.json();
+
+            if (isValid){
+                nick = isValid;
+            }else{
                 alert(MSG);
                 deleteCookie(ETY_ADM_COOKIE);
                 window.location.href = '/';
