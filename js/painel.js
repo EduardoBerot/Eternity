@@ -1,13 +1,11 @@
 const URL_VERIFY_LOGIN = `${URL_BASE}/api/verifyLogin`;
+const URL_GET_MEMBROS = `${URL_BASE}/api/membros`;
 let nick;
 
 async function index() {
     await authenticate();
-    const dataUrl = `${URL_BASE}/api/membros`;
-    const tableId = 'membros';
-    const propertiesToShow = ['nick', 'cargo', 'data_entrada'];
 
-    fetchDataAndRenderTable(dataUrl, tableId, propertiesToShow);
+    // fetchDataAndRenderTable(URL_GET_MEMBROS, 'membros', ['nick', 'cargo', 'data_entrada']);
 }
 
 async function authenticate() {
@@ -27,10 +25,10 @@ async function authenticate() {
                 throw new Error('Erro na requisição');
             }
 
-            const {isValid} = await response.json();
+            const {valid} = await response.json();
 
-            if (isValid){
-                nick = isValid;
+            if (valid){
+                nick = valid;
             }else{
                 alert(MSG);
                 deleteCookie(ETY_ADM_COOKIE);
