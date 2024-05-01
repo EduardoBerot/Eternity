@@ -7,6 +7,13 @@ const ETY_ADM_COOKIE = 'eternity-adm';
 
 const STAFFMEMBERS = ['Ducred22', 'Ov3r5y5t3m', 'XeKeMaTe', 'Sir_Felipee', 'DRAGON_SDK', "DarkMelissa"]
 
+function getDate(defaultDate='') {
+    const f = (str)=>String(str).padStart(2, '0');
+    const date = defaultDate ? new Date(defaultDate) : new Date;
+    const date_str = `${date.getFullYear()}-${f(date.getMonth()+1)}-${f(date.getDate())}`
+    return date_str
+}
+
 function setCookie(name, time, value='') {
     const expiry = new Date();
     expiry.setTime(expiry.getTime() + (time * 60 * 1000)); // Define a expiração do cookie

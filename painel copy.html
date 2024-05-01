@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="imgs/favicon.ico" type="image/x-icon">
+    <title>Eternity | Administração</title>
+    <link rel="stylesheet" href="./css/painel.css">
+    <link rel="stylesheet" href="./css/layout.css">
+</head>
+
+<body>
+    <main>
+        <nav>
+            <d>
+                <a href="./index.html">Voltar</a>
+            </d>
+            <div>
+                <a class="itens" id="solicitacoes">Solicitações</a>
+                <a class="itens" id="membros">Membros</a>
+                <a class="itens" id="adicionar">Adicionar</a>
+             </div>
+        </nav>
+        <section id="app" class="content">
+            <!--TABELA DAS SOLICITAÇÕES, O SELECT DEVE SER OBRIGATORIO E AS INFOS QUE CHEGAM NESSA TABELA VEM DO FORM EM JUNTAR-SE-->
+            <!-- <table>
+                <thead>
+                    <tr>
+                        <th>Nick</th>  
+                        <th>Idade</th>
+                        <th>Foco</th>
+                        <th>Data Solicitação</th>
+                        <th>Recrutador</th> 
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>trogro9</td>
+                        <td>23</td>
+                        <td>Farm</td>
+                        <td>29/04/2024</td>
+                        <td>
+                            <select name="" id="">
+                                <option value="" disabled selected>Selecionar</option>
+                                <option value="Ducred22">Ducred22</option>
+                            </select></td>
+                        <td>
+                            <div>
+                                <img src="./imgs/icons/Check.svg" alt="Aceitar">
+                                <img src="./imgs/icons/Close.svg" alt="Negar">
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table> -->
+
+            <div class="tabletittle">
+                <p>Lista de Membros</p>
+                <a href="./cadastro.html">Adicionar membro</a>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nick</th>
+                        <th>Idade</th>
+                        <th>Cargo</th>
+                        <th>Membro Desde</th>
+                        <th>Recrutado por</th>
+                        <th>Expulsar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>trogro9</td>
+                        <td>23</td>
+                        <td>Membro</td>
+                        <td>29/04/2024</td>
+                        <td>Ducred22</td> <!--o Value daqui vem do select da tabela de solicitações dps que aprova-->
+                        <td><img src="./imgs/icons/Kick.svg" alt=""></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div id="loading">Carregando<span class="loading-dot">...</span></div>
+            <!-- <table id="membros"></table> -->
+        </section>
+    </main>
+    <script src="js/global.js"></script>
+    <script src="js/painel.js"></script>
+</body>
+
+</html> 
