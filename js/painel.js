@@ -1,6 +1,9 @@
 const URL_VERIFY_LOGIN = `${URL_BASE}/api/verifyLogin`;
-const URL_GET_MEMBROS = `${URL_BASE}/api/membros`;
+// const URL_GET_MEMBROS = `${URL_BASE}/api/membros`;
+const URL_GET_MEMBROS_ATIVOS = `${URL_BASE}/api/membros/ativos`;
 const URL_GET_SOLICITACOES = `${URL_BASE}/api/solicitacoes`;
+const URL_PATH_ATIVAR_MEMBRO = `${URL_BASE}/api/membro/ativar/id`;
+const URL_DELETE_MEMBRO = `${URL_BASE}/api/membro/id`;
 
 const APP = document.getElementById("app");
 let nick;
@@ -183,8 +186,8 @@ function renderSolicitacoes() {
         name: 'Status',
         content: `
             <div>
-                <img value="%id" src="./imgs/icons/Check.svg" alt="Aceitar" onclick="checkOutSolicitation(event)">
-                <img value="%id" src="./imgs/icons/Close.svg" alt="Negar" onclick="checkOutSolicitation(event)">
+                <img value="%id" status="Ativo" src="./imgs/icons/Check.svg" alt="Aceitar" onclick="checkOutSolicitation(event)">
+                <img value="%id" status="Excluído" src="./imgs/icons/Close.svg" alt="Negar" onclick="checkOutSolicitation(event)">
             </div>
         `
     }
@@ -214,10 +217,18 @@ function renderAdicionar() {
 
 function renderMembros() {
     const table_id = 'tb_membros';
-    const properties = ['nick', 'idade',  'cargo', 'data_entrada', 'recrutador'];
+    const properties = ['id', 'nick', 'idade',  'cargo', 'data_entrada', 'recrutador'];
     renderLoading(APP);
     createTable(APP, table_id);
-    fetchDataAndRenderTable(URL_GET_MEMBROS, table_id, properties);
+    const extraField = {
+        name: 'Excluir',
+        content: `
+            <div>
+                <img value="%id" status="Excluído" src="./imgs/icons/Close.svg" alt="Negar" onclick="checkOutSolicitation(event)">
+            </div>
+        `
+    }
+    fetchDataAndRenderTable(URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField);
 }
 
 const pages_content = {
@@ -234,14 +245,61 @@ function render(event) {
     selectItem(event.target);
 }
 
-membros.click()
+solicitacoes.click()
 
 function checkOutSolicitation(event){
     const id = event.target.getAttribute('value');
-    const status = event.target.alt == 'Aceitar' ? 'Ativo' : false;
-    const proceed = confirm(`Tem certeza que deseja definir como ${status? status : 'Recusado'} o membro Nº${id}?`)
+    const status = event.target.getAttribute('status');
+    const proceed = confirm(`Tem certeza que deseja definir como ${status} o membro Nº${id}?`)
 
-    console.log(proceed);
+    if (proceed) {
+        if (status == 'Ativo'){
+            updateMember(id)
+        }else if(status == 'Excluído'){
+            excludeMember(id)
+        }else{
+            throw new Error( `Invalid status ${status}`);
+        }
+    }
+
+    function updateMember(id) {
+        const opcoes = {
+            method: 'PATCH', 
+            headers: {'Content-Type': 'application/json'},
+        };
+    
+        fetch(`${URL_PATH_ATIVAR_MEMBRO}/${id}`, opcoes)
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Algo deu errado na requisição: ' + response.statusText);
+            })
+            .then(data => {
+                alert(`O membro Nº${data.id} foi definido como Ativo!`);
+            })
+            .catch(error => {
+                console.error('Erro durante a requisição:', error);
+            });
+    }
+    
+    function excludeMember(id) {
+        fetch(`${URL_DELETE_MEMBRO}/${id}`, {method: 'DELETE'})
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Algo deu errado na requisição: ' + response.statusText);
+            })
+            .then(data => {
+                alert(`O membro Nº${data.id} foi excluído!`);
+                solicitacoes.click()
+            })
+            .catch(error => {
+                console.error('Erro durante a requisição:', error);
+                solicitacoes.click()
+            });
+    }
 }
 
 function submitAdicionar(event) {

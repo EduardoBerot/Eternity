@@ -97,3 +97,9 @@ table td {
         opacity: 0;
     }
 }
+
+img:hover{
+    cursor: pointer;
+    filter: invert();
+    transition-duration: 200ms;
+}

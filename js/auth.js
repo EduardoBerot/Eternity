@@ -63,7 +63,6 @@ async function send (event){
 
 function getFormData() {
     const data = {
-        uuid: document.getElementById('uuid').value,
         nick: document.getElementById('nick').value,
         idade: document.getElementById('idade').value,
         foco: document.getElementById('foco').value,
