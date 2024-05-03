@@ -92,7 +92,7 @@ solicitacoes.click()
 function checkOutSolicitation(event){
     const id = event.target.getAttribute('value');
     const status = event.target.getAttribute('status');
-    const proceed = confirm(`Tem certeza que deseja definir como ${status} o membro Nº${id}?`)
+    const proceed = confirm(`Tem certeza que deseja definir o membro como ${status}?`)
 
     if (proceed) {
         if (status == 'Ativo'){
