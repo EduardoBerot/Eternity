@@ -32,7 +32,7 @@ function render(event) {
 
 function renderSolicitacoes() {
     const table_id = 'tb_solicitacoes';
-    const properties = ['id','nick', 'idade',  'foco', 'data_entrada'];
+    const properties = ['nick', 'idade',  'foco', 'data_entrada'];
     renderLoading(APP);
     createTable(APP, table_id);
     const extraField = {
@@ -70,7 +70,7 @@ function renderAdicionar() {
 
 function renderMembros() {
     const table_id = 'tb_membros';
-    const properties = ['id', 'nick', 'idade',  'cargo', 'data_entrada', 'recrutador'];
+    const properties = ['nick', 'idade',  'cargo', 'data_entrada', 'recrutador'];
     renderLoading(APP);
     createTable(APP, table_id);
     

@@ -54,19 +54,8 @@ nav a:hover, nav a.select{
     
 }
 
-.tabletittle {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    /* border-bottom: solid aqua 2px; */
-    align-items: center;
-    margin-bottom: 30px;
-}
 
-.tabletittle a:hover {
-    color: aqua;
-    cursor: pointer;
-}
+
 table {
     width: 100%;
     text-align: center;
