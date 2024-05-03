@@ -16,8 +16,7 @@ const FIELD_MASK = {
     status: 'Status',
     recrutador: 'Recrutador Por',
     cargo: 'Cargo',
-    data_entrada: 'Data de Admissão',
-    status: 'Status',
+    data_entrada: 'Data de Solicitação',
 }
 
 async function authenticate() {
@@ -59,7 +58,7 @@ async function authenticate() {
 
 authenticate();
 
-function fetchDataAndRenderTable(url, tableId, properties, extraField='') {
+function fetchDataAndRenderTable(url, tableId, properties, extraField='', callback=null) {
     function renderTable(data, tableId, properties) {
         const table = document.getElementById(tableId);
         if (!table) {
@@ -127,6 +126,7 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='') {
             hideLoading();
             // data = formatData(data);
             renderTable(data, tableId, properties);
+            if (callback) callback()
         })
         .catch(error => {
             console.error('There has been a problem with your fetch operation:', error);
@@ -179,7 +179,7 @@ function createTable(element,id) {
 
 function renderSolicitacoes() {
     const table_id = 'tb_solicitacoes';
-    const properties = ['id','nick', 'idade',  'foco', 'data_entrada', 'recrutador'];
+    const properties = ['id','nick', 'idade',  'foco', 'data_entrada'];
     renderLoading(APP);
     createTable(APP, table_id);
     const extraField = {
@@ -220,16 +220,30 @@ function renderMembros() {
     const properties = ['id', 'nick', 'idade',  'cargo', 'data_entrada', 'recrutador'];
     renderLoading(APP);
     createTable(APP, table_id);
+    
     const extraField = {
         name: 'Excluir',
         content: `
-            <div>
-                <img value="%id" status="Excluído" src="./imgs/icons/Close.svg" alt="Negar" onclick="checkOutSolicitation(event)">
-            </div>
+        <div>
+        <img value="%id" status="Excluído" src="./imgs/icons/Close.svg" alt="Negar" onclick="checkOutSolicitation(event)">
+        </div>
         `
     }
-    fetchDataAndRenderTable(URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField);
+    fetchDataAndRenderTable(URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField, ()=>{
+        replaceInTableHeader(FIELD_MASK['data_entrada'],'Membro desde')
+    });
 }
+
+function replaceInTableHeader(searchString, replaceString) {
+    const headers = document.getElementsByTagName("th");
+    Object.values(headers).forEach(function(header) {
+        if (header.innerHTML.includes(searchString)) {
+            header.innerHTML = header.innerHTML.replace(searchString, replaceString);
+            return null;
+        }
+    });
+}
+
 
 const pages_content = {
     solicitacoes: renderSolicitacoes,
