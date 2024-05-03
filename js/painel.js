@@ -283,7 +283,9 @@ function checkOutSolicitation(event){
             });
     }
     
-    function excludeMember(id) {
+    function excludeMember(id, element=solicitacoes) {
+        const redirectElement = getRedirectElement();
+
         fetch(`${URL_DELETE_MEMBRO}/${id}`, {method: 'DELETE'})
             .then(response => {
                 if (response.ok) {
@@ -293,13 +295,21 @@ function checkOutSolicitation(event){
             })
             .then(data => {
                 alert(`O membro Nº${data.id} foi excluído!`);
-                solicitacoes.click()
+                redirectElement?.click();
             })
             .catch(error => {
                 console.error('Erro durante a requisição:', error);
-                solicitacoes.click()
+                redirectElement?.click();
             });
     }
+}
+
+function getRedirectElement() {
+    const  elements = document.getElementsByClassName('select');
+    if(elements){
+        return elements[0]
+    }
+    return null
 }
 
 function submitAdicionar(event) {
