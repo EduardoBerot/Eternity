@@ -1,7 +1,8 @@
 const URL_DISCORD_INTEGRATION = "https://discord.com/api/webhooks/1228845807550074900/HwKlDWuMZqONWv1HumZnjIoBPJnYmuDKnWziKJbImSe2EuWf6PsvswlCHPLYph24FWvH"
 
-// const URL_BASE = "https://eternity-crud.onrender.com"
-const URL_BASE = "http://localhost:5000"
+const URL_BASE = "https://eternity-crud.onrender.com"
+// const URL_BASE = "http://localhost:5000"
+const URL_MEMBERS = `${URL_BASE}/api/membro`;
 
 const ETY_ADM_LOGIN_COOKIE = 'eternity-adm-login';
 const ETY_ADM_PASS_COOKIE = 'eternity-adm';

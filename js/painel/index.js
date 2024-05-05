@@ -52,11 +52,11 @@ function renderAdicionar() {
     <h1 class="tittle">Adicionar Membro</h1>
     <form id="form_adicionar" onsubmit="submitAdicionar(event)"> 
         <input type="text" id="nick" placeholder="Nick" required>
-        <input type="number" step="1" id="idade" placeholder="Idade">
+        <input type="number" step="1" min="5" max="120" value="14" id="idade" placeholder="Idade" required>
         <select name="foco" id="foco" required></select>
         <input type="text" id="cargo" placeholder="Cargo" value="Membro" required>
         <input type="text" id="status" placeholder="Status" value="Ativo" style="display:none"required>
-        <input type="date" value="" id="data_entrada" placeholder="Data" required>
+        <input type="date" id="data_entrada" placeholder="Data" required>
         <select name="recrutador" id="recrutador" required></select>
         <button>Cadastrar</button>
     </form>
@@ -99,7 +99,7 @@ function checkOutSolicitation(event){
 
     if (proceed) {
         if (status == 'Ativo'){
-            updateMember(id)
+            updateMember(id);
         }else if(status == 'Excluído'){
             excludeMember(id)
         }else{
@@ -122,14 +122,14 @@ function checkOutSolicitation(event){
             })
             .then(data => {
                 alert(`O membro Nº${data.id} foi definido como Ativo!`);
+                getRedirectElement()?.click()
             })
             .catch(error => {
                 console.error('Erro durante a requisição:', error);
             });
     }
     
-    function excludeMember(id, element=solicitacoes) {
-        const redirectElement = getRedirectElement();
+    function excludeMember(id) {
 
         fetch(`${URL_DELETE_MEMBRO}/${id}`, {method: 'DELETE'})
             .then(response => {
@@ -138,13 +138,11 @@ function checkOutSolicitation(event){
                 }
                 throw new Error('Algo deu errado na requisição: ' + response.statusText);
             })
-            .then(data => {
-                alert(`O membro Nº${data.id} foi excluído!`);
-                redirectElement?.click();
+            .then(_ => {
+                getRedirectElement()?.click()
             })
             .catch(error => {
                 console.error('Erro durante a requisição:', error);
-                redirectElement?.click();
             });
     }
 }
@@ -157,9 +155,42 @@ function getRedirectElement() {
     return null
 }
 
-function submitAdicionar(event) {
+async function submitAdicionar(event) {
     event.preventDefault();
-    console.log('submetendo formulário de adição');
+    console.log('Submetendo formulário de adição.');
+
+    const data = getFormData();
+
+    try {
+        let response = await fetch(URL_MEMBERS,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+
+        alert("Cadastro realizado com sucesso!");
+    } catch (error) {
+        alert(`Não foi possível realizar o cadastro. Verifique se não um membro cadastrado com o nick "${data.nick}"`);
+    }
+
+    function getFormData() {
+        const data = {
+            nick: document.getElementById('nick').value,
+            idade: document.getElementById('idade').value,
+            foco: document.getElementById('foco').value,
+            recrutador: document.getElementById('recrutador').value,
+            cargo: document.getElementById('cargo').value,
+            data_entrada: document.getElementById('data_entrada').value,
+            status: document.getElementById('status').value,
+        }
+        return data
+    }
 }
 
 function fetchDataAndRenderTable(url, tableId, properties, extraField='', callback=null) {
@@ -219,6 +250,24 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
         }
     }
 
+    function renderVoidTable(tableId, properties) {
+        const table = document.getElementById(tableId);
+        if (!table) {
+            console.error(`No table found with id "${tableId}"`);
+            return;
+        }
+    
+        table.innerHTML = '<h2>Não há nada aqui!</h2>';
+    
+        // const thead = table.createTHead();
+        // const row = thead.insertRow();
+        // for (const prop of properties) {
+        //     const th = document.createElement('th');
+        //     const field = FIELD_MASK[prop] || prop;
+        //     th.textContent = field;
+        //     row.appendChild(th);
+        }
+
     fetch(url)
         .then(response => {
             if (!response.ok) {
@@ -228,7 +277,13 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
         })
         .then(data => {
             hideLoading();
-            renderTable(data, tableId, properties);
+
+            if(data.length == 0){
+                renderVoidTable(tableId, properties)
+            }else{
+                renderTable(data, tableId, properties);
+            }
+
             if (callback) callback()
         })
         .catch(error => {
