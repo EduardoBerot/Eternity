@@ -121,7 +121,7 @@ function checkOutSolicitation(event){
                 throw new Error('Algo deu errado na requisição: ' + response.statusText);
             })
             .then(data => {
-                alert(`O membro Nº${data.id} foi definido como Ativo!`);
+                alert(`O membro foi definido como Ativo!`);
                 getRedirectElement()?.click()
             })
             .catch(error => {
