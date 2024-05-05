@@ -5,13 +5,15 @@ async function authenticate() {
     const MSG = 'Faça login na seção "Administração".';
     
     try {
-        if (checkCookie(ETY_ADM_COOKIE)) {
-            const token = getCookie(ETY_ADM_COOKIE);
+        const cookiesOk = checkCookie(ETY_ADM_LOGIN_COOKIE) && checkCookie(ETY_ADM_PASS_COOKIE);
+        if (cookiesOk) {
+            const login_nick = getCookie(ETY_ADM_LOGIN_COOKIE);
+            const token = getCookie(ETY_ADM_PASS_COOKIE);
 
             const response = await fetch(URL_VERIFY_LOGIN, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({token})
+            body: JSON.stringify({token, login: login_nick})
         });
 
             if (!response.ok) {
@@ -19,14 +21,14 @@ async function authenticate() {
             }
 
             const {valid} = await response.json();
-
-            if (valid){
-                nick = valid;
-            }else{
+            
+            if (!valid){
                 alert(MSG);
-                deleteCookie(ETY_ADM_COOKIE);
+                deleteCookie(ETY_ADM_LOGIN_COOKIE);
+                deleteCookie(ETY_ADM_PASS_COOKIE);
                 window.location.href = '/';
             }
+
         } else {
             alert(MSG);
             window.location.href = '/';

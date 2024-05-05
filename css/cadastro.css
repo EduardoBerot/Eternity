@@ -15,7 +15,12 @@ form#form_adicionar input {
 
 form#form_adicionar select {
     width: 100%;
-    color: gray;
+    color: black;
+}
+
+form#form_adicionar select {
+    width: 100%;
+    color: black;
 }
 
 button {

@@ -52,14 +52,19 @@ function renderAdicionar() {
     <h1 class="tittle">Adicionar Membro</h1>
     <form id="form_adicionar" onsubmit="submitAdicionar(event)"> 
         <input type="text" id="nick" placeholder="Nick" required>
-        <input type="text" id="idade" placeholder="Idade">
-        <input type="text" id="cargo" placeholder="Cargo" required>
+        <input type="number" step="1" id="idade" placeholder="Idade">
+        <select name="foco" id="foco" required></select>
+        <input type="text" id="cargo" placeholder="Cargo" value="Membro" required>
+        <input type="text" id="status" placeholder="Status" value="Ativo" style="display:none"required>
         <input type="date" value="" id="data_entrada" placeholder="Data" required>
-        <select name="recrutador" id="recrutador" ></select>
+        <select name="recrutador" id="recrutador" required></select>
         <button>Cadastrar</button>
     </form>
     `;
-    createOptions('recrutador', STAFFMEMBERS, nick)
+    
+    const nick = getCookie(ETY_ADM_LOGIN_COOKIE);
+    createOptions('recrutador', STAFFMEMBERS, nick);
+    createOptions('foco', FOCUS_TYPE, 'PvP')
     setDate()
 
     function setDate() {
@@ -86,8 +91,6 @@ function renderMembros() {
         replaceInTableHeader(FIELD_MASK['data_entrada'],'Membro desde')
     });
 }
-
-solicitacoes.click()
 
 function checkOutSolicitation(event){
     const id = event.target.getAttribute('value');
@@ -204,7 +207,7 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
 
         function formatValue(value) {
             if (isValidDate(value)){
-                return getDate(value);
+                return getDate(value, true);
             }
 
             return value
@@ -232,3 +235,13 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
             console.error('There has been a problem with your fetch operation:', error);
         });
 }
+
+function init() {
+    const nick = getCookie(ETY_ADM_LOGIN_COOKIE);
+    const element = document.querySelector('#title_nick');
+    const msg = `Seja Bem-Vindo ${nick}!`;
+    element.textContent = msg;
+    solicitacoes.click()
+}
+
+init();

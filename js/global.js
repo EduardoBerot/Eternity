@@ -1,17 +1,24 @@
 const URL_DISCORD_INTEGRATION = "https://discord.com/api/webhooks/1228845807550074900/HwKlDWuMZqONWv1HumZnjIoBPJnYmuDKnWziKJbImSe2EuWf6PsvswlCHPLYph24FWvH"
 
-const URL_BASE = "https://eternity-crud.onrender.com"
-// const URL_BASE = "http://localhost:5000"
+// const URL_BASE = "https://eternity-crud.onrender.com"
+const URL_BASE = "http://localhost:5000"
 
-const ETY_ADM_COOKIE = 'eternity-adm';
+const ETY_ADM_LOGIN_COOKIE = 'eternity-adm-login';
+const ETY_ADM_PASS_COOKIE = 'eternity-adm';
 
-const STAFFMEMBERS = ['Ducred22', 'Ov3r5y5t3m', 'XeKeMaTe', 'Sir_Felipee', 'DRAGON_SDK', "DarkMelissa"]
+const STAFFMEMBERS = ['Ducred22', 'Ov3r5y5t3m', 'XeKeMaTe', 'Sir_Felipee', 'DRAGON_SDK', 'DarkMelissa','trogro9'];
 
-function getDate(defaultDate='') {
+const FOCUS_TYPE = ['PvP', 'Torneio', 'Build','Farm'];
+
+function getDate(defaultDate='',brOrder=false) {
     const f = (str)=>String(str).padStart(2, '0');
     const date = defaultDate ? new Date(defaultDate) : new Date;
-    const date_str = `${date.getFullYear()}-${f(date.getMonth()+1)}-${f(date.getDate())}`
-    return date_str
+    
+    if (brOrder){
+        return `${f(date.getDate())}-${f(date.getMonth()+1)}-${date.getFullYear()}`
+    }else{
+        return `${date.getFullYear()}-${f(date.getMonth()+1)}-${f(date.getDate())}`
+    }
 }
 
 function setCookie(name, time, value='') {

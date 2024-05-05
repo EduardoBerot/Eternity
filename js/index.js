@@ -106,7 +106,7 @@ async function validationLogin(event) {
     const URL_LOGIN = `${URL_BASE}/api/login`
     const login = document.querySelector('#login').value;
     const senha = document.querySelector('#senha').value;
-    const dados = {login,senha}
+    const dados = {login, senha}
 
     try {
         const response = await fetch(URL_LOGIN, {
@@ -119,10 +119,11 @@ async function validationLogin(event) {
             throw new Error('Erro na requisição');
         }
 
-        const {token} = await response.json();
+        const {token, login} = await response.json();
         const DOIS_DIAS_EM_MINUTOS = 60*24*2;
 
-        setCookie(ETY_ADM_COOKIE, DOIS_DIAS_EM_MINUTOS, token);
+        setCookie(ETY_ADM_LOGIN_COOKIE, DOIS_DIAS_EM_MINUTOS, login);
+        setCookie(ETY_ADM_PASS_COOKIE, DOIS_DIAS_EM_MINUTOS, token);
 
         window.location.href = '/painel.html';
 
