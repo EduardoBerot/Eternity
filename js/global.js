@@ -1,5 +1,3 @@
-const URL_DISCORD_INTEGRATION = "https://discord.com/api/webhooks/1228845807550074900/HwKlDWuMZqONWv1HumZnjIoBPJnYmuDKnWziKJbImSe2EuWf6PsvswlCHPLYph24FWvH"
-
 const URL_BASE = "https://eternity-crud.onrender.com"
 // const URL_BASE = "http://localhost:5000"
 const URL_MEMBERS = `${URL_BASE}/api/membro`;
@@ -14,17 +12,18 @@ const FOCUS_TYPE = ['PvP', 'Torneio', 'Build','Farm'];
 function getDate(defaultDate='',brOrder=false) {
     const f = (str)=>String(str).padStart(2, '0');
     const date = defaultDate ? new Date(defaultDate) : new Date;
+    const add = defaultDate ? 1 : 0;
     
     if (brOrder){
-        return `${f(date.getDate())}-${f(date.getMonth()+1)}-${date.getFullYear()}`
+        return `${f(add+date.getDate())}-${f(date.getMonth()+1)}-${date.getFullYear()}`
     }else{
-        return `${date.getFullYear()}-${f(date.getMonth()+1)}-${f(date.getDate())}`
+        return `${date.getFullYear()}-${f(date.getMonth()+1)}-${f(add+date.getDate())}`
     }
 }
 
 function setCookie(name, time, value='') {
     const expiry = new Date();
-    expiry.setTime(expiry.getTime() + (time * 60 * 1000)); // Define a expiração do cookie
+    expiry.setTime(expiry.getTime() + (time * 60 * 1000));
     document.cookie = `${name}=${value}; expires=${expiry.toGMTString()}; path=/`;
 }
 

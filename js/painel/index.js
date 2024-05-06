@@ -173,8 +173,8 @@ async function submitAdicionar(event) {
         if (!response.ok) {
             throw new Error("Network response was not ok");
         }
-
         alert("Cadastro realizado com sucesso!");
+        cleanForm();
     } catch (error) {
         alert(`Não foi possível realizar o cadastro. Verifique se não um membro cadastrado com o nick "${data.nick}"`);
     }
@@ -190,6 +190,12 @@ async function submitAdicionar(event) {
             status: document.getElementById('status').value,
         }
         return data
+    }
+
+    function cleanForm() {
+        document.getElementById('nick').value = ''
+        document.getElementById('idade').value = ''
+        document.getElementById('foco').value = ''
     }
 }
 
