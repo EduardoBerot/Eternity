@@ -9,6 +9,10 @@ form#form_adicionar {
     margin-bottom: 50px;
 }
 
+.form-label{
+    width: 100%;
+}
+
 form#form_adicionar input {
     width: 100%;
     padding: 3px;

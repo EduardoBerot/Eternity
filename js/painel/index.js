@@ -50,14 +50,32 @@ function renderSolicitacoes() {
 function renderAdicionar() {
     APP.innerHTML = `
     <h1 class="tittle">Adicionar Membro</h1>
-    <form id="form_adicionar" onsubmit="submitAdicionar(event)"> 
-        <input type="text" id="nick" placeholder="Nick" required>
-        <input type="number" step="1" min="5" max="120" value="14" id="idade" placeholder="Idade" required>
-        <select name="foco" id="foco" required></select>
-        <input type="text" id="cargo" placeholder="Cargo" value="Membro" required>
+    <form id="form_adicionar" onsubmit="submitAdicionar(event)">
+        <div class="form-label">
+            <label for="nick">Nick</label>
+            <input type="text" id="nick" placeholder="Nick" required>
+        </div>
+        <div class="form-label">
+            <label for="idade">Data de Nascimento</label>
+            <input type="number" step="1" min="5" max="120" value="5" id="idade" placeholder="Idade" required>
+        </div>
+        <div class="form-label">
+            <label for="foco">Foco</label>
+            <select name="foco" id="foco" required></select>
+        </div>
+        <div class="form-label">
+            <label for="cargo">Cargo</label>        
+            <input type="text" id="cargo" placeholder="Cargo" value="Membro" required>
+        </div>
         <input type="text" id="status" placeholder="Status" value="Ativo" style="display:none"required>
-        <input type="date" id="data_entrada" placeholder="Data" required>
-        <select name="recrutador" id="recrutador" required></select>
+        <div class="form-label">
+            <label for="data_entrada">Data de Cadastro</label>
+            <input type="date" id="data_entrada" placeholder="Data" required>
+        </div>
+        <div class="form-label">
+            <label for="recrutador">Recrutador</label>
+            <select name="recrutador" id="recrutador" required></select>
+        </div>
         <button>Cadastrar</button>
     </form>
     `;
@@ -193,9 +211,8 @@ async function submitAdicionar(event) {
     }
 
     function cleanForm() {
-        document.getElementById('nick').value = ''
-        document.getElementById('idade').value = ''
-        document.getElementById('foco').value = ''
+        document.getElementById('nick').value = '';
+        document.getElementById('idade').value = '5';
     }
 }
 
