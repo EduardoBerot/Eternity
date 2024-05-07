@@ -16,6 +16,8 @@ const FIELD_MASK = {
 
 const APP = document.getElementById("app");
 
+let member_edit = {}
+
 const pages_content = {
     solicitacoes: renderSolicitacoes,
     membros: renderMembros,
@@ -76,7 +78,7 @@ function renderAdicionar() {
             <label for="recrutador">Recrutador</label>
             <select name="recrutador" id="recrutador" required></select>
         </div>
-        <button>Cadastrar</button>
+        <button>Adicionar</button>
     </form>
     `;
     
@@ -99,16 +101,24 @@ function renderMembros() {
     createTable(APP, table_id);
     
     const extraField = {
-        name: 'Excluir',
+        name: 'Editar',
         content: `
         <div>
-        <img value="%id" status="Excluído" src="./imgs/icons/Close.svg" alt="Negar" onclick="checkOutSolicitation(event)">
+            <img value="%id" status="Excluído" src="./imgs/icons/Kick.svg" alt="Negar" onclick="goEditPage(event)">
+            <img value="%id" status="Excluído" src="./imgs/icons/Close.svg" alt="Negar" onclick="checkOutSolicitation(event)">
         </div>
         `
     }
+
+    
     fetchDataAndRenderTable(URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField, ()=>{
         replaceInTableHeader(FIELD_MASK['data_entrada'],'Membro desde')
     });
+}
+
+function goEditPage(event) {
+    const id = event.target.getAttribute('value');
+    console.log(id);
 }
 
 function checkOutSolicitation(event){
