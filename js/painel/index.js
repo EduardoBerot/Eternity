@@ -65,7 +65,7 @@ function renderAdicionar() {
         </div>
         <div class="form-label">
             <label for="cargo">Cargo</label>        
-            <input type="text" id="cargo" placeholder="Cargo" value="Membro" required>
+            <select name="cargo" id="cargo" required></select>
         </div>
         <input type="text" id="status" placeholder="Status" value="Ativo" style="display:none"required>
         <div class="form-label">
@@ -83,6 +83,7 @@ function renderAdicionar() {
     const nick = getCookie(ETY_ADM_LOGIN_COOKIE);
     createOptions('recrutador', STAFFMEMBERS, nick);
     createOptions('foco', FOCUS_TYPE, 'PvP')
+    createOptions('cargo', CARGOS, 'Membro')
     setDate()
 
     function setDate() {

@@ -128,6 +128,7 @@ async function validationLogin(event) {
         window.location.href = '/painel.html';
 
     } catch (error) {
+        alert('Login ou senha não conferem.')
         console.error('Erro ao enviar os dados:', error);
     }
 
