@@ -104,7 +104,7 @@ function renderMembros() {
         name: 'Editar',
         content: `
         <div>
-            <img value="%id" status="Excluído" src="./imgs/icons/Kick.svg" alt="Negar" onclick="goEditPage(event)">
+            <img value="%id" status="Excluído" src="./imgs/icons/Edit.svg" alt="Editar" onclick="goEditPage(event)">
             <img value="%id" status="Excluído" src="./imgs/icons/Close.svg" alt="Negar" onclick="checkOutSolicitation(event)">
         </div>
         `
