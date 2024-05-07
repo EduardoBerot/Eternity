@@ -9,7 +9,19 @@ const STAFFMEMBERS = ['Ducred22', 'Ov3r5y5t3m', 'XeKeMaTe', 'Sir_Felipee', 'DRAG
 const FOCUS_TYPE = ['PvP', 'Torneio', 'Build', 'Farm'];
 const CARGOS = ['Membro','Estagiário', 'Auxiliar', 'Supervisor', 'Coordenador', 'Dono']
 
-function getDate(defaultDate='',brOrder=false) {
+const clearAPP = (element=APP) => element.innerHTML = ''; 
+
+function selectOptionByValue(selectId, optionValue) {
+    const selectElement = document.getElementById(selectId);
+    for (const i = 0; i < selectElement.options.length; i++) {
+        if (selectElement.options[i].value === optionValue) {
+            selectElement.selectedIndex = i;
+            break;
+        }
+    }
+}
+
+function getDate(defaultDate='', brOrder=false) {
     const f = (str)=>String(str).padStart(2, '0');
     const date = defaultDate ? new Date(defaultDate) : new Date;
     const add = defaultDate ? 1 : 0;

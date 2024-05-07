@@ -2,6 +2,7 @@ const URL_GET_MEMBROS_ATIVOS = `${URL_BASE}/api/membros/ativos`;
 const URL_GET_SOLICITACOES = `${URL_BASE}/api/solicitacoes`;
 const URL_PATH_ATIVAR_MEMBRO = `${URL_BASE}/api/membro/ativar/id`;
 const URL_DELETE_MEMBRO = `${URL_BASE}/api/membro/id`;
+const URL_GET_MEMBRO = `${URL_BASE}/api/membro/id`;
 
 const FIELD_MASK = {
     id: 'ID',
@@ -104,21 +105,15 @@ function renderMembros() {
         name: 'Editar',
         content: `
         <div>
-            <img value="%id" status="Excluído" src="./imgs/icons/Edit.svg" alt="Editar" onclick="goEditPage(event)">
+            <img value="%id" status="Ativo" src="./imgs/icons/Edit.svg" alt="Editar" onclick="renderEditPage(event)">
             <img value="%id" status="Excluído" src="./imgs/icons/Close.svg" alt="Negar" onclick="checkOutSolicitation(event)">
         </div>
         `
     }
 
-    
     fetchDataAndRenderTable(URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField, ()=>{
         replaceInTableHeader(FIELD_MASK['data_entrada'],'Membro desde')
     });
-}
-
-function goEditPage(event) {
-    const id = event.target.getAttribute('value');
-    console.log(id);
 }
 
 function checkOutSolicitation(event){
