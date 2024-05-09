@@ -5,7 +5,7 @@ const URL_MEMBERS = `${URL_BASE}/api/membro`;
 const ETY_ADM_LOGIN_COOKIE = 'eternity-adm-login';
 const ETY_ADM_PASS_COOKIE = 'eternity-adm';
 
-const STAFFMEMBERS = ['Ducred22', 'Ov3r5y5t3m', 'XeKeMaTe', 'Sir_Felipee', 'DRAGON_SDK', 'DarkMelissa','trogro9'];
+const STAFFMEMBERS = ['Ducred22', 'ov3r5y5t3m', 'XeKeMaTe', 'Sir_Felipee', 'DRAGON_SDK', 'DarkMelissa','trogro9'];
 const FOCUS_TYPE = ['PvP', 'Torneio', 'Build', 'Farm'];
 const CARGOS = ['Membro','Estagiário', 'Auxiliar', 'Supervisor', 'Coordenador', 'Dono']
 
