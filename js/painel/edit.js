@@ -32,7 +32,7 @@ function renderEditPage(event) {
 function renderFormEdit(data){
     APP.innerHTML = `
     <h1 class="tittle">Editar Informações - ${data.nick}</h1>
-    <form id="form_adicionar" onsubmit="submitAdicionar(event)">
+    <form id="form_editar" onsubmit="submitEditar(event)">
         <div class="form-label">
             <label for="nick">Nick</label>
             <input type="text" id="nick" value="${data.nick}" placeholder="Nick" disabled>
@@ -79,4 +79,8 @@ function renderFormEdit(data){
 
 function goBackMembers() {
     membros.click()
+}
+
+function submitEditar() {
+    
 }

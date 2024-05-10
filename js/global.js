@@ -1,5 +1,5 @@
-const URL_BASE = "https://eternity-crud.onrender.com"
-// const URL_BASE = "http://localhost:5000"
+// const URL_BASE = "https://eternity-crud.onrender.com"
+const URL_BASE = "http://localhost:5000"
 const URL_MEMBERS = `${URL_BASE}/api/membro`;
 
 const ETY_ADM_LOGIN_COOKIE = 'eternity-adm-login';
@@ -24,12 +24,11 @@ function selectOptionByValue(selectId, optionValue) {
 function getDate(defaultDate='', brOrder=false) {
     const f = (str)=>String(str).padStart(2, '0');
     const date = defaultDate ? new Date(defaultDate) : new Date;
-    const add = defaultDate ? 1 : 0;
     
     if (brOrder){
-        return `${f(add+date.getDate())}-${f(date.getMonth()+1)}-${date.getFullYear()}`
+        return `${f(date.getDate())}-${f(date.getMonth()+1)}-${date.getFullYear()}`
     }else{
-        return `${date.getFullYear()}-${f(date.getMonth()+1)}-${f(add+date.getDate())}`
+        return `${date.getFullYear()}-${f(date.getMonth()+1)}-${f(date.getDate())}`
     }
 }
 
