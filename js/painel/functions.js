@@ -32,22 +32,6 @@ function renderLoading(element) {
     element.innerHTML += '<div id="loading">Carregando<span class="loading-dot">...</span></div>'
 }
 
-function createOptions(id, options, defaultValue) {
-    const selectElement = document.getElementById(id);
-
-    options.forEach(function (value) {
-        const option = document.createElement("option");
-        option.text = value;
-        option.value = value;
-
-        if (value == defaultValue){
-            option.selected = true;
-        }
-
-        selectElement.add(option);
-    });
-}
-
 function createTable(element,id) {
     element.innerHTML += `<table id="${id}"></table>`
 }

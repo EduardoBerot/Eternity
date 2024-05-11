@@ -38,8 +38,8 @@ function renderFormEdit(data){
             <input type="text" id="nick" value="${data.nick}" placeholder="Nick" disabled>
         </div>
         <div class="form-label">
-            <label for="idade">Data de Nascimento</label>
-            <input type="number" step="1" min="5" max="120" value="${data.idade}" id="idade" placeholder="Idade" required>
+            <label for="data_nascimento">Data de Nascimento</label>
+            <input type="date" value="${getDate(data.data_nascimento)}" id="data_nascimento" required>
         </div>
         <div class="form-label">
             <label for="foco">Foco</label>
@@ -49,10 +49,10 @@ function renderFormEdit(data){
             <label for="cargo">Cargo</label>        
             <select name="cargo" id="cargo" required></select>
         </div>
-        <input type="text" id="status" placeholder="Status" value="Ativo" style="display:none"required>
+        <input type="text" id="status" placeholder="Status" value="${data.status}" style="display:none"required>
         <div class="form-label">
             <label for="data_entrada">Data de Cadastro</label>
-            <input type="date" id="data_entrada" placeholder="Data" required>
+            <input type="date" id="data_entrada" value="${getDate(data.data_entrada)}" required>
         </div>
         <div class="form-label">
             <label for="recrutador">Recrutador</label>
@@ -64,17 +64,9 @@ function renderFormEdit(data){
         </div>
     </form>
     `;
-
     createOptions('recrutador', STAFFMEMBERS, data.recrutador);
     createOptions('foco', FOCUS_TYPE, data.foco);
     createOptions('cargo', CARGOS, data.cargo);
-    
-    setDate();
-
-    function setDate() {
-        const date_input = document.querySelector('input[type="date"]');
-        date_input.value = getDate(data.data_entrada,false,true);
-    }
 }
 
 function goBackMembers() {

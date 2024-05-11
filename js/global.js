@@ -20,6 +20,22 @@ const CARGOS = ['Membro','Estagiário', 'Auxiliar', 'Supervisor', 'Coordenador',
 
 const clearAPP = (element=APP) => element.innerHTML = ''; 
 
+function createOptions(id, options, defaultValue) {
+    const selectElement = document.getElementById(id);
+
+    options.forEach(function (value) {
+        const option = document.createElement("option");
+        option.text = value;
+        option.value = value;
+
+        if (value == defaultValue){
+            option.selected = true;
+        }
+
+        selectElement.add(option);
+    });
+}
+
 function selectOptionByValue(selectId, optionValue) {
     const selectElement = document.getElementById(selectId);
     for (const i = 0; i < selectElement.options.length; i++) {
@@ -33,18 +49,19 @@ function selectOptionByValue(selectId, optionValue) {
 function getDate(defaultDate='', brOrder=false) {
     const f = (str)=>String(str).padStart(2, '0');
     const date = defaultDate ? new Date(defaultDate) : new Date;
-
+    let date_str;
     if (brOrder){
-        return `${f(date.getUTCDate())}-${f(date.getUTCMonth()+1)}-${date.getUTCFullYear()}`
+        date_str = `${f(date.getUTCDate())}-${f(date.getUTCMonth()+1)}-${date.getUTCFullYear()}`
     }else{
-        return `${date.getUTCFullYear()}-${f(date.getUTCMonth()+1)}-${f(date.getUTCDate())}`
+        date_str = `${date.getUTCFullYear()}-${f(date.getUTCMonth()+1)}-${f(date.getUTCDate())}`
     }
+    return date_str
 }
 
 function getFormData() {
     const data = {
         nick: document.getElementById('nick')?.value,
-        idade: document.getElementById('idade')?.value,
+        data_nascimento: document.getElementById('data_nascimento')?.value,
         foco: document.getElementById('foco')?.value,
         recrutador: document.getElementById('recrutador')?.value,
         cargo: document.getElementById('cargo')?.value,

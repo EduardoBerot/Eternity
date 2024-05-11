@@ -7,7 +7,7 @@ const URL_GET_MEMBRO = `${URL_BASE}/api/membro/id`;
 const FIELD_MASK = {
     id: 'ID',
     nick: 'Nick',
-    idade: 'Idade',
+    data_nascimento: 'Idade',
     foco: 'Foco',
     status: 'Status',
     recrutador: 'Recrutador Por',
@@ -35,7 +35,7 @@ function render(event) {
 
 function renderSolicitacoes() {
     const table_id = 'tb_solicitacoes';
-    const properties = ['nick', 'idade',  'foco', 'data_entrada'];
+    const properties = ['nick', 'data_nascimento',  'foco', 'data_entrada'];
     renderLoading(APP);
     createTable(APP, table_id);
     const extraField = {
@@ -47,7 +47,9 @@ function renderSolicitacoes() {
             </div>
         `
     }
-    fetchDataAndRenderTable(URL_GET_SOLICITACOES, table_id, properties, extraField);
+    fetchDataAndRenderTable(URL_GET_SOLICITACOES, table_id, properties, extraField, ()=>{
+        convertDatesToAges(table_id, FIELD_MASK['data_nascimento'])
+    });
 }
 
 function renderAdicionar() {
@@ -60,7 +62,7 @@ function renderAdicionar() {
         </div>
         <div class="form-label">
             <label for="idade">Data de Nascimento</label>
-            <input type="number" step="1" min="5" max="120" value="5" id="idade" placeholder="Idade" required>
+            <input type="date" value="2002-06-30" id="idade" placeholder="Idade" required>
         </div>
         <div class="form-label">
             <label for="foco">Foco</label>
@@ -73,7 +75,7 @@ function renderAdicionar() {
         <input type="text" id="status" placeholder="Status" value="Ativo" style="display:none"required>
         <div class="form-label">
             <label for="data_entrada">Data de Cadastro</label>
-            <input type="date" id="data_entrada" placeholder="Data" required>
+            <input type="date" id="data_entrada" value="${getDate()}" required>
         </div>
         <div class="form-label">
             <label for="recrutador">Recrutador</label>
@@ -85,19 +87,13 @@ function renderAdicionar() {
     
     const nick = getCookie(ETY_ADM_LOGIN_COOKIE);
     createOptions('recrutador', STAFFMEMBERS, nick);
-    createOptions('foco', FOCUS_TYPE, 'PvP')
-    createOptions('cargo', CARGOS, 'Membro')
-    setDate()
-
-    function setDate() {
-        const date_input = document.querySelector('input[type="date"]');
-        date_input.value = getDate();
-    }
+    createOptions('foco', FOCUS_TYPE, 'PvP');
+    createOptions('cargo', CARGOS, 'Membro');
 }
 
 function renderMembros() {
     const table_id = 'tb_membros';
-    const properties = ['nick', 'idade',  'cargo', 'data_entrada', 'recrutador'];
+    const properties = ['nick', 'data_nascimento',  'cargo', 'data_entrada', 'recrutador'];
     renderLoading(APP);
     createTable(APP, table_id);
     
@@ -113,6 +109,7 @@ function renderMembros() {
 
     fetchDataAndRenderTable(URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField, ()=>{
         replaceInTableHeader(FIELD_MASK['data_entrada'],'Membro desde')
+        convertDatesToAges(table_id, FIELD_MASK['data_nascimento'])
     });
 }
 
@@ -144,7 +141,7 @@ function checkOutSolicitation(event){
                 }
                 throw new Error('Algo deu errado na requisição: ' + response.statusText);
             })
-            .then(data => {
+            .then(_ => {
                 alert(`O membro foi definido como Ativo!`);
                 getRedirectElement()?.click()
             })
@@ -205,7 +202,7 @@ async function submitAdicionar(event) {
 
     function cleanForm() {
         document.getElementById('nick').value = '';
-        document.getElementById('idade').value = '5';
+        document.getElementById('data_nascimento').value = '2002-06-30';
     }
 }
 
@@ -260,29 +257,23 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
             return value
 
             function isValidDate(dataStr) {
-                const ISO_8601_FULL = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d+)?(([+-]\d\d:\d\d)|Z)?$/i;
-                return ISO_8601_FULL.test(dataStr);
+                const ISO_8601_FULL = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(([+-]\d{2}:\d{2})|Z)?$/i;
+                const ISO_8601 = /^\d{4}-\d{2}-\d{2}$/;
+            
+                return ISO_8601_FULL.test(dataStr) || ISO_8601.test(dataStr);
             }
+            
         }
     }
 
-    function renderVoidTable(tableId, properties) {
+    function renderVoidTable(tableId) {
         const table = document.getElementById(tableId);
         if (!table) {
             console.error(`No table found with id "${tableId}"`);
             return;
         }
-    
         table.innerHTML = '<h2>Não há nada aqui!</h2>';
-    
-        // const thead = table.createTHead();
-        // const row = thead.insertRow();
-        // for (const prop of properties) {
-        //     const th = document.createElement('th');
-        //     const field = FIELD_MASK[prop] || prop;
-        //     th.textContent = field;
-        //     row.appendChild(th);
-        }
+    }
 
     fetch(url)
         .then(response => {
@@ -300,11 +291,62 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
                 renderTable(data, tableId, properties);
             }
 
-            if (callback) callback()
+            if (callback && data.length > 0) callback()
         })
         .catch(error => {
             console.error('There has been a problem with your fetch operation:', error);
         });
+}
+
+function convertDatesToAges(tableId, columnHeader) {
+    const table = document.getElementById(tableId);
+    if (!table) {
+        console.log("Tabela não encontrada!");
+        return;
+    }
+
+    const headers = table.querySelectorAll('thead th');
+    let columnIndex = -1;
+
+    headers.forEach((th, index) => {
+        if (th.textContent === columnHeader) {
+            columnIndex = index;
+        }
+    });
+
+    if (columnIndex === -1) {
+        console.log("Cabeçalho não encontrado!");
+        return;
+    }
+
+    const rows = table.querySelectorAll('tbody tr');
+
+    rows.forEach(row => {
+        const cell = row.cells[columnIndex];
+        if (cell) {
+            const dateText = cell.textContent;
+            const dateRegex = /^\d{2}-\d{2}-\d{4}$/; // Regex para validar o formato 'dd-mm-yyyy'
+
+            if (dateRegex.test(dateText)) {
+                const [day, month, year] = dateText.split('-').map(Number);
+                const date = new Date(year, month - 1, day); // Os meses no JS começam de 0
+
+                const age = calculateAge(date);
+                cell.textContent = age;
+            }
+        }
+    });
+
+    function calculateAge(birthDate) {
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    }
 }
 
 function init() {
