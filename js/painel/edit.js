@@ -32,7 +32,7 @@ function renderEditPage(event) {
 function renderFormEdit(data){
     APP.innerHTML = `
     <h1 class="tittle">Editar Informações - ${data.nick}</h1>
-    <form id="form_editar" onsubmit="submitEditar(event)">
+    <form id="form_editar" value="${data.id}" onsubmit="submitEditar(event)">
         <div class="form-label">
             <label for="nick">Nick</label>
             <input type="text" id="nick" value="${data.nick}" placeholder="Nick" disabled>
@@ -58,8 +58,8 @@ function renderFormEdit(data){
             <label for="recrutador">Recrutador</label>
             <select name="recrutador" id="recrutador" required></select>
         </div>
-        <div class="form-label">
-            <a onclick="goBackMembers()" class="button">Voltar</a>
+        <div id="form-label-editar-btn">
+            <a onclick="goBackMembers()" tabindex="0" class="button">Voltar</a>
             <button>Editar</button>
         </div>
     </form>
@@ -81,6 +81,29 @@ function goBackMembers() {
     membros.click()
 }
 
-function submitEditar() {
-    
+function submitEditar(event) {
+    event.preventDefault();
+    const data = getFormData();
+    const id = event.target.getAttribute('value');
+
+    const opcoes = {
+        method: 'PATCH', 
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    };
+
+    fetch(`${URL_PATH_MEMBRO}/${id}`, opcoes)
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Algo deu errado na requisição: ' + response.statusText);
+        })
+        .then(data => {
+            alert(`O membro foi alterado com sucesso!`);
+            getRedirectElement()?.click()
+        })
+        .catch(error => {
+            console.error('Erro durante a requisição:', error);
+        });
 }

@@ -1,6 +1,7 @@
 
 
-form#form_adicionar {
+form#form_adicionar, 
+form#form_editar {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -13,7 +14,13 @@ form#form_adicionar {
     width: 100%;
 }
 
-form#form_adicionar input {
+.form-label{
+    display: flex;
+    flex-direction: column;
+}
+
+form#form_adicionar input, 
+form#form_editar input{
     width: 100%;
     padding: 3px;
     padding-inline-start: 3px;
@@ -22,18 +29,18 @@ form#form_adicionar input {
 
 form#form_adicionar input:focus,
 form#form_adicionar select:focus,
-form#form_adicionar button:focus {
+form#form_adicionar button:focus,
+form#form_editar input:focus,
+form#form_editar select:focus,
+form#form_editar button:focus,
+#form-label-editar-btn a:focus  {
     outline: none;
     border: none;
     box-shadow: 0px 0px 6px 3px #00ffff50;
 }
 
-form#form_adicionar select {
-    width: 100%;
-    color: black;
-}
-
-form#form_adicionar select {
+form#form_adicionar select,
+form#form_editar select {
     width: 100%;
     color: black;
 }
@@ -49,4 +56,36 @@ form button {
 
 button:hover {
     background-color: rgb(21, 128, 128);
+}
+
+#form-label-editar-btn{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 1em;
+}
+
+#form-label-editar-btn a{
+    width: calc( 100% - 0.5em );
+    height: 30px;
+    border-radius: 0 6px 0 6px;
+    background-color: rgb(251, 72, 96);
+    transition: 0.2s ease-out;
+    margin-top: 30px;
+    cursor: pointer;
+    text-align: center;
+    border-width: 2px;
+    border-style: outset;
+    border-color: buttonborder;
+    font-size: 13.333px;
+    line-height: 26px;
+}
+
+#form-label-editar-btn a:hover,
+#form-label-editar-btn a:focus {
+    background-color: rgb(204, 46, 67);
+}
+
+#form-label-editar-btn button{
+    width: calc( 100% - 0.5em );
 }

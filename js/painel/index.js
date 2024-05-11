@@ -203,19 +203,6 @@ async function submitAdicionar(event) {
         alert(`Não foi possível realizar o cadastro. Verifique se não um membro cadastrado com o nick "${data.nick}"`);
     }
 
-    function getFormData() {
-        const data = {
-            nick: document.getElementById('nick').value,
-            idade: document.getElementById('idade').value,
-            foco: document.getElementById('foco').value,
-            recrutador: document.getElementById('recrutador').value,
-            cargo: document.getElementById('cargo').value,
-            data_entrada: document.getElementById('data_entrada').value,
-            status: document.getElementById('status').value,
-        }
-        return data
-    }
-
     function cleanForm() {
         document.getElementById('nick').value = '';
         document.getElementById('idade').value = '5';

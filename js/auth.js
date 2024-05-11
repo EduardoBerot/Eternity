@@ -32,19 +32,6 @@ async function send (event){
     }
 };
 
-function getFormData() {
-    const data = {
-        nick: document.getElementById('nick').value,
-        idade: document.getElementById('idade').value,
-        foco: document.getElementById('foco').value,
-        recrutador: document.getElementById('recrutador').value,
-        cargo: document.getElementById('cargo').value,
-        data_entrada: document.getElementById('data_entrada').value,
-        status: document.getElementById('status').value,
-    }
-    return data
-}
-
 function goHome() {
     join.classList.remove('select');
     app.innerHTML = pages_content.home;

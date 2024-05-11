@@ -5,7 +5,16 @@ const URL_MEMBERS = `${URL_BASE}/api/membro`;
 const ETY_ADM_LOGIN_COOKIE = 'eternity-adm-login';
 const ETY_ADM_PASS_COOKIE = 'eternity-adm';
 
-const STAFFMEMBERS = ['Ducred22', 'ov3r5y5t3m', 'XeKeMaTe', 'Sir_Felipee', 'DRAGON_SDK', 'DarkMelissa','trogro9'];
+const STAFFMEMBERS = [
+    'Ducred22', 
+    'ov3r5y5t3m', 
+    'XeKeMaTe', 
+    'Sir_Felipee', 
+    'DRAGON_SDK', 
+    'DarkMelissa',
+    'trogro9'
+];
+
 const FOCUS_TYPE = ['PvP', 'Torneio', 'Build', 'Farm'];
 const CARGOS = ['Membro','Estagiário', 'Auxiliar', 'Supervisor', 'Coordenador', 'Dono']
 
@@ -24,16 +33,29 @@ function selectOptionByValue(selectId, optionValue) {
 function getDate(defaultDate='', brOrder=false) {
     const f = (str)=>String(str).padStart(2, '0');
     const date = defaultDate ? new Date(defaultDate) : new Date;
-    
+
     if (brOrder){
-        return `${f(date.getDate())}-${f(date.getMonth()+1)}-${date.getFullYear()}`
+        return `${f(date.getUTCDate())}-${f(date.getUTCMonth()+1)}-${date.getUTCFullYear()}`
     }else{
-        return `${date.getFullYear()}-${f(date.getMonth()+1)}-${f(date.getDate())}`
+        return `${date.getUTCFullYear()}-${f(date.getUTCMonth()+1)}-${f(date.getUTCDate())}`
     }
 }
 
+function getFormData() {
+    const data = {
+        nick: document.getElementById('nick')?.value,
+        idade: document.getElementById('idade')?.value,
+        foco: document.getElementById('foco')?.value,
+        recrutador: document.getElementById('recrutador')?.value,
+        cargo: document.getElementById('cargo')?.value,
+        data_entrada: document.getElementById('data_entrada')?.value,
+        status: document.getElementById('status')?.value,
+    }
+    return data
+}
+
 function setCookie(name, time, value='') {
-    const expiry = new Date();
+    const expiry = new Date();  
     expiry.setTime(expiry.getTime() + (time * 60 * 1000));
     document.cookie = `${name}=${value}; expires=${expiry.toGMTString()}; path=/`;
 }
