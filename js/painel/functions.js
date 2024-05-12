@@ -35,3 +35,49 @@ function renderLoading(element) {
 function createTable(element,id) {
     element.innerHTML += `<table id="${id}"></table>`
 }
+
+function renderSearch(element, id) {
+    element.innerHTML += `
+    <div class="form-label">
+        <input 
+            type="text" id="search" table_id="${id}" placeholder="Pesquisar" oninput="updateTable(event)">
+    </div>
+    `
+}
+
+function updateTable(event) {
+    const searchValue = event.target.value.toLowerCase();
+
+    const tableId = event.target.getAttribute('table_id');
+
+    const table = document.getElementById(tableId);
+
+    if (!table) {
+        console.error(`Tabela com o ID '${tableId}' não foi encontrada.`);
+        return;
+    }
+
+    const rows = table.getElementsByTagName('tr');
+
+    for (let i = 0; i < rows.length; i++) {
+        if (i>0){
+            const cells = rows[i].getElementsByTagName('td');
+            let rowContainsSearchText = false;
+    
+            for (let j = 0; j < cells.length; j++) {
+                if (cells[j].textContent.toLowerCase().indexOf(searchValue) > -1) {
+                    rowContainsSearchText = true;
+                    break;
+                }
+            }
+    
+            if (rowContainsSearchText) {
+                rows[i].style.display = '';
+            } else {
+                rows[i].style.display = 'none';
+            }
+        }
+    }
+}
+
+

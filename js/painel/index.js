@@ -95,6 +95,7 @@ function renderMembros() {
     const table_id = 'tb_membros';
     const properties = ['nick', 'data_nascimento',  'cargo', 'data_entrada', 'recrutador'];
     renderLoading(APP);
+    renderSearch(APP, table_id);
     createTable(APP, table_id);
     
     const extraField = {

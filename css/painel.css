@@ -93,3 +93,15 @@ img:hover{
     transition-duration: 200ms;
 }
 
+input#search{
+    height: 30px;
+    padding-left: 1em;
+    border: none;
+    border-radius: 5px;
+}
+
+input#search:focus,
+input#search:hover{
+    outline: none;
+    box-shadow: 0 0px 5px 5px #00ffff30;
+}
