@@ -17,8 +17,6 @@ const FIELD_MASK = {
 
 const APP = document.getElementById("app");
 
-let tableData;
-
 const pages_content = {
     solicitacoes: renderSolicitacoes,
     membros: renderMembros,
@@ -93,11 +91,14 @@ function renderAdicionar() {
 
 function renderMembros() {
     const table_id = 'tb_membros';
-    const properties = ['nick', 'data_nascimento','cargo', 'foco', 'data_entrada', 'recrutador'];
     renderLoading(APP);
     renderSearch(APP, table_id);
     createTable(APP, table_id);
-    
+    fetchDataMembros(table_id);
+}
+
+function fetchDataMembros(table_id) {
+    const properties = ['nick', 'data_nascimento','cargo', 'foco', 'data_entrada', 'recrutador'];
     const extraField = {
         name: 'Editar',
         content: `
@@ -108,10 +109,10 @@ function renderMembros() {
         `
     }
 
-    tableData = fetchDataAndRenderTable(URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField, ()=>{
+    return fetchDataAndRenderTable(URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField, ()=>{
         replaceInTableHeader(FIELD_MASK['data_entrada'],'Membro desde')
         convertDatesToAges(table_id, FIELD_MASK['data_nascimento'])
-    });
+    }, tableData)
 }
 
 function checkOutSolicitation(event){
@@ -226,7 +227,7 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
             const field = FIELD_MASK[prop] || prop;
             th.textContent = field;
             th.id = `${i}-${prop}`
-            th.onclick = `setOrder(event,${tableId})`
+            th.onclick = (event) => setOrder(event, tableId)
             row.appendChild(th);
             i++;
         }
@@ -361,9 +362,50 @@ function convertDatesToAges(tableId, columnHeader) {
     }
 }
 
-function setOrder(event,tableId) {
-    console.log(event.target.id);
-    console.log(tableId);
+function setOrder(event, tableId) {
+    const index = event.target.id.split('-')[0];
+    sortTableByColumn(index, tableId);
+}
+
+function sortTableByColumn(columnIndex, tableId) {
+    const table = document.getElementById(tableId);
+    const tbody = table.tBodies[0];
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    // Função para extrair o valor da célula (assume que é texto ou número)
+    const getCellValue = (row, index) => row.children[index].innerText || row.children[index].textContent;
+
+    // Função para comparar os valores das células (converte em número se possível)
+    const compareCells = (rowA, rowB) => {
+        const valA = getCellValue(rowA, columnIndex);
+        const valB = getCellValue(rowB, columnIndex);
+        const floatA = parseFloat(valA.replace(',', '.'));
+        const floatB = parseFloat(valB.replace(',', '.'));
+
+        if (!isNaN(floatA) && !isNaN(floatB)) {
+            return floatA - floatB;
+        }
+        return valA.localeCompare(valB);
+    };
+
+    // Determinar se a tabela já está ordenada por essa coluna
+    let sorted = true;
+    for (let i = 0; i < rows.length - 1; i++) {
+        if (compareCells(rows[i], rows[i + 1]) > 0) {
+            sorted = false;
+            break;
+        }
+    }
+
+    // Se já está ordenada, inverter a ordem
+    if (sorted) {
+        rows.reverse();
+    } else {
+        rows.sort(compareCells);
+    }
+
+    // Reanexar as linhas ao corpo da tabela na nova ordem
+    rows.forEach(row => tbody.appendChild(row));
 }
 
 function init() {
