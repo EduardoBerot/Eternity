@@ -62,7 +62,7 @@ function renderAdicionar() {
         </div>
         <div class="form-label">
             <label for="idade">Data de Nascimento</label>
-            <input type="date" value="2002-06-30" id="idade" placeholder="Idade" required>
+            <input type="date" value="2002-06-30" id="data_nascimento" placeholder="Idade" required>
         </div>
         <div class="form-label">
             <label for="foco">Foco</label>
@@ -93,7 +93,7 @@ function renderAdicionar() {
 
 function renderMembros() {
     const table_id = 'tb_membros';
-    const properties = ['nick', 'data_nascimento',  'cargo', 'data_entrada', 'recrutador'];
+    const properties = ['nick', 'data_nascimento','cargo', 'foco', 'data_entrada', 'recrutador'];
     renderLoading(APP);
     renderSearch(APP, table_id);
     createTable(APP, table_id);
