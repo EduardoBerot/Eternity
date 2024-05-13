@@ -105,3 +105,15 @@ input#search:hover{
     outline: none;
     box-shadow: 0 0px 5px 5px #00ffff30;
 }
+
+th[id]:not([id=""]) {
+    cursor: pointer;
+}
+
+th[id]:not([id=""]):hover {
+    background-color: #ffffff30;
+}
+
+th[id]:not([id=""]):active {
+    background-color: #ffffff60;
+}
