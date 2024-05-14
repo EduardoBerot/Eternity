@@ -20,8 +20,11 @@ const pages_content = {
     </br><p id="msg">Junte-se ao Clã Eternity, um lugar acolhedor para jogar Minecraft. Valorizamos amizade, colaboração e diversão. Venha construir, explorar e criar memórias inesquecíveis conosco.</p>
     </br><div id="loading">Carregando<span class="loading-dot">...</span></div>
     <form onsubmit="send(event)" style="display:none;">
-        <input type="text" id="nick" placeholder="Nick" required>
+        <label>Nick</label>
+        <input type="text" id="nick" required>
+        <label>Data de Nascimento</label>
         <input type="date" id="data_nascimento" placeholder="Data de nascimento" required>
+        <label>Foco</label>
         <select id="foco" required></select>
         <select id="recrutador" style="display:none;"></select>
         <input type="text" id="cargo" value="Membro" style="display:none;" readonly>

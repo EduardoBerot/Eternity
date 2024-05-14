@@ -74,8 +74,6 @@ form {
     padding-top: 36px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 12px;
     width: 100%;
 }
 
@@ -86,6 +84,12 @@ form input, form select {
     height: 24px;
     color: gray;
 }
+
+form label {
+    margin-top: 14px;
+    
+}
+
 
 .button {
     width: 40%;
