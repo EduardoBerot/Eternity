@@ -45,7 +45,7 @@ function renderSolicitacoes() {
             </div>
         `
     }
-    tableData = fetchDataAndRenderTable(URL_GET_SOLICITACOES, table_id, properties, extraField, ()=>{
+    fetchDataAndRenderTable(URL_GET_SOLICITACOES, table_id, properties, extraField, ()=>{
         convertDatesToAges(table_id, FIELD_MASK['data_nascimento'])
     });
 }
@@ -109,10 +109,10 @@ function fetchDataMembros(table_id) {
         `
     }
 
-    return fetchDataAndRenderTable(URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField, ()=>{
+    fetchDataAndRenderTable(URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField, ()=>{
         replaceInTableHeader(FIELD_MASK['data_entrada'],'Membro desde')
         convertDatesToAges(table_id, FIELD_MASK['data_nascimento'])
-    }, tableData)
+    })
 }
 
 function checkOutSolicitation(event){
@@ -208,7 +208,7 @@ async function submitAdicionar(event) {
     }
 }
 
-function fetchDataAndRenderTable(url, tableId, properties, extraField='', callback=null, data=undefined) {
+function fetchDataAndRenderTable(url, tableId, properties, extraField='', callback=null) {
     function renderTable(data, tableId, properties) {
         const table = document.getElementById(tableId);
         if (!table) {
@@ -283,32 +283,26 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
         table.innerHTML = '<h2>Não há nada aqui!</h2>';
     }
 
-    if(data==undefined){
-        fetch(url)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                hideLoading();
-                
-                if(data.length == 0){
-                    renderVoidTable(tableId, properties)
-                }else{
-                    renderTable(data, tableId, properties);
-                }
-                
-            })
-            .catch(error => {
-                console.error('There has been a problem with your fetch operation:', error);
-            });
-    }else{
-        renderTable(data, tableId, properties);
-    }
-    if (callback && data?.length > 0) callback()
-    return data
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            hideLoading();
+            
+            if(data.length == 0){
+                renderVoidTable(tableId, properties)
+            }else{
+                renderTable(data, tableId, properties);
+            }
+            if (callback) callback()
+        })
+        .catch(error => {
+            console.error('There has been a problem with your fetch operation:', error);
+        });
 }
 
 function convertDatesToAges(tableId, columnHeader) {
@@ -317,10 +311,10 @@ function convertDatesToAges(tableId, columnHeader) {
         console.log("Tabela não encontrada!");
         return;
     }
-
+    
     const headers = table.querySelectorAll('thead th');
     let columnIndex = -1;
-
+    
     headers.forEach((th, index) => {
         if (th.textContent === columnHeader) {
             columnIndex = index;
