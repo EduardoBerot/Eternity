@@ -23,7 +23,7 @@ const pages_content = {
         <label>Nick</label>
         <input type="text" id="nick" required>
         <label>Data de Nascimento</label>
-        <input type="date" id="data_nascimento" placeholder="Data de nascimento" required>
+        <input type="date" id="data_nascimento" required>
         <label>Foco</label>
         <select id="foco" required></select>
         <select id="recrutador" style="display:none;"></select>
