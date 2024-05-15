@@ -38,7 +38,7 @@ const pages_content = {
     discord:
         `<h1>Acesse nosso discord</h1></br><p>Para acessar nosso servidor discord basta clicar no botão abaixo, lá você podera se manter atualizado quanto as novidades do Clã.</p></br><a href="https://discord.gg/vj4eNDJqct" class="button">Acesse já</a>`,
 
-    zap: `<h1>Participe do nosso grupo de WhatsApp!</h1></br><p>Entre no nosso grupo de Whatsapp clicando no botão abaixo!</p></br><button class="button"><a href="https://chat.whatsapp.com/L3P1OvMnrVpJ3cj849ZoIw">Entre no grupo</a></button>`,
+    zap: `<h1>Participe do nosso grupo de WhatsApp!</h1></br><p>Entre no nosso grupo de Whatsapp clicando no botão abaixo!</p></br><a href="https://chat.whatsapp.com/L3P1OvMnrVpJ3cj849ZoIw" class="button">Entre no grupo</a>`,
 
     administracao: `<div id="loading">Carregando<span class="loading-dot">...</span></div><form onsubmit="validationLogin(event)" style="display:none;"><h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>`,
 };
