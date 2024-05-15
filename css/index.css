@@ -95,12 +95,17 @@ form label {
 
 
 .button {
+    display: flex;
     width: 40%;
     height: 50px;
     margin-top: 36px;
     border-radius: 0 6px 0 6px;
     background-color: aqua;
     transition: 0.2s ease-out;
+    text-decoration: none;
+    color: black;
+    align-items: center;
+    justify-content: center;
 
 }
 
@@ -108,10 +113,6 @@ form label {
     background-color: rgb(21, 128, 128);
 }
 
-.button a {
-    text-decoration: none;
-    color: black;
-}
 
 #gallery {
     display: flex;

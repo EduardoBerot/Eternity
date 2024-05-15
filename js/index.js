@@ -36,7 +36,7 @@ const pages_content = {
     city: `<h1>Conheça nossa cidade</h1></br><p>Nossa cidade no servidor de sobrevivência é mais do que apenas blocos e estruturas. É um lar acolhedor, onde todos contribuem para algo maior. Cada pedra conta uma história de cooperação e criatividade.</p><div id="gallery"><a href="/imgs/City00.jpg"><img class="cityimgs" src="/imgs/City00.jpg" alt="city00"></a><a href="/imgs/City01.jpg"><img class="cityimgs" src="/imgs/City01.jpg" alt="city01"></a><a href="/imgs/City02.jpg"><img class="cityimgs" src="/imgs/City02.jpg" alt="city02"></a><a href="/imgs/City03.jpg"><img class="cityimgs" src="/imgs/City03.jpg" alt="city03"></a><a href="/imgs/City04.jpg"><img class="cityimgs" src="/imgs/City04.jpg" alt="city04"></a><a href="/imgs/City05.jpg"><img class="cityimgs" src="/imgs/City05.jpg" alt="city05"></a></div>`,
 
     discord:
-        `<h1>Acesse nosso discord</h1></br><p>Para acessar nosso servidor discord basta clicar no botão abaixo, lá você podera se manter atualizado quanto as novidades do Clã.</p></br><button class="button"><a href="https://discord.gg/vj4eNDJqct">Acesse já</a></button>`,
+        `<h1>Acesse nosso discord</h1></br><p>Para acessar nosso servidor discord basta clicar no botão abaixo, lá você podera se manter atualizado quanto as novidades do Clã.</p></br><a href="https://discord.gg/vj4eNDJqct" class="button">Acesse já</a>`,
 
     zap: `<h1>Participe do nosso grupo de WhatsApp!</h1></br><p>Entre no nosso grupo de Whatsapp clicando no botão abaixo!</p></br><button class="button"><a href="https://chat.whatsapp.com/L3P1OvMnrVpJ3cj849ZoIw">Entre no grupo</a></button>`,
 
