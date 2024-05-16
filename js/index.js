@@ -21,7 +21,7 @@ const pages_content = {
     </br><div id="loading">Carregando<span class="loading-dot">...</span></div>
     <form onsubmit="send(event)" style="display:none;">
         <label>Nick</label>
-        <input type="text" id="nick" required>
+        <input type="text" id="nick" placeholder="Nick" required>
         <label>Data de Nascimento</label>
         <input type="date" id="data_nascimento" required>
         <label>Foco</label>

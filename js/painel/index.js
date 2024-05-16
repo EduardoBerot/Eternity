@@ -134,6 +134,7 @@ function checkOutSolicitation(event){
         const opcoes = {
             method: 'PATCH', 
             headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({recrutador : getCookie(ETY_ADM_LOGIN_COOKIE)})
         };
     
         fetch(`${URL_PATH_ATIVAR_MEMBRO}/${id}`, opcoes)
