@@ -59,8 +59,8 @@ function renderAdicionar() {
             <input type="text" id="nick" placeholder="Nick" required>
         </div>
         <div class="form-label">
-            <label for="idade">Data de Nascimento</label>
-            <input type="date" value="2002-06-30" id="data_nascimento" placeholder="Idade" required>
+            <label for="data_nascimento">Data de Nascimento</label>
+            <input type="date" value="2002-06-30" id="data_nascimento" required>
         </div>
         <div class="form-label">
             <label for="foco">Foco</label>
@@ -323,7 +323,6 @@ function convertDatesToAges(tableId, columnHeader) {
     });
 
     if (columnIndex === -1) {
-        console.log("Cabeçalho não encontrado!");
         return;
     }
 
