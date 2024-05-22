@@ -1,4 +1,4 @@
-const URL_PATH_MEMBRO = `${URL_BASE}/api/membro/id`;
+// const URL_PATH_MEMBRO = `${URL_BASE}/api/membro/id`;
 const URL_GET_MEMBRO = `${URL_BASE}/api/membro/id`;
 
 function checkIdParameter() {
