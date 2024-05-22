@@ -2,7 +2,7 @@ const URL_GET_MEMBROS_ATIVOS = `${URL_BASE}/api/membros/ativos`;
 const URL_GET_SOLICITACOES = `${URL_BASE}/api/solicitacoes`;
 const URL_PATH_ATIVAR_MEMBRO = `${URL_BASE}/api/membro/ativar/id`;
 const URL_DELETE_MEMBRO = `${URL_BASE}/api/membro/id`;
-const URL_GET_MEMBRO = `${URL_BASE}/api/membro/id`;
+const URL_PATH_MEMBRO = `${URL_BASE}/api/membro/id`;
 
 const FIELD_MASK = {
     id: 'ID',
@@ -13,6 +13,8 @@ const FIELD_MASK = {
     recrutador: 'Recrutador Por',
     cargo: 'Cargo',
     data_entrada: 'Data de Solicitação',
+    updatedAt: 'Excluído em',
+    comentario: 'Motivo',
 }
 
 const APP = document.getElementById("app");
@@ -21,6 +23,7 @@ const pages_content = {
     solicitacoes: renderSolicitacoes,
     membros: renderMembros,
     adicionar: renderAdicionar,
+    excluidos: renderExcluidos,
 }
 
 function render(event) {
@@ -31,9 +34,20 @@ function render(event) {
     selectItem(event.target);
 }
 
+function renderExcluidos() {
+    const table_id = 'tb_excluidos';
+    const properties = ['nick', 'data_nascimento', 'data_entrada', 'updatedAt', 'comentario'];
+    renderLoading(APP);
+    createTable(APP, table_id);
+
+    fetchDataAndRenderTable(URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField, ()=>{
+        convertDatesToAges(table_id, FIELD_MASK['data_nascimento'])
+    });
+}
+
 function renderSolicitacoes() {
     const table_id = 'tb_solicitacoes';
-    const properties = ['nick', 'data_nascimento',  'foco', 'data_entrada'];
+    const properties = ['nick', 'data_nascimento', 'foco', 'data_entrada'];
     renderLoading(APP);
     createTable(APP, table_id);
     const extraField = {
@@ -59,8 +73,8 @@ function renderAdicionar() {
             <input type="text" id="nick" placeholder="Nick" required>
         </div>
         <div class="form-label">
-            <label for="idade">Data de Nascimento</label>
-            <input type="date" value="2002-06-30" id="data_nascimento" placeholder="Idade" required>
+            <label for="data_nascimento">Data de Nascimento</label>
+            <input type="date" value="2002-06-30" id="data_nascimento" required>
         </div>
         <div class="form-label">
             <label for="foco">Foco</label>
@@ -124,7 +138,8 @@ function checkOutSolicitation(event){
         if (status == 'Ativo'){
             updateMember(id);
         }else if(status == 'Excluído'){
-            excludeMember(id)
+            const comentario = prompt('Digite o motivo da expulsão: ')
+            excludeMember(id, comentario)
         }else{
             throw new Error( `Invalid status ${status}`);
         }
@@ -153,9 +168,20 @@ function checkOutSolicitation(event){
             });
     }
     
-    function excludeMember(id) {
+    function excludeMember(id, comentario) {
+        const data = {
+            id,
+            comentario,
+            status:'Excluído'
+        }
 
-        fetch(`${URL_DELETE_MEMBRO}/${id}`, {method: 'DELETE'})
+        const opcoes = {
+            method: 'PATCH', 
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        };
+
+        fetch(`${URL_DELETE_MEMBRO}/${id}`, opcoes)
             .then(response => {
                 if (response.ok) {
                     return response.json();
@@ -323,7 +349,6 @@ function convertDatesToAges(tableId, columnHeader) {
     });
 
     if (columnIndex === -1) {
-        console.log("Cabeçalho não encontrado!");
         return;
     }
 

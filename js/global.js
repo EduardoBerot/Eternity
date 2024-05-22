@@ -1,5 +1,5 @@
-const URL_BASE = "https://eternity-crud.onrender.com"
-// const URL_BASE = "http://localhost:5000"
+// const URL_BASE = "https://eternity-crud.onrender.com"
+const URL_BASE = "http://localhost:5000"
 const URL_MEMBERS = `${URL_BASE}/api/membro`;
 
 const ETY_ADM_LOGIN_COOKIE = 'eternity-adm-login';
