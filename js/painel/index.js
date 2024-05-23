@@ -169,18 +169,11 @@ function checkOutSolicitation(event){
     }
     
     function excludeMember(id, comentario) {
-        const data = {
-            id,
-            comentario,
-            status:'Excluído'
-        }
-
         const opcoes = {
-            method: 'PATCH', 
+            method: 'DELETE', 
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data)
-        };
-
+            body: JSON.stringify({comentario})
+        }
         fetch(`${URL_DELETE_MEMBRO}/${id}`, opcoes)
             .then(response => {
                 if (response.ok) {
