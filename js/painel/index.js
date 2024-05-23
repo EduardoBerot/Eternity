@@ -1,5 +1,6 @@
 const URL_GET_MEMBROS_ATIVOS = `${URL_BASE}/api/membros/ativos`;
 const URL_GET_SOLICITACOES = `${URL_BASE}/api/solicitacoes`;
+const URL_GET_EVENTOS = `${URL_BASE}/api/eventos`;
 const URL_PATH_ATIVAR_MEMBRO = `${URL_BASE}/api/membro/ativar/id`;
 const URL_DELETE_MEMBRO = `${URL_BASE}/api/membro/id`;
 const URL_PATH_MEMBRO = `${URL_BASE}/api/membro/id`;
@@ -13,8 +14,10 @@ const FIELD_MASK = {
     recrutador: 'Recrutador Por',
     cargo: 'Cargo',
     data_entrada: 'Data de Solicitação',
+    createdAt: 'Data da Ocorrência',
     updatedAt: 'Excluído em',
     comentario: 'Motivo',
+    evento: 'Evento',
 }
 
 const APP = document.getElementById("app");
@@ -23,7 +26,8 @@ const pages_content = {
     solicitacoes: renderSolicitacoes,
     membros: renderMembros,
     adicionar: renderAdicionar,
-    excluidos: renderExcluidos,
+    // excluidos: renderExcluidos,
+    historico: renderHistorico,
 }
 
 function render(event) {
@@ -34,16 +38,28 @@ function render(event) {
     selectItem(event.target);
 }
 
-function renderExcluidos() {
-    const table_id = 'tb_excluidos';
-    const properties = ['nick', 'data_nascimento', 'data_entrada', 'updatedAt', 'comentario'];
+function renderHistorico() {
+    const table_id = 'tb_historico';
+    const properties = ['createdAt', 'evento', 'nick', 'recrutador', 'comentario'];
     renderLoading(APP);
+    renderSearch(APP, table_id);
     createTable(APP, table_id);
-
-    fetchDataAndRenderTable(URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField, ()=>{
-        convertDatesToAges(table_id, FIELD_MASK['data_nascimento'])
+    fetchDataAndRenderTable(URL_GET_EVENTOS, table_id, properties, undefined, ()=>{
+        replaceInTableHeader(FIELD_MASK['recrutador'], 'Staff')
+        replaceInTableHeader(FIELD_MASK['nick'], 'Player')
     });
 }
+
+// function renderExcluidos() {
+//     const table_id = 'tb_excluidos';
+//     const properties = ['nick', 'data_nascimento', 'data_entrada', 'updatedAt', 'comentario'];
+//     renderLoading(APP);
+//     createTable(APP, table_id);
+
+//     fetchDataAndRenderTable(URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField, ()=>{
+//         convertDatesToAges(table_id, FIELD_MASK['data_nascimento'])
+//     });
+// }
 
 function renderSolicitacoes() {
     const table_id = 'tb_solicitacoes';
