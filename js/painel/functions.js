@@ -39,10 +39,18 @@ function createTable(element,id) {
 function renderSearch(element, id) {
     element.innerHTML += `
     <div class="form-label">
+        <label for="search" id="count_search" style="padding-bottom:0.5em;">Nº de ocorrências</label>
         <input 
             type="text" id="search" table_id="${id}" placeholder="Pesquisar" oninput="updateTable(event)">
     </div>
     `
+}
+
+function updateCountSearch(num){
+    const countSearch = document.getElementById('count_search');
+    if (countSearch) {
+        countSearch.innerHTML = `Nº de ocorrências: ${num}`;
+    }
 }
 
 function updateTable(event) {
@@ -51,6 +59,8 @@ function updateTable(event) {
     const tableId = event.target.getAttribute('table_id');
 
     const table = document.getElementById(tableId);
+
+    let count = 0
 
     if (!table) {
         console.error(`Tabela com o ID '${tableId}' não foi encontrada.`);
@@ -73,11 +83,13 @@ function updateTable(event) {
     
             if (rowContainsSearchText) {
                 rows[i].style.display = '';
+                count++;
             } else {
                 rows[i].style.display = 'none';
             }
         }
     }
+    updateCountSearch(count);
 }
 
 

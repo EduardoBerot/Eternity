@@ -328,13 +328,16 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
         })
         .then(data => {
             hideLoading();
-            
             if(data.length == 0){
                 renderVoidTable(tableId, properties)
             }else{
                 renderTable(data, tableId, properties);
+                updateCountSearch(data.length)
             }
-            if (callback) callback()
+            
+            if (callback) {
+                callback()
+            }
         })
         .catch(error => {
             console.error('There has been a problem with your fetch operation:', error);
