@@ -64,6 +64,7 @@ function renderHistorico() {
 function renderSolicitacoes() {
     const table_id = 'tb_solicitacoes';
     const properties = ['nick', 'data_nascimento', 'foco', 'data_entrada'];
+    const fieldDataEntrada = 'Tempo de Solicitação'
     renderLoading(APP);
     createTable(APP, table_id);
     const extraField = {
@@ -76,7 +77,9 @@ function renderSolicitacoes() {
         `
     }
     fetchDataAndRenderTable(URL_GET_SOLICITACOES, table_id, properties, extraField, ()=>{
-        convertDatesToAges(table_id, FIELD_MASK['data_nascimento'])
+        replaceInTableHeader(FIELD_MASK['data_entrada'], fieldDataEntrada);
+        convertDatesToAges(table_id, FIELD_MASK['data_nascimento']);
+        convertDatesToAges(table_id, fieldDataEntrada, true);
     });
 }
 
@@ -129,6 +132,7 @@ function renderMembros() {
 
 function fetchDataMembros(table_id) {
     const properties = ['nick', 'data_nascimento','cargo', 'foco', 'data_entrada', 'recrutador'];
+    const fieldDataEntrada = 'Tempo de clan'
     const extraField = {
         name: 'Editar',
         content: `
@@ -140,8 +144,9 @@ function fetchDataMembros(table_id) {
     }
 
     fetchDataAndRenderTable(URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField, ()=>{
-        replaceInTableHeader(FIELD_MASK['data_entrada'],'Membro desde')
-        convertDatesToAges(table_id, FIELD_MASK['data_nascimento'])
+        replaceInTableHeader(FIELD_MASK['data_entrada'], fieldDataEntrada);
+        convertDatesToAges(table_id, FIELD_MASK['data_nascimento']);
+        convertDatesToAges(table_id, fieldDataEntrada, true);
     })
 }
 
@@ -344,7 +349,7 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
         });
 }
 
-function convertDatesToAges(tableId, columnHeader) {
+function convertDatesToAges(tableId, columnHeader, dayReturn=false) {
     const table = document.getElementById(tableId);
     if (!table) {
         console.log("Tabela não encontrada!");
@@ -375,8 +380,14 @@ function convertDatesToAges(tableId, columnHeader) {
             if (dateRegex.test(dateText)) {
                 const [day, month, year] = dateText.split('-').map(Number);
                 const date = new Date(year, month - 1, day); // Os meses no JS começam de 0
+                let age;
 
-                const age = calculateAge(date);
+                if (dayReturn){
+                    age = `${calculateAgeInDays(date)} dias`;
+                }else{
+                    age = `${calculateAge(date)} anos`;
+                }
+
                 cell.textContent = age;
             }
         }
@@ -391,6 +402,13 @@ function convertDatesToAges(tableId, columnHeader) {
             age--;
         }
         return age;
+    }
+
+    function calculateAgeInDays(birthDate) {
+        const today = new Date();
+        const timeDifference = today - new Date(birthDate);
+        const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+        return daysDifference;
     }
 }
 
