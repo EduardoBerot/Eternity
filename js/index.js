@@ -18,7 +18,7 @@ const pages_content = {
 
     join: `<h1>Junte-se a Eternidade </h1>
     </br><p id="msg">Junte-se ao Clã Eternity, um lugar acolhedor para jogar Minecraft. Valorizamos amizade, colaboração e diversão. Venha construir, explorar e criar memórias inesquecíveis conosco.</p>
-    </br><div id="loading">Carregando<span class="loading-dot">...</span></div>
+    </br><div id="loading">Carregando<span class="loading-dot">...</span><div class="alert" style="font-size:0.75em;margin-left:auto;margin-top:0.5em;">(isso pode demorar um pouco)</div></div>
     <form onsubmit="send(event)" style="display:none;">
         <label>Nick</label>
         <input type="text" id="nick" placeholder="Nick" required>
@@ -40,7 +40,7 @@ const pages_content = {
 
     zap: `<h1>Participe do nosso grupo de WhatsApp!</h1></br><p>Entre no nosso grupo de Whatsapp clicando no botão abaixo!</p></br><a href="https://chat.whatsapp.com/L3P1OvMnrVpJ3cj849ZoIw" class="button">Entre no grupo</a>`,
 
-    administracao: `<div id="loading">Carregando<span class="loading-dot">...</span></div><form onsubmit="validationLogin(event)" style="display:none;"><h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>`,
+    administracao: `<div id="loading">Carregando<span class="loading-dot">...</span><div class="alert" style="font-size:0.75em;margin-left:auto;margin-top:0.5em;">(isso pode demorar um pouco)</div></div><form onsubmit="validationLogin(event)" style="display:none;"><h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>`,
 };
 
 function render(event) {
