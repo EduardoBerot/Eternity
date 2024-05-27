@@ -10,7 +10,7 @@ const FIELD_MASK = {
     data_nascimento: 'Idade',
     foco: 'Foco',
     status: 'Status',
-    recrutador: 'Recrutador Por',
+    recrutador: 'Recrutador',
     cargo: 'Cargo',
     data_entrada: 'Data de Solicitação',
     updatedAt: 'Excluído em',
