@@ -10,7 +10,7 @@ const STAFFMEMBERS = [
     'ov3r5y5t3m', 
     'XeKeMaTe', 
     'Sir_Felipee', 
-    'SkyRell_SDK', 
+    'SkyRell_SDK',
     'Dark_Luninha',
     'trogro9'
 ];

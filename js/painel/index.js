@@ -2,7 +2,8 @@ const URL_GET_MEMBROS_ATIVOS = `${URL_BASE}/api/membros/ativos`;
 const URL_GET_SOLICITACOES = `${URL_BASE}/api/solicitacoes`;
 const URL_GET_EVENTOS = `${URL_BASE}/api/eventos`;
 const URL_PATH_ATIVAR_MEMBRO = `${URL_BASE}/api/membro/ativar/id`;
-const URL_DELETE_MEMBRO = `${URL_BASE}/api/membro/id`;
+const URL_BAN_MEMBRO = `${URL_BASE}/api/membro/banir/id`;
+const URL_KICK_MEMBRO = `${URL_BASE}/api/membro/kick/id`;
 const URL_PATH_MEMBRO = `${URL_BASE}/api/membro/id`;
 
 const FIELD_MASK = {
@@ -139,6 +140,7 @@ function fetchDataMembros(table_id) {
         <div>
             <img value="%id" status="Ativo" src="./imgs/icons/Edit.svg" alt="Editar" onclick="renderEditPage(event)">
             <img value="%id" status="Excluído" src="./imgs/icons/Close.svg" alt="Negar" onclick="checkOutSolicitation(event)">
+            <img value="%id" status="Banido" src="./imgs/icons/ban.png" alt="Banir" onclick="checkOutSolicitation(event)">
         </div>
         `
     }
@@ -161,6 +163,9 @@ function checkOutSolicitation(event){
         }else if(status == 'Excluído'){
             const comentario = prompt('Digite o motivo da expulsão: ')
             excludeMember(id, comentario)
+        }else if(status == 'Banido'){
+            const comentario = prompt('Digite o motivo da expulsão: ')
+            banMember(id, comentario)
         }else{
             throw new Error( `Invalid status ${status}`);
         }
@@ -191,11 +196,32 @@ function checkOutSolicitation(event){
     
     function excludeMember(id, comentario) {
         const opcoes = {
-            method: 'DELETE', 
+            method: 'PATCH', 
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({comentario})
         }
-        fetch(`${URL_DELETE_MEMBRO}/${id}`, opcoes)
+        fetch(`${URL_KICK_MEMBRO}/${id}`, opcoes)
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Algo deu errado na requisição: ' + response.statusText);
+            })
+            .then(_ => {
+                getRedirectElement()?.click()
+            })
+            .catch(error => {
+                console.error('Erro durante a requisição:', error);
+            });
+    }
+    
+    function banMember(id, comentario) {
+        const opcoes = {
+            method: 'PATCH', 
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({comentario})
+        }
+        fetch(`${URL_BAN_MEMBRO}/${id}`, opcoes)
             .then(response => {
                 if (response.ok) {
                     return response.json();
@@ -240,7 +266,7 @@ async function submitAdicionar(event) {
         alert("Cadastro realizado com sucesso!");
         cleanForm();
     } catch (error) {
-        alert(`Não foi possível realizar o cadastro. Verifique se não um membro cadastrado com o nick "${data.nick}"`);
+        alert(`Não foi possível realizar o cadastro. Verifique se não há um membro cadastrado com o nick "${data.nick}"`);
     }
 
     function cleanForm() {
