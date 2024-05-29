@@ -138,9 +138,9 @@ function fetchDataMembros(table_id) {
         name: 'Editar',
         content: `
         <div>
+            <img value="%id" status="Banido" src="./imgs/icons/Banir.svg" alt="Banir" onclick="checkOutSolicitation(event)">
             <img value="%id" status="Ativo" src="./imgs/icons/Edit.svg" alt="Editar" onclick="renderEditPage(event)">
             <img value="%id" status="Excluído" src="./imgs/icons/Close.svg" alt="Negar" onclick="checkOutSolicitation(event)">
-            <img value="%id" status="Banido" src="./imgs/icons/Banir.svg" alt="Banir" onclick="checkOutSolicitation(event)">
         </div>
         `
     }
