@@ -12,7 +12,11 @@ const STAFFMEMBERS = [
     'Sir_Felipee', 
     'SkyRell_SDK',
     'Dark_Luninha',
-    'trogro9'
+    'trogro9',
+    'DarckGRym',
+    'Akaaaashi_San',
+    'DMonte1122',
+    'zMiranhaX',
 ];
 
 const FOCUS_TYPE = ['PvP', 'Torneio', 'Build', 'Farm'];

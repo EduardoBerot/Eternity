@@ -487,7 +487,7 @@ function sortTableByColumn(columnIndex, tableId) {
 function init() {
     const nick = getCookie(ETY_ADM_LOGIN_COOKIE);
     const element = document.querySelector('#title_nick');
-    const msg = `Seja Bem-Vindo ${nick}!`;
+    const msg = `Saudações ${nick}!`;
     element.textContent = msg;
     solicitacoes.click()
 }
