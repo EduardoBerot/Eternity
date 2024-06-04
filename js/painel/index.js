@@ -195,10 +195,11 @@ function checkOutSolicitation(event){
     }
     
     function excludeMember(id, comentario) {
+        const recrutador = getCookie(ETY_ADM_LOGIN_COOKIE);
         const opcoes = {
             method: 'PATCH', 
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({comentario})
+            body: JSON.stringify({comentario, recrutador})
         }
         fetch(`${URL_KICK_MEMBRO}/${id}`, opcoes)
             .then(response => {
@@ -216,10 +217,11 @@ function checkOutSolicitation(event){
     }
     
     function banMember(id, comentario) {
+        const recrutador = getCookie(ETY_ADM_LOGIN_COOKIE);
         const opcoes = {
             method: 'PATCH', 
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({comentario})
+            body: JSON.stringify({comentario, recrutador})
         }
         fetch(`${URL_BAN_MEMBRO}/${id}`, opcoes)
             .then(response => {

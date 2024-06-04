@@ -26,7 +26,7 @@ const pages_content = {
         <input type="date" id="data_nascimento" required>
         <label>Foco</label>
         <select id="foco" required></select>
-        <select id="recrutador" style="display:none;"></select>
+        <input type="text" id="recrutador" value="" style="display:none;" readonly>
         <input type="text" id="cargo" value="Membro" style="display:none;" readonly>
         <input type="text" id="data_entrada" style="display:none;" readonly>
         <input type="text" id="status" value="Pendente" style="display:none;" readonly>
@@ -84,7 +84,6 @@ function renderFormJoin(id) {
                 }
                 document.getElementById('loading').style.display = 'none';
                 document.querySelector('form').style.display = 'flex';
-                renderSelect(STAFFMEMBERS, 'recrutador');
                 renderDate();
                 createOptions('foco', FOCUS_TYPE, 'PvP');
             })
@@ -92,18 +91,6 @@ function renderFormJoin(id) {
                 console.error('There has been a problem with your fetch operation:', error);
             });
     }
-}
-
-function renderSelect(values, id) {
-    const selectElement = document.getElementById(id);
-
-    values.forEach(function (value) {
-        const option = document.createElement("option");
-        option.text = value;
-        option.value = value;
-
-        selectElement.add(option);
-    });
 }
 
 function renderDate() {
