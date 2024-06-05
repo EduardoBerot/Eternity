@@ -96,4 +96,59 @@ function updateTable(event) {
     updateCountSearch(count);
 }
 
-
+function createModal() {
+    return new Promise((resolve) => {
+      // Create modal container
+      const modalContainer = document.createElement('div');
+      modalContainer.style.position = 'fixed';
+      modalContainer.style.top = '0';
+      modalContainer.style.left = '0';
+      modalContainer.style.width = '100%';
+      modalContainer.style.height = '100%';
+      modalContainer.style.backgroundColor = 'rgba(0,0,0,0.5)';
+      modalContainer.style.display = 'flex';
+      modalContainer.style.justifyContent = 'center';
+      modalContainer.style.alignItems = 'center';
+      modalContainer.style.zIndex = '1000';
+  
+      // Create modal content
+      const modalContent = document.createElement('div');
+      modalContent.style.backgroundColor = '#fff';
+      modalContent.style.padding = '20px';
+      modalContent.style.borderRadius = '5px';
+      modalContent.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+  
+      // Create select element
+      const selectElement = document.createElement('select');
+      const option1 = document.createElement('option');
+      option1.value = 'option1';
+      option1.text = 'Option 1';
+      const option2 = document.createElement('option');
+      option2.value = 'option2';
+      option2.text = 'Option 2';
+      selectElement.add(option1);
+      selectElement.add(option2);
+  
+      // Create OK button
+      const okButton = document.createElement('button');
+      okButton.textContent = 'OK';
+      okButton.style.marginTop = '10px';
+  
+      // Append elements to modal content
+      modalContent.appendChild(selectElement);
+      modalContent.appendChild(okButton);
+      
+      // Append modal content to modal container
+      modalContainer.appendChild(modalContent);
+      
+      // Append modal container to body
+      document.body.appendChild(modalContainer);
+  
+      // Add event listener to OK button
+      okButton.addEventListener('click', () => {
+        const selectedValue = selectElement.value;
+        document.body.removeChild(modalContainer);
+        resolve(selectedValue);
+      });
+    });
+  }
