@@ -1,4 +1,5 @@
 const URL_GET_MEMBROS_ATIVOS = `${URL_BASE}/api/membros/ativos`;
+const URL_GET_MEMBROS_BANIDOS = `${URL_BASE}/api/membros/banidos`;
 const URL_GET_SOLICITACOES = `${URL_BASE}/api/solicitacoes`;
 const URL_GET_EVENTOS = `${URL_BASE}/api/eventos`;
 const URL_PATH_ATIVAR_MEMBRO = `${URL_BASE}/api/membro/ativar/id`;
@@ -27,7 +28,7 @@ const pages_content = {
     solicitacoes: renderSolicitacoes,
     membros: renderMembros,
     adicionar: renderAdicionar,
-    // excluidos: renderExcluidos,
+    excluidos: renderExcluidos,
     historico: renderHistorico,
 }
 
@@ -51,16 +52,17 @@ function renderHistorico() {
     });
 }
 
-// function renderExcluidos() {
-//     const table_id = 'tb_excluidos';
-//     const properties = ['nick', 'data_nascimento', 'data_entrada', 'updatedAt', 'comentario'];
-//     renderLoading(APP);
-//     createTable(APP, table_id);
+function renderExcluidos() {
+    const table_id = 'tb_excluidos';
+    const properties = ['nick', 'data_nascimento', 'data_entrada', 'updatedAt'];
+    // const properties = ['nick', 'data_nascimento', 'data_entrada', 'updatedAt', 'comentario'];
+    renderLoading(APP);
+    createTable(APP, table_id);
 
-//     fetchDataAndRenderTable(URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField, ()=>{
-//         convertDatesToAges(table_id, FIELD_MASK['data_nascimento'])
-//     });
-// }
+    fetchDataAndRenderTable(URL_GET_MEMBROS_BANIDOS, table_id, properties, undefined, ()=>{
+        convertDatesToAges(table_id, FIELD_MASK['data_nascimento'])
+    });
+}
 
 function renderSolicitacoes() {
     const table_id = 'tb_solicitacoes';
