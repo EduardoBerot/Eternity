@@ -1,3 +1,49 @@
+const URL_GET_MEMBROS_ATIVOS = `${URL_BASE}/api/membros/ativos`;
+const URL_GET_MEMBROS_BANIDOS = `${URL_BASE}/api/membros/banidos`;
+const URL_GET_SOLICITACOES = `${URL_BASE}/api/solicitacoes`;
+const URL_GET_EVENTOS = `${URL_BASE}/api/eventos`;
+const URL_PATH_ATIVAR_MEMBRO = `${URL_BASE}/api/membro/ativar/id`;
+const URL_BAN_MEMBRO = `${URL_BASE}/api/membro/banir/id`;
+const URL_KICK_MEMBRO = `${URL_BASE}/api/membro/kick/id`;
+const URL_PATH_MEMBRO = `${URL_BASE}/api/membro/id`;
+
+const FIELD_MASK = {
+    id: 'ID',
+    nick: 'Nick',
+    data_nascimento: 'Idade',
+    foco: 'Foco',
+    status: 'Status',
+    recrutador: 'Recrutador',
+    cargo: 'Cargo',
+    data_entrada: 'Data de Solicitação',
+    createdAt: 'Data da Ocorrência',
+    updatedAt: 'Excluído em',
+    comentario: 'Motivo',
+    evento: 'Evento',
+}
+
+const OPTIONS_RECUSE_SOLICITATION = [
+    'Nick Incorreto',
+    'Tempo Limite Excedido',
+    'Tentativa de Burlar Banimento',
+    'Outros'
+]
+
+const OPTIONS_BAN = [
+    'Desrespeitar as regras do servidor',
+    'Griffar farms',
+    'Reincidente em kicks',
+    'Desertar e/ou iniciar motim de outro clan',
+]
+
+const OPTIONS_KICK = [
+    'Desrespeitar regras de build',
+    'Conduta moral inapropriada',
+    'Abandono',
+    'Inatividade',
+    'Equívoco no aceite da solicitação',
+]
+
 function replaceInTableHeader(searchString, replaceString) {
     const headers = document.getElementsByTagName("th");
     Object.values(headers).forEach(function(header) {
@@ -95,60 +141,3 @@ function updateTable(event) {
     }
     updateCountSearch(count);
 }
-
-function createModal() {
-    return new Promise((resolve) => {
-      // Create modal container
-      const modalContainer = document.createElement('div');
-      modalContainer.style.position = 'fixed';
-      modalContainer.style.top = '0';
-      modalContainer.style.left = '0';
-      modalContainer.style.width = '100%';
-      modalContainer.style.height = '100%';
-      modalContainer.style.backgroundColor = 'rgba(0,0,0,0.5)';
-      modalContainer.style.display = 'flex';
-      modalContainer.style.justifyContent = 'center';
-      modalContainer.style.alignItems = 'center';
-      modalContainer.style.zIndex = '1000';
-  
-      // Create modal content
-      const modalContent = document.createElement('div');
-      modalContent.style.backgroundColor = '#fff';
-      modalContent.style.padding = '20px';
-      modalContent.style.borderRadius = '5px';
-      modalContent.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
-  
-      // Create select element
-      const selectElement = document.createElement('select');
-      const option1 = document.createElement('option');
-      option1.value = 'option1';
-      option1.text = 'Option 1';
-      const option2 = document.createElement('option');
-      option2.value = 'option2';
-      option2.text = 'Option 2';
-      selectElement.add(option1);
-      selectElement.add(option2);
-  
-      // Create OK button
-      const okButton = document.createElement('button');
-      okButton.textContent = 'OK';
-      okButton.style.marginTop = '10px';
-  
-      // Append elements to modal content
-      modalContent.appendChild(selectElement);
-      modalContent.appendChild(okButton);
-      
-      // Append modal content to modal container
-      modalContainer.appendChild(modalContent);
-      
-      // Append modal container to body
-      document.body.appendChild(modalContainer);
-  
-      // Add event listener to OK button
-      okButton.addEventListener('click', () => {
-        const selectedValue = selectElement.value;
-        document.body.removeChild(modalContainer);
-        resolve(selectedValue);
-      });
-    });
-  }

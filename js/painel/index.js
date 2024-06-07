@@ -1,27 +1,3 @@
-const URL_GET_MEMBROS_ATIVOS = `${URL_BASE}/api/membros/ativos`;
-const URL_GET_MEMBROS_BANIDOS = `${URL_BASE}/api/membros/banidos`;
-const URL_GET_SOLICITACOES = `${URL_BASE}/api/solicitacoes`;
-const URL_GET_EVENTOS = `${URL_BASE}/api/eventos`;
-const URL_PATH_ATIVAR_MEMBRO = `${URL_BASE}/api/membro/ativar/id`;
-const URL_BAN_MEMBRO = `${URL_BASE}/api/membro/banir/id`;
-const URL_KICK_MEMBRO = `${URL_BASE}/api/membro/kick/id`;
-const URL_PATH_MEMBRO = `${URL_BASE}/api/membro/id`;
-
-const FIELD_MASK = {
-    id: 'ID',
-    nick: 'Nick',
-    data_nascimento: 'Idade',
-    foco: 'Foco',
-    status: 'Status',
-    recrutador: 'Recrutador',
-    cargo: 'Cargo',
-    data_entrada: 'Data de Solicitação',
-    createdAt: 'Data da Ocorrência',
-    updatedAt: 'Excluído em',
-    comentario: 'Motivo',
-    evento: 'Evento',
-}
-
 const APP = document.getElementById("app");
 
 const pages_content = {
@@ -55,11 +31,18 @@ function renderHistorico() {
 function renderExcluidos() {
     const table_id = 'tb_excluidos';
     const properties = ['nick', 'data_nascimento', 'data_entrada', 'updatedAt'];
-    // const properties = ['nick', 'data_nascimento', 'data_entrada', 'updatedAt', 'comentario'];
     renderLoading(APP);
     createTable(APP, table_id);
+    const extraField = {
+        name: 'Status',
+        content: `
+            <div>
+                <img value="%id" status="Ativo" src="./imgs/icons/Check.svg" alt="Aceitar" onclick="checkOutSolicitation(event)">
+            </div>
+        `
+    }
 
-    fetchDataAndRenderTable(URL_GET_MEMBROS_BANIDOS, table_id, properties, undefined, ()=>{
+    fetchDataAndRenderTable(URL_GET_MEMBROS_BANIDOS, table_id, properties, extraField, ()=>{
         convertDatesToAges(table_id, FIELD_MASK['data_nascimento'])
     });
 }
@@ -75,7 +58,7 @@ function renderSolicitacoes() {
         content: `
             <div>
                 <img value="%id" status="Ativo" src="./imgs/icons/Check.svg" alt="Aceitar" onclick="checkOutSolicitation(event)">
-                <img value="%id" status="Excluído" src="./imgs/icons/Close.svg" alt="Negar" onclick="checkOutSolicitation(event)">
+                <img value="%id" status="Negado" src="./imgs/icons/Close.svg" alt="Negar" onclick="checkOutSolicitation(event)">
             </div>
         `
     }
@@ -159,16 +142,19 @@ async function checkOutSolicitation(event){
     const status = event.target.getAttribute('status');
     const proceed = confirm(`Tem certeza que deseja definir o membro como ${status}?`)
 
-    // let proceed = await createModal()
-
     if (proceed) {
         if (status == 'Ativo'){
             updateMember(id);
+        }else if(status == 'Negado'){
+            // const comentario = prompt('Digite o motivo da expulsão: ')
+            const comentario = promptOptions('Escolha o motivo de recusar a solicitação: ', OPTIONS_RECUSE_SOLICITATION)
+            excludeMember(id, comentario)
         }else if(status == 'Excluído'){
-            const comentario = prompt('Digite o motivo da expulsão: ')
+            // const comentario = prompt('Digite o motivo da expulsão: ')
+            const comentario = promptOptions('Escolha o motivo da expulsão: ', OPTIONS_KICK)
             excludeMember(id, comentario)
         }else if(status == 'Banido'){
-            const comentario = prompt('Digite o motivo da expulsão: ')
+            const comentario = prompt('Digite o motivo do banimento: ', OPTIONS_BAN)
             banMember(id, comentario)
         }else{
             throw new Error( `Invalid status ${status}`);

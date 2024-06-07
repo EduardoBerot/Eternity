@@ -1,5 +1,5 @@
-const URL_BASE = "https://eternity-crud.onrender.com"
-// const URL_BASE = "http://localhost:5000"
+// const URL_BASE = "https://eternity-crud.onrender.com"
+const URL_BASE = "http://localhost:5000"
 const URL_MEMBERS = `${URL_BASE}/api/membro`;
 
 const ETY_ADM_LOGIN_COOKIE = 'eternity-adm-login';
@@ -116,3 +116,28 @@ function getCookie(cookieName) {
     }
     return undefined;
 }
+
+function promptOptions(msg, options) {
+    let respostaValida = false;
+    let objOptions = {}
+    // objOptions[id + 1] = op
+    let mensage = msg + options.map((op, id) => {
+        return `\n${id + 1} - ${op}`
+    }).join('')
+
+    console.log(mensage);
+
+    while (!respostaValida) {
+        try {
+            const optionSelected = parseFloat(prompt(mensage));
+            if (isNaN(optionSelected) || optionSelected < 1 || optionSelected > options.length) {
+                throw new Error("Opção inválida. Por favor, escolha um número correspondente à opção desejada.");
+            }
+            const response = objOptions[optionSelected];
+            return response;
+        } catch (error) {
+            console.error(error.message);
+        }
+    }
+}
+
