@@ -120,24 +120,24 @@ function getCookie(cookieName) {
 function promptOptions(msg, options) {
     let respostaValida = false;
     let objOptions = {}
-    // objOptions[id + 1] = op
     let mensage = msg + options.map((op, id) => {
+        objOptions[id+1] = op;
         return `\n${id + 1} - ${op}`
     }).join('')
 
-    console.log(mensage);
+    return objOptions[+prompt(mensage)]
 
-    while (!respostaValida) {
-        try {
-            const optionSelected = parseFloat(prompt(mensage));
-            if (isNaN(optionSelected) || optionSelected < 1 || optionSelected > options.length) {
-                throw new Error("Opção inválida. Por favor, escolha um número correspondente à opção desejada.");
-            }
-            const response = objOptions[optionSelected];
-            return response;
-        } catch (error) {
-            console.error(error.message);
-        }
-    }
+    // while (!respostaValida) {
+    //     try {
+    //         const optionSelected = parseFloat(prompt(mensage));
+    //         if (isNaN(optionSelected) || optionSelected < 1 || optionSelected > options.length) {
+    //             throw new Error("Opção inválida. Por favor, escolha um número correspondente à opção desejada.");
+    //         }
+    //         const response = objOptions[optionSelected];
+    //         return response;
+    //     } catch (error) {
+    //         console.error(error.message);
+    //     }
+    // }
 }
 

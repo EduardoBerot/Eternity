@@ -141,21 +141,35 @@ async function checkOutSolicitation(event){
     const id = event.target.getAttribute('value');
     const status = event.target.getAttribute('status');
     const proceed = confirm(`Tem certeza que deseja definir o membro como ${status}?`)
+    const msg_error = 'Opção incorreta';
 
     if (proceed) {
         if (status == 'Ativo'){
             updateMember(id);
         }else if(status == 'Negado'){
-            // const comentario = prompt('Digite o motivo da expulsão: ')
+            // const comentario = prompt('Digite o motivo de negar a solicitação: ')
             const comentario = promptOptions('Escolha o motivo de recusar a solicitação: ', OPTIONS_RECUSE_SOLICITATION)
-            excludeMember(id, comentario)
+            if (comentario){
+                excludeMember(id, comentario)
+            }else{
+                console.log(msg_error)
+            }
         }else if(status == 'Excluído'){
             // const comentario = prompt('Digite o motivo da expulsão: ')
             const comentario = promptOptions('Escolha o motivo da expulsão: ', OPTIONS_KICK)
-            excludeMember(id, comentario)
+            if (comentario) {
+                excludeMember(id, comentario)
+            } else {
+                console.log(msg_error)
+            }
         }else if(status == 'Banido'){
-            const comentario = prompt('Digite o motivo do banimento: ', OPTIONS_BAN)
-            banMember(id, comentario)
+            // const comentario = prompt('Digite o motivo do banimento: ')
+            const comentario = promptOptions('Escolha o motivo do banimento: ', OPTIONS_BAN)
+            if (comentario) {
+                banMember(id, comentario)
+            } else {
+                console.log(msg_error)
+            }
         }else{
             throw new Error( `Invalid status ${status}`);
         }
@@ -485,3 +499,4 @@ function init() {
 }
 
 init();
+
