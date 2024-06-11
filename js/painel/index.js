@@ -147,28 +147,31 @@ async function checkOutSolicitation(event){
         if (status == 'Ativo'){
             updateMember(id);
         }else if(status == 'Negado'){
-            // const comentario = prompt('Digite o motivo de negar a solicitação: ')
             const comentario = promptOptions('Escolha o motivo de recusar a solicitação: ', OPTIONS_RECUSE_SOLICITATION)
             if (comentario){
                 excludeMember(id, comentario)
             }else{
-                console.log(msg_error)
+                alert(msg_error)
             }
         }else if(status == 'Excluído'){
-            // const comentario = prompt('Digite o motivo da expulsão: ')
             const comentario = promptOptions('Escolha o motivo da expulsão: ', OPTIONS_KICK)
             if (comentario) {
                 excludeMember(id, comentario)
             } else {
-                console.log(msg_error)
+                alert(msg_error)
             }
         }else if(status == 'Banido'){
-            // const comentario = prompt('Digite o motivo do banimento: ')
-            const comentario = promptOptions('Escolha o motivo do banimento: ', OPTIONS_BAN)
-            if (comentario) {
-                banMember(id, comentario)
-            } else {
-                console.log(msg_error)
+            const membro_staff = getCookie(ETY_ADM_LOGIN_COOKIE);
+            const frase = `${membro_staff} está banindo o membro ${id}`;
+            const test = prompt(`Escreva a seguinte frase de confirmação: ${frase}`);
+
+            if (test == frase){
+                const comentario = promptOptions('Escolha o motivo do banimento: ', OPTIONS_BAN)
+                if (comentario) {
+                    banMember(id, comentario)
+                } else {
+                    alert(msg_error)
+                }
             }
         }else{
             throw new Error( `Invalid status ${status}`);
