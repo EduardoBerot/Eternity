@@ -40,7 +40,7 @@ const pages_content = {
 
     zap: `<h1>Participe do nosso grupo de WhatsApp!</h1></br><p>Entre no nosso grupo de Whatsapp clicando no botão abaixo!</p></br><a href="https://chat.whatsapp.com/L3P1OvMnrVpJ3cj849ZoIw" class="button">Entre no grupo</a>`,
 
-    texture: `<h1>Utilize nossa textura!</h1></br><p>Clique no botão abaixo para baixar a nossa textura oficial, contando com beneficios para PvP, Hud tematizado e muito mais!</p></br><a href="https://drive.usercontent.google.com/u/0/uc?id=1FE7HafEXq_V3NBliSEe_80y2Y7l1N_gM&export=download" download="Eternity Texture" class="button">Versão Convencional</a><a href="https://drive.usercontent.google.com/u/0/uc?id=1kYLq1G-a4EGhVaCIXf0JcKrgJOlkQHjW&export=download" download="Eternity Texture Lite" class="button">Versão Lite</a>`,
+    texture: `<h1>Utilize nossa textura!</h1></br><p>Clique no botão abaixo para baixar a nossa textura oficial, contando com beneficios para PvP, Hud tematizado e muito mais!</p></br><a href="https://drive.usercontent.google.com/u/0/uc?id=1FE7HafEXq_V3NBliSEe_80y2Y7l1N_gM&export=download" download="Eternity Texture" class="button">Versão Convencional</a><a href="https://drive.usercontent.google.com/u/0/uc?id=1Qxja2VzC-OHlfl1uemSs13YQ2Oj0odMN&export=download" download="Eternity Texture Lite" class="button">Versão Lite</a>`,
 
     administracao: `<div id="loading">Carregando<span class="loading-dot">...</span><div class="alert" style="font-size:0.75em;margin-left:auto;margin-top:0.5em;">(isso pode demorar um pouco)</div></div><form onsubmit="validationLogin(event)" style="display:none;"><h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>`,
 };
