@@ -498,7 +498,8 @@ function init() {
     const element = document.querySelector('#title_nick');
     const msg = `Saudações ${nick}!`;
     element.textContent = msg;
-    solicitacoes.click()
+    solicitacoes.click();
+    checkAniver();
 }
 
 init();
