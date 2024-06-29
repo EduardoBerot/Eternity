@@ -1,0 +1,53 @@
+@media (max-width:840px){
+    body{
+        padding: 0 1em;
+    }
+
+    main{
+        width: 100%;
+        margin-top: 1em;
+    }
+
+    main nav {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        align-items: center;
+    }
+
+    main nav div{
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 1em;
+        padding-bottom: 1em;
+        border-bottom: 1px solid black;
+    }
+
+    .itens:not(:last-of-type){
+        padding-right: 1em;
+        border-right: 1px solid black;
+    }
+
+    #title_nick{
+        text-align: center;
+        font-size: 1.5em;
+    }
+
+    .content{
+        padding: 1.5em 1em;
+        margin-bottom: 2em;
+        align-items: initial;
+    }
+
+    #app{
+        font-size: 0.75em;
+    }
+
+    table img{
+        width: 1.25em;
+    }
+}
