@@ -61,7 +61,7 @@ function renderFormEdit(data){
         </div>
         <div id="form-label-editar-btn">
             <a onclick="goBackMembers()" tabindex="0" class="button">Voltar</a>
-            <button>Editar</button>
+            <button>Salvar</button>
         </div>
     </form>
     `;
