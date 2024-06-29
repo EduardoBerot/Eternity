@@ -25,9 +25,9 @@ nav {
     border: 2px solid black;
     border-radius: 0px 12px 0% 12px;
     padding: 16px;
-    gap: 30px;
+    gap: 1em;
     background-color: rgba(0, 0, 0, 0.1);
-    font-size: 20px;
+    font-size: 1em;
 }
 
 nav a {
@@ -58,7 +58,7 @@ nav a:hover{
     background-color: rgba(0, 0, 0, 0.1);
     align-items: center;
     gap: 10px;
-    
+    overflow: scroll;    
 }
 
 .content h1 {
@@ -93,12 +93,12 @@ form label {
     
 }
 
-
 .button {
     display: flex;
     width: 40%;
     height: 50px;
-    margin-top: 36px;
+    /* margin-top: 0.75em; */
+    margin-bottom: 0.5em;
     border-radius: 0 6px 0 6px;
     background-color: aqua;
     transition: 0.2s ease-out;
@@ -106,7 +106,7 @@ form label {
     color: black;
     align-items: center;
     justify-content: center;
-
+    text-align: center;
 }
 
 .button:hover {
@@ -212,4 +212,23 @@ form label {
     50% {
         opacity: 0;
     }
+}
+
+::-webkit-scrollbar {
+    width: 12px; /* Largura da barra de rolagem vertical */
+    height: 0px; /* Altura da barra de rolagem horizontal */
+}
+
+::-webkit-scrollbar-track {
+    background: #00000000; /* Cor do fundo da trilha */
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #0ea1a180; /* Cor do polegar */
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: #07c0c0; /* Cor do polegar ao clicar */
 }
