@@ -126,18 +126,5 @@ function promptOptions(msg, options) {
     }).join('')
 
     return objOptions[+prompt(mensage)]
-
-    // while (!respostaValida) {
-    //     try {
-    //         const optionSelected = parseFloat(prompt(mensage));
-    //         if (isNaN(optionSelected) || optionSelected < 1 || optionSelected > options.length) {
-    //             throw new Error("Opção inválida. Por favor, escolha um número correspondente à opção desejada.");
-    //         }
-    //         const response = objOptions[optionSelected];
-    //         return response;
-    //     } catch (error) {
-    //         console.error(error.message);
-    //     }
-    // }
 }
 
