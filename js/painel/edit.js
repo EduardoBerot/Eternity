@@ -65,6 +65,7 @@ function renderFormEdit(data){
         </div>
     </form>
     `;
+    const STAFFMEMBERS = await getStaffsNames();
     createOptions('recrutador', STAFFMEMBERS, data.recrutador);
     createOptions('foco', FOCUS_TYPE, data.foco);
     createOptions('cargo', CARGOS, data.cargo);

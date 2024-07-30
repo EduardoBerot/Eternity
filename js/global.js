@@ -6,8 +6,6 @@ const URL_STAFFMEMBERS_NAMES = `${URL_BASE}/api/staffs`;
 const ETY_ADM_LOGIN_COOKIE = 'eternity-adm-login';
 const ETY_ADM_PASS_COOKIE = 'eternity-adm';
 
-const STAFFMEMBERS = await getStaffsNames();
-
 const FOCUS_TYPE = ['PvP', 'Torneio', 'Build', 'Farm'];
 const CARGOS = ['Membro','Estagiário', 'Auxiliar', 'Supervisor', 'Coordenador', 'Dono']
 
