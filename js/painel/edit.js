@@ -30,7 +30,7 @@ function renderEditPage(event) {
     });
 }
 
-function renderFormEdit(data){
+async function renderFormEdit(data){
     APP.innerHTML = `
     <h1 class="tittle">Editar Informações - ${data.nick}</h1>
     <form id="form_editar" value="${data.id}" onsubmit="submitEditar(event)">
