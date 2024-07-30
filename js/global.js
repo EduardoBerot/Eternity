@@ -1,28 +1,22 @@
 const URL_BASE = "https://eternity-crud.onrender.com"
 // const URL_BASE = "http://localhost:5000"
 const URL_MEMBERS = `${URL_BASE}/api/membro`;
+const URL_STAFFMEMBERS_NAMES = `${URL_BASE}/api/staffs`;
 
 const ETY_ADM_LOGIN_COOKIE = 'eternity-adm-login';
 const ETY_ADM_PASS_COOKIE = 'eternity-adm';
 
-const STAFFMEMBERS = [
-    'Ducred22', 
-    'ov3r5y5t3m', 
-    'XeKeMaTe', 
-    'Sir_Felipee', 
-    'SkyRell_SDK',
-    'Dark_Luninha',
-    'trogro9',
-    'DarckGRym',
-    'Akaaaashi_San',
-    'DMonte1122',
-    'zMiranhaX',
-];
+const STAFFMEMBERS = await getStaffsNames();
 
 const FOCUS_TYPE = ['PvP', 'Torneio', 'Build', 'Farm'];
 const CARGOS = ['Membro','Estagiário', 'Auxiliar', 'Supervisor', 'Coordenador', 'Dono']
 
 const clearAPP = (element=APP) => element.innerHTML = ''; 
+
+async function getStaffsNames() {
+    const resultado = await fetch (URL_STAFFMEMBERS_NAMES);
+    return await resultado.json();
+}
 
 function createOptions(id, options, defaultValue) {
     const selectElement = document.getElementById(id);
@@ -118,7 +112,6 @@ function getCookie(cookieName) {
 }
 
 function promptOptions(msg, options) {
-    let respostaValida = false;
     let objOptions = {}
     let mensage = msg + options.map((op, id) => {
         objOptions[id+1] = op;

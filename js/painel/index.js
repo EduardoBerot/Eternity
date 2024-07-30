@@ -69,7 +69,7 @@ function renderSolicitacoes() {
     });
 }
 
-function renderAdicionar() {
+async function renderAdicionar() {
     APP.innerHTML = `
     <h1 class="tittle">Adicionar Membro</h1>
     <form id="form_adicionar" onsubmit="submitAdicionar(event)">
@@ -103,7 +103,8 @@ function renderAdicionar() {
     `;
     
     const nick = getCookie(ETY_ADM_LOGIN_COOKIE);
-    createOptions('recrutador', STAFFMEMBERS, nick);
+    const staffs = await getStaffsNames();
+    createOptions('recrutador', staffs, nick);
     createOptions('foco', FOCUS_TYPE, 'PvP');
     createOptions('cargo', CARGOS, 'Membro');
 }
