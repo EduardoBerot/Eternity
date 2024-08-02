@@ -43,9 +43,11 @@ const pages_content = {
     texture: `<h1>Utilize nossa textura!</h1></br><p>Clique no botão abaixo para baixar a nossa textura oficial, contando com beneficios para PvP, Hud tematizado e muito mais!</p></br><a href="https://drive.usercontent.google.com/u/0/uc?id=1FE7HafEXq_V3NBliSEe_80y2Y7l1N_gM&export=download" download="Eternity Texture" class="button">Versão Convencional</a><a href="https://drive.usercontent.google.com/u/0/uc?id=1Qxja2VzC-OHlfl1uemSs13YQ2Oj0odMN&export=download" download="Eternity Texture Lite" class="button">Versão Lite</a>`,
 
     administracao: `<div id="loading">Carregando<span class="loading-dot">...</span><div class="alert" style="font-size:0.75em;margin-left:auto;margin-top:0.5em;">(isso pode demorar um pouco)</div></div><form onsubmit="validationLogin(event)" style="display:none;"><h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>`,
+
+    hall: `<h1>Hall da Fama</h1><hr style="width:100%;"><div id="hall-da-fama" style="display:flex;flex-wrap:wrap;gap:3em;justify-content:center"></div>`,
 };
 
-function render(event) {
+async function render(event) {
     const id = event.target.id;
     app.innerHTML = pages_content[id];
     selectItem(event.target);
@@ -53,6 +55,7 @@ function render(event) {
     renderGallery(id);
     renderFormJoin(id);
     renderFormAdmin(id);
+    await renderHall(id);
 }
 
 function renderGallery(id) {
@@ -92,6 +95,29 @@ function renderFormJoin(id) {
             .catch(error => {
                 console.error('There has been a problem with your fetch operation:', error);
             });
+    }
+}
+
+async function renderHall(id) {
+    if (id == 'hall') {
+        const hall = document.getElementById('hall-da-fama');
+        let playersHTML = "";
+        const STAFFMEMBERS = await getStaffsNames();
+        console.log(STAFFMEMBERS);
+
+        for (const staff of STAFFMEMBERS) {
+            const playerHTML = `
+            <div style="display:flex; flex-direction:column; align-items:center;">
+                <img width="100" src="https://mc-heads.net/head/${staff}" alt="skin do player ${staff}">
+                <p>${staff}</p>
+            </div>
+            `;
+            
+            playersHTML += playerHTML;
+        }
+        
+
+        hall.innerHTML = playersHTML;
     }
 }
 
@@ -140,3 +166,4 @@ async function validationLogin(event) {
 }
 
 app.innerHTML = pages_content.home;
+hall.click();
