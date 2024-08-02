@@ -44,7 +44,7 @@ const pages_content = {
 
     administracao: `<div id="loading">Carregando<span class="loading-dot">...</span><div class="alert" style="font-size:0.75em;margin-left:auto;margin-top:0.5em;">(isso pode demorar um pouco)</div></div><form onsubmit="validationLogin(event)" style="display:none;"><h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>`,
 
-    hall: `<h1>Hall da Fama</h1><hr style="width:100%;"><div id="hall-da-fama" style="display:flex;flex-wrap:wrap;gap:3em;justify-content:center"></div>`,
+    hall: `<h1>Membros Staff</h1><hr style="width:100%;"><div id="hall-da-fama" style="display:flex;flex-wrap:wrap;gap:3em;justify-content:center"></div>`,
 };
 
 async function render(event) {
@@ -166,4 +166,3 @@ async function validationLogin(event) {
 }
 
 app.innerHTML = pages_content.home;
-hall.click();
