@@ -131,6 +131,20 @@ form label {
     border-radius: 0px 12px 0px 12px;
 }
 
+.card-staff{
+    background-color: #ffffff30;
+    width: 190px;
+    border: 1px solid rgb(158, 158, 158);
+    border-radius: 16px;
+    padding: 8px;
+    box-shadow: 3px 3px 7px #00000030;
+}
+
+hr{
+    margin-top: 8px;
+    border: 1px solid #00000090;
+}
+
 @media (max-width:840px){
     body{
         height: 100vh;

@@ -44,7 +44,7 @@ const pages_content = {
 
     administracao: `<div id="loading">Carregando<span class="loading-dot">...</span><div class="alert" style="font-size:0.75em;margin-left:auto;margin-top:0.5em;">(isso pode demorar um pouco)</div></div><form onsubmit="validationLogin(event)" style="display:none;"><h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>`,
 
-    hall: `<h1>Membros Staff</h1><hr style="width:100%;"><div id="hall-da-fama" style="display:flex;flex-wrap:wrap;gap:3em;justify-content:center"></div>`,
+    hall: `<h1>Membros Staff</h1><hr style="width:100%;"><div id="hall-da-fama" style="display:flex;flex-wrap:wrap;gap:1em;justify-content:center;padding-top:8px; margin-bottom:16px;"></div>`,
 };
 
 async function render(event) {
@@ -102,14 +102,19 @@ async function renderHall(id) {
     if (id == 'hall') {
         const hall = document.getElementById('hall-da-fama');
         let playersHTML = "";
-        const STAFFMEMBERS = await getStaffsNames();
-        console.log(STAFFMEMBERS);
+        const resposta = await fetch(URL_STAFFMEMBERS);
+        const STAFFMEMBERS = await resposta.json();
+        STAFFMEMBERS.push({nick:'trogro9',cargo:'Admin',data_entrada:'2022-05-11 00:00:00+00'})
 
         for (const staff of STAFFMEMBERS) {
             const playerHTML = `
-            <div style="display:flex; flex-direction:column; align-items:center;">
-                <img width="100" src="https://mc-heads.net/head/${staff}" alt="skin do player ${staff}">
-                <p>${staff}</p>
+            <div class="card-staff" style="display:flex; flex-direction:column; align-items:center;">
+                <img width="100" src="https://mc-heads.net/head/${staff.nick}" alt="skin do player ${staff.nick}">
+                <div style="display:flex; flex-direction:column;align-items:center;margin-top:8px;">
+                <p>${staff.nick}</p>
+                    <h3>${staff.cargo}</h3>
+                    <em style="font-size:0.8em;color:#404040">${calculateInYearOrDays(staff.data_entrada)}</em>
+                </div>
             </div>
             `;
             
@@ -119,6 +124,33 @@ async function renderHall(id) {
 
         hall.innerHTML = playersHTML;
     }
+}
+
+function calculateInYearOrDays(incomeDate) {
+    function calculateAge(birthDate) {
+        const today = new Date();
+
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    }
+
+    function calculateAgeInDays(birthDate) {
+        const today = new Date();
+        const timeDifference = today - new Date(birthDate);
+        const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+        return daysDifference;
+    }
+
+    incomeDate = new Date(incomeDate);
+    let age = calculateAge(incomeDate);
+    let ageInDays = calculateAgeInDays(incomeDate);
+    if (ageInDays > 365) return `Membro a +${age} anos`;
+    return `Membro a ${ageInDays} dias`;
 }
 
 function renderDate() {
