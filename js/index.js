@@ -106,13 +106,13 @@ async function renderHall(id) {
         const STAFFMEMBERS = await resposta.json();
         STAFFMEMBERS.push({nick:'trogro9',cargo:'Admin',data_entrada:'2022-05-11 00:00:00+00'})
 
-        for (const staff of STAFFMEMBERS) {
+        for (const membros of STAFFMEMBERS) {
             const playerHTML = `
-            <div class="card-staff ${staff.cargo.toLowerCase()}" style="display:flex; flex-direction:column; align-items:center;">
-                <img width="100" src="https://mc-heads.net/head/${staff.nick}" alt="skin do player ${staff.nick}">
+            <div class="card-staff ${membros.cargo.toLowerCase()}" style="display:flex; flex-direction:column; align-items:center;">
+                <img width="100" src="https://mc-heads.net/head/${membros.nick}" alt="skin do player ${membros.nick}">
                 <div style="display:flex; flex-direction:column;align-items:center;margin-top:8px;">
-                <p>${staff.nick}</p>
-                    <h3>${staff.cargo}</h3>
+                <p>${membros.nick}</p>
+                    <h3>${membros.cargo}</h3>
                     <em style="font-size:0.8em;color:#404040">${calculateInYearOrDays(staff.data_entrada)}</em>
                 </div>
             </div>
