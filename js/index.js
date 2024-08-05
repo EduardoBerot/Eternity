@@ -210,5 +210,3 @@ async function validationLogin(event) {
 }
 
 app.innerHTML = pages_content.home;
-
-hall.click();
