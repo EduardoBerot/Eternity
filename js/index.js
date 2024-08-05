@@ -102,13 +102,13 @@ async function renderHall(id) {
     if (id == 'hall') {
         const hall = document.getElementById('hall-da-fama');
         let playersHTML = "";
-        const resposta = await fetch(URL_STAFFMEMBERS);
+        const resposta = await fetch(URL_MEMBERS);
         const STAFFMEMBERS = await resposta.json();
         STAFFMEMBERS.push({nick:'trogro9',cargo:'Admin',data_entrada:'2022-05-11 00:00:00+00'})
 
         for (const staff of STAFFMEMBERS) {
             const playerHTML = `
-            <div class="card-staff" style="display:flex; flex-direction:column; align-items:center;">
+            <div class="card-staff ${staff.cargo.toLowerCase()}" style="display:flex; flex-direction:column; align-items:center;">
                 <img width="100" src="https://mc-heads.net/head/${staff.nick}" alt="skin do player ${staff.nick}">
                 <div style="display:flex; flex-direction:column;align-items:center;margin-top:8px;">
                 <p>${staff.nick}</p>

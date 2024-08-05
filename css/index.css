@@ -140,6 +140,10 @@ form label {
     box-shadow: 3px 3px 7px #00000030;
 }
 
+.dono {
+    background-color: #d94c1d30;
+}
+
 hr{
     margin-top: 8px;
     border: 1px solid #00000090;
