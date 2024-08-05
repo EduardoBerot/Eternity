@@ -140,8 +140,43 @@ form label {
     box-shadow: 3px 3px 7px #00000030;
 }
 
-.dono {
-    background-color: #d94c1d30;
+.card-staff:not([class="card-staff membro"])::before{
+    content: "";
+    position: absolute;
+    z-index: -1;
+    height: 100px;
+    top: -5px;
+    left: -5px;
+    width: calc( 100% + 10px);
+    height: calc( 100% + 10px );
+    background: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%),
+                radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);
+    border-radius: 18.5px;
+} 
+
+.card-staff.dono {
+    position: relative;
+    background-color: #6f998e;
+}
+
+.card-staff.auxiliar{
+    position: relative;
+    background-color: #97d3ab;
+}
+
+.card-staff.coordenador{
+    position: relative;
+    background-color: #82b685;
+}
+
+.card-staff.supervisor{
+    position: relative;
+    background-color: #c4b771;
+}
+
+.card-staff.admin{
+    position: relative;
+    background-color: #d397c4;
 }
 
 hr{

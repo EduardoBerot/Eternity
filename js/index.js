@@ -102,18 +102,30 @@ async function renderHall(id) {
     if (id == 'hall') {
         const hall = document.getElementById('hall-da-fama');
         let playersHTML = "";
-        const resposta = await fetch(URL_MEMBERS);
-        const STAFFMEMBERS = await resposta.json();
-        STAFFMEMBERS.push({nick:'trogro9',cargo:'Admin',data_entrada:'2022-05-11 00:00:00+00'})
+        const hierarquia = {
+            "Dono":99,
+            "Coordenador":90,
+            "Supervisor":80,
+            "Auxiliar":70,
+            "Estagiário":60,
+            "Admin":10,
+            "Membro":1,
+        };
+        
+        const resposta = await fetch(`${URL_BASE}/api/membros/ativos`);
+        let membros = await resposta.json();
+        
+        membros.push({nick:'trogro9',cargo:'Admin',data_entrada:'2022-05-11 00:00:00+00'});
+        membros = membros.sort((a,b)=>hierarquia[a.cargo]<hierarquia[b.cargo]? 1 : -1);
 
-        for (const membros of STAFFMEMBERS) {
+        for (const membro of membros) {
             const playerHTML = `
-            <div class="card-staff ${membros.cargo.toLowerCase()}" style="display:flex; flex-direction:column; align-items:center;">
-                <img width="100" src="https://mc-heads.net/head/${membros.nick}" alt="skin do player ${membros.nick}">
+            <div class="card-staff ${membro.cargo.toLowerCase()}" style="display:flex; flex-direction:column; align-items:center;">
+                <img width="100" src="https://mc-heads.net/head/${membro.nick}" alt="skin do player ${membro.nick}">
                 <div style="display:flex; flex-direction:column;align-items:center;margin-top:8px;">
-                <p>${membros.nick}</p>
-                    <h3>${membros.cargo}</h3>
-                    <em style="font-size:0.8em;color:#404040">${calculateInYearOrDays(staff.data_entrada)}</em>
+                <p>${membro.nick}</p>
+                    <h3>${membro.cargo}</h3>
+                    <em style="font-size:0.8em;color:#404040">${calculateInYearOrDays(membro.data_entrada)}</em>
                 </div>
             </div>
             `;
@@ -198,3 +210,5 @@ async function validationLogin(event) {
 }
 
 app.innerHTML = pages_content.home;
+
+hall.click();
