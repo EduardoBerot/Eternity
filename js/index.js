@@ -103,11 +103,12 @@ async function renderHall(id) {
         const hall = document.getElementById('hall-da-fama');
         let playersHTML = "";
         const hierarquia = {
-            "Dono":99,
-            "Coordenador":90,
-            "Supervisor":80,
-            "Auxiliar":70,
-            "Estagiário":60,
+            "Fundador":99,
+            "Dono":90,
+            "Coordenador":80,
+            "Supervisor":70,
+            "Auxiliar":60,
+            "Estagiário":50,
             "Admin":10,
             "Membro":1,
         };
