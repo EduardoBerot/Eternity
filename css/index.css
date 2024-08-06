@@ -154,9 +154,10 @@ form label {
     border-radius: 18.5px;
 } 
 
-.card-staff:not([class="card-staff membro"])em::before{
+.card-staff:not([class="card-staff membro"])em {
     color: #fff;
 }
+
 
 .card-staff.fundador {
     position: relative;
