@@ -154,7 +154,7 @@ form label {
     border-radius: 18.5px;
 } 
 
-.card-staff:not([class="card-staff membro"]):last-child::before{
+.card-staff:not([class="card-staff membro"])em::before{
     color: #fff;
 }
 
