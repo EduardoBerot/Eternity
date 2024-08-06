@@ -154,24 +154,29 @@ form label {
     border-radius: 18.5px;
 } 
 
+.card-staff.fundador {
+    position: relative;
+    background-color: rgba(255, 1, 1, 0.3);
+}
+
 .card-staff.dono {
     position: relative;
-    background-color: #6f998e;
+    background-color: rgba(255, 103, 1, 0.3);
 }
 
 .card-staff.auxiliar{
     position: relative;
-    background-color: #97d3ab;
+    background-color: rgba(35, 255, 1, 0.3);
 }
 
 .card-staff.coordenador{
     position: relative;
-    background-color: #82b685;
+    background-color: rgba(255, 1, 230, 0.3);
 }
 
 .card-staff.supervisor{
     position: relative;
-    background-color: #c4b771;
+    background-color: rgba(56, 1, 255, 0.3);
 }
 
 .card-staff.admin{
