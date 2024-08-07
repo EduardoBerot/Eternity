@@ -154,42 +154,14 @@ form label {
     border-radius: 18.5px;
 } 
 
-
-
-
-.card-staff.fundador {
+.card-staff:not([class="card-staff membro"]){
     position: relative;
-    background-color: rgba(255, 1, 1, 0.6);
+    background-color: #e7e7e7;
 }
 
-.card-staff.dono {
-    position: relative;
-    background-color: rgba(255, 103, 1, 0.6);
-}
-
-.card-staff.auxiliar{
-    position: relative;
-    background-color: rgba(35, 255, 1, 0.6);
-}
-
-.card-staff.coordenador{
-    position: relative;
-    background-color: rgba(255, 1, 230, 0.6);
-}
-
-.card-staff.supervisor{
-    position: relative;
-    background-color: rgba(56, 1, 255, 0.6);
-}
-
-.card-staff.admin{
-    position: relative;
-    background-color: hsla(44, 100%, 60%, 0.6);
-}
-
-.card-staff.estagiário{
-    position: relative;
-    background-color: hsla(60, 100%, 60%, 0.7);
+.card-staff:not([class="card-staff membro"]) em{
+    color: #5d4a1f;
+    text-shadow: 1px 1px 1px #dbdbdb;
 }
 
 hr{

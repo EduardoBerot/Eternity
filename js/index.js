@@ -126,7 +126,7 @@ async function renderHall(id) {
                 <div style="display:flex; flex-direction:column;align-items:center;margin-top:8px;">
                 <p>${membro.nick}</p>
                     <h3>${membro.cargo}</h3>
-                    <em style="font-size:0.8em;color:#404040">${calculateInYearOrDays(membro.data_entrada)}</em>
+                    <em style="font-size:0.8em">${calculateInYearOrDays(membro.data_entrada)}</em>
                 </div>
             </div>
             `;
