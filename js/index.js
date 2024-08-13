@@ -120,15 +120,13 @@ async function renderHall(id) {
         membros.push({nick:'trogro9',cargo:'Admin',data_entrada:'2022-05-11 00:00:00+00'});
         membros = membros.sort((a,b)=>hierarquia[a.cargo]<hierarquia[b.cargo]? 1 : -1);
         
-        const staff = membros.filter(m=>m.cargo != "Membro");
+        const staffs = membros.filter(m=>m.cargo != "Membro");
         let membros_padrao = membros.filter(m=>m.cargo == "Membro");
-        membros_padrao = membros_padrao.sort((a,b)=>a.data_entrada<b.data_entrada? 1 : -1);
+        membros_padrao = membros_padrao.sort((a,b)=>a.data_entrada>b.data_entrada? 1 : -1);
 
-        membros = staff + membros_padrao;
+        membros_padrao.map(membro=>staffs.push(membro));
 
-        console.log(membros);
-
-        for (const membro of membros) {
+        for (const membro of staffs) {
             const playerHTML = `
             <div class="card-staff ${membro.cargo.toLowerCase()}" style="display:flex; flex-direction:column; align-items:center;">
                 <img width="100" src="https://mc-heads.net/head/${membro.nick}" alt="skin do player ${membro.nick}">
