@@ -44,7 +44,8 @@ const pages_content = {
 
     administracao: `<div id="loading">Carregando<span class="loading-dot">...</span><div class="alert" style="font-size:0.75em;margin-left:auto;margin-top:0.5em;">(isso pode demorar um pouco)</div></div><form onsubmit="validationLogin(event)" style="display:none;"><h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>`,
 
-    hall: `<h1>Membros Staff</h1><hr style="width:100%;"><div id="hall-da-fama" style="display:flex;flex-wrap:wrap;gap:1em;justify-content:center;padding-top:8px; margin-bottom:16px;"></div>`,
+    hall: `<h1>Membros Staff</h1><hr style="width:100%;"><div id="hall-da-fama" style="display:flex;flex-wrap:wrap;gap:1em;justify-content:center;padding-top:8px; margin-bottom:16px;">
+    </div>`,
 };
 
 async function render(event) {
@@ -117,6 +118,14 @@ async function renderHall(id) {
         
         membros.push({nick:'trogro9',cargo:'Admin',data_entrada:'2022-05-11 00:00:00+00'});
         membros = membros.sort((a,b)=>hierarquia[a.cargo]<hierarquia[b.cargo]? 1 : -1);
+        
+        const staff = membros.filter(m=>m.cargo != "Membro");
+        let membros_padrao = membros.filter(m=>m.cargo == "Membro");
+        membros_padrao = membros_padrao.sort((a,b)=>a.data_entrada<b.data_entrada? 1 : -1);
+
+        membros = staff + membros_padrao;
+
+        console.log(membros);
 
         for (const membro of membros) {
             const playerHTML = `
@@ -210,5 +219,3 @@ async function validationLogin(event) {
 }
 
 app.innerHTML = pages_content.home;
-
-hall.click();
