@@ -3,6 +3,12 @@
     src: url(../fonts/conthrax_sb.ttf);
 }
 
+@font-face {
+    font-family: Vermin;
+    src: url(../fonts/vermin_vibes_ex.ttf);
+}
+
+
 * {
     box-sizing: border-box;
     padding: 0;

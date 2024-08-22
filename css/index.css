@@ -6,7 +6,7 @@ header {
     flex-direction: column;
     justify-content: center;
     height: 20vh;
-    gap: 12px;
+    text-align: center;
 }
 
 main {
@@ -16,6 +16,14 @@ main {
     gap: 30px;
     height: 75vh;
 
+}
+
+.tittle {
+    font-family: Vermin;
+    font-size: 100px;
+    height: 80px;
+    margin: 0 auto;
+    margin-bottom: 40px;
 }
 
 nav {
@@ -42,10 +50,6 @@ nav a:hover{
 
 .select {
     color: aqua;
-}
-
-.hometittle {
-    margin-top: 30px;
 }
 
 .content {
