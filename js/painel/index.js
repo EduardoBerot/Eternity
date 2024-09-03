@@ -6,6 +6,7 @@ const pages_content = {
     adicionar: renderAdicionar,
     excluidos: renderExcluidos,
     historico: renderHistorico,
+    desafios: renderDesafios,
 }
 
 function render(event) {
@@ -504,4 +505,3 @@ function init() {
 }
 
 init();
-
