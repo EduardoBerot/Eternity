@@ -1,12 +1,20 @@
-
-
 header {
     display: flex;
     align-items: center;
     flex-direction: column;
     justify-content: center;
-    height: 20vh;
     text-align: center;
+
+    h1.title {
+        font-family: Vermin;
+        font-size: 6em;
+        margin: 0 auto;
+    }
+
+    p {
+        font-size: 1.25em;
+        margin-bottom: 0.5em;
+    }
 }
 
 main {
@@ -15,16 +23,9 @@ main {
     justify-content: space-between;
     gap: 30px;
     height: 75vh;
-
 }
 
-.tittle {
-    font-family: Vermin;
-    font-size: 100px;
-    height: 80px;
-    margin: 0 auto;
-    margin-bottom: 40px;
-}
+
 
 nav {
     width: 21%;
@@ -36,17 +37,18 @@ nav {
     gap: 1em;
     background-color: rgba(0, 0, 0, 0.1);
     font-size: 1em;
+
+    a {
+        text-decoration: none;
+        color: black;
+    }
+    
+    a:hover{
+        color: aqua;
+        cursor: pointer;
+    }
 }
 
-nav a {
-    text-decoration: none;
-    color: black;
-}
-
-nav a:hover{
-    color: aqua;
-    cursor: pointer;
-}
 
 .select {
     color: aqua;
@@ -62,17 +64,18 @@ nav a:hover{
     background-color: rgba(0, 0, 0, 0.1);
     align-items: center;
     gap: 10px;
-    overflow: scroll;    
+    overflow: scroll; 
+
+    h1 {
+        margin-top: 16px;
+    }
+    
+    p {
+        text-align: justify;
+        line-height: 20px;
+    }
 }
 
-.content h1 {
-    margin-top: 16px;
-}
-
-.content p {
-    text-align: justify;
-    line-height: 20px;
-}
 
 form {
     padding-top: 36px;
@@ -178,9 +181,15 @@ hr{
         height: 100vh;
     }
 
-    header p{
-        height: auto;
-        text-align: center;
+    header {
+        h1.title{
+            font-size: 4em;
+        }
+
+        p{
+            height: auto;
+            text-align: center;
+        }
     }
 
     main{
@@ -215,11 +224,12 @@ hr{
 
     .content{
         padding: 0px 16px 16px 16px;
+
+        p{
+            text-align: left;
+        }
     }
 
-    .content p{
-        text-align: left;
-    }
 
     #gallery {
         display: flex;
@@ -227,11 +237,12 @@ hr{
         align-items: center;
         gap: 40px;
         margin-bottom: 30px;
+
+        a {
+            width: 90%;
+        }
     }
 
-    #gallery a {
-        width: 90%;
-    }
 
     .cityimgs {
         width: 100%;
