@@ -31,17 +31,18 @@ function renderDesafios() {
             <select style="width:100%" id="seletor-data-dia"></select>
         </div>
     </div>
-    `
+    `;
+
     const anos = ['2024'];
-    const mes = Object.values(mesesDoAno);
-    const dia = obterDias();
+    const meses = Object.values(mesesDoAno);
+    const dias = obterDias();
 
     const mes_atual = obterMesAtual();
     const dia_atual = obterDiaAtual();
-
-    createOptions('seletor-data-ano', anos, '2024');
-    createOptions('seletor-data-mes', mes, mes_atual);
-    createOptions('seletor-data-dia', dia, dia_atual);
+    
+    createOptionsHTML('seletor-data-ano', anos, '2024');
+    createOptionsHTML('seletor-data-mes', meses, mes_atual);
+    createOptionsHTML('seletor-data-dia', dias, dia_atual);
 
     const table_id = 'tb_desafios';
     renderLoading(APP);
@@ -74,8 +75,15 @@ function obterDiaAtual() {
 
 function obterDias() {
     const dias = [];
-    for (let i = 1; i <= 31; i++) {
+    const dataAtual = new Date();
+    const mes = dataAtual.getMonth();
+    const ano = dataAtual.getFullYear();
+
+    const ultimoDia = new Date(ano, mes + 1, 0).getDate();
+
+    for (let i = 1; i <= ultimoDia; i++) {
         dias.push(i);
     }
+
     return dias;
 }

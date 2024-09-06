@@ -25,12 +25,23 @@ function createOptions(id, options, defaultValue) {
         const option = document.createElement("option");
         option.text = value;
         option.value = value;
-
+        
         if (value == defaultValue){
             option.selected = true;
         }
 
         selectElement.add(option);
+    });
+}
+
+function createOptionsHTML(id, options, defaultValue) {
+    const selectElement = document.getElementById(id);
+
+    options.forEach(function (value) {
+        const selected = value == defaultValue? 'selected' : ''
+        const option = `<option ${selected} value="${value}">${value}</option>`;
+
+        selectElement.innerHTML += option;
     });
 }
 
