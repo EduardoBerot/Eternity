@@ -44,7 +44,7 @@ const pages_content = {
 
     administracao: `<div id="loading">Carregando<span class="loading-dot">...</span><div class="alert" style="font-size:0.75em;margin-left:auto;margin-top:0.5em;">(isso pode demorar um pouco)</div></div><form onsubmit="validationLogin(event)" style="display:none;"><h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>`,
 
-    hall: `<h1>Membros Staff</h1><hr style="width:100%;"><div id="hall-da-fama" style="display:flex;flex-wrap:wrap;gap:1em;justify-content:center;padding-top:8px; margin-bottom:16px;">
+    hall: `<h1>Membros</h1><hr style="width:100%;"><div id="hall-da-fama" style="display:flex;flex-wrap:wrap;gap:1em;justify-content:center;padding-top:8px; margin-bottom:16px;">
     </div>`,
 };
 
@@ -106,10 +106,14 @@ async function renderHall(id) {
         const hierarquia = {
             "Fundador":99,
             "Dono":90,
-            "Coordenador":80,
-            "Supervisor":70,
-            "Auxiliar":60,
-            "Estagiário":50,
+            "Heika":80,
+            "Coordenador":70,
+            "Sohei":60,
+            "Supervisor":50,
+            "Ikko":45,
+            "Auxiliar":40,
+            "Daimyo":30,
+            "Estagiário":20,
             "Admin":10,
             "Membro":1,
         };
