@@ -121,3 +121,37 @@ th[id]:not([id=""]):hover {
 th[id]:not([id=""]):active {
     background-color: #ffffff60;
 }
+
+.btn{
+    padding: 0px 20px;
+    border-radius: 0 6px 0 6px;
+    cursor: pointer;
+    box-shadow: 2px 2px 5px #00000030 ;
+    height: 30px;
+}
+
+.btn-primary{
+    background-color: aqua;
+}
+
+.btn-danger{
+    background-color: rgb(251, 72, 96);
+}
+.btn-danger:hover{
+    background-color: rgb(204, 46, 67);
+}
+
+.btn-primary:hover{
+    background-color: rgb(21, 128, 128);
+    transition-duration: 200ms;
+}
+
+input[type="date"]{
+    width: 100%;
+    padding-inline-start: 6px;
+    height: 30px;
+    color: gray;
+    border-radius: 6px 0 6px 0;
+    border: none;
+    border-bottom: 2px solid black;
+}

@@ -17,32 +17,16 @@ const mesesDoAno = {
 function renderDesafios() {
     APP.innerHTML = `
     <h1 style="text-align:center;">Gerenciador de Desafios</h1>
-    <div id="seletor-data" style="display:flex;gap:8px;justify-content:center;margin-bottom:1em;">
-        <div style="width:calc(33.333% - 16px / 3)">
-            <label>Ano</label>
-            <select style="width:100%" id="seletor-data-ano"></select>
-        </div>
-        <div style="width:calc(33.333% - 16px / 3)">
-            <label>Mês</label>
-            <select style="width:100%" id="seletor-data-mes"></select>
-        </div>
-        <div style="width:calc(33.333% - 16px / 3)">
-            <label>Dia</label>
-            <select style="width:100%" id="seletor-data-dia"></select>
-        </div>
+    <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;margin-bottom:1em;">
+        <label>Dia do desafio</label>
+        <input type="date" min="2024-09-30">
+    </div>
+    <div style="display:flex;gap:1em;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="marcarTodos()">Todos</button>
+        <button class="btn btn-danger" onclick="desmarcarTodos()">Nenhum</button>
+        <button class="btn btn-primary" onclick="enviarMarcados()">Confirmar</button>
     </div>
     `;
-
-    const anos = ['2024'];
-    const meses = Object.values(mesesDoAno);
-    const dias = obterDias();
-
-    const mes_atual = obterMesAtual();
-    const dia_atual = obterDiaAtual();
-    
-    createOptionsHTML('seletor-data-ano', anos, '2024');
-    createOptionsHTML('seletor-data-mes', meses, mes_atual);
-    createOptionsHTML('seletor-data-dia', dias, dia_atual);
 
     const table_id = 'tb_desafios';
     renderLoading(APP);
@@ -55,35 +39,77 @@ function renderDesafios() {
         const properties = ['nick'];
         const extraField = {
             name: 'Concluído',
-            content: `<input type="checkbox" class="menu-filtrar-filtro">`
+            content: `<input id-member="%id" type="checkbox" class="menu-filtrar-filtro">`
         }
     
         fetchDataAndRenderTable(URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField,)
     }
 }
 
-function obterMesAtual() {
-    const dataAtual = new Date();
-    const mesNumerico = dataAtual.getMonth();
-    return mesesDoAno[mesNumerico];
+function marcarTodos() {
+    const checkboxes = document.querySelectorAll('.menu-filtrar-filtro');
+    checkboxes.forEach(checkbox => checkbox.checked = true);
 }
 
-function obterDiaAtual() {
-    const dataAtual = new Date();
-    return dataAtual.getDate();
+function desmarcarTodos() {
+    const checkboxes = document.querySelectorAll('.menu-filtrar-filtro');
+    checkboxes.forEach(checkbox => checkbox.checked = false);
 }
 
-function obterDias() {
-    const dias = [];
-    const dataAtual = new Date();
-    const mes = dataAtual.getMonth();
-    const ano = dataAtual.getFullYear();
-
-    const ultimoDia = new Date(ano, mes + 1, 0).getDate();
-
-    for (let i = 1; i <= ultimoDia; i++) {
-        dias.push(i);
+function enviarMarcados() {
+    const checkboxes = document.querySelectorAll('.menu-filtrar-filtro');
+    const desafiosMarcados = [];
+    
+    checkboxes.forEach(checkbox => {
+        if (checkbox.checked) {
+            desafiosMarcados.push(checkbox.getAttribute('id-member'));
+        }
+    });
+    
+    if (desafiosMarcados.length > 0) {
+        fetchDataConcluirDesafios(desafiosMarcados);
     }
+    else {
+        alert('Nenhum desafio marcado para concluir.');
+    }
+    
+    function fetchDataConcluirDesafios(desafios) {
 
-    return dias;
+        const data_atual = document.querySelector('input[type=date]').value
+
+        if (data_atual.length < 1){
+            alert('Escolha uma data para prosseguir o registro da informação.');
+            return;
+        }
+
+        console.log(data_atual);
+        
+        
+        const data = {
+            date: data_atual,
+            members: desafios
+        };
+
+
+        fetch(URL_CONCLUIR_DESAFIOS, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Registro realizado com sucesso.');
+            }
+            else {
+                alert('Falha ao realizar o registro.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Falha ao realizar o registro.');
+        });
+    }
 }
