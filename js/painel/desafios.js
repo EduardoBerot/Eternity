@@ -44,6 +44,19 @@ function renderDesafios() {
     
         fetchDataAndRenderTable(URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField,)
     }
+
+    setDataAtual()
+}
+
+function setDataAtual() {
+    const dataAtual = new Date();
+    const diaAtual = dataAtual.getDate();
+    const mesAtual = dataAtual.getMonth() + 1;
+    const anoAtual = dataAtual.getFullYear();
+
+    function f(num) {return num.toString().padStart(2,'0')}
+
+    document.querySelector('input[type=date]').value = `${anoAtual}-${f(mesAtual)}-${f(diaAtual)}`;
 }
 
 function marcarTodos() {
@@ -81,15 +94,11 @@ function enviarMarcados() {
             alert('Escolha uma data para prosseguir o registro da informação.');
             return;
         }
-
-        console.log(data_atual);
-        
         
         const data = {
             date: data_atual,
             members: desafios
         };
-
 
         fetch(URL_CONCLUIR_DESAFIOS, {
             method: 'POST',
@@ -100,7 +109,7 @@ function enviarMarcados() {
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
+            if (data) {
                 alert('Registro realizado com sucesso.');
             }
             else {
