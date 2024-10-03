@@ -18,13 +18,14 @@ function renderDesafios() {
     APP.innerHTML = `
     <h1 style="text-align:center;">Gerenciador de Desafios</h1>
     <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;margin-bottom:1em;">
-        <label>Dia do desafio</label>
-        <input type="date" min="2024-09-30">
+        <label>Data do desafio</label>
+        <input id="data_atual" type="date" min="2024-09-30">
     </div>
     <div style="display:flex;gap:1em;flex-wrap:wrap;">
         <button class="btn btn-primary" onclick="marcarTodos()">Todos</button>
         <button class="btn btn-danger" onclick="desmarcarTodos()">Nenhum</button>
         <button class="btn btn-primary" onclick="enviarMarcados()">Confirmar</button>
+        <button class="btn btn-primary" onclick="renderDesafiosRelatorio()">Gerar Relatório</button>
     </div>
     `;
 
@@ -48,15 +49,53 @@ function renderDesafios() {
     setDataAtual()
 }
 
+function renderDesafiosRelatorio() {
+    APP.innerHTML = `
+    <h1 style="text-align:center;">Relatório de Desafios</h1>
+    <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;margin-bottom:1em;">
+        <label>Data do desafio</label>
+        <input id="data_atual" type="date" min="2024-09-30">
+    </div>
+    <div style="display:flex;gap:1em;flex-wrap:wrap;">
+        <button class="btn btn-danger" onclick="desafios.click()">Voltar</button>
+        <button class="btn btn-primary" onclick="gerarRelatorio()">Gerar</button>
+    </div>
+    `;
+    gerarRelatorio();
+    setDataAtual();
+}
+
+function gerarRelatorio() {
+    const table_id = 'tb_desafios_relatorio';
+
+    renderLoading(APP);
+    renderSearch(APP, table_id);
+    createTable(APP, table_id);
+    
+    fetchDataDesafiosRelatorio(table_id);
+
+
+    function fetchDataDesafiosRelatorio(table_id) {
+        const properties = ['nick', 'quantidade'];
+        
+        fetchDataAndRenderTable(`${URL_RELATORIO_DESAFIOS}?data=${encodeURI(setDataAtual())}`, table_id, properties)
+    }
+}
+
 function setDataAtual() {
+    const data_atual = document.getElementById('data_atual');
     const dataAtual = new Date();
     const diaAtual = dataAtual.getDate();
     const mesAtual = dataAtual.getMonth() + 1;
     const anoAtual = dataAtual.getFullYear();
 
     function f(num) {return num.toString().padStart(2,'0')}
+    
+    const valor = `${anoAtual}-${f(mesAtual)}-${f(diaAtual)}`;
 
-    document.querySelector('input[type=date]').value = `${anoAtual}-${f(mesAtual)}-${f(diaAtual)}`;
+    data_atual.value = valor;
+
+    return valor;
 }
 
 function marcarTodos() {
@@ -88,7 +127,7 @@ function enviarMarcados() {
     
     function fetchDataConcluirDesafios(desafios) {
 
-        const data_atual = document.querySelector('input[type=date]').value
+        const data_atual = document.getElementById('data_atual').value
 
         if (data_atual.length < 1){
             alert('Escolha uma data para prosseguir o registro da informação.');

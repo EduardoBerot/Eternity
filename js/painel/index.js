@@ -505,5 +505,3 @@ function init() {
 }
 
 init();
-
-desafios.click();

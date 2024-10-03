@@ -1,10 +1,11 @@
 // const URL_BASE = "https://eternity-crud.onrender.com"
-const URL_BASE = "http://127.0.0.1:5000"
+const URL_BASE = "http://localhost:5000"
 
 const URL_MEMBERS = `${URL_BASE}/api/membro`;
 const URL_STAFFMEMBERS = `${URL_BASE}/api/membros/staffs`;
 const URL_STAFFMEMBERS_NAMES = `${URL_BASE}/api/staffs`;
-const URL_CONCLUIR_DESAFIOS = `${URL_BASE}/api/registrar`;
+const URL_CONCLUIR_DESAFIOS = `${URL_BASE}/api/desafio/registrar`;
+const URL_RELATORIO_DESAFIOS = `${URL_BASE}/api/desafio/relatorio`;
 
 const ETY_ADM_LOGIN_COOKIE = 'eternity-adm-login';
 const ETY_ADM_PASS_COOKIE = 'eternity-adm';
