@@ -9,6 +9,7 @@ header {
         font-family: Vermin;
         font-size: 6em;
         margin: 0 auto;
+        text-shadow: 2px 2px 2px #fff;
     }
 
     p {
@@ -21,10 +22,9 @@ main {
     width: 100%;
     display: flex;
     justify-content: space-between;
-    gap: 30px;
+    gap: 1em;
     height: 75vh;
 }
-
 
 
 nav {
@@ -34,24 +34,30 @@ nav {
     border: 2px solid black;
     border-radius: 0px 12px 0% 12px;
     padding: 16px;
-    gap: 1em;
     background-color: rgba(0, 0, 0, 0.1);
     font-size: 1em;
 
     a {
         text-decoration: none;
         color: black;
+        padding: 0.5em;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
-    a:hover{
+    a:hover, a:focus {
+        outline: none;
         color: aqua;
         cursor: pointer;
+        background-color: #00000030;
+        border-radius: 0 0.5em;
     }
 }
 
-
 .select {
     color: aqua;
+    background-color: #00000060;
+    border-radius: 0    0.5em;
 }
 
 .content {
@@ -68,6 +74,8 @@ nav {
 
     h1 {
         margin-top: 16px;
+        text-shadow: 1px 1px 1px #fff;
+        margin-bottom: 0.5em;
     }
     
     p {
@@ -196,12 +204,17 @@ hr{
         display: flex;
         flex-direction: column;
         gap: 16px;
-        padding-bottom: 16px;
+        height: initial;
+        padding-bottom: 1em;
     }
     nav{
         width: 100%;
-        gap: 8px;
+        gap: 0.5em;
         font-size: medium;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
     #app{

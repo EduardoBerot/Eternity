@@ -16,9 +16,11 @@ strong{
 main a {
     text-decoration: none;
     color: black;
+    padding: 0.5em;
 }
 
 nav {
+    margin-top: 0.5em;
     display: flex;
     justify-content: space-between;
     width: 90%;
@@ -29,9 +31,16 @@ nav div{
     gap: 2em;
 }
 
-nav a:hover, nav a.select{
+nav a:hover, nav a:focus, nav a.select{
+    outline: none;
     color: aqua;
     cursor: pointer;
+    background-color: #00000030;
+    border-radius: 0 0.5em;
+}
+
+nav a.select{
+    background-color: #00000060;
 }
 
 .content {
@@ -130,8 +139,20 @@ th[id]:not([id=""]):active {
     height: 30px;
 }
 
-.btn-primary{
-    background-color: aqua;
+.btn-success{
+    background-color: rgb(96, 189, 77);
+}
+
+.btn-success:hover{
+    background-color: rgb(76, 150, 62);
+}
+
+.btn-secondary{
+    background-color: rgb(206, 206, 206);
+}
+
+.btn-secondary:hover{
+    background-color: rgb(142, 145, 142);
 }
 
 .btn-danger{
@@ -139,6 +160,10 @@ th[id]:not([id=""]):active {
 }
 .btn-danger:hover{
     background-color: rgb(204, 46, 67);
+}
+
+.btn-primary{
+    background-color: aqua;
 }
 
 .btn-primary:hover{
