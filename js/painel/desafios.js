@@ -1,4 +1,3 @@
-
 const mesesDoAno = {
     0: 'Janeiro',
     1: 'Fevereiro',
@@ -22,10 +21,10 @@ function renderDesafios() {
         <input id="data_atual" type="date" min="2024-09-30">
     </div>
     <div style="display:flex;gap:1em;flex-wrap:wrap;">
-        <button class="btn btn-primary" onclick="marcarTodos()">Todos</button>
+        <button class="btn btn-success" onclick="marcarTodos()">Todos</button>
         <button class="btn btn-danger" onclick="desmarcarTodos()">Nenhum</button>
         <button class="btn btn-primary" onclick="enviarMarcados()">Confirmar</button>
-        <button class="btn btn-primary" onclick="renderDesafiosRelatorio()">Gerar Relatório</button>
+        <button class="btn btn-secondary" onclick="renderDesafiosRelatorio()">Gerar Relatório</button>
     </div>
     `;
 
@@ -54,32 +53,39 @@ function renderDesafiosRelatorio() {
     <h1 style="text-align:center;">Relatório de Desafios</h1>
     <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;margin-bottom:1em;">
         <label>Data do desafio</label>
-        <input id="data_atual" type="date" min="2024-09-30">
+        <input id="data_atual" type="date" min="2024-09-30" value="${getDataAtual()}">
     </div>
     <div style="display:flex;gap:1em;flex-wrap:wrap;">
         <button class="btn btn-danger" onclick="desafios.click()">Voltar</button>
-        <button class="btn btn-primary" onclick="gerarRelatorio()">Gerar</button>
+        <button class="btn btn-primary" onclick="gerarRelatorio(getDataAtual())">Gerar</button>
     </div>
     `;
     gerarRelatorio();
-    setDataAtual();
 }
 
 function gerarRelatorio() {
+    const data_atual = document.getElementById('data_atual').value;
+    APP.innerHTML = `
+    <h1 style="text-align:center;">Relatório de Desafios</h1>
+    <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;align-items:center;margin-bottom:1em;">
+        <label>Data do desafio</label>
+        <input id="data_atual" type="date" min="2024-09-30" value="${data_atual}">
+        <sub style="color:#202020;">*Apenas mês e ano será avaliado</sub>
+    </div>
+    <div style="display:flex;gap:1em;flex-wrap:wrap;">
+        <button class="btn btn-danger" onclick="desafios.click()">Voltar</button>
+        <button class="btn btn-primary" onclick="gerarRelatorio(getDataAtual())">Gerar</button>
+    </div>
+    `;
+    console.log(data_atual);
     const table_id = 'tb_desafios_relatorio';
-
     renderLoading(APP);
     renderSearch(APP, table_id);
     createTable(APP, table_id);
-    
-    fetchDataDesafiosRelatorio(table_id);
 
+    const properties = ['nick', 'quantidade'];
 
-    function fetchDataDesafiosRelatorio(table_id) {
-        const properties = ['nick', 'quantidade'];
-        
-        fetchDataAndRenderTable(`${URL_RELATORIO_DESAFIOS}?data=${encodeURI(setDataAtual())}`, table_id, properties)
-    }
+    fetchDataAndRenderTable(`${URL_RELATORIO_DESAFIOS}?data=${encodeURI(data_atual)}`, table_id, properties)
 }
 
 function setDataAtual() {
@@ -94,6 +100,18 @@ function setDataAtual() {
     const valor = `${anoAtual}-${f(mesAtual)}-${f(diaAtual)}`;
 
     data_atual.value = valor;
+}
+
+function getDataAtual() {
+    const data_atual = document.getElementById('data_atual');
+    const dataAtual = new Date();
+    const diaAtual = dataAtual.getDate();
+    const mesAtual = dataAtual.getMonth() + 1;
+    const anoAtual = dataAtual.getFullYear();
+
+    function f(num) {return num.toString().padStart(2,'0')}
+
+    const valor = `${anoAtual}-${f(mesAtual)}-${f(diaAtual)}`;
 
     return valor;
 }
@@ -150,6 +168,7 @@ function enviarMarcados() {
         .then(data => {
             if (data) {
                 alert('Registro realizado com sucesso.');
+                desmarcarTodos();
             }
             else {
                 alert('Falha ao realizar o registro.');
