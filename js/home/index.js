@@ -14,7 +14,6 @@ function selectItem(itemSelect) {
 const loadingHTML = `
     <div id="loading" style="display:flex;flex-direction:column;align-items:center;margin-top:1em;">
         <span class="loading-dot">Aguarde ...</span>
-        <div class="alert" style="font-size:0.75em;margin-left:auto;margin-top:0.5em;">(isso pode demorar um pouco)</div>
     </div>
     `
 
@@ -51,8 +50,7 @@ const pages_content = {
 
     administracao: `${loadingHTML}<form onsubmit="validationLogin(event)" style="display:none;"><h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>`,
 
-    hall: `<h1>Membros</h1><hr style="width:100%;margin-bottom:1em;"><div id="hall-da-fama" style="display:flex;flex-wrap:wrap;gap:1em;justify-content:center;padding-top:8px; margin-bottom:16px;">
-    </div>`,
+    hall: `<h1>Membros</h1><hr style="width:100%;margin-bottom:1em;"><div id="hall-da-fama" style="display:flex;flex-wrap:wrap;gap:1em;justify-content:center;padding-top:8px; margin-bottom:16px;">${loadingHTML}</div>`,
 };
 
 async function render(event) {
@@ -126,6 +124,7 @@ async function renderHall(id) {
         };
         
         const resposta = await fetch(`${URL_BASE}/api/membros/ativos`);
+        document.getElementById('loading').style.display = 'none';
         let membros = await resposta.json();
         
         membros.push({nick:'trogro9',cargo:'Admin',data_entrada:'2022-05-11 00:00:00+00'});
