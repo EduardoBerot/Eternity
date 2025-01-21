@@ -9,7 +9,7 @@ header {
         font-family: Vermin;
         font-size: 6em;
         margin: 0 auto;
-        text-shadow: 2px 2px 2px #fff;
+        text-shadow: 2px 2px #45f9ff;
     }
 
     p {
@@ -36,6 +36,7 @@ nav {
     padding: 16px;
     background-color: rgba(0, 0, 0, 0.1);
     font-size: 1em;
+    gap: 0.25em;
 
     a {
         text-decoration: none;
@@ -94,13 +95,22 @@ form {
 }
 
 form input, form select {
-    width: 30%;
-    border-radius: 6px 0 6px 0;
+    width: 50%;
+    border-radius: 0.5em 0;
     padding-inline-start: 6px;
-    height: 24px;
+    height: 2.5em;
+    padding-left: 0.75em;
+    padding-right: 0.75em;
     color: gray;
     margin-bottom: 12px;
-    
+    border: 1px solid black;
+    box-shadow: 2px 2px 2px #00000030;
+}
+
+form input:focus, form select:focus {
+    outline: none;
+    border: 2px solid aqua;
+    box-shadow: 0 0 4px 4px #00000060;
 }
 
 form label {
@@ -110,11 +120,11 @@ form label {
 
 .button {
     display: flex;
-    width: 40%;
-    height: 50px;
-    /* margin-top: 0.75em; */
+    width: 50%;
+    height: 3em;
+    margin-top: 0.75em;
     margin-bottom: 0.5em;
-    border-radius: 0 6px 0 6px;
+    border-radius: 0.5em 0;
     background-color: aqua;
     transition: 0.2s ease-out;
     text-decoration: none;
@@ -122,10 +132,17 @@ form label {
     align-items: center;
     justify-content: center;
     text-align: center;
+    border: 1px solid black;
+    box-shadow: 2px 2px 2px #00000030;
 }
 
-.button:hover {
-    background-color: rgb(21, 128, 128);
+.button:hover, .button:focus {
+    background-color: rgb(0, 153, 153);
+    color: aqua;
+    cursor: pointer;
+    border: 2px solid aqua;
+    outline: none;
+    box-shadow: 0 0 4px black;
 }
 
 
