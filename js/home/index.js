@@ -11,6 +11,13 @@ function selectItem(itemSelect) {
     }
 };
 
+const loadingHTML = `
+    <div id="loading" style="display:flex;flex-direction:column;align-items:center;margin-top:1em;">
+        <span class="loading-dot">Aguarde ...</span>
+        <div class="alert" style="font-size:0.75em;margin-left:auto;margin-top:0.5em;">(isso pode demorar um pouco)</div>
+    </div>
+    `
+
 const pages_content = {
     home: `<h1>Como usar nosso site?</h1></br><p>Use o menu de navegação para solicitar recrutamento, acessar nossos meios de comunicação e saber mais sobre nos</p></br><h1 style="margin-top:150px">Uni-vos pela Eternidade!</h1>`,
 
@@ -18,7 +25,7 @@ const pages_content = {
 
     join: `<h1>Junte-se a Eternidade </h1>
     </br><p id="msg">Junte-se ao Clã Eternity, um lugar acolhedor para jogar Minecraft. Valorizamos amizade, colaboração e diversão. Venha construir, explorar e criar memórias inesquecíveis conosco.</p>
-    </br><div id="loading">Carregando<span class="loading-dot">...</span><div class="alert" style="font-size:0.75em;margin-left:auto;margin-top:0.5em;">(isso pode demorar um pouco)</div></div>
+    </br>${loadingHTML}
     <form onsubmit="send(event)" style="display:none;">
         <label>Nick</label>
         <input type="text" id="nick" placeholder="Nick" required>
@@ -42,7 +49,7 @@ const pages_content = {
 
     texture: `<h1>Utilize nossa textura!</h1></br><p>Clique no botão abaixo para baixar a nossa textura oficial, contando com beneficios para PvP, Hud tematizado e muito mais!</p></br><a href="https://drive.usercontent.google.com/u/0/uc?id=1FE7HafEXq_V3NBliSEe_80y2Y7l1N_gM&export=download" download="Eternity Texture" class="button">Versão Convencional</a><a href="https://drive.usercontent.google.com/u/0/uc?id=1Qxja2VzC-OHlfl1uemSs13YQ2Oj0odMN&export=download" download="Eternity Texture Lite" class="button">Versão Lite</a>`,
 
-    administracao: `<div id="loading">Carregando<span class="loading-dot">...</span><div class="alert" style="font-size:0.75em;margin-left:auto;margin-top:0.5em;">(isso pode demorar um pouco)</div></div><form onsubmit="validationLogin(event)" style="display:none;"><h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>`,
+    administracao: `${loadingHTML}<form onsubmit="validationLogin(event)" style="display:none;"><h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>`,
 
     hall: `<h1>Membros</h1><hr style="width:100%;margin-bottom:1em;"><div id="hall-da-fama" style="display:flex;flex-wrap:wrap;gap:1em;justify-content:center;padding-top:8px; margin-bottom:16px;">
     </div>`,
