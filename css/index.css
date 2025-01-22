@@ -137,7 +137,7 @@ form label {
 }
 
 .button:hover, .button:focus {
-    background-color: rgb(0, 153, 153);
+    background-color: #009999;
     color: aqua;
     cursor: pointer;
     border: 2px solid aqua;
