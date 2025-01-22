@@ -1,5 +1,5 @@
-// const URL_BASE = "https://eternity-crud.onrender.com"
-const URL_BASE = "http://localhost:5000"
+const URL_BASE = "https://eternity-crud.onrender.com"
+// const URL_BASE = "http://localhost:5000"
 
 const URL_MEMBERS = `${URL_BASE}/api/membro`;
 const URL_STAFFMEMBERS = `${URL_BASE}/api/membros/staffs`;
