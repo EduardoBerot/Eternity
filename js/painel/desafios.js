@@ -25,6 +25,7 @@ function renderDesafios() {
         <button class="btn btn-danger" onclick="desmarcarTodos()">Nenhum</button>
         <button class="btn btn-primary" onclick="enviarMarcados()">Confirmar</button>
         <button class="btn btn-secondary" onclick="renderDesafiosRelatorio()">Gerar Relatório</button>
+        <button class="btn btn-secondary" onclick="renderEditarPorMembro()">Editar por Membro</button>
     </div>
     `;
 
@@ -86,6 +87,51 @@ function gerarRelatorio() {
     const properties = ['nick', 'quantidade'];
 
     fetchDataAndRenderTable(`${URL_RELATORIO_DESAFIOS}?data=${encodeURI(data_atual)}`, table_id, properties)
+}
+
+function renderEditarPorMembro() {
+    APP.innerHTML = `
+        <h1 style="text-align:center;">Relatório de Desafios por Membro</h1>
+        <div style="display:flex;flex-direction:column;gap:8px;justify-content:center;align-items:center;margin-bottom:1em;">
+            <label>Membro</label>
+            <input list="membros-datalist" id="membros-input">
+            <datalist id="membros-datalist"></datalist>
+        </div>
+        <hr>
+    `
+
+    fetch(URL_MEMBERS)
+        .then(response => response.json())
+        .then(data => {
+            const datalist = document.getElementById('membros-datalist');
+            const membrosInput = document.getElementById('membros-input');
+            console.log(data);
+            if (data.length > 0) {
+                membrosInput.value = data[0].nick; // Set default value to the first member's nick
+            }
+            data.forEach(member => {
+                const option = document.createElement('option');
+                option.value = member.nick;
+                option.setAttribute('data-id', member.id); // Store member id in data attribute
+                datalist.appendChild(option);
+            }); 
+        })
+        .catch(error => {
+            console.error('Error fetching members:', error);
+        });
+
+    const membrosInput = document.getElementById('membros-input');
+    membrosInput.addEventListener('input', () => {
+        const selectedOption = document.querySelector(`#membros-datalist option[value="${membrosInput.value}"]`);
+        const membroId = selectedOption ? selectedOption.getAttribute('data-id') : null;
+        if (membroId) {
+            const table_id = 'tb_desafios_membro';
+            renderLoading(APP);
+            renderSearch(APP, table_id);
+            createTable(APP, table_id);
+            fetchDataAndRenderTable(`${URL_DESAFIOS_MEMBER}/${membroId}`, table_id);
+        }
+    });
 }
 
 function setDataAtual() {

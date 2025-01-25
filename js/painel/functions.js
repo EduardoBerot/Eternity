@@ -76,8 +76,8 @@ function hideLoading() {
 
 function renderLoading(element) {
     element.innerHTML += `
-    <div id="loading">Aguarde
-        <span class="loading-dot">...</span>
+    <div id="loading">
+        <span class="loading-dot">Aguarde ...</span>
     </div>`
 }
 
