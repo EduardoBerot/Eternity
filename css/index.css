@@ -4,12 +4,12 @@ header {
     flex-direction: column;
     justify-content: center;
     text-align: center;
+    margin-block: 1em;
 
     h1.title {
         font-family: Vermin;
         font-size: 6em;
         margin: 0 auto;
-        text-shadow: 2px 2px #45f9ff;
     }
 
     p {
@@ -24,6 +24,10 @@ main {
     justify-content: space-between;
     gap: 1em;
     height: 75vh;
+}
+
+.menu-toggle {
+    display: none;
 }
 
 
@@ -53,6 +57,40 @@ nav {
         background-color: #00000030;
         border-radius: 0 0.5em;
     }
+}
+
+.social-links {
+    display: flex;
+    justify-content: space-evenly;
+    width: 100%;
+    gap: 0;
+    margin-top: auto;
+    padding-top: 1em;
+}
+
+nav .social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    color: #000;
+    transition: transform 0.2s ease;
+}
+
+nav .social-link:hover,
+nav .social-link:focus {
+    color: #000;
+    background: transparent;
+    border-radius: 0;
+    outline: none;
+    transform: translateY(-2px);
+}
+
+.social-link .fa-brands {
+    font-size: 36px;
+    line-height: 1;
 }
 
 .select {
@@ -124,25 +162,33 @@ form label {
     height: 3em;
     margin-top: 0.75em;
     margin-bottom: 0.5em;
-    border-radius: 0.5em 0;
-    background-color: aqua;
-    transition: 0.2s ease-out;
+    border-radius: 0.75em 0.2em;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(0, 220, 230, 0.22));
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     text-decoration: none;
-    color: black;
+    color: #003f45;
     align-items: center;
     justify-content: center;
     text-align: center;
-    border: 1px solid black;
-    box-shadow: 2px 2px 2px #00000030;
+    border: 1px solid rgba(0, 91, 99, 0.65);
+    box-shadow: 0 4px 12px rgba(0, 63, 69, 0.18), inset 0 1px rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(4px);
+    font-weight: bold;
 }
 
 .button:hover, .button:focus {
-    background-color: #009999;
-    color: aqua;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(0, 210, 220, 0.38));
+    color: #002f33;
     cursor: pointer;
-    border: 2px solid aqua;
+    border-color: #008e96;
     outline: none;
-    box-shadow: 0 0 4px black;
+    box-shadow: 0 7px 16px rgba(0, 63, 69, 0.25), inset 0 1px rgba(255, 255, 255, 0.85);
+    transform: translateY(-2px);
+}
+
+.button:active {
+    box-shadow: 0 2px 7px rgba(0, 63, 69, 0.2);
+    transform: translateY(0);
 }
 
 
@@ -172,27 +218,76 @@ form label {
     box-shadow: 3px 3px 7px #00000030;
 }
 
-.card-staff:not([class="card-staff membro"])::before{
-    content: "";
-    position: absolute;
-    z-index: -1;
-    height: 100px;
-    top: -5px;
-    left: -5px;
-    width: calc( 100% + 10px);
-    height: calc( 100% + 10px );
-    background: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%),
-                radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);
-    border-radius: 18.5px;
-} 
-
-.card-staff:not([class="card-staff membro"]){
+.card-staff:not(.membro){
+    --frame-light: #FFFFAC;
+    --frame-mid: #D1B464;
+    --frame-color: #9f7928;
+    --frame-dark: #5d4a1f;
     position: relative;
     background-color: #e7e7e7;
 }
 
-.card-staff:not([class="card-staff membro"]) em{
-    color: #5d4a1f;
+.card-staff.fundador{
+    --frame-light: #ff8a80;
+    --frame-mid: #c62828;
+    --frame-color: #7f0000;
+    --frame-dark: #3b0000;
+}
+
+.card-staff.heika,
+.card-staff.dono{
+    --frame-light: #ffab91;
+    --frame-mid: #ff5722;
+    --frame-color: #c63f17;
+    --frame-dark: #7a1d0b;
+}
+
+.card-staff.coordenador,
+.card-staff.sohei{
+    --frame-light: #d1c4e9;
+    --frame-mid: #7e57c2;
+    --frame-color: #5e35b1;
+    --frame-dark: #311b68;
+}
+
+.card-staff.supervisor,
+.card-staff.ikko{
+    --frame-light: #90caf9;
+    --frame-mid: #1565c0;
+    --frame-color: #0d47a1;
+    --frame-dark: #082b63;
+}
+
+.card-staff.auxiliar,
+.card-staff.daimyo{
+    --frame-light: #a5d6a7;
+    --frame-mid: #43a047;
+    --frame-color: #2e7d32;
+    --frame-dark: #164c1d;
+}
+
+.card-staff.estagiário{
+    --frame-light: #fff9c4;
+    --frame-mid: #ffeb3b;
+    --frame-color: #fbc02d;
+    --frame-dark: #9a7400;
+}
+
+.card-staff:not(.membro)::before{
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: -5px;
+    left: -5px;
+    width: calc( 100% + 10px);
+    height: calc( 100% + 10px );
+    background: radial-gradient(ellipse farthest-corner at right bottom, var(--frame-light) 0%, var(--frame-mid) 8%, var(--frame-color) 30%, var(--frame-dark) 40%, transparent 80%),
+                radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, var(--frame-light) 8%, var(--frame-mid) 25%, var(--frame-dark) 62.5%, var(--frame-dark) 100%);
+    border-radius: 18.5px;
+} 
+
+.card-staff:not(.membro) em{
+    color: var(--frame-dark);
     text-shadow: 1px 1px 1px #dbdbdb;
 }
 
@@ -224,14 +319,74 @@ hr{
         height: initial;
         padding-bottom: 1em;
     }
+
+    .menu-toggle {
+        display: flex;
+        width: 46px;
+        height: 42px;
+        padding: 9px 10px;
+        align-self: flex-end;
+        flex-direction: column;
+        justify-content: space-between;
+        border: 1px solid rgba(0, 0, 0, 0.45);
+        border-radius: 10px 3px;
+        background: rgba(255, 255, 255, 0.28);
+        box-shadow: 0 3px 9px rgba(0, 0, 0, 0.15);
+        cursor: pointer;
+    }
+
+    .menu-toggle span {
+        display: block;
+        width: 100%;
+        height: 3px;
+        border-radius: 3px;
+        background: #000;
+        transform-origin: center;
+        transition: transform 0.22s ease, opacity 0.18s ease;
+    }
+
+    .menu-toggle.open span:nth-child(1) {
+        transform: translateY(10px) rotate(45deg);
+    }
+
+    .menu-toggle.open span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .menu-toggle.open span:nth-child(3) {
+        transform: translateY(-10px) rotate(-45deg);
+    }
+
     nav{
         width: 100%;
         gap: 0.5em;
         font-size: medium;
-        display: flex;
+        display: none;
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: center;
+    }
+
+    nav.open {
+        display: flex;
+        animation: openMenu 0.2s ease-out;
+    }
+
+    @keyframes openMenu {
+        from {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .social-links {
+        width: 100%;
+        margin-top: 0.5em;
+        padding-top: 0.8em;
     }
 
     #app{

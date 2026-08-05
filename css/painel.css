@@ -140,42 +140,47 @@ th[id]:not([id=""])::after {
 
 .btn{
     padding: 0px 20px;
-    border-radius: 0 6px 0 6px;
+    border: 1px solid rgba(0, 0, 0, 0.28);
+    border-radius: 9px 3px;
     cursor: pointer;
-    box-shadow: 2px 2px 5px #00000030 ;
-    height: 30px;
+    box-shadow: 0 3px 9px #00000028, inset 0 1px rgba(255, 255, 255, 0.65);
+    min-height: 34px;
+    font-weight: bold;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.btn:hover,
+.btn:focus{
+    box-shadow: 0 6px 13px #00000035, inset 0 1px rgba(255, 255, 255, 0.75);
+    filter: saturate(1.08);
+    outline: none;
+    transform: translateY(-2px);
+}
+
+.btn:active{
+    box-shadow: 0 2px 5px #0000002e;
+    transform: translateY(0);
 }
 
 .btn-success{
-    background-color: rgb(96, 189, 77);
-}
-
-.btn-success:hover{
-    background-color: rgb(76, 150, 62);
+    background: linear-gradient(135deg, #e8f5e9, #8fd27f);
+    color: #174c1b;
 }
 
 .btn-secondary{
-    background-color: rgb(206, 206, 206);
-}
-
-.btn-secondary:hover{
-    background-color: rgb(142, 145, 142);
+    background: linear-gradient(135deg, #ffffff, #c9cdcf);
+    color: #363a3c;
 }
 
 .btn-danger{
-    background-color: rgb(251, 72, 96);
-}
-.btn-danger:hover{
-    background-color: rgb(204, 46, 67);
+    background: linear-gradient(135deg, #fff0f2, #f58b9a);
+    color: #681725;
 }
 
 .btn-primary{
-    background-color: aqua;
-}
-
-.btn-primary:hover{
-    background-color: #158080;
-    transition-duration: 200ms;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(0, 210, 220, 0.35));
+    border-color: rgba(0, 91, 99, 0.6);
+    color: #003f45;
 }
 
 table input, table input:focus{

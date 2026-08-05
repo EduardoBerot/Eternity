@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="./css/layout.css">
     <link rel="stylesheet" href="./css/index.css" />
     <link rel="icon" href="imgs/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.0/css/lightgallery.min.css" />
 </head>
@@ -25,18 +26,30 @@
 <body>
     <header>
         <h1 class="title">Eternity</h1>
-        <p>Seja bem vindo ao site do Clã ETY</p>
     </header>
     <main>
-        <nav>
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Abrir menu" aria-controls="main-menu" aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <nav id="main-menu">
             <a class="itens" tabindex="0" id="about" onkeypress="render(event)" onclick="render(event)">Sobre nos</a>
             <a class="itens" tabindex="0" id="join" onkeypress="render(event)" onclick="render(event)">Juntar-se</a>
             <a class="itens" tabindex="0" id="city" onkeypress="render(event)" onclick="render(event)">Cidade</a>
-            <a class="itens" tabindex="0" id="discord" onkeypress="render(event)" onclick="render(event)">Discord</a>
-            <a class="itens" tabindex="0" id="zap" onkeypress="render(event)" onclick="render(event)">Whatsapp</a>
-            <a class="itens" tabindex="0" id="texture" onkeypress="render(event)" onclick="render(event)">Textura</a>
             <a class="itens" tabindex="0" id="hall" onkeypress="render(event)" onclick="render(event)">Membros</a>
             <a class="itens" tabindex="0" id="administracao" onkeypress="render(event)" onclick="render(event)">Administração</a>
+            <div class="social-links" aria-label="Redes sociais do Eternity">
+                <a class="social-link discord" href="https://discord.gg/vj4eNDJqct" target="_blank" rel="noopener noreferrer" aria-label="Discord do Eternity" title="Discord">
+                    <i class="fa-brands fa-discord" aria-hidden="true"></i>
+                </a>
+                <a class="social-link whatsapp" href="https://chat.whatsapp.com/L3P1OvMnrVpJ3cj849ZoIw" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp do Eternity" title="WhatsApp">
+                    <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
+                </a>
+                <a class="social-link youtube" href="https://www.youtube.com/@Eternity-Armaggedon" target="_blank" rel="noopener noreferrer" aria-label="YouTube do Eternity" title="YouTube">
+                    <i class="fa-brands fa-youtube" aria-hidden="true"></i>
+                </a>
+            </div>
         </nav>
         <section id="app" class="content"></section>
     </main>

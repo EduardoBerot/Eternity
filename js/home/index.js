@@ -1,4 +1,24 @@
 const app = document.getElementById("app");
+const menuToggle = document.getElementById("menu-toggle");
+const mainMenu = document.getElementById("main-menu");
+
+function setMenuOpen(isOpen) {
+    mainMenu.classList.toggle('open', isOpen);
+    menuToggle.classList.toggle('open', isOpen);
+    menuToggle.setAttribute('aria-expanded', String(isOpen));
+    menuToggle.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
+}
+
+menuToggle.addEventListener('click', () => {
+    setMenuOpen(!mainMenu.classList.contains('open'));
+});
+
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+        setMenuOpen(false);
+        menuToggle.focus();
+    }
+});
 
 function selectItem(itemSelect) {
     const itens = document.querySelectorAll(".itens");
@@ -41,13 +61,6 @@ const pages_content = {
 
     city: `<h1>Conheça nossa cidade</h1></br><p>Nossa cidade no servidor de sobrevivência é mais do que apenas blocos e estruturas. É um lar acolhedor, onde todos contribuem para algo maior. Cada pedra conta uma história de cooperação e criatividade.</p><div id="gallery"><a href="/imgs/City00.jpg"><img class="cityimgs" src="/imgs/City00.jpg" alt="city00"></a><a href="/imgs/City01.jpg"><img class="cityimgs" src="/imgs/City01.jpg" alt="city01"></a><a href="/imgs/City02.jpg"><img class="cityimgs" src="/imgs/City02.jpg" alt="city02"></a><a href="/imgs/City03.jpg"><img class="cityimgs" src="/imgs/City03.jpg" alt="city03"></a><a href="/imgs/City04.jpg"><img class="cityimgs" src="/imgs/City04.jpg" alt="city04"></a><a href="/imgs/City05.jpg"><img class="cityimgs" src="/imgs/City05.jpg" alt="city05"></a></div>`,
 
-    discord:
-        `<h1>Acesse nosso discord</h1></br><p>Para acessar nosso servidor discord basta clicar no botão abaixo, lá você podera se manter atualizado quanto as novidades do Clã.</p></br><a href="https://discord.gg/vj4eNDJqct" class="button">Acesse já</a>`,
-
-    zap: `<h1>Participe do nosso grupo de WhatsApp!</h1></br><p>Entre no nosso grupo de Whatsapp clicando no botão abaixo!</p></br><a href="https://chat.whatsapp.com/L3P1OvMnrVpJ3cj849ZoIw" class="button">Entre no grupo</a>`,
-
-    texture: `<h1>Utilize nossa textura!</h1></br><p>Clique no botão abaixo para baixar a nossa textura oficial, contando com beneficios para PvP, Hud tematizado e muito mais!</p></br><a href="https://drive.usercontent.google.com/u/0/uc?id=1FE7HafEXq_V3NBliSEe_80y2Y7l1N_gM&export=download" download="Eternity Texture" class="button">Versão Convencional</a><a href="https://drive.usercontent.google.com/u/0/uc?id=1Qxja2VzC-OHlfl1uemSs13YQ2Oj0odMN&export=download" download="Eternity Texture Lite" class="button">Versão Lite</a>`,
-
     administracao: `${loadingHTML}<form onsubmit="validationLogin(event)" style="display:none;"><h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>`,
 
     hall: `<h1>Membros</h1><hr style="width:100%;margin-bottom:1em;"><div id="hall-da-fama" style="display:flex;flex-wrap:wrap;gap:1em;justify-content:center;padding-top:8px; margin-bottom:16px;">${loadingHTML}</div>`,
@@ -57,6 +70,7 @@ async function render(event) {
     const id = event.target.id;
     app.innerHTML = pages_content[id];
     selectItem(event.target);
+    setMenuOpen(false);
 
     renderGallery(id);
     renderFormJoin(id);
