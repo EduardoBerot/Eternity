@@ -14,10 +14,13 @@
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#8ea4c8">
     <title>Eternity</title>
     <link rel="stylesheet" href="./css/layout.css">
     <link rel="stylesheet" href="./css/index.css" />
     <link rel="icon" href="imgs/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="./imgs/pwa/eternity-icon-192.png">
+    <link rel="manifest" href="./manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.0/css/lightgallery.min.css" />
@@ -26,13 +29,13 @@
 <body>
     <header>
         <h1 class="title">Eternity</h1>
-    </header>
-    <main>
         <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Abrir menu" aria-controls="main-menu" aria-expanded="false">
             <span></span>
             <span></span>
             <span></span>
         </button>
+    </header>
+    <main>
         <nav id="main-menu">
             <a class="itens" tabindex="0" id="about" onkeypress="render(event)" onclick="render(event)">Sobre nos</a>
             <a class="itens" tabindex="0" id="join" onkeypress="render(event)" onclick="render(event)">Juntar-se</a>

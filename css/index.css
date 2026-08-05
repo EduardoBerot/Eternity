@@ -302,8 +302,13 @@ hr{
     }
 
     header {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+
         h1.title{
-            font-size: 4em;
+            font-size: 3.25em;
+            margin: 0;
         }
 
         p{
@@ -325,7 +330,6 @@ hr{
         width: 46px;
         height: 42px;
         padding: 9px 10px;
-        align-self: flex-end;
         flex-direction: column;
         justify-content: space-between;
         border: 1px solid rgba(0, 0, 0, 0.45);

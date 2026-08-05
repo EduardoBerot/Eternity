@@ -1,0 +1,38 @@
+{
+  "id": "./",
+  "name": "Eternity - Clã ETY",
+  "short_name": "Eternity",
+  "description": "Site oficial do Clã Eternity no servidor Armageddon.",
+  "lang": "pt-BR",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#e4d7e2",
+  "theme_color": "#8ea4c8",
+  "icons": [
+    {
+      "src": "./imgs/pwa/eternity-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./imgs/pwa/eternity-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./imgs/pwa/eternity-icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./imgs/pwa/eternity-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
