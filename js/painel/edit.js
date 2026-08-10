@@ -59,8 +59,8 @@ async function renderFormEdit(data){
             <select name="recrutador" id="recrutador" required></select>
         </div>
         <div id="form-label-editar-btn">
-            <a onclick="goBackMembers()" tabindex="0" class="button">Voltar</a>
-            <button>Salvar</button>
+            <button type="button" class="edit-action edit-action--back" onclick="goBackMembers()">Voltar</button>
+            <button type="submit" class="edit-action edit-action--save">Salvar</button>
         </div>
     </form>
     `;

@@ -55,29 +55,24 @@ form button:active {
     flex-direction: row;
     width: 100%;
     gap: 1em;
+    margin-top: 0.5em;
 }
 
-#form-label-editar-btn a{
-    width: calc( 100% - 0.5em );
-    height: 30px;
-    border-radius: 0 6px 0 6px;
-    background-color: rgb(251, 72, 96);
-    transition: 0.2s ease-out;
-    margin-top: 30px;
-    cursor: pointer;
-    text-align: center;
-    border-width: 2px;
-    border-style: outset;
-    border-color: buttonborder;
-    font-size: 13.333px;
-    line-height: 26px;
+#form-label-editar-btn .edit-action{
+    width: calc(50% - 0.5em);
+    height: 3em;
+    margin-top: 0;
+    border-radius: 10px 3px;
 }
 
-#form-label-editar-btn a:hover,
-#form-label-editar-btn a:focus {
-    background-color: rgb(204, 46, 67);
+#form-label-editar-btn .edit-action--back{
+    border-color: rgba(131, 35, 49, 0.62);
+    background: linear-gradient(135deg, rgba(255, 244, 246, 0.9), rgba(239, 91, 112, 0.48));
+    color: #681725;
 }
 
-#form-label-editar-btn button{
-    width: calc( 100% - 0.5em );
+#form-label-editar-btn .edit-action--back:hover,
+#form-label-editar-btn .edit-action--back:focus{
+    border-color: #a72e40;
+    background: linear-gradient(135deg, rgba(255, 250, 251, 0.96), rgba(231, 69, 93, 0.68));
 }
