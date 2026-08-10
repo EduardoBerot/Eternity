@@ -40,7 +40,7 @@ async function renderFormEdit(data){
         </div>
         <div class="form-label">
             <label for="data_nascimento">Data de Nascimento</label>
-            <input type="date" value="${getDate(data.data_nascimento)}" id="data_nascimento" required>
+            <input type="date" value="${getDate(data.data_nascimento)}" id="data_nascimento">
         </div>
         <div class="form-label">
             <label for="foco">Foco</label>
@@ -53,7 +53,7 @@ async function renderFormEdit(data){
         <input type="text" id="status" placeholder="Status" value="${data.status}" style="display:none"required>
         <div class="form-label">
             <label for="data_entrada">Data de Cadastro</label>
-            <input type="date" id="data_entrada" value="${getDate(data.data_entrada)}" required>
+            <input type="date" id="data_entrada" value="${getDate(data.data_entrada)}">
         </div>
         <div class="form-label">
             <label for="recrutador">Recrutador</label>

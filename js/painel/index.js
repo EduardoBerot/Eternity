@@ -68,6 +68,51 @@ function renderSolicitacoes() {
         convertDatesToAges(table_id, FIELD_MASK['data_nascimento']);
         convertDatesToAges(table_id, fieldDataEntrada, true);
     });
+
+    const updateTableId = 'tb_atualizacoes_cadastrais';
+    APP.innerHTML += '<h2>Atualizações cadastrais</h2>';
+    createTable(APP, updateTableId);
+    const updateActions = {
+        name: 'Status',
+        content: `
+            <div>
+                <img value="%id" action="aprovar" src="./imgs/icons/Check.svg" alt="Aprovar" onclick="checkOutProfileUpdate(event)">
+                <img value="%id" action="negar" src="./imgs/icons/Close.svg" alt="Negar" onclick="checkOutProfileUpdate(event)">
+            </div>
+        `
+    };
+    fetchDataAndRenderTable(
+        URL_GET_ATUALIZACOES,
+        updateTableId,
+        ['nick', 'data_nascimento', 'foco', 'createdAt'],
+        updateActions,
+        () => convertDatesToAges(updateTableId, FIELD_MASK['data_nascimento']),
+        { headers: getAdminRequestHeaders() },
+    );
+}
+
+async function checkOutProfileUpdate(event) {
+    const id = event.target.getAttribute('value');
+    const action = event.target.getAttribute('action');
+    if (!['aprovar', 'negar'].includes(action)) return;
+    if (!confirm(`Tem certeza que deseja ${action} esta atualização cadastral?`)) return;
+
+    const body = action === 'negar'
+        ? { comentario: prompt('Motivo da recusa:') || '' }
+        : {};
+    try {
+        const response = await fetch(`${URL_PATH_ATUALIZACOES}/${id}/${action}`, {
+            method: 'PATCH',
+            headers: getAdminRequestHeaders(),
+            body: JSON.stringify(body),
+        });
+        if (!response.ok) throw new Error(`Falha HTTP ${response.status}`);
+        alert(`Atualização cadastral ${action === 'aprovar' ? 'aprovada' : 'negada'}!`);
+        getRedirectElement()?.click();
+    } catch (error) {
+        console.error('Erro ao analisar atualização cadastral:', error);
+        alert('Não foi possível analisar a atualização cadastral.');
+    }
 }
 
 async function renderAdicionar() {
@@ -286,7 +331,7 @@ async function submitAdicionar(event) {
     }
 }
 
-function fetchDataAndRenderTable(url, tableId, properties, extraField='', callback=null) {
+function fetchDataAndRenderTable(url, tableId, properties, extraField='', callback=null, fetchOptions={}) {
     function renderTable(data, tableId, properties) {
         const table = document.getElementById(tableId);
         if (!table) {
@@ -336,6 +381,9 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
         }
 
         function formatValue(value) {
+            if (value === null || value === undefined || value === '') {
+                return 'Não informado';
+            }
             if (isValidDate(value)){
                 return getDate(value, true);
             }
@@ -361,7 +409,7 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
         table.innerHTML = '<h2>Não há nada aqui!</h2>';
     }
 
-    fetch(url)
+    fetch(url, fetchOptions)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');

@@ -1,11 +1,21 @@
 const URL_GET_MEMBROS_ATIVOS = `${URL_BASE}/api/membros/ativos`;
 const URL_GET_MEMBROS_BANIDOS = `${URL_BASE}/api/membros/banidos`;
 const URL_GET_SOLICITACOES = `${URL_BASE}/api/solicitacoes`;
+const URL_GET_ATUALIZACOES = `${URL_BASE}/api/solicitacoes/atualizacao`;
+const URL_PATH_ATUALIZACOES = `${URL_BASE}/api/solicitacoes/atualizacao`;
 const URL_GET_EVENTOS = `${URL_BASE}/api/eventos`;
 const URL_PATH_ATIVAR_MEMBRO = `${URL_BASE}/api/membro/ativar/id`;
 const URL_BAN_MEMBRO = `${URL_BASE}/api/membro/banir/id`;
 const URL_KICK_MEMBRO = `${URL_BASE}/api/membro/kick/id`;
 const URL_PATH_MEMBRO = `${URL_BASE}/api/membro/id`;
+
+function getAdminRequestHeaders() {
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getCookie(ETY_ADM_PASS_COOKIE)}`,
+        'X-Eternity-Login': getCookie(ETY_ADM_LOGIN_COOKIE),
+    };
+}
 
 const FIELD_MASK = {
     id: 'ID',

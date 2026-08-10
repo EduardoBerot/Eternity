@@ -43,7 +43,7 @@ const pages_content = {
     about: `<h1>Missão, propósito e valores</h1></br><p>Desde 2020, o Clã Eternity tem sido uma comunidade calorosa no Minecraft, unindo jogadores para construir, explorar e crescer juntos. Evoluindo ao longo dos anos, nossa visão resultou em uma cidade vibrante, o coração do servidor.</p><p>Valorizamos a cooperação e o trabalho em equipe, mantendo farms comunitárias para garantir recursos compartilhados. Essa abordagem promove solidariedade e uma comunidade unida.</p><p>Nossos valores - união, respeito e honestidade - são a base de nossa comunidade, construindo confiança e um ambiente acolhedor para todos.</p>`,
 
     join: `<h1>Junte-se a Eternidade </h1>
-    </br><p id="msg">Junte-se ao Clã Eternity, um lugar acolhedor para jogar Minecraft. Valorizamos amizade, colaboração e diversão. Venha construir, explorar e criar memórias inesquecíveis conosco.</p>
+    </br><p id="msg">Informe seu nick. Para quem já está no clã, este formulário funciona como atualização cadastral; para os demais, cria uma solicitação de recrutamento.</p>
     </br>${loadingHTML}
     <form onsubmit="send(event)" style="display:none;">
         <label>Nick</label>
@@ -141,7 +141,6 @@ async function renderHall(id) {
         document.getElementById('loading').style.display = 'none';
         let membros = await resposta.json();
         
-        membros.push({nick:'trogro9',cargo:'Admin',data_entrada:'2022-05-11 00:00:00+00'});
         membros = membros.sort((a,b)=>hierarquia[a.cargo]<hierarquia[b.cargo]? 1 : -1);
         
         const staffs = membros.filter(m=>m.cargo != "Membro");
@@ -171,6 +170,8 @@ async function renderHall(id) {
 }
 
 function calculateInYearOrDays(incomeDate) {
+    if (!incomeDate) return 'Cadastro incompleto';
+
     function calculateAge(birthDate) {
         const today = new Date();
 
@@ -191,6 +192,7 @@ function calculateInYearOrDays(incomeDate) {
     }
 
     incomeDate = new Date(incomeDate);
+    if (Number.isNaN(incomeDate.getTime())) return 'Cadastro incompleto';
     let age = calculateAge(incomeDate);
     let ageInDays = calculateAgeInDays(incomeDate);
     if (ageInDays > 365) return `Membro a +${age} anos`;

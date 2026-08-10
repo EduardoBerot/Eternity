@@ -5,14 +5,36 @@ async function send (event){
     const ETY_FORM_TIME = 10; /* tempo em minutos */
 
     if (!checkCookie(ETY_FORM_COOKIE)){
-        data = getFormData();
+        const data = getFormData();
 
         try {
-            let response = await fetch(URL_MEMBERS,
+            const activeResponse = await fetch(`${URL_BASE}/api/membros/ativos`);
+            if (!activeResponse.ok) {
+                throw new Error("Não foi possível consultar os membros ativos");
+            }
+
+            const activeMembers = await activeResponse.json();
+            const normalizedNick = String(data.nick || '').trim().toLowerCase();
+            const existingMember = activeMembers.find(member =>
+                String(member.nick || '').trim().toLowerCase() === normalizedNick
+            );
+            const isProfileUpdate = Boolean(existingMember);
+            const targetUrl = isProfileUpdate ? URL_MEMBER_UPDATES : URL_MEMBERS;
+            const requestData = isProfileUpdate
+                ? {
+                    membro_id: existingMember.id,
+                    tipo: 'Atualização cadastral',
+                    nick: existingMember.nick,
+                    data_nascimento: data.data_nascimento,
+                    foco: data.foco,
+                }
+                : data;
+
+            const response = await fetch(targetUrl,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(data),
+                    body: JSON.stringify(requestData),
                 }
             );
     
@@ -21,10 +43,14 @@ async function send (event){
             }
 
             setCookie(ETY_FORM_COOKIE, ETY_FORM_TIME);
-            alert("Cadastro Realizado com sucesso!");
-            msg.innerText="Cadastro realizado com sucesso!";
+            const successMessage = isProfileUpdate
+                ? "Atualização cadastral enviada para análise!"
+                : "Solicitação de recrutamento enviada com sucesso!";
+            alert(successMessage);
+            msg.innerText = successMessage;
         } catch (error) {
-            alert("Não foi possível realizar o cadastro. Verifique se já não exite solicitações para esse nick e tente mais tarde novamente.")
+            console.error(error);
+            alert("Não foi possível enviar a solicitação. Verifique se já não existe uma solicitação pendente para esse nick e tente novamente mais tarde.")
         }
     }else{
         alert('Você já realizou o seu cadastro! Tente novamente mais tarde.')
