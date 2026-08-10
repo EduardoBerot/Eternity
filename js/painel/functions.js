@@ -1,4 +1,5 @@
 const URL_GET_MEMBROS_ATIVOS = `${URL_BASE}/api/membros/ativos`;
+const URL_GET_MEMBROS_INATIVOS = `${URL_BASE}/api/membros/inativos`;
 const URL_GET_MEMBROS_BANIDOS = `${URL_BASE}/api/membros/banidos`;
 const URL_GET_SOLICITACOES = `${URL_BASE}/api/solicitacoes`;
 const URL_GET_ATUALIZACOES = `${URL_BASE}/api/solicitacoes/atualizacao`;
@@ -28,6 +29,8 @@ const FIELD_MASK = {
     data_entrada: 'Data de Solicitação',
     createdAt: 'Data da Ocorrência',
     updatedAt: 'Excluído em',
+    inativo_desde: 'Inativo desde',
+    inativo_ate: 'Reservado ate',
     comentario: 'Motivo',
     evento: 'Evento',
 }

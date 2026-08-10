@@ -4,6 +4,7 @@ const pages_content = {
     solicitacoes: renderSolicitacoes,
     membros: renderMembros,
     adicionar: renderAdicionar,
+    inativos: renderInativos,
     excluidos: renderExcluidos,
     historico: renderHistorico,
     desafios: renderDesafios,
@@ -46,6 +47,24 @@ function renderExcluidos() {
     fetchDataAndRenderTable(URL_GET_MEMBROS_BANIDOS, table_id, properties, extraField, ()=>{
         convertDatesToAges(table_id, FIELD_MASK['data_nascimento'])
     });
+}
+
+function renderInativos() {
+    const table_id = 'tb_inativos';
+    const properties = ['nick', 'cargo', 'inativo_desde', 'inativo_ate'];
+    renderLoading(APP);
+    renderSearch(APP, table_id);
+    createTable(APP, table_id);
+    const extraField = {
+        name: 'Status',
+        content: `
+            <div>
+                <img value="%id" status="Ativo" src="./imgs/icons/Check.svg" alt="Reativar" title="Reativar membro" onclick="checkOutSolicitation(event)">
+            </div>
+        `
+    };
+
+    fetchDataAndRenderTable(URL_GET_MEMBROS_INATIVOS, table_id, properties, extraField);
 }
 
 function renderSolicitacoes() {
