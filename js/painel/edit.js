@@ -1,5 +1,6 @@
 // const URL_PATH_MEMBRO = `${URL_BASE}/api/membro/id`;
 const URL_GET_MEMBRO = `${URL_BASE}/api/membro/id`;
+let editReturnPage = 'membros';
 
 function checkIdParameter() {
     const params = new URLSearchParams(window.location.search);
@@ -12,6 +13,7 @@ function checkIdParameter() {
 
 function renderEditPage(event) {
     const id = event.target.getAttribute('value');
+    editReturnPage = event.target.getAttribute('return-page') || 'membros';
     clearAPP(APP);
     renderLoading(APP);
 
@@ -33,6 +35,7 @@ function renderEditPage(event) {
 async function renderFormEdit(data){
     APP.innerHTML = `
     <h1 class="tittle">Editar Informações - ${data.nick}</h1>
+    <p class="edit-help">Preencha todos os campos para concluir a pendência cadastral.</p>
     <form id="form_editar" value="${data.id}" onsubmit="submitEditar(event)">
         <div class="form-label">
             <label for="nick">Nick</label>
@@ -40,11 +43,7 @@ async function renderFormEdit(data){
         </div>
         <div class="form-label">
             <label for="data_nascimento">Data de Nascimento</label>
-            <input type="date" value="${getDate(data.data_nascimento)}" id="data_nascimento">
-        </div>
-        <div class="form-label">
-            <label for="foco">Foco</label>
-            <select name="foco" id="foco" required></select>
+            <input type="date" value="${getDate(data.data_nascimento)}" id="data_nascimento" required>
         </div>
         <div class="form-label">
             <label for="cargo">Cargo</label>        
@@ -53,7 +52,7 @@ async function renderFormEdit(data){
         <input type="text" id="status" placeholder="Status" value="${data.status}" style="display:none"required>
         <div class="form-label">
             <label for="data_entrada">Data de Cadastro</label>
-            <input type="date" id="data_entrada" value="${getDate(data.data_entrada)}">
+            <input type="date" id="data_entrada" value="${getDate(data.data_entrada)}" required>
         </div>
         <div class="form-label">
             <label for="recrutador">Recrutador</label>
@@ -67,12 +66,12 @@ async function renderFormEdit(data){
     `;
     const STAFFMEMBERS = await getStaffsNames();
     createOptions('recrutador', STAFFMEMBERS, data.recrutador);
-    createOptions('foco', FOCUS_TYPE, data.foco);
     createOptions('cargo', CARGOS, data.cargo);
 }
 
 function goBackMembers() {
-    membros.click()
+    const target = document.getElementById(editReturnPage) || membros;
+    target.click()
 }
 
 function submitEditar(event) {
@@ -82,7 +81,7 @@ function submitEditar(event) {
 
     const opcoes = {
         method: 'PATCH', 
-        headers: {'Content-Type': 'application/json'},
+        headers: getAdminRequestHeaders(),
         body: JSON.stringify(data)
     };
 

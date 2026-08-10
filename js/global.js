@@ -11,7 +11,6 @@ const URL_RELATORIO_DESAFIOS = `${URL_BASE}/api/desafio/relatorio`;
 const ETY_ADM_LOGIN_COOKIE = 'eternity-adm-login';
 const ETY_ADM_PASS_COOKIE = 'eternity-adm';
 
-const FOCUS_TYPE = ['PvP', 'Torneio', 'Build', 'Farm'];
 const CARGOS = ['Membro','Estagiário','Daimyo', 'Auxiliar', 'Ikko', 'Supervisor', 'Sohei', 'Coordenador', 'Heika', 'Dono', 'Fundador']
 
 const clearAPP = (element=APP) => element.innerHTML = ''; 
@@ -75,7 +74,6 @@ function getFormData() {
     const data = {
         nick: document.getElementById('nick')?.value,
         data_nascimento: document.getElementById('data_nascimento')?.value,
-        foco: document.getElementById('foco')?.value,
         recrutador: document.getElementById('recrutador')?.value,
         cargo: document.getElementById('cargo')?.value,
         data_entrada: document.getElementById('data_entrada')?.value,

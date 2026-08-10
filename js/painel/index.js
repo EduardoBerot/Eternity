@@ -4,7 +4,6 @@ const pages_content = {
     solicitacoes: renderSolicitacoes,
     membros: renderMembros,
     adicionar: renderAdicionar,
-    inativos: renderInativos,
     excluidos: renderExcluidos,
     historico: renderHistorico,
     desafios: renderDesafios,
@@ -49,36 +48,73 @@ function renderExcluidos() {
     });
 }
 
-function renderInativos() {
-    const table_id = 'tb_inativos';
-    const properties = ['nick', 'cargo', 'inativo_desde', 'inativo_ate'];
-    renderLoading(APP);
-    renderSearch(APP, table_id);
-    createTable(APP, table_id);
-    const extraField = {
-        name: 'Status',
-        content: `
-            <div>
-                <img value="%id" status="Ativo" src="./imgs/icons/Check.svg" alt="Reativar" title="Reativar membro" onclick="checkOutSolicitation(event)">
-            </div>
-        `
-    };
-
-    fetchDataAndRenderTable(URL_GET_MEMBROS_INATIVOS, table_id, properties, extraField);
-}
-
 function renderSolicitacoes() {
     const table_id = 'tb_solicitacoes';
-    const properties = ['nick', 'data_nascimento', 'foco', 'data_entrada'];
+    const incompleteTableId = 'tb_cadastros_incompletos';
+    const updateTableId = 'tb_atualizacoes_cadastrais';
+    const properties = ['nick', 'data_nascimento', 'data_entrada'];
     const fieldDataEntrada = 'Tempo de Solicitação'
-    renderLoading(APP);
-    createTable(APP, table_id);
+    APP.innerHTML = `
+        <div class="pending-page">
+            <header class="pending-page__intro">
+                <span class="pending-page__eyebrow">Central de análise</span>
+                <h1>Pendências</h1>
+                <p>Revise novos pedidos de entrada e alterações de cadastro em um só lugar.</p>
+            </header>
+
+            <div class="pending-list">
+                <section class="pending-card" aria-labelledby="title_solicitacoes">
+                    <div class="pending-card__header">
+                        <div>
+                            <h2 id="title_solicitacoes">Solicitações de entrada</h2>
+                            <p>Jogadores aguardando aprovação para entrar no clã.</p>
+                        </div>
+                        <span class="pending-card__count" id="count_solicitacoes" aria-label="Total de solicitações">—</span>
+                    </div>
+                    <div class="pending-card__loading" id="loading_solicitacoes">Carregando solicitações...</div>
+                    <div class="pending-card__table"><table id="${table_id}"></table></div>
+                </section>
+
+                <section class="pending-card" aria-labelledby="title_cadastros">
+                    <div class="pending-card__header">
+                        <div>
+                            <h2 id="title_cadastros">Pendências de cadastro</h2>
+                            <p>Complete dados ausentes e analise alterações enviadas pelos membros.</p>
+                        </div>
+                        <span class="pending-card__count" id="count_cadastros_total" aria-label="Total de cadastros pendentes">—</span>
+                    </div>
+                    <div class="pending-subsection">
+                        <div class="pending-subsection__header">
+                            <div>
+                                <h3>Cadastros incompletos</h3>
+                                <p>Membros ativos que ainda possuem algum campo marcado como “Não informado”.</p>
+                            </div>
+                            <span class="pending-card__count pending-card__count--small" id="count_incompletos" data-pending-group="cadastros">—</span>
+                        </div>
+                        <div class="pending-card__loading" id="loading_incompletos">Carregando cadastros incompletos...</div>
+                        <div class="pending-card__table"><table id="${incompleteTableId}"></table></div>
+                    </div>
+                    <div class="pending-subsection pending-subsection--divided">
+                        <div class="pending-subsection__header">
+                            <div>
+                                <h3>Alterações enviadas</h3>
+                                <p>Pedidos de alteração cadastral enviados pelos próprios membros.</p>
+                            </div>
+                            <span class="pending-card__count pending-card__count--small" id="count_atualizacoes" data-pending-group="cadastros">—</span>
+                        </div>
+                        <div class="pending-card__loading" id="loading_cadastros">Carregando alterações...</div>
+                        <div class="pending-card__table"><table id="${updateTableId}"></table></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    `;
     const extraField = {
-        name: 'Status',
+        name: 'Ações',
         content: `
-            <div>
-                <img value="%id" status="Ativo" src="./imgs/icons/Check.svg" alt="Aceitar" onclick="checkOutSolicitation(event)">
-                <img value="%id" status="Negado" src="./imgs/icons/Close.svg" alt="Negar" onclick="checkOutSolicitation(event)">
+            <div class="pending-actions">
+                <img value="%id" status="Ativo" src="./imgs/icons/Check.svg" alt="Aceitar" title="Aceitar solicitação" onclick="checkOutSolicitation(event)">
+                <img value="%id" status="Negado" src="./imgs/icons/Close.svg" alt="Negar" title="Negar solicitação" onclick="checkOutSolicitation(event)">
             </div>
         `
     }
@@ -86,27 +122,57 @@ function renderSolicitacoes() {
         replaceInTableHeader(FIELD_MASK['data_entrada'], fieldDataEntrada);
         convertDatesToAges(table_id, FIELD_MASK['data_nascimento']);
         convertDatesToAges(table_id, fieldDataEntrada, true);
+    }, {}, {
+        loadingId: 'loading_solicitacoes',
+        countId: 'count_solicitacoes',
+        emptyMessage: 'Nenhuma solicitação de entrada aguardando análise.'
     });
 
-    const updateTableId = 'tb_atualizacoes_cadastrais';
-    APP.innerHTML += '<h2>Atualizações cadastrais</h2>';
-    createTable(APP, updateTableId);
-    const updateActions = {
-        name: 'Status',
+    const incompleteActions = {
+        name: 'Editar',
         content: `
-            <div>
-                <img value="%id" action="aprovar" src="./imgs/icons/Check.svg" alt="Aprovar" onclick="checkOutProfileUpdate(event)">
-                <img value="%id" action="negar" src="./imgs/icons/Close.svg" alt="Negar" onclick="checkOutProfileUpdate(event)">
+            <div class="pending-actions">
+                <img value="%id" return-page="solicitacoes" src="./imgs/icons/Edit.svg" alt="Editar" title="Completar cadastro" onclick="renderEditPage(event)">
+            </div>
+        `
+    };
+    fetchDataAndRenderTable(
+        URL_GET_CADASTROS_PENDENTES,
+        incompleteTableId,
+        ['nick', 'data_nascimento', 'cargo', 'data_entrada', 'recrutador'],
+        incompleteActions,
+        () => convertDatesToAges(incompleteTableId, FIELD_MASK['data_nascimento']),
+        { headers: getAdminRequestHeaders() },
+        {
+            loadingId: 'loading_incompletos',
+            countId: 'count_incompletos',
+            groupCountId: 'count_cadastros_total',
+            emptyMessage: 'Todos os membros ativos estão com o cadastro completo.'
+        },
+    );
+
+    const updateActions = {
+        name: 'Ações',
+        content: `
+            <div class="pending-actions">
+                <img value="%id" action="aprovar" src="./imgs/icons/Check.svg" alt="Aprovar" title="Aprovar alteração" onclick="checkOutProfileUpdate(event)">
+                <img value="%id" action="negar" src="./imgs/icons/Close.svg" alt="Negar" title="Negar alteração" onclick="checkOutProfileUpdate(event)">
             </div>
         `
     };
     fetchDataAndRenderTable(
         URL_GET_ATUALIZACOES,
         updateTableId,
-        ['nick', 'data_nascimento', 'foco', 'createdAt'],
+        ['nick', 'data_nascimento', 'createdAt'],
         updateActions,
         () => convertDatesToAges(updateTableId, FIELD_MASK['data_nascimento']),
         { headers: getAdminRequestHeaders() },
+        {
+            loadingId: 'loading_cadastros',
+            countId: 'count_atualizacoes',
+            groupCountId: 'count_cadastros_total',
+            emptyMessage: 'Nenhuma atualização cadastral aguardando análise.'
+        },
     );
 }
 
@@ -147,10 +213,6 @@ async function renderAdicionar() {
             <input type="date" value="2002-06-30" id="data_nascimento" required>
         </div>
         <div class="form-label">
-            <label for="foco">Foco</label>
-            <select name="foco" id="foco" required></select>
-        </div>
-        <div class="form-label">
             <label for="cargo">Cargo</label>        
             <select name="cargo" id="cargo" required></select>
         </div>
@@ -170,33 +232,63 @@ async function renderAdicionar() {
     const nick = getCookie(ETY_ADM_LOGIN_COOKIE);
     const staffs = await getStaffsNames();
     createOptions('recrutador', staffs, nick);
-    createOptions('foco', FOCUS_TYPE, 'PvP');
     createOptions('cargo', CARGOS, 'Membro');
 }
 
-function renderMembros() {
+function renderMembros(view = 'ativos') {
     const table_id = 'tb_membros';
-    renderLoading(APP);
-    renderSearch(APP, table_id);
-    createTable(APP, table_id);
-    fetchDataMembros(table_id);
+    const showingInactive = view === 'inativos';
+    APP.innerHTML = `
+        <div class="members-page">
+            <div class="members-page__header">
+                <div>
+                    <span class="pending-page__eyebrow">Gestão do clã</span>
+                    <h1>Membros</h1>
+                    <p>Consulte os membros ativos ou alterne para os afastados temporariamente.</p>
+                </div>
+                <div class="member-toggle" role="group" aria-label="Exibir membros">
+                    <button type="button" class="member-toggle__button ${showingInactive ? '' : 'is-active'}" onclick="renderMembros('ativos')">Ativos</button>
+                    <button type="button" class="member-toggle__button ${showingInactive ? 'is-active' : ''}" onclick="renderMembros('inativos')">Inativos</button>
+                </div>
+            </div>
+            <div id="members_table_area" class="members-page__table"></div>
+        </div>
+    `;
+    const tableArea = document.getElementById('members_table_area');
+    renderLoading(tableArea);
+    renderSearch(tableArea, table_id);
+    createTable(tableArea, table_id);
+    fetchDataMembros(table_id, view);
 }
 
-function fetchDataMembros(table_id) {
-    const properties = ['nick', 'data_nascimento','cargo', 'foco', 'data_entrada', 'recrutador'];
+function fetchDataMembros(table_id, view = 'ativos') {
+    const showingInactive = view === 'inativos';
+    const properties = showingInactive
+        ? ['nick', 'cargo', 'inativo_desde', 'inativo_ate']
+        : ['nick', 'data_nascimento', 'cargo', 'data_entrada', 'recrutador'];
     const fieldDataEntrada = 'Tempo de clan'
-    const extraField = {
-        name: 'Editar',
-        content: `
-        <div>
-            <img value="%id" status="Banido" src="./imgs/icons/Banir.svg" alt="Banir" onclick="checkOutSolicitation(event)">
-            <img value="%id" status="Ativo" src="./imgs/icons/Edit.svg" alt="Editar" onclick="renderEditPage(event)">
-            <img value="%id" status="Excluído" src="./imgs/icons/Close.svg" alt="Negar" onclick="checkOutSolicitation(event)">
-        </div>
-        `
-    }
+    const extraField = showingInactive
+        ? {
+            name: 'Status',
+            content: `
+                <div class="pending-actions">
+                    <img value="%id" status="Ativo" src="./imgs/icons/Check.svg" alt="Reativar" title="Reativar membro" onclick="checkOutSolicitation(event)">
+                </div>
+            `
+        }
+        : {
+            name: 'Editar',
+            content: `
+                <div class="pending-actions">
+                    <img value="%id" status="Banido" src="./imgs/icons/Banir.svg" alt="Banir" title="Banir membro" onclick="checkOutSolicitation(event)">
+                    <img value="%id" status="Ativo" src="./imgs/icons/Edit.svg" alt="Editar" title="Editar membro" onclick="renderEditPage(event)">
+                    <img value="%id" status="Excluído" src="./imgs/icons/Close.svg" alt="Remover" title="Remover membro" onclick="checkOutSolicitation(event)">
+                </div>
+            `
+        };
 
-    fetchDataAndRenderTable(URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField, ()=>{
+    fetchDataAndRenderTable(showingInactive ? URL_GET_MEMBROS_INATIVOS : URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField, ()=>{
+        if (showingInactive) return;
         replaceInTableHeader(FIELD_MASK['data_entrada'], fieldDataEntrada);
         convertDatesToAges(table_id, FIELD_MASK['data_nascimento']);
         convertDatesToAges(table_id, fieldDataEntrada, true);
@@ -350,7 +442,7 @@ async function submitAdicionar(event) {
     }
 }
 
-function fetchDataAndRenderTable(url, tableId, properties, extraField='', callback=null, fetchOptions={}) {
+function fetchDataAndRenderTable(url, tableId, properties, extraField='', callback=null, fetchOptions={}, uiOptions={}) {
     function renderTable(data, tableId, properties) {
         const table = document.getElementById(tableId);
         if (!table) {
@@ -419,13 +511,44 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
         }
     }
 
-    function renderVoidTable(tableId) {
+    function renderVoidTable(tableId, message = 'Não há nada aqui!') {
         const table = document.getElementById(tableId);
         if (!table) {
             console.error(`No table found with id "${tableId}"`);
             return;
         }
-        table.innerHTML = '<h2>Não há nada aqui!</h2>';
+        const columns = properties.length + (extraField ? 1 : 0);
+        table.innerHTML = `<tbody><tr><td class="table-message" colspan="${columns}">${message}</td></tr></tbody>`;
+    }
+
+    function finishLoading() {
+        if (uiOptions.loadingId) {
+            const loading = document.getElementById(uiOptions.loadingId);
+            if (loading) loading.hidden = true;
+            return;
+        }
+        hideLoading();
+    }
+
+    function updateScopedCount(total) {
+        if (!uiOptions.countId) return;
+        const count = document.getElementById(uiOptions.countId);
+        if (!count) return;
+        count.textContent = total;
+        count.dataset.count = Number.isFinite(total) ? total : 0;
+        count.dataset.error = Number.isFinite(total) ? 'false' : 'true';
+
+        if (uiOptions.groupCountId) {
+            const groupCount = document.getElementById(uiOptions.groupCountId);
+            const children = document.querySelectorAll('[data-pending-group="cadastros"]');
+            const hasError = [...children].some(item => item.dataset.error === 'true');
+            const hasPending = [...children].some(item => item.textContent === '—');
+            if (groupCount) {
+                groupCount.textContent = hasError
+                    ? '!'
+                    : (hasPending ? '—' : [...children].reduce((sum, item) => sum + Number(item.dataset.count || 0), 0));
+            }
+        }
     }
 
     fetch(url, fetchOptions)
@@ -436,12 +559,13 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
             return response.json();
         })
         .then(data => {
-            hideLoading();
+            finishLoading();
+            updateScopedCount(data.length);
             if(data.length == 0){
-                renderVoidTable(tableId, properties)
+                renderVoidTable(tableId, uiOptions.emptyMessage)
             }else{
                 renderTable(data, tableId, properties);
-                updateCountSearch(data.length)
+                if (!uiOptions.countId) updateCountSearch(data.length)
             }
             
             if (callback) {
@@ -449,6 +573,9 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
             }
         })
         .catch(error => {
+            finishLoading();
+            updateScopedCount('!');
+            renderVoidTable(tableId, 'Não foi possível carregar esta lista. Tente novamente.');
             console.error('There has been a problem with your fetch operation:', error);
         });
 }
@@ -565,8 +692,12 @@ function sortTableByColumn(columnIndex, tableId) {
 function init() {
     const nick = getCookie(ETY_ADM_LOGIN_COOKIE);
     const element = document.querySelector('#title_nick');
+    const head = document.querySelector('#admin_profile_head');
     const msg = `Saudações ${nick}!`;
     element.textContent = msg;
+    head.src = `https://mc-heads.net/head/${encodeURIComponent(nick)}`;
+    head.alt = `Head do jogador ${nick}`;
+    head.addEventListener('error', () => { head.hidden = true; }, { once: true });
     solicitacoes.click();
     checkAniver();
 }

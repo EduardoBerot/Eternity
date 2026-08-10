@@ -32,9 +32,10 @@
         border-right: 1px solid black;
     }
 
-    #title_nick{
-        text-align: center;
-        font-size: 1.5em;
+    .admin-profile {
+        width: auto;
+        align-self: center;
+        font-size: 0.9em;
     }
 
     .content{
@@ -49,5 +50,44 @@
 
     table img{
         width: 1.25em;
+    }
+
+    .pending-page {
+        gap: 18px;
+    }
+
+    .pending-page__intro {
+        padding-bottom: 14px;
+    }
+
+    .pending-card__header {
+        padding: 18px 16px 15px;
+    }
+
+    .pending-card__header h2 {
+        font-size: 1rem;
+    }
+
+    .pending-card__count {
+        min-width: 34px;
+        height: 34px;
+    }
+
+    .pending-card__table th,
+    .pending-card__table td {
+        padding: 11px 10px;
+    }
+
+    .members-page__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .member-toggle {
+        align-self: stretch;
+    }
+
+    .member-toggle__button {
+        flex: 1;
     }
 }

@@ -50,8 +50,6 @@ const pages_content = {
         <input type="text" id="nick" placeholder="Nick" required>
         <label>Data de Nascimento</label>
         <input type="date" id="data_nascimento" required>
-        <label>Foco</label>
-        <select id="foco" required></select>
         <input type="text" id="recrutador" value="" style="display:none;" readonly>
         <input type="text" id="cargo" value="Membro" style="display:none;" readonly>
         <input type="text" id="data_entrada" style="display:none;" readonly>
@@ -110,7 +108,6 @@ function renderFormJoin(id) {
                 document.getElementById('loading').style.display = 'none';
                 document.querySelector('form').style.display = 'flex';
                 renderDate();
-                createOptions('foco', FOCUS_TYPE, 'PvP');
             })
             .catch(error => {
                 console.error('There has been a problem with your fetch operation:', error);

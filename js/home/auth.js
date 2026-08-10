@@ -26,7 +26,6 @@ async function send (event){
                     tipo: 'Atualização cadastral',
                     nick: existingMember.nick,
                     data_nascimento: data.data_nascimento,
-                    foco: data.foco,
                 }
                 : data;
 

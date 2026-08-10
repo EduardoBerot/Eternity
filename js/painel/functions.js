@@ -1,5 +1,6 @@
 const URL_GET_MEMBROS_ATIVOS = `${URL_BASE}/api/membros/ativos`;
 const URL_GET_MEMBROS_INATIVOS = `${URL_BASE}/api/membros/inativos`;
+const URL_GET_CADASTROS_PENDENTES = `${URL_BASE}/api/membros/cadastros-pendentes`;
 const URL_GET_MEMBROS_BANIDOS = `${URL_BASE}/api/membros/banidos`;
 const URL_GET_SOLICITACOES = `${URL_BASE}/api/solicitacoes`;
 const URL_GET_ATUALIZACOES = `${URL_BASE}/api/solicitacoes/atualizacao`;
@@ -22,7 +23,6 @@ const FIELD_MASK = {
     id: 'ID',
     nick: 'Nick',
     data_nascimento: 'Idade',
-    foco: 'Foco',
     status: 'Status',
     recrutador: 'Recrutador',
     cargo: 'Cargo',
