@@ -122,7 +122,7 @@ function renderSolicitacoes() {
         replaceInTableHeader(FIELD_MASK['data_entrada'], fieldDataEntrada);
         convertDatesToAges(table_id, FIELD_MASK['data_nascimento']);
         convertDatesToAges(table_id, fieldDataEntrada, true);
-    }, {}, {
+    }, { headers: getAdminRequestHeaders() }, {
         loadingId: 'loading_solicitacoes',
         countId: 'count_solicitacoes',
         emptyMessage: 'Nenhuma solicitação de entrada aguardando análise.'
@@ -339,7 +339,7 @@ async function checkOutSolicitation(event){
     function updateMember(id) {
         const opcoes = {
             method: 'PATCH', 
-            headers: {'Content-Type': 'application/json'},
+            headers: getAdminRequestHeaders(),
             body: JSON.stringify({recrutador : getCookie(ETY_ADM_LOGIN_COOKIE)})
         };
     
