@@ -18,6 +18,7 @@ Este projeto consiste em um site para o Clã Eternity, uma comunidade de jogador
   - Tabelas interativas com colunas que podem ser ordenadas clicando nos cabeçalhos correspondentes.
   - Funcionalidade de pesquisa que filtra os valores exibidos na tabela de acordo com o que é digitado no campo de busca.
   - Cada tabela (como "Solicitações", "Membros", "Excluídos", "Histórico") possui botões de ação para editar membros, banir, ativar, ou excluir, dependendo do status e contexto.
+  - A tabela administrativa de membros mostra o vínculo com o Discord; pendências aparecem como `Não` e vínculos confirmados como um link compacto para o perfil.
 
 ## Tecnologias Utilizadas
 

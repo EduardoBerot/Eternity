@@ -265,7 +265,7 @@ function fetchDataMembros(table_id, view = 'ativos') {
     const showingInactive = view === 'inativos';
     const properties = showingInactive
         ? ['nick', 'cargo', 'inativo_desde', 'inativo_ate']
-        : ['nick', 'data_nascimento', 'cargo', 'data_entrada', 'recrutador'];
+        : ['nick', 'data_nascimento', 'cargo', 'data_entrada', 'recrutador', 'discord_vinculado'];
     const fieldDataEntrada = 'Tempo de clan'
     const extraField = showingInactive
         ? {
@@ -287,12 +287,14 @@ function fetchDataMembros(table_id, view = 'ativos') {
             `
         };
 
-    fetchDataAndRenderTable(showingInactive ? URL_GET_MEMBROS_INATIVOS : URL_GET_MEMBROS_ATIVOS, table_id, properties, extraField, ()=>{
+    const url = showingInactive ? URL_GET_MEMBROS_INATIVOS : URL_GET_VINCULOS_DISCORD;
+    const fetchOptions = showingInactive ? {} : { headers: getAdminRequestHeaders() };
+    fetchDataAndRenderTable(url, table_id, properties, extraField, ()=>{
         if (showingInactive) return;
         replaceInTableHeader(FIELD_MASK['data_entrada'], fieldDataEntrada);
         convertDatesToAges(table_id, FIELD_MASK['data_nascimento']);
         convertDatesToAges(table_id, fieldDataEntrada, true);
-    })
+    }, fetchOptions)
 }
 
 async function checkOutSolicitation(event){
@@ -477,6 +479,10 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
             const row = tbody.insertRow();
             for (const prop of properties) {
                 const cell = row.insertCell();
+                if (prop === 'discord_vinculado') {
+                    renderDiscordStatus(cell, item);
+                    continue;
+                }
                 const value = formatValue(item[prop]);
                 cell.textContent = value;
             }
@@ -489,6 +495,20 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
 
         function formatExtraField(element, id) {
             return element.replaceAll('%id',id)
+        }
+
+        function renderDiscordStatus(cell, item) {
+            const linked = item.discord_vinculado === true && /^https:\/\/discord\.com\/users\/\d{17,20}$/.test(item.discord_url || '');
+            const status = document.createElement(linked ? 'a' : 'span');
+            status.className = `discord-link-status ${linked ? 'is-linked' : 'is-pending'}`;
+            status.textContent = linked ? 'Sim ↗' : 'Não';
+            status.title = linked ? 'Abrir perfil no Discord' : 'Vínculo com o Discord pendente';
+            if (linked) {
+                status.href = item.discord_url;
+                status.target = '_blank';
+                status.rel = 'noopener noreferrer';
+            }
+            cell.appendChild(status);
         }
 
         function formatValue(value) {

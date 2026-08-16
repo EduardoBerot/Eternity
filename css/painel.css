@@ -449,3 +449,34 @@ tr:nth-child(even) {
 .members-page__table {
     width: 100%;
 }
+
+.discord-link-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 52px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.discord-link-status.is-linked {
+    background: rgba(8, 109, 114, 0.14);
+    color: #086d72;
+}
+
+.discord-link-status.is-linked:hover,
+.discord-link-status.is-linked:focus-visible {
+    background: #086d72;
+    color: #fff;
+    outline: none;
+}
+
+.discord-link-status.is-pending {
+    background: rgba(181, 112, 0, 0.14);
+    color: #8a5700;
+}

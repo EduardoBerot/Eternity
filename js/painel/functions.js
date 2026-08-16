@@ -1,4 +1,5 @@
 const URL_GET_MEMBROS_ATIVOS = `${URL_BASE}/api/membros/ativos`;
+const URL_GET_VINCULOS_DISCORD = `${URL_BASE}/api/membros/vinculos-discord`;
 const URL_GET_MEMBROS_INATIVOS = `${URL_BASE}/api/membros/inativos`;
 const URL_GET_CADASTROS_PENDENTES = `${URL_BASE}/api/membros/cadastros-pendentes`;
 const URL_GET_MEMBROS_BANIDOS = `${URL_BASE}/api/membros/banidos`;
@@ -24,6 +25,7 @@ const FIELD_MASK = {
     nick: 'Nick',
     data_nascimento: 'Idade',
     status: 'Status',
+    discord_vinculado: 'Vinculado',
     recrutador: 'Recrutador',
     cargo: 'Cargo',
     data_entrada: 'Data de Solicitação',
