@@ -51,6 +51,7 @@ function renderExcluidos() {
 function renderSolicitacoes() {
     const table_id = 'tb_solicitacoes';
     const incompleteTableId = 'tb_cadastros_incompletos';
+    const unlinkedTableId = 'tb_nao_vinculados';
     const updateTableId = 'tb_atualizacoes_cadastrais';
     const properties = ['nick', 'data_nascimento', 'data_entrada'];
     const fieldDataEntrada = 'Tempo de Solicitação'
@@ -78,22 +79,37 @@ function renderSolicitacoes() {
                 <section class="pending-card" aria-labelledby="title_cadastros">
                     <div class="pending-card__header">
                         <div>
-                            <h2 id="title_cadastros">Pendências de cadastro</h2>
-                            <p>Complete dados ausentes e analise alterações enviadas pelos membros.</p>
+                            <h2 id="title_cadastros">Pendências</h2>
+                            <p>Acompanhe separadamente dados ausentes, vínculos com o Discord e alterações enviadas.</p>
                         </div>
                         <span class="pending-card__count" id="count_cadastros_total" aria-label="Total de cadastros pendentes">—</span>
                     </div>
-                    <div class="pending-subsection">
-                        <div class="pending-subsection__header">
+                    <details class="pending-subsection pending-disclosure">
+                        <summary class="pending-subsection__header">
                             <div>
                                 <h3>Cadastros incompletos</h3>
                                 <p>Membros ativos que ainda possuem algum campo marcado como “Não informado”.</p>
                             </div>
                             <span class="pending-card__count pending-card__count--small" id="count_incompletos" data-pending-group="cadastros">—</span>
+                        </summary>
+                        <div class="pending-disclosure__content">
+                            <div class="pending-card__loading" id="loading_incompletos">Carregando cadastros incompletos...</div>
+                            <div class="pending-card__table"><table id="${incompleteTableId}"></table></div>
                         </div>
-                        <div class="pending-card__loading" id="loading_incompletos">Carregando cadastros incompletos...</div>
-                        <div class="pending-card__table"><table id="${incompleteTableId}"></table></div>
-                    </div>
+                    </details>
+                    <details class="pending-subsection pending-subsection--divided pending-disclosure">
+                        <summary class="pending-subsection__header">
+                            <div>
+                                <h3>Não vinculados</h3>
+                                <p>Membros ativos que ainda não vincularam sua conta do Discord ao Minecraft.</p>
+                            </div>
+                            <span class="pending-card__count pending-card__count--small" id="count_nao_vinculados" data-pending-group="cadastros">—</span>
+                        </summary>
+                        <div class="pending-disclosure__content">
+                            <div class="pending-card__loading" id="loading_nao_vinculados">Carregando membros não vinculados...</div>
+                            <div class="pending-card__table"><table id="${unlinkedTableId}"></table></div>
+                        </div>
+                    </details>
                     <div class="pending-subsection pending-subsection--divided">
                         <div class="pending-subsection__header">
                             <div>
@@ -148,6 +164,22 @@ function renderSolicitacoes() {
             countId: 'count_incompletos',
             groupCountId: 'count_cadastros_total',
             emptyMessage: 'Todos os membros ativos estão com o cadastro completo.'
+        },
+    );
+
+    fetchDataAndRenderTable(
+        URL_GET_VINCULOS_DISCORD,
+        unlinkedTableId,
+        ['nick', 'cargo', 'discord_vinculado'],
+        undefined,
+        undefined,
+        { headers: getAdminRequestHeaders() },
+        {
+            loadingId: 'loading_nao_vinculados',
+            countId: 'count_nao_vinculados',
+            groupCountId: 'count_cadastros_total',
+            filterData: member => member.discord_vinculado !== true,
+            emptyMessage: 'Todos os membros ativos estão vinculados ao Discord.'
         },
     );
 
@@ -579,13 +611,16 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
             return response.json();
         })
         .then(data => {
+            const visibleData = typeof uiOptions.filterData === 'function'
+                ? data.filter(uiOptions.filterData)
+                : data;
             finishLoading();
-            updateScopedCount(data.length);
-            if(data.length == 0){
+            updateScopedCount(visibleData.length);
+            if(visibleData.length == 0){
                 renderVoidTable(tableId, uiOptions.emptyMessage)
             }else{
-                renderTable(data, tableId, properties);
-                if (!uiOptions.countId) updateCountSearch(data.length)
+                renderTable(visibleData, tableId, properties);
+                if (!uiOptions.countId) updateCountSearch(visibleData.length)
             }
             
             if (callback) {

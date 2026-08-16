@@ -319,6 +319,49 @@ tr:nth-child(even) {
     padding: 18px 24px 10px;
 }
 
+.pending-disclosure > summary {
+    position: relative;
+    padding-right: 58px;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+}
+
+.pending-disclosure > summary::-webkit-details-marker {
+    display: none;
+}
+
+.pending-disclosure > summary::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 25px;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid #087178;
+    border-bottom: 2px solid #087178;
+    transform: translateY(-65%) rotate(45deg);
+    transition: transform 160ms ease;
+}
+
+.pending-disclosure[open] > summary::after {
+    transform: translateY(-20%) rotate(225deg);
+}
+
+.pending-disclosure > summary:hover,
+.pending-disclosure > summary:focus-visible {
+    background: rgba(108, 225, 226, 0.14);
+}
+
+.pending-disclosure > summary:focus-visible {
+    outline: 2px solid #008e95;
+    outline-offset: -2px;
+}
+
+.pending-disclosure__content {
+    border-top: 1px solid rgba(0, 81, 87, 0.12);
+}
+
 .pending-subsection__header h3 {
     margin-bottom: 5px;
     color: #0a4d51;
