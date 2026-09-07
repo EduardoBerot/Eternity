@@ -1,0 +1,5 @@
+# Projetos separados que moram dentro desta pasta, mas nao fazem parte do site.
+# Sem esta linha eles aparecem como pendentes em todo `git status`, e um
+# `git add .` distraido arrasta os dois para dentro do repositorio do site.
+Eternity/
+Eternity2/
