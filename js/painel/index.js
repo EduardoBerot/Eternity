@@ -296,8 +296,8 @@ function renderMembros(view = 'ativos') {
 function fetchDataMembros(table_id, view = 'ativos') {
     const showingInactive = view === 'inativos';
     const properties = showingInactive
-        ? ['nick', 'cargo', 'inativo_desde', 'inativo_ate']
-        : ['nick', 'data_nascimento', 'cargo', 'data_entrada', 'recrutador', 'discord_vinculado'];
+        ? ['nick', 'cargo', 'servidor', 'inativo_desde', 'inativo_ate']
+        : ['nick', 'data_nascimento', 'cargo', 'servidor', 'data_entrada', 'recrutador', 'discord_vinculado'];
     const fieldDataEntrada = 'Tempo de clan'
     const extraField = showingInactive
         ? {
@@ -513,6 +513,13 @@ function fetchDataAndRenderTable(url, tableId, properties, extraField='', callba
                 const cell = row.insertCell();
                 if (prop === 'discord_vinculado') {
                     renderDiscordStatus(cell, item);
+                    continue;
+                }
+                // Valor cru ('apocalipse,genesis') nao serve para ler numa
+                // tabela, e um cadastro sem a coluna nao pode virar
+                // "Nao informado": ele e do apocalipse.
+                if (prop === 'servidor') {
+                    cell.textContent = formatServers(item[prop]);
                     continue;
                 }
                 const value = formatValue(item[prop]);

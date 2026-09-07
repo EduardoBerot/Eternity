@@ -28,6 +28,7 @@ const FIELD_MASK = {
     discord_vinculado: 'Vinculado',
     recrutador: 'Recrutador',
     cargo: 'Cargo',
+    servidor: 'Servidor',
     data_entrada: 'Data de Solicitação',
     createdAt: 'Data da Ocorrência',
     updatedAt: 'Excluído em',
@@ -35,6 +36,25 @@ const FIELD_MASK = {
     inativo_ate: 'Reservado ate',
     comentario: 'Motivo',
     evento: 'Evento',
+}
+
+// Em qual servidor da rede o cadastro existe. A coluna do site guarda
+// 'apocalipse', 'genesis' ou os dois separados por virgula; quem joga nos dois
+// tem um cadastro so, entao a celula precisa mostrar os dois. Cadastro antigo,
+// anterior a coluna, veio do apocalipse.
+const SERVER_LABELS = {
+    apocalipse: 'Apocalipse',
+    genesis: 'Gênesis',
+};
+
+function formatServers(value) {
+    const servers = String(value ?? '')
+        .split(',')
+        .map(part => part.trim().toLowerCase())
+        .filter(Boolean)
+        .map(part => SERVER_LABELS[part] || part);
+    if (servers.length === 0) return SERVER_LABELS.apocalipse;
+    return servers.join(' + ');
 }
 
 const OPTIONS_RECUSE_SOLICITATION = [
