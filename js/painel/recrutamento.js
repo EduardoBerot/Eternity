@@ -28,6 +28,7 @@ const ETAPAS_LABEL = {
     invited: 'Convite enviado',
     returning: 'Voltando ao clã',
     complete: 'Entrou',
+    expirado: 'Encerrado por inatividade',
 };
 
 // A cor seque o desfecho, nunca a posicao dele no ranking: filtrar a tela nao
@@ -41,6 +42,7 @@ const DESFECHOS = [
     { id: 'inelegivel', nome: 'Inelegível', cor: 'var(--viz-5)' },
     { id: 'encerrado', nome: 'Encerrado sem interesse', cor: 'var(--viz-6)' },
     { id: 'recusou', nome: 'Pediu para parar', cor: 'var(--viz-7)' },
+    { id: 'expirado', nome: 'Encerrado por 10 dias parado', cor: 'var(--viz-8)' },
 ];
 
 function rotuloEtapa(valor) {
