@@ -5,8 +5,6 @@ const URL_MEMBERS = `${URL_BASE}/api/membro`;
 const URL_MEMBER_UPDATES = `${URL_BASE}/api/solicitacoes/atualizacao`;
 const URL_STAFFMEMBERS = `${URL_BASE}/api/membros/staffs`;
 const URL_STAFFMEMBERS_NAMES = `${URL_BASE}/api/staffs`;
-const URL_CONCLUIR_DESAFIOS = `${URL_BASE}/api/desafio/registrar`;
-const URL_RELATORIO_DESAFIOS = `${URL_BASE}/api/desafio/relatorio`;
 
 const ETY_ADM_LOGIN_COOKIE = 'eternity-adm-login';
 const ETY_ADM_PASS_COOKIE = 'eternity-adm';
