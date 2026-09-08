@@ -35,11 +35,12 @@ const ETAPAS_LABEL = {
 // que ela foi validada para pares vizinhos.
 const DESFECHOS = [
     { id: 'entrou', nome: 'Entrou no clã', cor: 'var(--viz-1)' },
-    { id: 'em_andamento', nome: 'Em andamento', cor: 'var(--viz-2)' },
-    { id: 'recusou', nome: 'Pediu para parar', cor: 'var(--viz-3)' },
+    { id: 'em_andamento', nome: 'No meio do recrutamento', cor: 'var(--viz-2)' },
+    { id: 'aguardando', nome: 'Aguardando a 1ª resposta', cor: 'var(--viz-3)' },
     { id: 'sem_resposta', nome: 'Sem resposta', cor: 'var(--viz-4)' },
     { id: 'inelegivel', nome: 'Inelegível', cor: 'var(--viz-5)' },
     { id: 'encerrado', nome: 'Encerrado sem interesse', cor: 'var(--viz-6)' },
+    { id: 'recusou', nome: 'Pediu para parar', cor: 'var(--viz-7)' },
 ];
 
 function rotuloEtapa(valor) {
@@ -134,6 +135,7 @@ function renderRecrutamento() {
         </div>
     `;
 
+    ligarDicas();
     carregarRecrutamento();
 }
 
@@ -209,7 +211,8 @@ function renderTiles(kpis) {
         { valor: kpis.abordados, nome: 'Abordados' },
         { valor: kpis.interessados, nome: 'Interessados' },
         { valor: kpis.entraram, nome: 'Entraram' },
-        { valor: kpis.parados, nome: 'Parados', nota: `${kpis.paradosMaisDeUmaSemana} há mais de 7 dias` },
+        { valor: kpis.parados, nome: 'Travados', nota: `${kpis.paradosMaisDeUmaSemana} há mais de 7 dias` },
+        { valor: kpis.aguardando, nome: 'Sem responder ainda', nota: 'fecham sozinhos em 48h' },
         { valor: tempo, nome: 'Até entrar', nota: 'mediana' },
     ];
     document.getElementById('viz_tiles').innerHTML = tiles.map(tile => `
@@ -238,8 +241,7 @@ function renderFunil(funil) {
                 class="viz-barra${ativo ? ' is-active' : ''}${clicavel ? '' : ' viz-barra--fixa'}"
                 ${clicavel ? `onclick="filtrarEtapa('${degrau.id}')"` : 'disabled'}
                 aria-pressed="${ativo}"
-                onmousemove="mostrarDica(event, '${degrau.nome}: ${degrau.total} pessoa(s)${degrau.taxa === null ? '' : ` · ${degrau.taxa}% do degrau anterior`}')"
-                onmouseleave="esconderDica()">
+                data-dica="${textoSeguro(`${degrau.nome}: ${degrau.total} pessoa(s)${degrau.taxa === null ? '' : ` · ${degrau.taxa}% do degrau anterior`}`)}">
                 <span class="viz-barra__nome">${degrau.nome}</span>
                 <span class="viz-barra__trilho">
                     <span class="viz-barra__fill" style="width:${largura}%"></span>
@@ -268,8 +270,7 @@ function renderSemanas(serie) {
             <button type="button" class="viz-semana${ativo ? ' is-active' : ''}"
                 onclick="filtrarSemana('${item.semana}')"
                 aria-pressed="${ativo}"
-                onmousemove="mostrarDica(event, '${dica}')"
-                onmouseleave="esconderDica()">
+                data-dica="${textoSeguro(dica)}">
                 <span class="viz-semana__colunas">
                     <span class="viz-semana__col viz-semana__col--novos" style="height:${(item.novos / maior) * 100}%"></span>
                     <span class="viz-semana__col viz-semana__col--entraram" style="height:${(item.entraram / maior) * 100}%"></span>
@@ -305,12 +306,11 @@ function renderDesfechos(desfechos) {
         const dica = `${item.nome}: ${dado.total} (${Math.round(fatia)}%)${motivos ? ` · ${motivos}` : ''}`;
         return `
             <button type="button" class="viz-seg${ativo ? ' is-active' : ''}"
-                style="width:${fatia}%;background:${item.cor}"
+                style="flex-grow:${dado.total};background:${item.cor}"
                 onclick="filtrarDesfecho('${item.id}')"
                 aria-pressed="${ativo}"
                 aria-label="${item.nome}: ${dado.total}"
-                onmousemove="mostrarDica(event, '${dica.replace(/'/g, '')}')"
-                onmouseleave="esconderDica()">
+                data-dica="${textoSeguro(dica)}">
                 ${fatia >= 18 ? `<span class="viz-seg__valor">${dado.total}</span>` : ''}
             </button>
         `;
@@ -423,22 +423,54 @@ function renderTabela() {
 }
 
 /* ---------------------------------------------------------------------------
- * Dica flutuante. Um gráfico em HTML é interativo por natureza; sem a dica, as
- * barras sem rótulo direto viram adivinhação.
+ * Dica flutuante.
+ *
+ * Fica em `position: fixed`, em coordenadas de viewport. A primeira versao era
+ * absoluta dentro do #app e calculava a posicao descontando o retangulo do
+ * container: como o #app rola, a dica aparecia deslocada assim que a pagina
+ * saia do topo, e perto da borda direita ela ESTICAVA a area rolavel, que era
+ * de onde vinha a barra de rolagem lateral. Elemento fixo nao ocupa espaco no
+ * fluxo, entao nao empurra nada.
+ *
+ * O texto vem de `data-dica` e um so ouvinte cobre todas as marcas: com a
+ * string dentro de um `onmousemove` inline, uma aspas num motivo ou num nick
+ * quebrava o atributo inteiro.
  * ------------------------------------------------------------------------- */
-function mostrarDica(event, texto) {
+const MARGEM_DICA = 14;
+
+function moverDica(event) {
+    const alvo = event.target.closest('[data-dica]');
     const dica = document.getElementById('viz_tooltip');
     if (!dica) return;
-    dica.textContent = texto;
+    if (!alvo) {
+        dica.hidden = true;
+        return;
+    }
+    dica.textContent = alvo.getAttribute('data-dica');
     dica.hidden = false;
-    const limites = APP.getBoundingClientRect();
-    dica.style.left = `${event.clientX - limites.left + 14}px`;
-    dica.style.top = `${event.clientY - limites.top + 14}px`;
+
+    // Encostou na borda? A dica vira para o outro lado do cursor em vez de
+    // sair da tela.
+    const caixa = dica.getBoundingClientRect();
+    const direita = event.clientX + MARGEM_DICA + caixa.width > window.innerWidth;
+    const abaixo = event.clientY + MARGEM_DICA + caixa.height > window.innerHeight;
+    dica.style.left = `${Math.max(4, direita ? event.clientX - MARGEM_DICA - caixa.width : event.clientX + MARGEM_DICA)}px`;
+    dica.style.top = `${Math.max(4, abaixo ? event.clientY - MARGEM_DICA - caixa.height : event.clientY + MARGEM_DICA)}px`;
 }
 
 function esconderDica() {
     const dica = document.getElementById('viz_tooltip');
     if (dica) dica.hidden = true;
+}
+
+function ligarDicas() {
+    const raiz = document.querySelector('.viz-root');
+    if (!raiz) return;
+    raiz.addEventListener('mousemove', moverDica);
+    raiz.addEventListener('mouseleave', esconderDica);
+    // Rolar com a dica aberta a deixaria parada no lugar errado, ja que ela vive
+    // em coordenadas de viewport.
+    APP.addEventListener('scroll', esconderDica);
 }
 
 // Sem modal: o painel não tem um, e a sub-view dentro do #app é o caminho que a

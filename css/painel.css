@@ -575,6 +575,10 @@ tr:nth-child(even) {
    gradiente translúcido do card.
    =========================================================================== */
 .viz-root {
+    /* Nada aqui dentro pode empurrar a pagina para o lado: o container do painel
+       rola nos dois eixos, e uma barra horizontal aparecendo e sumindo faz a
+       tela inteira tremer. */
+    max-width: 100%;
     --viz-surface: #f6fafa;
     --viz-ink: #16211f;
     --viz-ink-2: #4d5a58;
@@ -585,6 +589,7 @@ tr:nth-child(even) {
     --viz-4: #eda100;
     --viz-5: #e87ba4;
     --viz-6: #008300;
+    --viz-7: #4a3aa7;
     --viz-bar: #2a78d6;
     --viz-bar-forte: #184f95;
     --viz-novos: #86b6ef;
@@ -806,9 +811,16 @@ tr:nth-child(even) {
     gap: 2px;
     height: 34px;
     width: 100%;
+    max-width: 100%;
 }
 
+/* A largura sai do `flex-grow` proporcional, e nao de uma porcentagem: com
+   larguras em % somadas a uma largura minima e aos 2px de respiro entre os
+   segmentos, o total passava de 100% e a barra empurrava a pagina para o lado.
+   Com flex-grow o navegador distribui o espaco que existe, e os respiros ja
+   entram na conta. */
 .viz-seg {
+    flex: 1 1 0;
     border: 0;
     padding: 0;
     cursor: pointer;
@@ -857,9 +869,12 @@ tr:nth-child(even) {
 .viz-swatch--novos { background: var(--viz-novos); }
 .viz-swatch--entraram { background: var(--viz-entraram); }
 
+/* Fixa, em coordenadas de viewport: absoluta dentro do #app, que rola, ela
+   aparecia deslocada depois de qualquer rolagem e, perto da borda direita,
+   esticava a area rolavel -- era dali que vinha a rolagem lateral. */
 .viz-tooltip {
-    position: absolute;
-    z-index: 20;
+    position: fixed;
+    z-index: 999;
     pointer-events: none;
     background: #16211f;
     color: #ffffff;
