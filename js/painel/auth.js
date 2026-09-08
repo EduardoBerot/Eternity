@@ -20,8 +20,17 @@ async function authenticate() {
                 throw new Error('Erro na requisição');
             }
 
-            const {valid} = await response.json();
-            
+            const {valid, lider} = await response.json();
+
+            // A aba de recrutamento nasce escondida no HTML: ela mostra
+            // conversa privada de jogador e so lideres a enxergam. Esconder o
+            // menu e conveniencia de interface -- quem autoriza de verdade e o
+            // middleware do backend em cada requisicao.
+            if (valid && lider) {
+                const item = document.getElementById('recrutamento');
+                if (item) item.hidden = false;
+            }
+
             if (!valid){
                 alert(MSG);
                 deleteCookie(ETY_ADM_LOGIN_COOKIE);

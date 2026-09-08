@@ -6,6 +6,7 @@ const pages_content = {
     adicionar: renderAdicionar,
     excluidos: renderExcluidos,
     historico: renderHistorico,
+    recrutamento: renderRecrutamento,
 }
 
 function render(event) {

@@ -523,3 +523,43 @@ tr:nth-child(even) {
     background: rgba(181, 112, 0, 0.14);
     color: #8a5700;
 }
+
+/* Log da conversa de um recruta. O resto da tela de recrutamento reusa os
+   cards e tabelas que ja existem; so o balao de fala precisava de estilo. */
+.recruta-log {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+}
+
+.recruta-log__fala {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-width: 80%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: #f1f1f1;
+    color: #202020;
+}
+
+.recruta-log__fala--eternity {
+    align-self: flex-start;
+    background: #e8eef7;
+}
+
+.recruta-log__fala--jogador {
+    align-self: flex-end;
+    background: #eef7ea;
+}
+
+.recruta-log__fala strong {
+    font-size: 0.8rem;
+    opacity: 0.75;
+}
+
+.recruta-log__fala small {
+    font-size: 0.7rem;
+    opacity: 0.55;
+}
