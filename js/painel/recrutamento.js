@@ -1,278 +1,467 @@
 const URL_METRICAS_RECRUTAMENTO = `${URL_BASE}/api/recrutamento/metricas`;
 const URL_RECRUTAS = `${URL_BASE}/api/recrutamento/recrutas`;
 
-// Filtro de servidor da tela. Os dois funis sao conduzidos por bots diferentes,
-// em servidores diferentes, e somar os dois esconderia justamente a diferenca
-// entre eles.
-let recrutamentoServidor = '';
+// Estado da tela. O servidor e filtro de servidor (o backend consulta so aquele
+// funil); etapa, desfecho e semana sao recortes locais, feitos sobre a lista que
+// ja veio, para cada clique num grafico responder na hora.
+const painelRecrutamento = {
+    servidor: '',
+    etapa: null,
+    desfecho: null,
+    semana: null,
+    lista: [],
+    metricas: null,
+};
 
 const ETAPAS_LABEL = {
-    // Prospecao
     candidato: 'Visto no chat',
     abordado: 'Abordado',
     convertido: 'Aceitou o convite',
     recusou: 'Pediu para parar',
     sem_resposta: 'Sem resposta',
     encerrado: 'Encerrado',
-    inelegivel: 'Inelegivel',
-    // Recrutamento
+    inelegivel: 'Inelegível',
     visit: 'Lendo as placas',
     quiz: 'No teste',
     site: 'Falta o cadastro',
     discord: 'Falta o Discord',
     invited: 'Convite enviado',
-    returning: 'Voltando ao cla',
+    returning: 'Voltando ao clã',
     complete: 'Entrou',
 };
 
-const DESFECHO_LABEL = {
-    entrou: 'Entrou no cla',
-    em_andamento: 'Em andamento',
-    recusou: 'Pediu para parar',
-    sem_resposta: 'Sem resposta',
-    encerrado: 'Encerrado sem interesse',
-    inelegivel: 'Inelegivel',
-};
+// A cor seque o desfecho, nunca a posicao dele no ranking: filtrar a tela nao
+// pode repintar quem sobrou. Slots 1 a 6 da paleta categorica, na ordem fixa em
+// que ela foi validada para pares vizinhos.
+const DESFECHOS = [
+    { id: 'entrou', nome: 'Entrou no clã', cor: 'var(--viz-1)' },
+    { id: 'em_andamento', nome: 'Em andamento', cor: 'var(--viz-2)' },
+    { id: 'recusou', nome: 'Pediu para parar', cor: 'var(--viz-3)' },
+    { id: 'sem_resposta', nome: 'Sem resposta', cor: 'var(--viz-4)' },
+    { id: 'inelegivel', nome: 'Inelegível', cor: 'var(--viz-5)' },
+    { id: 'encerrado', nome: 'Encerrado sem interesse', cor: 'var(--viz-6)' },
+];
 
 function rotuloEtapa(valor) {
     return ETAPAS_LABEL[valor] || valor || '—';
 }
 
 function textoSeguro(valor) {
-    // Fala de jogador e texto escrito por estranho: vai para a tela escapado,
-    // sempre.
+    // Fala e nick sao texto escrito por estranho: vao para a tela escapados.
     const div = document.createElement('div');
     div.textContent = String(valor ?? '');
     return div.innerHTML;
 }
 
+function diaCurto(iso) {
+    if (!iso) return '';
+    const data = new Date(iso);
+    return Number.isNaN(data.getTime()) ? '' : data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+}
+
+function horaCurta(iso) {
+    if (!iso) return '';
+    const data = new Date(iso);
+    return Number.isNaN(data.getTime())
+        ? ''
+        : data.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
 function renderRecrutamento() {
     APP.innerHTML = `
-        <div class="pending-page">
+        <div class="pending-page viz-root">
             <header class="pending-page__intro">
                 <span class="pending-page__eyebrow">Central de análise</span>
                 <h1>Recrutamento</h1>
-                <p>Quem está parado no meio do caminho, onde o funil vaza e o que está convertendo.</p>
-                <div class="member-toggle" id="filtro_servidor">
-                    <button type="button" class="member-toggle__button is-active" onclick="filtrarServidor(event,'')">Todos</button>
-                    <button type="button" class="member-toggle__button" onclick="filtrarServidor(event,'apocalipse')">Apocalipse</button>
-                    <button type="button" class="member-toggle__button" onclick="filtrarServidor(event,'genesis')">Gênesis</button>
+                <p id="aviso_cobertura">Carregando...</p>
+                <div class="viz-filtros">
+                    <div class="member-toggle" id="filtro_servidor">
+                        <button type="button" class="member-toggle__button is-active" onclick="filtrarServidor(event,'')">Todos</button>
+                        <button type="button" class="member-toggle__button" onclick="filtrarServidor(event,'apocalipse')">Apocalipse</button>
+                        <button type="button" class="member-toggle__button" onclick="filtrarServidor(event,'genesis')">Gênesis</button>
+                    </div>
+                    <div class="viz-chips" id="viz_chips"></div>
                 </div>
             </header>
 
-            <div class="pending-list">
-                <section class="pending-card">
+            <div class="viz-tiles" id="viz_tiles"></div>
+
+            <div class="viz-grid">
+                <section class="pending-card viz-card">
                     <div class="pending-card__header">
                         <div>
-                            <h2>Números do funil</h2>
-                            <p id="aviso_cobertura">Carregando...</p>
+                            <h2>Onde o funil vaza</h2>
+                            <p>Quantos chegaram a cada degrau. Clique num degrau para ver quem está nele.</p>
                         </div>
                     </div>
-                    <div class="pending-card__loading" id="loading_kpis">Carregando números...</div>
-                    <div class="pending-card__table" id="cartoes_recrutamento"></div>
+                    <div class="viz-plot" id="viz_funil"></div>
                 </section>
 
-                <section class="pending-card">
+                <section class="pending-card viz-card">
                     <div class="pending-card__header">
                         <div>
-                            <h2>Onde está travado</h2>
-                            <p>Quem começou o recrutamento e não terminou, do mais parado para o mais recente.</p>
-                        </div>
-                        <span class="pending-card__count" id="count_parados">—</span>
-                    </div>
-                    <div class="pending-card__loading" id="loading_parados">Carregando quem está parado...</div>
-                    <div class="pending-card__table"><table id="tb_parados"></table></div>
-                </section>
-
-                <section class="pending-card">
-                    <div class="pending-card__header">
-                        <div>
-                            <h2>Passagem por etapa</h2>
-                            <p>Quantos chegaram a cada degrau e que fatia do degrau anterior isso representa.</p>
+                            <h2>Semana a semana</h2>
+                            <p>Quem entrou no funil e quem chegou ao clã, nas últimas 12 semanas.</p>
                         </div>
                     </div>
-                    <div class="pending-card__table" id="tabela_funil"></div>
-                </section>
-
-                <section class="pending-card">
-                    <div class="pending-card__header">
-                        <div>
-                            <h2>Desfechos</h2>
-                            <p>Como terminaram os que saíram do funil, com o motivo registrado.</p>
-                        </div>
-                    </div>
-                    <div class="pending-card__table" id="tabela_desfechos"></div>
+                    <div class="viz-plot" id="viz_semanas"></div>
                 </section>
             </div>
+
+            <section class="pending-card viz-card">
+                <div class="pending-card__header">
+                    <div>
+                        <h2>Como terminaram</h2>
+                        <p>Composição de todo mundo que passou pelo funil. Clique para recortar a lista.</p>
+                    </div>
+                </div>
+                <div class="viz-plot" id="viz_desfechos"></div>
+            </section>
+
+            <section class="pending-card viz-card">
+                <div class="pending-card__header">
+                    <div>
+                        <h2 id="titulo_lista">Fila de ação</h2>
+                        <p id="subtitulo_lista">Quem começou e não terminou, do mais parado para o mais recente.</p>
+                    </div>
+                    <span class="pending-card__count" id="count_lista">—</span>
+                </div>
+                <div class="pending-card__loading" id="loading_lista">Carregando...</div>
+                <div class="pending-card__table"><table id="tb_recrutas"></table></div>
+            </section>
+
+            <div class="viz-tooltip" id="viz_tooltip" hidden></div>
         </div>
     `;
 
-    carregarMetricas();
-    carregarParados();
+    carregarRecrutamento();
 }
 
 function filtrarServidor(event, servidor) {
-    recrutamentoServidor = servidor;
+    painelRecrutamento.servidor = servidor;
     for (const botao of document.querySelectorAll('#filtro_servidor .member-toggle__button')) {
         botao.classList.remove('is-active');
     }
-    event.target.classList.add('is-active');
-    carregarMetricas();
-    carregarParados();
+    event.currentTarget.classList.add('is-active');
+    carregarRecrutamento();
 }
 
-function queryServidor() {
-    return recrutamentoServidor ? `?servidor=${recrutamentoServidor}` : '';
-}
+function carregarRecrutamento() {
+    const query = painelRecrutamento.servidor ? `?servidor=${painelRecrutamento.servidor}` : '';
+    const cabecalhos = { headers: getAdminRequestHeaders() };
 
-function carregarMetricas() {
-    fetch(`${URL_METRICAS_RECRUTAMENTO}${queryServidor()}`, { headers: getAdminRequestHeaders() })
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return response.json();
+    Promise.all([
+        fetch(`${URL_METRICAS_RECRUTAMENTO}${query}`, cabecalhos).then(resposta => {
+            if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+            return resposta.json();
+        }),
+        // A lista vem inteira, uma vez: com ela na mao, todo clique num grafico
+        // recorta a tabela sem uma nova volta ao servidor.
+        fetch(`${URL_RECRUTAS}${query}${query ? '&' : '?'}estado=todos`, cabecalhos).then(resposta => {
+            if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+            return resposta.json();
+        }),
+    ])
+        .then(([metricas, lista]) => {
+            painelRecrutamento.metricas = metricas;
+            painelRecrutamento.lista = lista;
+            painelRecrutamento.etapa = null;
+            painelRecrutamento.desfecho = null;
+            painelRecrutamento.semana = null;
+            document.getElementById('loading_lista').style.display = 'none';
+            renderCobertura(metricas.cobertura);
+            renderTiles(metricas.kpis);
+            renderFunil(metricas.funil);
+            renderSemanas(metricas.serie);
+            renderDesfechos(metricas.desfechos);
+            renderTabela();
         })
-        .then(dados => {
-            document.getElementById('loading_kpis').style.display = 'none';
-            renderCartoes(dados.kpis);
-            renderFunil(dados.funil);
-            renderDesfechos(dados.desfechos);
-            renderCobertura(dados.cobertura);
-        })
-        .catch(error => {
-            document.getElementById('loading_kpis').textContent = 'Não foi possível carregar os números.';
-            console.error('Métricas de recrutamento:', error);
+        .catch(erro => {
+            document.getElementById('loading_lista').textContent = 'Não foi possível carregar o painel.';
+            console.error('Painel de recrutamento:', erro);
         });
-}
-
-function renderCartoes(kpis) {
-    const horas = kpis.horasMedianasAteEntrar;
-    const tempo = horas === null
-        ? '—'
-        : (horas >= 48 ? `${Math.round(horas / 24)} dias` : `${horas} h`);
-    const cartoes = [
-        ['Abordados', kpis.abordados],
-        ['Demonstraram interesse', kpis.interessados],
-        ['Entraram no clã', kpis.entraram],
-        ['Taxa de conversão', `${kpis.taxaConversao}%`],
-        ['Parados agora', kpis.parados],
-        ['Parados há mais de 7 dias', kpis.paradosMaisDeUmaSemana],
-        ['Tempo até entrar', tempo],
-    ];
-    document.getElementById('cartoes_recrutamento').innerHTML = `
-        <table>
-            <tbody>
-                ${cartoes.map(([nome, valor]) => `<tr><td>${nome}</td><td><strong>${valor}</strong></td></tr>`).join('')}
-            </tbody>
-        </table>
-    `;
 }
 
 function renderCobertura(cobertura) {
     const aviso = document.getElementById('aviso_cobertura');
     if (!cobertura || !cobertura.parcial) {
-        aviso.textContent = 'Todos os registros têm o histórico completo de etapas.';
+        aviso.textContent = 'Quem está solto, o que converte e quanto tempo leva.';
         return;
     }
-    // Sem esse aviso as primeiras taxas parecem desempenho ruim quando são, na
-    // verdade, ausência de dado: o histórico de etapas só passou a ser gravado
-    // em 08/09/2026.
+    // Sem este aviso, as primeiras taxas parecem desempenho péssimo quando são,
+    // na verdade, ausência de dado: o histórico de etapas só passou a ser
+    // gravado em 08/09/2026.
     const semHistorico = cobertura.total - cobertura.comHistorico;
-    aviso.textContent = `Atenção: ${semHistorico} de ${cobertura.total} registros são anteriores ao histórico de etapas. `
-        + 'Para eles, vale a etapa em que estão hoje, e as taxas abaixo são parciais.';
+    aviso.textContent = `${semHistorico} de ${cobertura.total} registros são anteriores ao histórico de etapas: `
+        + 'para eles vale a etapa de hoje, e as taxas abaixo são parciais.';
 }
 
+/* ---------------------------------------------------------------------------
+ * Cartões. Números soltos são números, não gráficos de uma barra só.
+ * ------------------------------------------------------------------------- */
+function renderTiles(kpis) {
+    const horas = kpis.horasMedianasAteEntrar;
+    const tempo = horas === null
+        ? '—'
+        : (horas >= 48 ? `${Math.round(horas / 24)}d` : `${horas}h`);
+    const tiles = [
+        { valor: `${kpis.taxaConversao}%`, nome: 'Conversão', nota: `${kpis.entraram} de ${kpis.total}`, destaque: true },
+        { valor: kpis.abordados, nome: 'Abordados' },
+        { valor: kpis.interessados, nome: 'Interessados' },
+        { valor: kpis.entraram, nome: 'Entraram' },
+        { valor: kpis.parados, nome: 'Parados', nota: `${kpis.paradosMaisDeUmaSemana} há mais de 7 dias` },
+        { valor: tempo, nome: 'Até entrar', nota: 'mediana' },
+    ];
+    document.getElementById('viz_tiles').innerHTML = tiles.map(tile => `
+        <div class="viz-tile${tile.destaque ? ' viz-tile--destaque' : ''}">
+            <span class="viz-tile__valor">${tile.valor}</span>
+            <span class="viz-tile__nome">${tile.nome}</span>
+            ${tile.nota ? `<span class="viz-tile__nota">${tile.nota}</span>` : ''}
+        </div>
+    `).join('');
+}
+
+/* ---------------------------------------------------------------------------
+ * Funil. Uma cor só: o comprimento carrega a magnitude e a posição vertical já
+ * carrega a ordem. Pintar cada degrau de um tom diferente gastaria o único
+ * canal livre repetindo o que a barra mostra.
+ * ------------------------------------------------------------------------- */
 function renderFunil(funil) {
-    document.getElementById('tabela_funil').innerHTML = `
-        <table>
-            <thead><tr><th>Etapa</th><th>Chegaram</th><th>Do degrau anterior</th></tr></thead>
-            <tbody>
-                ${funil.map(degrau => `
-                    <tr>
-                        <td>${degrau.nome}</td>
-                        <td>${degrau.total}</td>
-                        <td>${degrau.taxa === null ? '—' : `${degrau.taxa}%`}</td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
+    const maior = Math.max(...funil.map(degrau => degrau.total), 1);
+    const clicaveis = new Set(['visit', 'quiz', 'site', 'discord', 'invited', 'complete']);
+    document.getElementById('viz_funil').innerHTML = funil.map(degrau => {
+        const largura = Math.max((degrau.total / maior) * 100, degrau.total ? 2 : 0);
+        const clicavel = clicaveis.has(degrau.id);
+        const ativo = painelRecrutamento.etapa === degrau.id;
+        return `
+            <button type="button"
+                class="viz-barra${ativo ? ' is-active' : ''}${clicavel ? '' : ' viz-barra--fixa'}"
+                ${clicavel ? `onclick="filtrarEtapa('${degrau.id}')"` : 'disabled'}
+                aria-pressed="${ativo}"
+                onmousemove="mostrarDica(event, '${degrau.nome}: ${degrau.total} pessoa(s)${degrau.taxa === null ? '' : ` · ${degrau.taxa}% do degrau anterior`}')"
+                onmouseleave="esconderDica()">
+                <span class="viz-barra__nome">${degrau.nome}</span>
+                <span class="viz-barra__trilho">
+                    <span class="viz-barra__fill" style="width:${largura}%"></span>
+                </span>
+                <span class="viz-barra__valor">${degrau.total}</span>
+                <span class="viz-barra__taxa">${degrau.taxa === null ? '' : `${degrau.taxa}%`}</span>
+            </button>
+        `;
+    }).join('');
+}
+
+/* ---------------------------------------------------------------------------
+ * Semanas. As duas séries são as duas pontas da MESMA jornada e dividem o
+ * mesmo eixo; por isso são dois tons de um azul só, e não duas cores.
+ * ------------------------------------------------------------------------- */
+function renderSemanas(serie) {
+    if (!serie || !serie.length) {
+        document.getElementById('viz_semanas').innerHTML = '<p class="table-message">Sem histórico suficiente.</p>';
+        return;
+    }
+    const maior = Math.max(...serie.flatMap(item => [item.novos, item.entraram]), 1);
+    const colunas = serie.map((item, indice) => {
+        const ativo = painelRecrutamento.semana === item.semana;
+        const dica = `Semana de ${diaCurto(item.semana)}: ${item.novos} no funil, ${item.entraram} entraram`;
+        return `
+            <button type="button" class="viz-semana${ativo ? ' is-active' : ''}"
+                onclick="filtrarSemana('${item.semana}')"
+                aria-pressed="${ativo}"
+                onmousemove="mostrarDica(event, '${dica}')"
+                onmouseleave="esconderDica()">
+                <span class="viz-semana__colunas">
+                    <span class="viz-semana__col viz-semana__col--novos" style="height:${(item.novos / maior) * 100}%"></span>
+                    <span class="viz-semana__col viz-semana__col--entraram" style="height:${(item.entraram / maior) * 100}%"></span>
+                </span>
+                <span class="viz-semana__label">${indice % 2 === 0 ? diaCurto(item.semana) : ''}</span>
+            </button>
+        `;
+    }).join('');
+
+    document.getElementById('viz_semanas').innerHTML = `
+        <div class="viz-legenda">
+            <span><i class="viz-swatch viz-swatch--novos"></i>Entraram no funil</span>
+            <span><i class="viz-swatch viz-swatch--entraram"></i>Entraram no clã</span>
+        </div>
+        <div class="viz-semanas">${colunas}</div>
     `;
 }
 
+/* ---------------------------------------------------------------------------
+ * Desfechos. Parte-de-um-todo: uma barra empilhada, com 2px de respiro entre
+ * os segmentos e rótulo direto em quem cabe.
+ * ------------------------------------------------------------------------- */
 function renderDesfechos(desfechos) {
-    document.getElementById('tabela_desfechos').innerHTML = `
-        <table>
-            <thead><tr><th>Desfecho</th><th>Total</th><th>Motivos</th></tr></thead>
-            <tbody>
-                ${desfechos.map(item => `
-                    <tr>
-                        <td>${DESFECHO_LABEL[item.desfecho] || item.desfecho}</td>
-                        <td>${item.total}</td>
-                        <td>${Object.entries(item.motivos).map(([motivo, total]) => `${textoSeguro(motivo)} (${total})`).join(', ') || '—'}</td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
+    const porId = Object.fromEntries(desfechos.map(item => [item.desfecho, item]));
+    const total = desfechos.reduce((soma, item) => soma + item.total, 0) || 1;
+    const presentes = DESFECHOS.filter(item => porId[item.id]);
+
+    const segmentos = presentes.map(item => {
+        const dado = porId[item.id];
+        const fatia = (dado.total / total) * 100;
+        const ativo = painelRecrutamento.desfecho === item.id;
+        const motivos = Object.entries(dado.motivos).map(([motivo, qtd]) => `${motivo} (${qtd})`).join(', ');
+        const dica = `${item.nome}: ${dado.total} (${Math.round(fatia)}%)${motivos ? ` · ${motivos}` : ''}`;
+        return `
+            <button type="button" class="viz-seg${ativo ? ' is-active' : ''}"
+                style="width:${fatia}%;background:${item.cor}"
+                onclick="filtrarDesfecho('${item.id}')"
+                aria-pressed="${ativo}"
+                aria-label="${item.nome}: ${dado.total}"
+                onmousemove="mostrarDica(event, '${dica.replace(/'/g, '')}')"
+                onmouseleave="esconderDica()">
+                ${fatia >= 18 ? `<span class="viz-seg__valor">${dado.total}</span>` : ''}
+            </button>
+        `;
+    }).join('');
+
+    const legenda = presentes.map(item => `
+        <span><i class="viz-swatch" style="background:${item.cor}"></i>${item.nome} <strong>${porId[item.id].total}</strong></span>
+    `).join('');
+
+    document.getElementById('viz_desfechos').innerHTML = `
+        <div class="viz-empilhada">${segmentos}</div>
+        <div class="viz-legenda viz-legenda--larga">${legenda}</div>
     `;
 }
 
-function carregarParados() {
-    const loading = document.getElementById('loading_parados');
-    loading.style.display = '';
-    fetch(`${URL_RECRUTAS}${queryServidor()}`, { headers: getAdminRequestHeaders() })
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return response.json();
-        })
-        .then(lista => {
-            loading.style.display = 'none';
-            document.getElementById('count_parados').textContent = lista.length;
-            document.getElementById('tb_parados').innerHTML = lista.length ? `
-                <thead><tr><th>Nick</th><th>Servidor</th><th>Origem</th><th>Etapa</th><th>Parado há</th><th>Log</th></tr></thead>
-                <tbody>
-                    ${lista.map(item => `
-                        <tr>
-                            <td>${textoSeguro(item.nick)}</td>
-                            <td>${item.servidor === 'genesis' ? 'Gênesis' : 'Apocalipse'}</td>
-                            <td>${item.origem === 'prospeccao' ? 'Prospecção' : 'Orgânico'}</td>
-                            <td>${rotuloEtapa(item.etapa)}</td>
-                            <td>${item.dias_parado === null ? '—' : `${item.dias_parado} dia(s)`}</td>
-                            <td>
-                                <button type="button" class="btn btn-secondary" value="${item.id}"
-                                    ${item.tem_conversa ? '' : 'disabled title="Sem conversa gravada"'}
-                                    onclick="renderConversaRecruta(event)">Log</button>
-                            </td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            ` : '<tbody><tr><td class="table-message">Ninguém parado no meio do recrutamento.</td></tr></tbody>';
-        })
-        .catch(error => {
-            loading.textContent = 'Não foi possível carregar a lista.';
-            console.error('Lista de recrutas:', error);
-        });
+/* ---------------------------------------------------------------------------
+ * Filtros: cada clique num gráfico recorta a tabela. Clicar de novo desfaz.
+ * ------------------------------------------------------------------------- */
+function filtrarEtapa(etapa) {
+    painelRecrutamento.etapa = painelRecrutamento.etapa === etapa ? null : etapa;
+    renderFunil(painelRecrutamento.metricas.funil);
+    renderTabela();
 }
 
-// Sem modal: o painel não tem um, e a sub-view dentro do #app é o caminho que
-// a tela de edição já usa.
+function filtrarDesfecho(desfecho) {
+    painelRecrutamento.desfecho = painelRecrutamento.desfecho === desfecho ? null : desfecho;
+    renderDesfechos(painelRecrutamento.metricas.desfechos);
+    renderTabela();
+}
+
+function filtrarSemana(semana) {
+    painelRecrutamento.semana = painelRecrutamento.semana === semana ? null : semana;
+    renderSemanas(painelRecrutamento.metricas.serie);
+    renderTabela();
+}
+
+function limparFiltros() {
+    painelRecrutamento.etapa = null;
+    painelRecrutamento.desfecho = null;
+    painelRecrutamento.semana = null;
+    renderFunil(painelRecrutamento.metricas.funil);
+    renderSemanas(painelRecrutamento.metricas.serie);
+    renderDesfechos(painelRecrutamento.metricas.desfechos);
+    renderTabela();
+}
+
+function mesmaSemana(iso, semana) {
+    if (!iso) return false;
+    const inicio = new Date(semana);
+    const fim = new Date(inicio.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const data = new Date(iso);
+    return data >= inicio && data < fim;
+}
+
+function listaFiltrada() {
+    const { etapa, desfecho, semana } = painelRecrutamento;
+    return painelRecrutamento.lista
+        .filter(item => (etapa ? item.etapa === etapa : true))
+        .filter(item => (desfecho ? item.desfecho === desfecho : true))
+        .filter(item => (semana ? mesmaSemana(item.iniciado_em, semana) || mesmaSemana(item.concluido_em, semana) : true));
+}
+
+function renderChips() {
+    const { etapa, desfecho, semana } = painelRecrutamento;
+    const chips = [];
+    if (etapa) chips.push(['Etapa: ' + rotuloEtapa(etapa), `filtrarEtapa('${etapa}')`]);
+    if (desfecho) {
+        const nome = (DESFECHOS.find(item => item.id === desfecho) || {}).nome || desfecho;
+        chips.push(['Desfecho: ' + nome, `filtrarDesfecho('${desfecho}')`]);
+    }
+    if (semana) chips.push(['Semana de ' + diaCurto(semana), `filtrarSemana('${semana}')`]);
+
+    document.getElementById('viz_chips').innerHTML = chips.length
+        ? chips.map(([texto, acao]) => `<button type="button" class="viz-chip" onclick="${acao}">${texto} ×</button>`).join('')
+          + '<button type="button" class="viz-chip viz-chip--limpar" onclick="limparFiltros()">Limpar</button>'
+        : '';
+}
+
+function renderTabela() {
+    renderChips();
+    const lista = listaFiltrada();
+    const semFiltro = !painelRecrutamento.etapa && !painelRecrutamento.desfecho && !painelRecrutamento.semana;
+    const visiveis = semFiltro ? lista.filter(item => item.desfecho === 'em_andamento') : lista;
+
+    document.getElementById('titulo_lista').textContent = semFiltro ? 'Fila de ação' : 'Recorte selecionado';
+    document.getElementById('subtitulo_lista').textContent = semFiltro
+        ? 'Quem começou e não terminou, do mais parado para o mais recente.'
+        : 'Clique de novo no gráfico para desfazer o recorte.';
+    document.getElementById('count_lista').textContent = visiveis.length;
+
+    document.getElementById('tb_recrutas').innerHTML = visiveis.length ? `
+        <thead><tr><th>Nick</th><th>Servidor</th><th>Origem</th><th>Etapa</th><th>Parado há</th><th>Log</th></tr></thead>
+        <tbody>
+            ${visiveis.map(item => `
+                <tr>
+                    <td>${textoSeguro(item.nick)}</td>
+                    <td>${item.servidor === 'genesis' ? 'Gênesis' : 'Apocalipse'}</td>
+                    <td>${item.origem === 'prospeccao' ? 'Prospecção' : 'Orgânico'}</td>
+                    <td>${rotuloEtapa(item.etapa)}</td>
+                    <td>${item.dias_parado === null ? '—' : `${item.dias_parado} dia(s)`}</td>
+                    <td>
+                        <button type="button" class="btn btn-secondary" value="${item.id}"
+                            ${item.tem_conversa ? '' : 'disabled title="Sem conversa gravada"'}
+                            onclick="renderConversaRecruta(event)">Log</button>
+                    </td>
+                </tr>
+            `).join('')}
+        </tbody>
+    ` : '<tbody><tr><td class="table-message">Ninguém neste recorte.</td></tr></tbody>';
+}
+
+/* ---------------------------------------------------------------------------
+ * Dica flutuante. Um gráfico em HTML é interativo por natureza; sem a dica, as
+ * barras sem rótulo direto viram adivinhação.
+ * ------------------------------------------------------------------------- */
+function mostrarDica(event, texto) {
+    const dica = document.getElementById('viz_tooltip');
+    if (!dica) return;
+    dica.textContent = texto;
+    dica.hidden = false;
+    const limites = APP.getBoundingClientRect();
+    dica.style.left = `${event.clientX - limites.left + 14}px`;
+    dica.style.top = `${event.clientY - limites.top + 14}px`;
+}
+
+function esconderDica() {
+    const dica = document.getElementById('viz_tooltip');
+    if (dica) dica.hidden = true;
+}
+
+// Sem modal: o painel não tem um, e a sub-view dentro do #app é o caminho que a
+// tela de edição já usa.
 function renderConversaRecruta(event) {
-    const id = event.target.getAttribute('value');
+    const id = event.currentTarget.getAttribute('value');
     APP.innerHTML = '';
     renderLoading(APP);
 
     fetch(`${URL_RECRUTAS}/${id}/conversa`, { headers: getAdminRequestHeaders() })
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return response.json();
+        .then(resposta => {
+            if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+            return resposta.json();
         })
         .then(dados => {
             const corpo = dados.expirada
-                ? '<p class="table-message">A conversa passou de 90 dias e o texto foi apagado. O histórico do funil continua acima.</p>'
+                ? '<p class="table-message">A conversa passou de 90 dias e o texto foi apagado. O histórico do funil continua na tela anterior.</p>'
                 : (dados.falas.length
                     ? dados.falas.map(fala => `
                         <div class="recruta-log__fala recruta-log__fala--${fala.quem === 'jogador' ? 'jogador' : 'eternity'}">
                             <strong>${fala.quem === 'jogador' ? textoSeguro(dados.nick) : 'Eternity'}</strong>
                             <span>${textoSeguro(fala.texto)}</span>
-                            <small>${fala.at ? getDate(fala.at, true) : ''}</small>
+                            <small>${horaCurta(fala.at)}</small>
                         </div>
                     `).join('')
                     : '<p class="table-message">Nenhuma fala gravada para este recruta.</p>');
@@ -295,8 +484,8 @@ function renderConversaRecruta(event) {
                 </div>
             `;
         })
-        .catch(error => {
+        .catch(erro => {
             APP.innerHTML = '<p class="table-message">Não foi possível carregar a conversa.</p>';
-            console.error('Conversa do recruta:', error);
+            console.error('Conversa do recruta:', erro);
         });
 }

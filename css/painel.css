@@ -563,3 +563,317 @@ tr:nth-child(even) {
     font-size: 0.7rem;
     opacity: 0.55;
 }
+
+/* ===========================================================================
+   Painel de recrutamento.
+
+   Os valores de cor vêm da paleta validada: os seis primeiros slots
+   categóricos para os desfechos (identidade, ordem fixa) e um azul só para o
+   funil, porque ali o comprimento da barra já carrega a magnitude e a posição
+   vertical já carrega a ordem. Superfície #f6fafa: a validação de contraste foi
+   feita contra ela, então o gráfico pinta o próprio fundo em vez de herdar o
+   gradiente translúcido do card.
+   =========================================================================== */
+.viz-root {
+    --viz-surface: #f6fafa;
+    --viz-ink: #16211f;
+    --viz-ink-2: #4d5a58;
+    --viz-track: #dfe8e8;
+    --viz-1: #2a78d6;
+    --viz-2: #eb6834;
+    --viz-3: #1baf7a;
+    --viz-4: #eda100;
+    --viz-5: #e87ba4;
+    --viz-6: #008300;
+    --viz-bar: #2a78d6;
+    --viz-bar-forte: #184f95;
+    --viz-novos: #86b6ef;
+    --viz-entraram: #2a78d6;
+    position: relative;
+    width: 100%;
+}
+
+.viz-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.viz-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.viz-chip {
+    border: 1px solid rgba(0, 81, 87, 0.35);
+    background: var(--viz-surface);
+    color: var(--viz-ink);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.viz-chip:hover, .viz-chip:focus-visible {
+    background: #e8f1f1;
+}
+
+.viz-chip--limpar {
+    border-style: dashed;
+}
+
+/* Linha de cartões: número solto é número, não gráfico de uma barra só. */
+.viz-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 14px;
+}
+
+.viz-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 14px;
+    border-radius: 4px 16px 4px 16px;
+    border: 1px solid rgba(0, 81, 87, 0.25);
+    background: var(--viz-surface);
+}
+
+.viz-tile--destaque .viz-tile__valor {
+    font-size: 2.6rem;
+    color: var(--viz-bar-forte);
+}
+
+.viz-tile__valor {
+    font-size: 1.7rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--viz-ink);
+}
+
+.viz-tile__nome {
+    font-size: 0.85rem;
+    color: var(--viz-ink);
+}
+
+.viz-tile__nota {
+    font-size: 0.72rem;
+    color: var(--viz-ink-2);
+}
+
+.viz-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 14px;
+    width: 100%;
+}
+
+.viz-card {
+    margin-bottom: 14px;
+}
+
+.viz-plot {
+    padding: 14px 18px 18px;
+    background: var(--viz-surface);
+}
+
+/* Funil: barra fina, ponta arredondada, ancorada na linha de base. */
+.viz-barra {
+    display: grid;
+    grid-template-columns: 150px 1fr 40px 46px;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 5px 0;
+    border: 0;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    color: var(--viz-ink);
+    font: inherit;
+}
+
+.viz-barra--fixa {
+    cursor: default;
+}
+
+.viz-barra__nome {
+    font-size: 0.82rem;
+}
+
+.viz-barra__trilho {
+    height: 14px;
+    border-radius: 0 4px 4px 0;
+    background: var(--viz-track);
+}
+
+.viz-barra__fill {
+    display: block;
+    height: 100%;
+    border-radius: 0 4px 4px 0;
+    background: var(--viz-bar);
+    transition: width 0.2s ease;
+}
+
+.viz-barra.is-active .viz-barra__fill,
+.viz-barra:hover:not(.viz-barra--fixa) .viz-barra__fill {
+    background: var(--viz-bar-forte);
+}
+
+.viz-barra.is-active {
+    outline: 2px solid var(--viz-bar-forte);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.viz-barra__valor {
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-align: right;
+}
+
+.viz-barra__taxa {
+    font-size: 0.78rem;
+    color: var(--viz-ink-2);
+    text-align: right;
+}
+
+/* Semanas: duas colunas finas por semana, dois tons de um azul só, porque são
+   as duas pontas da mesma jornada e dividem o mesmo eixo. */
+.viz-semanas {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 190px;
+    margin-top: 8px;
+}
+
+.viz-semana {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 4px;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.viz-semana:hover, .viz-semana.is-active {
+    background: rgba(42, 120, 214, 0.08);
+}
+
+.viz-semana.is-active {
+    outline: 2px solid var(--viz-bar-forte);
+    outline-offset: 1px;
+}
+
+.viz-semana__colunas {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 2px;
+    height: 100%;
+}
+
+.viz-semana__col {
+    width: 8px;
+    min-height: 2px;
+    border-radius: 4px 4px 0 0;
+}
+
+.viz-semana__col--novos { background: var(--viz-novos); }
+.viz-semana__col--entraram { background: var(--viz-entraram); }
+
+.viz-semana__label {
+    font-size: 0.68rem;
+    color: var(--viz-ink-2);
+    text-align: center;
+    min-height: 1em;
+}
+
+/* Desfechos: parte-de-um-todo, com 2px de respiro entre os segmentos. */
+.viz-empilhada {
+    display: flex;
+    gap: 2px;
+    height: 34px;
+    width: 100%;
+}
+
+.viz-seg {
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 3px;
+    /* Um segmento de 1% ainda precisa ser clicavel: o alvo nao pode ser menor
+       que o dedo de quem clica, mesmo que a fatia seja. */
+    min-width: 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.viz-seg.is-active {
+    outline: 2px solid var(--viz-ink);
+    outline-offset: 2px;
+}
+
+/* O rotulo veste tinta de texto, nunca branco sobre o preenchimento: em cima
+   do amarelo e do verde-agua o branco some. So aparece em segmento largo o
+   bastante para caber; nos outros, quem nomeia e a legenda logo abaixo, que
+   traz nome e contagem de todos. */
+.viz-seg__valor {
+    color: #16211f;
+}
+
+.viz-legenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 12px;
+    font-size: 0.78rem;
+    color: var(--viz-ink);
+}
+
+.viz-legenda--larga {
+    gap: 10px 18px;
+}
+
+.viz-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    margin-right: 6px;
+}
+
+.viz-swatch--novos { background: var(--viz-novos); }
+.viz-swatch--entraram { background: var(--viz-entraram); }
+
+.viz-tooltip {
+    position: absolute;
+    z-index: 20;
+    pointer-events: none;
+    background: #16211f;
+    color: #ffffff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.76rem;
+    max-width: 280px;
+}
+
+@media (max-width: 720px) {
+    .viz-barra {
+        grid-template-columns: 110px 1fr 34px;
+    }
+    .viz-barra__taxa {
+        display: none;
+    }
+}
