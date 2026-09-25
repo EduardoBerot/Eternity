@@ -26,7 +26,7 @@ function renderHistorico() {
     fetchDataAndRenderTable(URL_GET_EVENTOS, table_id, properties, undefined, ()=>{
         replaceInTableHeader(FIELD_MASK['recrutador'], 'Staff')
         replaceInTableHeader(FIELD_MASK['nick'], 'Player')
-    });
+    }, { headers: getAdminRequestHeaders() });
 }
 
 function renderExcluidos() {
@@ -45,7 +45,7 @@ function renderExcluidos() {
 
     fetchDataAndRenderTable(URL_GET_MEMBROS_BANIDOS, table_id, properties, extraField, ()=>{
         convertDatesToAges(table_id, FIELD_MASK['data_nascimento'])
-    });
+    }, { headers: getAdminRequestHeaders() });
 }
 
 function renderSolicitacoes() {
@@ -320,7 +320,9 @@ function fetchDataMembros(table_id, view = 'ativos') {
         };
 
     const url = showingInactive ? URL_GET_MEMBROS_INATIVOS : URL_GET_VINCULOS_DISCORD;
-    const fetchOptions = showingInactive ? {} : { headers: getAdminRequestHeaders() };
+    // As duas listas vao com o login: a de inativos tambem traz a data de
+    // nascimento, que o site so entrega a staff identificado.
+    const fetchOptions = { headers: getAdminRequestHeaders() };
     fetchDataAndRenderTable(url, table_id, properties, extraField, ()=>{
         if (showingInactive) return;
         replaceInTableHeader(FIELD_MASK['data_entrada'], fieldDataEntrada);
@@ -397,7 +399,8 @@ async function checkOutSolicitation(event){
         const recrutador = getCookie(ETY_ADM_LOGIN_COOKIE);
         const opcoes = {
             method: 'PATCH', 
-            headers: {'Content-Type': 'application/json'},
+            // Apagar e banir exigem staff logado desde 25/09/2026.
+            headers: getAdminRequestHeaders(),
             body: JSON.stringify({comentario, recrutador})
         }
         fetch(`${URL_KICK_MEMBRO}/${id}`, opcoes)
@@ -419,7 +422,8 @@ async function checkOutSolicitation(event){
         const recrutador = getCookie(ETY_ADM_LOGIN_COOKIE);
         const opcoes = {
             method: 'PATCH', 
-            headers: {'Content-Type': 'application/json'},
+            // Apagar e banir exigem staff logado desde 25/09/2026.
+            headers: getAdminRequestHeaders(),
             body: JSON.stringify({comentario, recrutador})
         }
         fetch(`${URL_BAN_MEMBRO}/${id}`, opcoes)

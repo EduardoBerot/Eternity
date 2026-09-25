@@ -17,7 +17,7 @@ function renderEditPage(event) {
     clearAPP(APP);
     renderLoading(APP);
 
-    fetch(`${URL_GET_MEMBRO}/${id}`)
+    fetch(`${URL_GET_MEMBRO}/${id}`, { headers: getAdminRequestHeaders() })
     .then(response => {
         if (response.ok) {
             return response.json();
