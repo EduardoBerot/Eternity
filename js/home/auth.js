@@ -18,7 +18,14 @@ async function send (event){
             const existingMember = activeMembers.find(member =>
                 String(member.nick || '').trim().toLowerCase() === normalizedNick
             );
-            const isProfileUpdate = Boolean(existingMember);
+            // Este formulario so atualiza cadastro de membro. Entrar no cla e
+            // pelo Guia do Recruta, que exige o teste.
+            if (!existingMember) {
+                alert('Esse nick não está entre os membros ativos. Para entrar no clã, use o Guia do Recruta.');
+                openGuia();
+                return;
+            }
+            const isProfileUpdate = true;
             const targetUrl = isProfileUpdate ? URL_MEMBER_UPDATES : URL_MEMBERS;
             const requestData = isProfileUpdate
                 ? {

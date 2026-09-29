@@ -42,8 +42,10 @@ const pages_content = {
 
     about: `<h1>Missão, propósito e valores</h1></br><p>Desde 2020, o Clã Eternity tem sido uma comunidade calorosa no Minecraft, unindo jogadores para construir, explorar e crescer juntos. Evoluindo ao longo dos anos, nossa visão resultou em uma cidade vibrante, o coração do servidor.</p><p>Valorizamos a cooperação e o trabalho em equipe, mantendo farms comunitárias para garantir recursos compartilhados. Essa abordagem promove solidariedade e uma comunidade unida.</p><p>Nossos valores - união, respeito e honestidade - são a base de nossa comunidade, construindo confiança e um ambiente acolhedor para todos.</p>`,
 
-    join: `<h1>Junte-se a Eternidade </h1>
-    </br><p id="msg">Informe seu nick. Para quem já está no clã, este formulário funciona como atualização cadastral; para os demais, cria uma solicitação de recrutamento.</p>
+    // "Juntar-se" abre o Guia do Recruta (guia.js). Este e o formulario de
+    // atualizacao cadastral de quem ja e membro, que nao passa pelo teste.
+    atualizar: `<h1>Atualizar cadastro</h1>
+    </br><p id="msg">Para quem já está no clã: informe seu nick e a data de nascimento. A mudança vai para análise da staff. Ainda não é membro? Use o <a href="#guia" onclick="openGuia()">Guia do Recruta</a>.</p>
     </br>${loadingHTML}
     <form onsubmit="send(event)" style="display:none;">
         <label>Nick</label>
@@ -54,7 +56,7 @@ const pages_content = {
         <input type="text" id="cargo" value="Membro" style="display:none;" readonly>
         <input type="text" id="data_entrada" style="display:none;" readonly>
         <input type="text" id="status" value="Pendente" style="display:none;" readonly>
-        <button class="button">Solicitar Recrutamento</button>
+        <button class="button">Enviar atualização</button>
     </form>`,
 
     city: `<h1>Conheça nossa cidade</h1></br><p>Nossa cidade no servidor de sobrevivência é mais do que apenas blocos e estruturas. É um lar acolhedor, onde todos contribuem para algo maior. Cada pedra conta uma história de cooperação e criatividade.</p><div id="gallery"><a href="/imgs/City00.jpg"><img class="cityimgs" src="/imgs/City00.jpg" alt="city00"></a><a href="/imgs/City01.jpg"><img class="cityimgs" src="/imgs/City01.jpg" alt="city01"></a><a href="/imgs/City02.jpg"><img class="cityimgs" src="/imgs/City02.jpg" alt="city02"></a><a href="/imgs/City03.jpg"><img class="cityimgs" src="/imgs/City03.jpg" alt="city03"></a><a href="/imgs/City04.jpg"><img class="cityimgs" src="/imgs/City04.jpg" alt="city04"></a><a href="/imgs/City05.jpg"><img class="cityimgs" src="/imgs/City05.jpg" alt="city05"></a></div>`,
@@ -66,9 +68,14 @@ const pages_content = {
 
 async function render(event) {
     const id = event.target.id;
-    app.innerHTML = pages_content[id];
     selectItem(event.target);
     setMenuOpen(false);
+    if (id == 'join') {
+        history.replaceState(null, '', '#guia');
+        openGuia();
+        return;
+    }
+    app.innerHTML = pages_content[id];
 
     renderGallery(id);
     renderFormJoin(id);
@@ -99,7 +106,7 @@ function renderFormAdmin(id) {
 }
 
 function renderFormJoin(id) {
-    if (id == 'join') {
+    if (id == 'atualizar') {
         fetch(URL_BASE)
             .then(response => {
                 if (!response.ok) {
@@ -240,4 +247,13 @@ async function validationLogin(event) {
 
 }
 
-app.innerHTML = pages_content.home;
+// Link direto para o guia (a Eternity manda este endereco no jogo). Espera o
+// DOMContentLoaded porque o guia.js carrega depois deste arquivo.
+document.addEventListener('DOMContentLoaded', () => {
+    if (location.hash === '#guia') {
+        selectItem(document.getElementById('join'));
+        openGuia();
+    } else {
+        app.innerHTML = pages_content.home;
+    }
+});

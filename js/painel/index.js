@@ -460,7 +460,9 @@ async function submitAdicionar(event) {
         let response = await fetch(URL_MEMBERS,
             {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                // Sem o login da staff o site trata como formulario publico,
+                // que exige o teste do Guia e grava so uma solicitacao.
+                headers: getAdminRequestHeaders(),
                 body: JSON.stringify(data),
             }
         );
