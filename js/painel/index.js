@@ -195,9 +195,15 @@ function renderSolicitacoes() {
     fetchDataAndRenderTable(
         URL_GET_ATUALIZACOES,
         updateTableId,
-        ['nick', 'data_nascimento', 'createdAt'],
+        ['nick', 'data_nascimento', 'data_entrada', 'createdAt'],
         updateActions,
-        () => convertDatesToAges(updateTableId, FIELD_MASK['data_nascimento']),
+        () => {
+            convertDatesToAges(updateTableId, FIELD_MASK['data_nascimento']);
+            // Aqui a coluna e o que o membro pediu (/entrada no Discord), e nao
+            // a data de solicitacao do cadastro, que e o rotulo geral dela.
+            const cabecalho = document.getElementById(updateTableId)?.querySelector('th[id$="-data_entrada"]');
+            if (cabecalho) cabecalho.textContent = 'Nova data de entrada';
+        },
         { headers: getAdminRequestHeaders() },
         {
             loadingId: 'loading_cadastros',
