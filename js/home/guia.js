@@ -1,9 +1,10 @@
 // Guia do Recruta: video, teste, Discord e convite num caminho so.
 // Substitui as placas do /go ETY e o teste que a Eternity aplicava no chat do
-// jogo (28/09/2026). O teste e sorteado e corrigido no servidor, que registra a
-// aprovacao pelo nick. Desde 29/09/2026 nao ha mais formulario de cadastro: a
-// data de nascimento e pedida na janela do vinculo do Discord, e o bot cria a
-// solicitacao sozinho quando o codigo e confirmado no jogo.
+// jogo (28/09/2026). O teste e sorteado e corrigido no servidor e e so uma
+// barreira antes da etapa do Discord: nao guarda quem passou. Desde 29/09/2026
+// nao ha formulario de cadastro -- a data de nascimento e pedida na janela do
+// vinculo do Discord, e o bot cria a solicitacao quando a pessoa, ja vinculada,
+// esta em recrutamento com ele.
 
 const URL_TESTE = `${URL_BASE}/api/recrutamento/teste`;
 const DISCORD_URL = 'https://discord.gg/vj4eNDJqct';
@@ -15,7 +16,7 @@ const GUIA_STORAGE = 'eternity-guia-v2';
 // `doJogo`: a pessoa chegou pelo link que a Eternity manda no jogo
 // (?nick=Fulano#guia). Ai a conta ja esta acompanhando o recrutamento e convida
 // sozinha no fim; sem o link, a pessoa precisa chamar a conta no jogo.
-let guia = { etapa: 0, nick: '', doJogo: false };
+let guia = { etapa: 0, aprovado: false, nick: '', doJogo: false };
 
 function guiaCarregar() {
     try {
@@ -128,14 +129,7 @@ async function carregarTeste() {
         if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
         const { token, perguntas } = await resposta.json();
         alvo.dataset.token = token;
-        // O nick vai com as respostas: e por ele que o vinculo do Discord acha a
-        // aprovacao depois.
-        alvo.innerHTML = `
-            <div class="guia-campos quiz-nick">
-                <label for="nick"><i class="fa-solid fa-user"></i> Nick no Minecraft</label>
-                <input type="text" id="nick" placeholder="Seu nick" required maxlength="16" pattern="[A-Za-z0-9_]{3,16}" value="${escapeGuia(guia.nick)}">
-                <small>Exatamente como no jogo — maiúsculas e minúsculas contam.</small>
-            </div>` + perguntas.map((p, i) => `
+        alvo.innerHTML = perguntas.map((p, i) => `
             <div class="quiz-card" role="radiogroup" aria-labelledby="quiz-q${i}">
                 <span class="quiz-num">Pergunta ${i + 1} de ${perguntas.length}</span>
                 <h3 id="quiz-q${i}">${escapeGuia(p.enunciado)}</h3>
@@ -190,22 +184,16 @@ async function enviarTeste(event) {
         respostas.push(Number(marcada.value));
     }
     const msg = document.getElementById('guia-msg');
-    const nick = document.getElementById('nick').value.trim();
     try {
-        const ativos = await (await fetch(`${URL_BASE}/api/membros/ativos`)).json();
-        if (ativos.some(m => String(m.nick || '').trim().toLowerCase() === nick.toLowerCase())) {
-            msg.innerHTML = `<b>${escapeGuia(nick)}</b> já faz parte do clã. Para corrigir seus dados, use <a href="#" onclick="openAtualizar(event)">Atualizar cadastro</a>.`;
-            return;
-        }
         const resposta = await fetch(URL_TESTE, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: form.dataset.token, respostas, nick }),
+            body: JSON.stringify({ token: form.dataset.token, respostas }),
         });
         const resultado = await resposta.json();
         if (!resposta.ok) throw new Error(resultado?.message || 'Falha ao corrigir.');
-        guia.nick = nick;
         if (resultado.aprovado) {
+            guia.aprovado = true;
             guiaIr(2);
             return;
         }
@@ -252,7 +240,10 @@ function renderGuiaDiscord() {
                     <div class="guia-cmds">${guiaComando('Apocalipse', '/m Eternity vincular CÓDIGO')}${guiaComando('Gênesis', '/m Coagula1999 vincular CÓDIGO')}</div></div>
             </li>
         </ol>
-        <button class="button guia-principal" onclick="guiaIr(3)">Já vinculei</button>`;
+        <button class="button guia-principal" onclick="guiaIr(3)">Já vinculei</button>
+        <!-- Quem ja tem o Discord vinculado ao nick nao refaz o vinculo: o bot
+             confere no jogo e segue direto para a solicitacao e o convite. -->
+        <p class="guia-links"><a href="#" onclick="guiaIr(3); return false;">Já tenho o Discord vinculado ao meu nick</a></p>`;
 }
 
 function renderGuiaConvite() {
@@ -273,7 +264,7 @@ function renderGuiaConvite() {
             <h2>Última etapa!</h2>
             <p>Entre no jogo e chame a conta do clã no privado:</p>
             <div class="guia-cmds">${guiaComando('Apocalipse', '/m Eternity quero entrar')}${guiaComando('Gênesis', '/m Coagula1999 quero entrar')}</div>
-            <p>Ela confere o teste e o Discord e manda o <b>convite do clã</b>. É só aceitar no jogo.</p>
+            <p>Ela confere o Discord e manda o <b>convite do clã</b>. É só aceitar no jogo.</p>
             ${lema}
         </div>
         <p class="guia-rodape"><a href="#" onclick="guiaRecomecar(event)">Recomeçar</a></p>`;
@@ -281,7 +272,7 @@ function renderGuiaConvite() {
 
 function guiaRecomecar(event) {
     event?.preventDefault();
-    guia = { etapa: 0, nick: guia.doJogo ? guia.nick : '', doJogo: guia.doJogo };
+    guia = { etapa: 0, aprovado: false, nick: guia.doJogo ? guia.nick : '', doJogo: guia.doJogo };
     guiaSalvar();
     renderGuia();
 }
@@ -289,8 +280,8 @@ function guiaRecomecar(event) {
 const GUIA_RENDER = [renderGuiaVideo, renderGuiaTeste, renderGuiaDiscord, renderGuiaConvite];
 
 function renderGuia() {
-    // Sem nick nao ha como seguir para o Discord: volta para o teste.
-    if (guia.etapa >= 2 && !guia.nick) guia.etapa = 1;
+    // O teste e a barreira: sem ele aprovado nesta sessao, volta para o teste.
+    if (guia.etapa >= 2 && !guia.aprovado) guia.etapa = 1;
     if (!GUIA_RENDER[guia.etapa]) guia.etapa = 0;
     const app = document.getElementById('app');
     // Na etapa do video a atencao e toda dele: as etapas so aparecem depois.

@@ -372,19 +372,6 @@
     span.ok { background: #10b981; }
 }
 
-/* ---------- Nick (topo do teste) ---------- */
-
-/* O nick vai com as respostas do teste: e por ele que o vinculo do Discord acha
-   a aprovacao. Mesmo cartao das perguntas, para nao parecer outro formulario. */
-.quiz-nick {
-    padding: 12px 20px 16px;
-    border-radius: 1.2em 0.3em;
-    background: var(--guia-vidro);
-    border: 1px solid var(--guia-borda);
-    box-shadow: 0 8px 22px rgba(8, 51, 68, 0.12);
-}
-
-
 .guia-campos {
     display: flex;
     flex-direction: column;
