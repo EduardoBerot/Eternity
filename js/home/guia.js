@@ -1,17 +1,21 @@
-// Guia do Recruta: regras, teste, cadastro, Discord e convite num caminho so.
+// Guia do Recruta: video, teste, Discord e convite num caminho so.
 // Substitui as placas do /go ETY e o teste que a Eternity aplicava no chat do
-// jogo (28/09/2026). O teste e sorteado e corrigido no servidor; o passe que
-// ele devolve e o que libera o cadastro.
+// jogo (28/09/2026). O teste e sorteado e corrigido no servidor, que registra a
+// aprovacao pelo nick. Desde 29/09/2026 nao ha mais formulario de cadastro: a
+// data de nascimento e pedida na janela do vinculo do Discord, e o bot cria a
+// solicitacao sozinho quando o codigo e confirmado no jogo.
 
 const URL_TESTE = `${URL_BASE}/api/recrutamento/teste`;
 const DISCORD_URL = 'https://discord.gg/vj4eNDJqct';
-const GUIA_ETAPAS = ['Vídeo', 'Teste', 'Cadastro', 'Discord', 'Convite'];
-const GUIA_STORAGE = 'eternity-guia';
+const GUIA_ETAPAS = ['Vídeo', 'Teste', 'Discord', 'Convite'];
+// v2: as etapas mudaram de indice quando o cadastro saiu; um progresso salvo
+// com a numeracao antiga abriria a etapa errada.
+const GUIA_STORAGE = 'eternity-guia-v2';
 
 // `doJogo`: a pessoa chegou pelo link que a Eternity manda no jogo
 // (?nick=Fulano#guia). Ai a conta ja esta acompanhando o recrutamento e convida
 // sozinha no fim; sem o link, a pessoa precisa chamar a conta no jogo.
-let guia = { etapa: 0, passe: null, nick: '', doJogo: false };
+let guia = { etapa: 0, nick: '', doJogo: false };
 
 function guiaCarregar() {
     try {
@@ -124,7 +128,14 @@ async function carregarTeste() {
         if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
         const { token, perguntas } = await resposta.json();
         alvo.dataset.token = token;
-        alvo.innerHTML = perguntas.map((p, i) => `
+        // O nick vai com as respostas: e por ele que o vinculo do Discord acha a
+        // aprovacao depois.
+        alvo.innerHTML = `
+            <div class="guia-campos quiz-nick">
+                <label for="nick"><i class="fa-solid fa-user"></i> Nick no Minecraft</label>
+                <input type="text" id="nick" placeholder="Seu nick" required maxlength="16" pattern="[A-Za-z0-9_]{3,16}" value="${escapeGuia(guia.nick)}">
+                <small>Exatamente como no jogo — maiúsculas e minúsculas contam.</small>
+            </div>` + perguntas.map((p, i) => `
             <div class="quiz-card" role="radiogroup" aria-labelledby="quiz-q${i}">
                 <span class="quiz-num">Pergunta ${i + 1} de ${perguntas.length}</span>
                 <h3 id="quiz-q${i}">${escapeGuia(p.enunciado)}</h3>
@@ -160,7 +171,7 @@ function renderGuiaTeste() {
     return `
         <div class="guia-cabeca">
             <h2>Teste</h2>
-            <p>Três perguntas sobre o vídeo. Acerte todas para liberar o cadastro. <a href="#" onclick="guiaIr(0); return false;">Rever o vídeo</a></p>
+            <p>Três perguntas sobre o vídeo. Acerte todas para seguir para o Discord. <a href="#" onclick="guiaIr(0); return false;">Rever o vídeo</a></p>
         </div>
         <form id="guia-teste" class="quiz" onsubmit="enviarTeste(event)">${loadingHTML}</form>`;
 }
@@ -178,16 +189,23 @@ async function enviarTeste(event) {
         }
         respostas.push(Number(marcada.value));
     }
+    const msg = document.getElementById('guia-msg');
+    const nick = document.getElementById('nick').value.trim();
     try {
+        const ativos = await (await fetch(`${URL_BASE}/api/membros/ativos`)).json();
+        if (ativos.some(m => String(m.nick || '').trim().toLowerCase() === nick.toLowerCase())) {
+            msg.innerHTML = `<b>${escapeGuia(nick)}</b> já faz parte do clã. Para corrigir seus dados, use <a href="#" onclick="openAtualizar(event)">Atualizar cadastro</a>.`;
+            return;
+        }
         const resposta = await fetch(URL_TESTE, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: form.dataset.token, respostas }),
+            body: JSON.stringify({ token: form.dataset.token, respostas, nick }),
         });
         const resultado = await resposta.json();
         if (!resposta.ok) throw new Error(resultado?.message || 'Falha ao corrigir.');
+        guia.nick = nick;
         if (resultado.aprovado) {
-            guia.passe = resultado.passe;
             guiaIr(2);
             return;
         }
@@ -204,61 +222,7 @@ async function enviarTeste(event) {
             </div>`;
     } catch (error) {
         console.error(error);
-        document.getElementById('guia-msg').textContent = 'Não consegui enviar. Tente de novo.';
-    }
-}
-
-function renderGuiaCadastro() {
-    if (!guia.passe) return renderGuiaTeste();
-    return `
-        <div class="guia-cartao guia-estreito">
-            <div class="guia-selo"><i class="fa-solid fa-id-card"></i></div>
-            <h2>Sua solicitação</h2>
-            <p class="guia-sub">Teste aprovado! Falta só se apresentar.</p>
-            <form class="guia-campos" onsubmit="enviarCadastro(event)">
-                <label for="nick"><i class="fa-solid fa-user"></i> Nick no Minecraft</label>
-                <input type="text" id="nick" placeholder="Seu nick" required maxlength="16" pattern="[A-Za-z0-9_]{3,16}" value="${escapeGuia(guia.nick)}">
-                <small>Exatamente como no jogo — maiúsculas e minúsculas contam.</small>
-                <label for="data_nascimento"><i class="fa-solid fa-cake-candles"></i> Data de nascimento</label>
-                <input type="date" id="data_nascimento" required>
-                <button class="button guia-principal">Enviar solicitação</button>
-                <p id="guia-msg" class="guia-msg"></p>
-            </form>
-        </div>`;
-}
-
-async function enviarCadastro(event) {
-    event.preventDefault();
-    const msg = document.getElementById('guia-msg');
-    const nick = document.getElementById('nick').value.trim();
-    const data_nascimento = document.getElementById('data_nascimento').value;
-    try {
-        const ativos = await (await fetch(`${URL_BASE}/api/membros/ativos`)).json();
-        if (ativos.some(m => String(m.nick || '').trim().toLowerCase() === nick.toLowerCase())) {
-            msg.innerHTML = `<b>${escapeGuia(nick)}</b> já faz parte do clã. Para corrigir seus dados, use <a href="#" onclick="openAtualizar(event)">Atualizar cadastro</a>.`;
-            return;
-        }
-        const resposta = await fetch(URL_MEMBERS, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nick, data_nascimento, passe_teste: guia.passe }),
-        });
-        if (resposta.status === 403) {
-            guia.passe = null;
-            msg.textContent = 'Seu teste expirou. Faça de novo para enviar a solicitação.';
-            setTimeout(() => guiaIr(1), 2500);
-            return;
-        }
-        if (!resposta.ok) {
-            const erro = await resposta.json().catch(() => ({}));
-            throw new Error(erro.message || 'Falha no envio');
-        }
-        guia.nick = nick;
-        guia.passe = null;
-        guiaIr(3);
-    } catch (error) {
-        console.error(error);
-        msg.textContent = `Não foi possível enviar. Confira se já não existe uma solicitação para "${nick}" e tente de novo.`;
+        msg.textContent = error.message && error.message !== 'Failed to fetch' ? error.message : 'Não consegui enviar. Tente de novo.';
     }
 }
 
@@ -267,7 +231,7 @@ function renderGuiaDiscord() {
     return `
         <div class="guia-cabeca">
             <h2>Discord</h2>
-            <p>Solicitação enviada! Todo membro fica no nosso Discord, com a conta vinculada ao nick.</p>
+            <p>Teste aprovado! Todo membro fica no nosso Discord, com a conta vinculada ao nick.</p>
         </div>
         <ol class="guia-timeline">
             <li>
@@ -279,7 +243,7 @@ function renderGuiaDiscord() {
             <li>
                 <span class="passo">2</span>
                 <div><h3>Vincule sua conta</h3>
-                    <p>No canal <b>#saudações</b>, clique em <b>Vincular minha conta</b> e informe o nick <b>${nick}</b>.</p></div>
+                    <p>No canal <b>#saudações</b>, clique em <b>Vincular minha conta</b> e informe o nick <b>${nick}</b> e sua data de nascimento.</p></div>
             </li>
             <li>
                 <span class="passo">3</span>
@@ -288,7 +252,7 @@ function renderGuiaDiscord() {
                     <div class="guia-cmds">${guiaComando('Apocalipse', '/m Eternity vincular CÓDIGO')}${guiaComando('Gênesis', '/m Coagula1999 vincular CÓDIGO')}</div></div>
             </li>
         </ol>
-        <button class="button guia-principal" onclick="guiaIr(4)">Já vinculei</button>`;
+        <button class="button guia-principal" onclick="guiaIr(3)">Já vinculei</button>`;
 }
 
 function renderGuiaConvite() {
@@ -309,7 +273,7 @@ function renderGuiaConvite() {
             <h2>Última etapa!</h2>
             <p>Entre no jogo e chame a conta do clã no privado:</p>
             <div class="guia-cmds">${guiaComando('Apocalipse', '/m Eternity quero entrar')}${guiaComando('Gênesis', '/m Coagula1999 quero entrar')}</div>
-            <p>Ela confere seu cadastro e o Discord e manda o <b>convite do clã</b>. É só aceitar no jogo.</p>
+            <p>Ela confere o teste e o Discord e manda o <b>convite do clã</b>. É só aceitar no jogo.</p>
             ${lema}
         </div>
         <p class="guia-rodape"><a href="#" onclick="guiaRecomecar(event)">Recomeçar</a></p>`;
@@ -317,16 +281,17 @@ function renderGuiaConvite() {
 
 function guiaRecomecar(event) {
     event?.preventDefault();
-    guia = { etapa: 0, passe: null, nick: guia.doJogo ? guia.nick : '', doJogo: guia.doJogo };
+    guia = { etapa: 0, nick: guia.doJogo ? guia.nick : '', doJogo: guia.doJogo };
     guiaSalvar();
     renderGuia();
 }
 
-const GUIA_RENDER = [renderGuiaVideo, renderGuiaTeste, renderGuiaCadastro, renderGuiaDiscord, renderGuiaConvite];
+const GUIA_RENDER = [renderGuiaVideo, renderGuiaTeste, renderGuiaDiscord, renderGuiaConvite];
 
 function renderGuia() {
-    // Sem passe (expirou, ou a sessao foi limpa) o cadastro volta para o teste.
-    if (guia.etapa === 2 && !guia.passe) guia.etapa = 1;
+    // Sem nick nao ha como seguir para o Discord: volta para o teste.
+    if (guia.etapa >= 2 && !guia.nick) guia.etapa = 1;
+    if (!GUIA_RENDER[guia.etapa]) guia.etapa = 0;
     const app = document.getElementById('app');
     // Na etapa do video a atencao e toda dele: as etapas so aparecem depois.
     app.classList.toggle('guia-modo-video', guia.etapa === 0);
