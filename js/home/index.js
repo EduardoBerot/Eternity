@@ -45,7 +45,7 @@ const pages_content = {
     // "Juntar-se" abre o Guia do Recruta (guia.js). Este e o formulario de
     // atualizacao cadastral de quem ja e membro, que nao passa pelo teste.
     atualizar: `<h1>Atualizar cadastro</h1>
-    </br><p id="msg">Para quem já está no clã: informe seu nick e a data de nascimento. A mudança vai para análise da staff. Ainda não é membro? Use o <a href="#guia" onclick="openGuia()">Guia do Recruta</a>.</p>
+    </br><p id="msg">Para quem já está no clã: informe seu nick e a data de nascimento. A mudança vai para análise da staff. Ainda não é membro? Faça o <a href="#guia" onclick="openGuia()">Recrutamento</a>.</p>
     </br>${loadingHTML}
     <form onsubmit="send(event)" style="display:none;">
         <label>Nick</label>

@@ -21,7 +21,7 @@ async function send (event){
             // Este formulario so atualiza cadastro de membro. Entrar no cla e
             // pelo Guia do Recruta, que exige o teste.
             if (!existingMember) {
-                alert('Esse nick não está entre os membros ativos. Para entrar no clã, use o Guia do Recruta.');
+                alert('Esse nick não está entre os membros ativos. Para entrar no clã, faça o Recrutamento em "Juntar-se".');
                 openGuia();
                 return;
             }

@@ -81,14 +81,21 @@ const GUIA_REGRAS = `
 // consulta de quem vai tentar o teste de novo.
 function renderGuiaVideo() {
     return `
-        <p class="guia-intro">Assista ao vídeo: ele apresenta o clã e as regras. O teste logo depois é sobre ele.</p>
         <video class="guia-video" controls playsinline preload="metadata" poster="imgs/apresentacao-poster.jpg" src="videos/apresentacao.mp4"></video>
-        <button class="button" id="guia-avancar" onclick="guiaIr(1)">Continuar</button>
-        <details class="guia-texto">
-            <summary>Prefere ler? Ver as regras em texto</summary>
-            ${GUIA_REGRAS}
-        </details>
-        <p class="guia-rodape">Já faz parte do clã e só quer corrigir seus dados? <a href="#" onclick="openAtualizar(event)">Atualizar cadastro</a></p>`;
+        <button class="button guia-continuar" id="guia-avancar" onclick="guiaIr(1)">Continuar</button>
+        <p class="guia-links">
+            <a href="#" onclick="guiaMostrarRegras(event)">Prefere ler? Ver as regras em texto</a>
+            <span>·</span>
+            Já é do clã? <a href="#" onclick="openAtualizar(event)">Atualizar cadastro</a>
+        </p>
+        <div id="guia-regras-texto" hidden>${GUIA_REGRAS}</div>`;
+}
+
+function guiaMostrarRegras(event) {
+    event?.preventDefault();
+    const bloco = document.getElementById('guia-regras-texto');
+    bloco.hidden = !bloco.hidden;
+    if (!bloco.hidden) bloco.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 async function carregarTeste() {
@@ -103,7 +110,7 @@ async function carregarTeste() {
                 <legend>${i + 1}. ${escapeGuia(p.enunciado)}</legend>
                 ${p.opcoes.map((opcao, j) => `
                     <label class="guia-opcao"><input type="radio" name="q${i}" value="${j}"> ${escapeGuia(opcao)}</label>`).join('')}
-            </fieldset>`).join('') + `<button class="button" type="submit">Enviar respostas</button>`;
+            </fieldset>`).join('') + `<p id="guia-msg" class="guia-msg"></p><button class="button" type="submit">Enviar respostas</button>`;
     } catch (error) {
         console.error(error);
         alvo.innerHTML = '<p class="guia-erro">Não consegui carregar o teste. Tente de novo em alguns segundos.</p>';
@@ -113,10 +120,8 @@ async function carregarTeste() {
 function renderGuiaTeste() {
     setTimeout(carregarTeste);
     return `
-        <p class="guia-intro">Três perguntas sobre as regras. Acerte todas para liberar o cadastro.</p>
-        <form id="guia-teste" class="guia-form" onsubmit="enviarTeste(event)">${loadingHTML}</form>
-        <p id="guia-msg" class="guia-msg"></p>
-        <p class="guia-rodape"><a href="#" onclick="guiaIr(0); return false;">Rever o vídeo</a></p>`;
+        <p class="guia-intro">Três perguntas sobre o vídeo. Acerte todas para liberar o cadastro. <a href="#" onclick="guiaIr(0); return false;">Rever o vídeo</a></p>
+        <form id="guia-teste" class="guia-form" onsubmit="enviarTeste(event)">${loadingHTML}</form>`;
 }
 
 async function enviarTeste(event) {
@@ -146,7 +151,7 @@ async function enviarTeste(event) {
             return;
         }
         document.getElementById('app').innerHTML = `
-            <h1>Guia do Recruta</h1>
+            <h1>Recrutamento</h1>
             ${guiaProgresso()}
             <div class="guia-resultado">
                 <h2>Quase lá!</h2>
@@ -263,7 +268,9 @@ function renderGuia() {
     // Sem passe (expirou, ou a sessao foi limpa) o cadastro volta para o teste.
     if (guia.etapa === 2 && !guia.passe) guia.etapa = 1;
     const app = document.getElementById('app');
-    app.innerHTML = `<h1>Guia do Recruta</h1>${guiaProgresso()}${GUIA_RENDER[guia.etapa]()}`;
+    // Na etapa do video a atencao e toda dele: as etapas so aparecem depois.
+    app.classList.toggle('guia-modo-video', guia.etapa === 0);
+    app.innerHTML = `<h1>Recrutamento</h1>${guia.etapa === 0 ? '' : guiaProgresso()}${GUIA_RENDER[guia.etapa]()}`;
 }
 
 function openGuia() {

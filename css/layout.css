@@ -24,4 +24,7 @@ body {
     backdrop-filter: blur(5px);
     padding: 0 32px;
     height: 100vh;
+    /* Sem isto a margem de cima do header vazava para fora do body e toda
+       pagina rolava 16px a mais. */
+    display: flow-root;
 }
