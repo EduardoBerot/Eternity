@@ -5,7 +5,7 @@
 
 const URL_TESTE = `${URL_BASE}/api/recrutamento/teste`;
 const DISCORD_URL = 'https://discord.gg/vj4eNDJqct';
-const GUIA_ETAPAS = ['Regras', 'Teste', 'Cadastro', 'Discord', 'Convite'];
+const GUIA_ETAPAS = ['Vídeo', 'Teste', 'Cadastro', 'Discord', 'Convite'];
 const GUIA_STORAGE = 'eternity-guia';
 
 // `doJogo`: a pessoa chegou pelo link que a Eternity manda no jogo
@@ -76,12 +76,18 @@ const GUIA_REGRAS = `
         </section>
     </div>`;
 
-function renderGuiaRegras() {
+// Primeira etapa: o video que apresenta o cla e as regras. O teste e sobre ele.
+// O texto das regras fica recolhido embaixo, para quem nao pode ouvir e para
+// consulta de quem vai tentar o teste de novo.
+function renderGuiaVideo() {
     return `
-        <p class="guia-intro">Leia com atenção: o teste da próxima etapa é sobre estas regras.</p>
-        ${GUIA_REGRAS}
-        <label class="guia-aceite"><input type="checkbox" id="guia-li"> Li as regras e concordo em segui-las</label>
-        <button class="button" id="guia-avancar" disabled onclick="guiaIr(1)">Fazer o teste</button>
+        <p class="guia-intro">Assista ao vídeo: ele apresenta o clã e as regras. O teste logo depois é sobre ele.</p>
+        <video class="guia-video" controls playsinline preload="metadata" poster="imgs/apresentacao-poster.jpg" src="videos/apresentacao.mp4"></video>
+        <button class="button" id="guia-avancar" onclick="guiaIr(1)">Continuar</button>
+        <details class="guia-texto">
+            <summary>Prefere ler? Ver as regras em texto</summary>
+            ${GUIA_REGRAS}
+        </details>
         <p class="guia-rodape">Já faz parte do clã e só quer corrigir seus dados? <a href="#" onclick="openAtualizar(event)">Atualizar cadastro</a></p>`;
 }
 
@@ -110,7 +116,7 @@ function renderGuiaTeste() {
         <p class="guia-intro">Três perguntas sobre as regras. Acerte todas para liberar o cadastro.</p>
         <form id="guia-teste" class="guia-form" onsubmit="enviarTeste(event)">${loadingHTML}</form>
         <p id="guia-msg" class="guia-msg"></p>
-        <p class="guia-rodape"><a href="#" onclick="guiaIr(0); return false;">Voltar às regras</a></p>`;
+        <p class="guia-rodape"><a href="#" onclick="guiaIr(0); return false;">Rever o vídeo</a></p>`;
 }
 
 async function enviarTeste(event) {
@@ -144,8 +150,8 @@ async function enviarTeste(event) {
             ${guiaProgresso()}
             <div class="guia-resultado">
                 <h2>Quase lá!</h2>
-                <p>Você acertou <b>${resultado.acertos} de ${resultado.total}</b>. Releia as regras com calma e tente de novo — as perguntas mudam a cada tentativa.</p>
-                <button class="button" onclick="guiaIr(0)">Reler as regras</button>
+                <p>Você acertou <b>${resultado.acertos} de ${resultado.total}</b>. Reveja o vídeo (ou as regras em texto) e tente de novo — as perguntas mudam a cada tentativa.</p>
+                <button class="button" onclick="guiaIr(0)">Rever o vídeo</button>
             </div>`;
     } catch (error) {
         console.error(error);
@@ -227,7 +233,7 @@ function renderGuiaConvite() {
             <h2>Tudo pronto!</h2>
             <p>A conta do clã já está acompanhando você no jogo. Em instantes chega o <b>convite do clã</b> — <b>agora é só aceitar o convite no jogo</b>.</p>
             <p>Se estiver offline, entre no servidor: o convite sai assim que você aparecer.</p>
-            <h2 class="guia-lema">Uni-vos pela Eternidade!</h2>
+            <h2 class="guia-lema">Seja bem-vindo à Eternity!</h2>
         </div>`;
     }
     return `
@@ -239,7 +245,7 @@ function renderGuiaConvite() {
                 <div><small>Gênesis</small><code>/m Coagula1999 quero entrar</code></div>
             </div>
             <p>Ela confere seu cadastro e o vínculo do Discord e manda o <b>convite do clã</b>. É só aceitar no jogo.</p>
-            <h2 class="guia-lema">Uni-vos pela Eternidade!</h2>
+            <h2 class="guia-lema">Seja bem-vindo à Eternity!</h2>
         </div>
         <p class="guia-rodape"><a href="#" onclick="guiaRecomecar(event)">Recomeçar o guia</a></p>`;
 }
@@ -251,15 +257,13 @@ function guiaRecomecar(event) {
     renderGuia();
 }
 
-const GUIA_RENDER = [renderGuiaRegras, renderGuiaTeste, renderGuiaCadastro, renderGuiaDiscord, renderGuiaConvite];
+const GUIA_RENDER = [renderGuiaVideo, renderGuiaTeste, renderGuiaCadastro, renderGuiaDiscord, renderGuiaConvite];
 
 function renderGuia() {
     // Sem passe (expirou, ou a sessao foi limpa) o cadastro volta para o teste.
     if (guia.etapa === 2 && !guia.passe) guia.etapa = 1;
     const app = document.getElementById('app');
     app.innerHTML = `<h1>Guia do Recruta</h1>${guiaProgresso()}${GUIA_RENDER[guia.etapa]()}`;
-    const li = document.getElementById('guia-li');
-    if (li) li.addEventListener('change', () => { document.getElementById('guia-avancar').disabled = !li.checked; });
 }
 
 function openGuia() {

@@ -50,6 +50,31 @@
     font-size: 1.05em;
 }
 
+.guia-video {
+    /* Altura limitada para o botao Continuar caber na mesma tela. */
+    width: 100%;
+    max-width: min(860px, calc(40vh * 16 / 9));
+    aspect-ratio: 16 / 9;
+    border-radius: 0.9em 0.2em;
+    border: 2px solid rgba(0, 0, 0, 0.6);
+    background: #000;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.guia-texto {
+    width: 100%;
+    margin: 4px 0 8px;
+
+    summary {
+        cursor: pointer;
+        text-align: center;
+        font-family: system-ui, "Segoe UI", sans-serif;
+        font-weight: 600;
+        color: #005b63;
+        margin-bottom: 10px;
+    }
+}
+
 .guia-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
