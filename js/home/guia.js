@@ -32,10 +32,26 @@ function guiaIr(etapa) {
 }
 
 function guiaProgresso() {
-    return `<ol class="guia-progresso">${GUIA_ETAPAS.map((nome, i) => `
+    return `<ol class="guia-stepper">${GUIA_ETAPAS.map((nome, i) => `
         <li class="${i < guia.etapa ? 'feita' : i === guia.etapa ? 'atual' : ''}">
-            <span>${i < guia.etapa ? '✓' : i + 1}</span>${nome}
+            <span class="num">${i < guia.etapa ? '<i class="fa-solid fa-check"></i>' : i + 1}</span>
+            <span class="nome">${nome}</span>
         </li>`).join('')}</ol>`;
+}
+
+// Comando com botao de copiar: no celular ninguem quer digitar "/m Coagula1999".
+function guiaComando(servidor, comando) {
+    return `<div class="cmd"><small>${servidor}</small><code>${escapeGuia(comando)}</code>
+        <button type="button" class="copiar" title="Copiar" data-cmd="${escapeGuia(comando)}" onclick="guiaCopiar(this)"><i class="fa-regular fa-copy"></i></button></div>`;
+}
+
+async function guiaCopiar(botao) {
+    try {
+        // O codigo do vinculo cada um tem o seu: copia so o comeco.
+        await navigator.clipboard.writeText(botao.dataset.cmd.replace(' CÓDIGO', ' '));
+        botao.innerHTML = '<i class="fa-solid fa-check"></i>';
+        setTimeout(() => { botao.innerHTML = '<i class="fa-regular fa-copy"></i>'; }, 1500);
+    } catch (_) { /* sem clipboard: o texto continua na tela */ }
 }
 
 function escapeGuia(texto) {
@@ -98,6 +114,9 @@ function guiaMostrarRegras(event) {
     if (!bloco.hidden) bloco.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+// Cada pergunta e um cartao com o titulo DENTRO dele. Era um fieldset com
+// legend, e o navegador desenha a legend em cima da borda: o titulo "pulava"
+// para fora do cartao.
 async function carregarTeste() {
     const alvo = document.getElementById('guia-teste');
     try {
@@ -106,28 +125,50 @@ async function carregarTeste() {
         const { token, perguntas } = await resposta.json();
         alvo.dataset.token = token;
         alvo.innerHTML = perguntas.map((p, i) => `
-            <fieldset class="guia-pergunta">
-                <legend>${i + 1}. ${escapeGuia(p.enunciado)}</legend>
-                ${p.opcoes.map((opcao, j) => `
-                    <label class="guia-opcao"><input type="radio" name="q${i}" value="${j}"> ${escapeGuia(opcao)}</label>`).join('')}
-            </fieldset>`).join('') + `<p id="guia-msg" class="guia-msg"></p><button class="button" type="submit">Enviar respostas</button>`;
+            <div class="quiz-card" role="radiogroup" aria-labelledby="quiz-q${i}">
+                <span class="quiz-num">Pergunta ${i + 1} de ${perguntas.length}</span>
+                <h3 id="quiz-q${i}">${escapeGuia(p.enunciado)}</h3>
+                <div class="quiz-opcoes">${p.opcoes.map((opcao, j) => `
+                    <label class="quiz-opcao">
+                        <input type="radio" name="q${i}" value="${j}" onchange="guiaContarRespostas()">
+                        <span class="letra">${'ABCD'[j]}</span>
+                        <span class="texto">${escapeGuia(opcao)}</span>
+                    </label>`).join('')}
+                </div>
+            </div>`).join('') + `
+            <div class="quiz-rodape">
+                <span id="quiz-contador">0 de ${perguntas.length} respondidas</span>
+                <button class="button guia-principal" id="quiz-enviar" type="submit" disabled>Enviar respostas</button>
+                <p id="guia-msg" class="guia-msg"></p>
+            </div>`;
     } catch (error) {
         console.error(error);
         alvo.innerHTML = '<p class="guia-erro">Não consegui carregar o teste. Tente de novo em alguns segundos.</p>';
     }
 }
 
+function guiaContarRespostas() {
+    const form = document.getElementById('guia-teste');
+    const total = form.querySelectorAll('.quiz-card').length;
+    const feitas = form.querySelectorAll('input[type="radio"]:checked').length;
+    document.getElementById('quiz-contador').textContent = `${feitas} de ${total} respondidas`;
+    document.getElementById('quiz-enviar').disabled = feitas < total;
+}
+
 function renderGuiaTeste() {
     setTimeout(carregarTeste);
     return `
-        <p class="guia-intro">Três perguntas sobre o vídeo. Acerte todas para liberar o cadastro. <a href="#" onclick="guiaIr(0); return false;">Rever o vídeo</a></p>
-        <form id="guia-teste" class="guia-form" onsubmit="enviarTeste(event)">${loadingHTML}</form>`;
+        <div class="guia-cabeca">
+            <h2>Teste</h2>
+            <p>Três perguntas sobre o vídeo. Acerte todas para liberar o cadastro. <a href="#" onclick="guiaIr(0); return false;">Rever o vídeo</a></p>
+        </div>
+        <form id="guia-teste" class="quiz" onsubmit="enviarTeste(event)">${loadingHTML}</form>`;
 }
 
 async function enviarTeste(event) {
     event.preventDefault();
     const form = event.target;
-    const total = form.querySelectorAll('fieldset').length;
+    const total = form.querySelectorAll('.quiz-card').length;
     const respostas = [];
     for (let i = 0; i < total; i++) {
         const marcada = form.querySelector(`input[name="q${i}"]:checked`);
@@ -150,13 +191,16 @@ async function enviarTeste(event) {
             guiaIr(2);
             return;
         }
+        const pontos = Array.from({ length: resultado.total }, (_, i) => `<span class="${i < resultado.acertos ? 'ok' : ''}"></span>`).join('');
         document.getElementById('app').innerHTML = `
             <h1>Recrutamento</h1>
             ${guiaProgresso()}
-            <div class="guia-resultado">
+            <div class="guia-cartao guia-centro">
+                <div class="guia-selo aviso"><i class="fa-solid fa-rotate-right"></i></div>
                 <h2>Quase lá!</h2>
+                <div class="quiz-pontos">${pontos}</div>
                 <p>Você acertou <b>${resultado.acertos} de ${resultado.total}</b>. Reveja o vídeo (ou as regras em texto) e tente de novo — as perguntas mudam a cada tentativa.</p>
-                <button class="button" onclick="guiaIr(0)">Rever o vídeo</button>
+                <button class="button guia-principal" onclick="guiaIr(0)">Rever o vídeo</button>
             </div>`;
     } catch (error) {
         console.error(error);
@@ -167,15 +211,20 @@ async function enviarTeste(event) {
 function renderGuiaCadastro() {
     if (!guia.passe) return renderGuiaTeste();
     return `
-        <p class="guia-intro">Teste aprovado! Agora preencha sua solicitação.</p>
-        <form class="guia-form" onsubmit="enviarCadastro(event)">
-            <label for="nick">Seu nick no Minecraft (exatamente como no jogo)</label>
-            <input type="text" id="nick" placeholder="Nick" required maxlength="16" pattern="[A-Za-z0-9_]{3,16}" value="${escapeGuia(guia.nick)}">
-            <label for="data_nascimento">Data de nascimento</label>
-            <input type="date" id="data_nascimento" required>
-            <button class="button">Enviar solicitação</button>
-        </form>
-        <p id="guia-msg" class="guia-msg"></p>`;
+        <div class="guia-cartao guia-estreito">
+            <div class="guia-selo"><i class="fa-solid fa-id-card"></i></div>
+            <h2>Sua solicitação</h2>
+            <p class="guia-sub">Teste aprovado! Falta só se apresentar.</p>
+            <form class="guia-campos" onsubmit="enviarCadastro(event)">
+                <label for="nick"><i class="fa-solid fa-user"></i> Nick no Minecraft</label>
+                <input type="text" id="nick" placeholder="Seu nick" required maxlength="16" pattern="[A-Za-z0-9_]{3,16}" value="${escapeGuia(guia.nick)}">
+                <small>Exatamente como no jogo — maiúsculas e minúsculas contam.</small>
+                <label for="data_nascimento"><i class="fa-solid fa-cake-candles"></i> Data de nascimento</label>
+                <input type="date" id="data_nascimento" required>
+                <button class="button guia-principal">Enviar solicitação</button>
+                <p id="guia-msg" class="guia-msg"></p>
+            </form>
+        </div>`;
 }
 
 async function enviarCadastro(event) {
@@ -216,43 +265,54 @@ async function enviarCadastro(event) {
 function renderGuiaDiscord() {
     const nick = escapeGuia(guia.nick || 'SeuNick');
     return `
-        <p class="guia-intro">Solicitação enviada! Todo membro precisa estar no nosso Discord, com a conta vinculada ao nick.</p>
-        <ol class="guia-passos">
-            <li>Entre no servidor: <a class="guia-link" href="${DISCORD_URL}" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-discord"></i> Entrar no Discord</a></li>
-            <li>No canal <b>#saudações</b>, clique em <b>Vincular minha conta</b> e informe o nick <b>${nick}</b>.</li>
-            <li>O bot mostra um <b>código</b>. No jogo, mande em privado para a conta do clã:
-                <div class="guia-comandos">
-                    <div><small>Apocalipse</small><code>/m Eternity vincular CÓDIGO</code></div>
-                    <div><small>Gênesis</small><code>/m Coagula1999 vincular CÓDIGO</code></div>
-                </div>
+        <div class="guia-cabeca">
+            <h2>Discord</h2>
+            <p>Solicitação enviada! Todo membro fica no nosso Discord, com a conta vinculada ao nick.</p>
+        </div>
+        <ol class="guia-timeline">
+            <li>
+                <span class="passo">1</span>
+                <div><h3>Entre no servidor</h3>
+                    <a class="guia-discord" href="${DISCORD_URL}" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-discord"></i> Entrar no Discord</a>
+                    <small>Não tem conta? É gratuita — crie em discord.com.</small></div>
+            </li>
+            <li>
+                <span class="passo">2</span>
+                <div><h3>Vincule sua conta</h3>
+                    <p>No canal <b>#saudações</b>, clique em <b>Vincular minha conta</b> e informe o nick <b>${nick}</b>.</p></div>
+            </li>
+            <li>
+                <span class="passo">3</span>
+                <div><h3>Confirme no jogo</h3>
+                    <p>O bot mostra um <b>código</b>. Mande em privado para a conta do clã:</p>
+                    <div class="guia-cmds">${guiaComando('Apocalipse', '/m Eternity vincular CÓDIGO')}${guiaComando('Gênesis', '/m Coagula1999 vincular CÓDIGO')}</div></div>
             </li>
         </ol>
-        <p class="guia-rodape">Não tem Discord? A conta é gratuita — crie em discord.com e volte aqui.</p>
-        <button class="button" onclick="guiaIr(4)">Já vinculei</button>`;
+        <button class="button guia-principal" onclick="guiaIr(4)">Já vinculei</button>`;
 }
 
 function renderGuiaConvite() {
+    const lema = '<h2 class="guia-bemvindo">Seja bem-vindo à Eternity!</h2>';
     if (guia.doJogo) {
         return `
-        <div class="guia-resultado">
+        <div class="guia-cartao guia-centro guia-final">
+            <div class="guia-selo sucesso"><i class="fa-solid fa-check"></i></div>
             <h2>Tudo pronto!</h2>
-            <p>A conta do clã já está acompanhando você no jogo. Em instantes chega o <b>convite do clã</b> — <b>agora é só aceitar o convite no jogo</b>.</p>
-            <p>Se estiver offline, entre no servidor: o convite sai assim que você aparecer.</p>
-            <h2 class="guia-lema">Seja bem-vindo à Eternity!</h2>
+            <p>A conta do clã já está acompanhando você no jogo. Em instantes chega o <b>convite do clã</b> — <b>agora é só aceitar no jogo</b>.</p>
+            <p class="guia-sub">Se estiver offline, entre no servidor: o convite sai assim que você aparecer.</p>
+            ${lema}
         </div>`;
     }
     return `
-        <div class="guia-resultado">
+        <div class="guia-cartao guia-centro guia-final">
+            <div class="guia-selo sucesso"><i class="fa-solid fa-check"></i></div>
             <h2>Última etapa!</h2>
             <p>Entre no jogo e chame a conta do clã no privado:</p>
-            <div class="guia-comandos">
-                <div><small>Apocalipse</small><code>/m Eternity quero entrar</code></div>
-                <div><small>Gênesis</small><code>/m Coagula1999 quero entrar</code></div>
-            </div>
-            <p>Ela confere seu cadastro e o vínculo do Discord e manda o <b>convite do clã</b>. É só aceitar no jogo.</p>
-            <h2 class="guia-lema">Seja bem-vindo à Eternity!</h2>
+            <div class="guia-cmds">${guiaComando('Apocalipse', '/m Eternity quero entrar')}${guiaComando('Gênesis', '/m Coagula1999 quero entrar')}</div>
+            <p>Ela confere seu cadastro e o Discord e manda o <b>convite do clã</b>. É só aceitar no jogo.</p>
+            ${lema}
         </div>
-        <p class="guia-rodape"><a href="#" onclick="guiaRecomecar(event)">Recomeçar o guia</a></p>`;
+        <p class="guia-rodape"><a href="#" onclick="guiaRecomecar(event)">Recomeçar</a></p>`;
 }
 
 function guiaRecomecar(event) {

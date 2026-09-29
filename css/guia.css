@@ -1,58 +1,20 @@
-/* Guia do Recruta (js/home/guia.js). Segue o vidro claro e o ciano do site. */
+/* Recrutamento (js/home/guia.js). Vidro claro e ciano, como o resto do site. */
 
-.guia-progresso {
-    display: flex;
-    gap: 6px;
-    width: 100%;
-    list-style: none;
-    margin-bottom: 8px;
-
-    li {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 10px;
-        border-radius: 0.6em 0.15em;
-        background: rgba(255, 255, 255, 0.35);
-        border: 1px solid rgba(0, 0, 0, 0.25);
-        font-size: 0.8em;
-        color: #33484b;
-    }
-
-    li span {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 24px;
-        height: 24px;
-        flex: none;
-        border-radius: 50%;
-        background: rgba(0, 0, 0, 0.12);
-        font-size: 0.85em;
-    }
-
-    li.atual {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(0, 220, 230, 0.35));
-        border-color: #008e96;
-        color: #002f33;
-        font-weight: bold;
-    }
-
-    li.atual span { background: #008e96; color: #fff; }
-    li.feita span { background: #2e9e6a; color: #fff; }
+:root {
+    --guia-tinta: #083344;
+    --guia-texto: #1f3a3d;
+    --guia-suave: #4b6366;
+    --guia-ciano: #0e7490;
+    --guia-ciano-claro: #22d3ee;
+    --guia-vidro: rgba(255, 255, 255, 0.62);
+    --guia-borda: rgba(8, 51, 68, 0.18);
+    --guia-sans: system-ui, "Segoe UI", sans-serif;
 }
 
-.guia-intro {
-    width: 100%;
-    text-align: center !important;
-    font-family: system-ui, "Segoe UI", sans-serif;
-    font-size: 1.05em;
-}
+/* ---------- Etapa do video: sem rolagem, o video manda ---------- */
 
-/* Etapa do video: sem barra de etapas, o video ocupa a altura que sobra do
-   painel (main tem 75vh) e nada rola. Os filhos nao encolhem: sem isso o
-   botao Continuar era achatado pela coluna flex do .content. */
+/* O video ocupa a altura que sobra do painel (main tem 75vh). Os filhos nao
+   encolhem: sem isso o botao Continuar era achatado pela coluna flex. */
 .content.guia-modo-video {
     overflow: hidden;
     gap: 8px;
@@ -84,9 +46,9 @@
 
 .guia-links {
     text-align: center !important;
-    font-family: system-ui, "Segoe UI", sans-serif;
+    font-family: var(--guia-sans);
     font-size: 0.85em;
-    color: #33484b;
+    color: var(--guia-suave);
 
     a { color: #005b63; }
     span { margin: 0 8px; }
@@ -96,6 +58,8 @@
 .content.guia-modo-video:has(#guia-regras-texto:not([hidden])) { overflow: auto; }
 
 #guia-regras-texto { width: 100%; padding-bottom: 12px; }
+
+/* ---------- Regras em texto ---------- */
 
 .guia-cards {
     display: grid;
@@ -107,192 +71,491 @@
 .guia-card {
     padding: 14px 16px;
     border-radius: 0.9em 0.2em;
-    background: rgba(255, 255, 255, 0.55);
-    border: 1px solid rgba(0, 91, 99, 0.35);
-    box-shadow: 0 4px 12px rgba(0, 63, 69, 0.12);
+    background: var(--guia-vidro);
+    border: 1px solid var(--guia-borda);
 
-    h3 {
-        font-size: 0.95em;
-        color: #004c52;
-        margin-bottom: 8px;
-    }
-
-    h3 i { margin-right: 6px; }
+    h3 { font-size: 0.95em; color: var(--guia-tinta); margin-bottom: 8px; }
+    h3 i { margin-right: 6px; color: var(--guia-ciano); }
 
     p {
-        font-family: system-ui, "Segoe UI", sans-serif;
+        font-family: var(--guia-sans);
         font-size: 0.95em;
         text-align: left !important;
         margin-bottom: 6px;
+        color: var(--guia-texto);
     }
 }
 
-.content code, .guia-comandos code {
-    font-family: Consolas, "Courier New", monospace;
-    background: rgba(0, 0, 0, 0.08);
-    border-radius: 4px;
-    padding: 1px 5px;
+/* ---------- Estrutura comum das etapas ---------- */
+
+.guia-stepper {
+    display: flex;
+    width: min(720px, 100%);
+    list-style: none;
+    margin: 4px 0 18px;
+    flex-shrink: 0;
+
+    li {
+        position: relative;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.72em;
+        color: #2f4a4d;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
+    }
+
+    /* A linha que liga uma etapa a proxima. */
+    li + li::before {
+        content: "";
+        position: absolute;
+        top: 16px;
+        right: calc(50% + 20px);
+        left: calc(-50% + 20px);
+        height: 3px;
+        border-radius: 2px;
+        background: rgba(8, 51, 68, 0.15);
+    }
+
+    li.feita + li::before, li.atual::before { background: var(--guia-ciano); }
+
+    .num {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        font-size: 1.15em;
+        background: rgba(255, 255, 255, 0.55);
+        border: 2px solid rgba(8, 51, 68, 0.2);
+        color: var(--guia-suave);
+        transition: all 0.3s ease;
+    }
+
+    li.feita .num { background: var(--guia-ciano); border-color: var(--guia-ciano); color: #fff; }
+
+    li.atual .num {
+        background: #fff;
+        border-color: var(--guia-ciano);
+        color: var(--guia-ciano);
+        box-shadow: 0 0 0 5px rgba(34, 211, 238, 0.25);
+    }
+
+    li.atual .nome { color: var(--guia-tinta); font-weight: bold; }
 }
 
-.guia-aceite {
+.guia-cabeca {
+    width: min(760px, 100%);
+    text-align: center;
+    margin-bottom: 14px;
+
+    h2 { color: var(--guia-tinta); margin-bottom: 6px; }
+
+    p {
+        text-align: center !important;
+        font-family: var(--guia-sans);
+        color: var(--guia-texto);
+    }
+
+    a { color: #005b63; margin-left: 4px; white-space: nowrap; }
+}
+
+.guia-cartao {
+    width: min(760px, 100%);
+    padding: 26px 30px;
+    border-radius: 1.4em 0.35em;
+    background: var(--guia-vidro);
+    border: 1px solid var(--guia-borda);
+    box-shadow: 0 12px 34px rgba(8, 51, 68, 0.16);
+    backdrop-filter: blur(6px);
+    margin-bottom: 18px;
+    flex-shrink: 0;
+
+    h2 { color: var(--guia-tinta); }
+
+    p {
+        font-family: var(--guia-sans);
+        color: var(--guia-texto);
+        line-height: 1.5;
+    }
+}
+
+.guia-estreito { width: min(460px, 100%); }
+
+.guia-centro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+
+    p { text-align: center !important; }
+}
+
+.guia-sub { color: var(--guia-suave) !important; font-size: 0.92em; }
+
+.guia-selo {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-top: 8px;
-    font-family: system-ui, "Segoe UI", sans-serif;
-    font-weight: 600;
-    cursor: pointer;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    font-size: 1.7em;
+    color: #fff;
+    background: linear-gradient(135deg, var(--guia-ciano), var(--guia-ciano-claro));
+    box-shadow: 0 8px 20px rgba(14, 116, 144, 0.35);
 }
 
-.guia-aceite input { width: 18px; height: 18px; accent-color: #008e96; }
+.guia-selo.aviso { background: linear-gradient(135deg, #b45309, #f59e0b); box-shadow: 0 8px 20px rgba(180, 83, 9, 0.3); }
+
+.guia-selo.sucesso {
+    width: 84px;
+    height: 84px;
+    font-size: 2.3em;
+    background: linear-gradient(135deg, #059669, #34d399);
+    box-shadow: 0 10px 26px rgba(5, 150, 105, 0.35);
+    animation: guia-pop 0.6s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+@keyframes guia-pop {
+    from { transform: scale(0.3); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.button.guia-principal {
+    width: min(340px, 100%);
+    height: auto;
+    min-height: 3.1em;
+    padding: 0.75em 1.4em;
+    margin: 6px auto 0;
+    font-size: 1.02em;
+    flex-shrink: 0;
+}
 
 .button:disabled {
     opacity: 0.45;
     cursor: not-allowed;
     transform: none;
-}
-
-.guia-form {
-    padding-top: 0;
-    gap: 4px;
-
-    .button { margin-top: 4px; }
-}
-
-.guia-intro a { color: #005b63; margin-left: 6px; }
-
-/* Opcoes em duas colunas: as tres perguntas cabem na tela sem rolar. */
-.guia-pergunta {
-    width: 80%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 8px;
-    border: 1px solid rgba(0, 91, 99, 0.35);
-    border-radius: 0.9em 0.2em;
-    background: rgba(255, 255, 255, 0.55);
-    padding: 4px 14px 5px;
-    margin-bottom: 6px;
-
-    legend {
-        padding: 0 6px;
-        font-weight: bold;
-        color: #004c52;
-    }
-}
-
-.guia-opcao {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 5px 8px;
-    margin: 0;
-    border-radius: 0.5em 0.1em;
-    font-family: system-ui, "Segoe UI", sans-serif;
-    cursor: pointer;
-}
-
-.guia-opcao:hover { background: rgba(0, 220, 230, 0.15); }
-
-.guia-opcao input {
-    width: 18px;
-    height: 18px;
-    margin: 0;
     box-shadow: none;
-    accent-color: #008e96;
+}
+
+.guia-msg, .guia-erro {
+    color: #9f1239;
+    text-align: center !important;
+    font-family: var(--guia-sans);
+    font-weight: 600;
 }
 
 .guia-msg:empty { display: none; }
 
-.guia-msg, .guia-erro {
-    color: #8a1c1c;
-    text-align: center !important;
-    font-family: system-ui, "Segoe UI", sans-serif;
-    font-weight: 600;
-}
-
 .guia-rodape {
     text-align: center !important;
-    font-family: system-ui, "Segoe UI", sans-serif;
+    font-family: var(--guia-sans);
     font-size: 0.9em;
     margin-bottom: 16px;
 
     a { color: #005b63; }
 }
 
-.guia-passos {
-    width: 80%;
+/* ---------- Teste ---------- */
+
+/* E um form: o CSS global centraliza os filhos de todo form, e sem o stretch
+   cada cartao encolhia ate o proprio conteudo, cada um de uma largura. */
+.quiz {
+    width: min(760px, 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+/* Titulo DENTRO do cartao. Era legend de fieldset, que o navegador desenha
+   sobre a borda, e o titulo pulava para fora. */
+.quiz-card {
+    padding: 18px 20px 20px;
+    border-radius: 1.2em 0.3em;
+    background: var(--guia-vidro);
+    border: 1px solid var(--guia-borda);
+    box-shadow: 0 8px 22px rgba(8, 51, 68, 0.12);
+
+    h3 {
+        margin: 8px 0 14px;
+        font-size: 1.05em;
+        line-height: 1.35;
+        color: var(--guia-tinta);
+    }
+}
+
+.quiz-num {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.68em;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--guia-ciano);
+    background: rgba(34, 211, 238, 0.14);
+    border: 1px solid rgba(14, 116, 144, 0.25);
+}
+
+.quiz-opcoes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.quiz-opcao {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: 0.8em 0.2em;
+    background: rgba(255, 255, 255, 0.75);
+    border: 2px solid rgba(8, 51, 68, 0.1);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+
+    input { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; margin: 0; }
+
+    .letra {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: none;
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        font-size: 0.85em;
+        color: var(--guia-ciano);
+        background: rgba(34, 211, 238, 0.14);
+        transition: all 0.2s ease;
+    }
+
+    .texto { font-family: var(--guia-sans); color: var(--guia-texto); font-size: 0.98em; }
+}
+
+.quiz-opcao:hover { border-color: rgba(14, 116, 144, 0.45); transform: translateY(-1px); }
+
+.quiz-opcao:has(input:focus-visible) { outline: 3px solid rgba(34, 211, 238, 0.6); outline-offset: 2px; }
+
+.quiz-opcao:has(input:checked) {
+    border-color: var(--guia-ciano);
+    background: linear-gradient(135deg, #ffffff, rgba(165, 243, 252, 0.7));
+
+    .letra { background: var(--guia-ciano); color: #fff; }
+    .texto { color: var(--guia-tinta); font-weight: 600; }
+}
+
+.quiz-rodape {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding-bottom: 18px;
+
+    #quiz-contador { font-family: var(--guia-sans); font-size: 0.88em; color: var(--guia-suave); }
+}
+
+.quiz-pontos {
+    display: flex;
+    gap: 8px;
+
+    span { width: 14px; height: 14px; border-radius: 50%; background: rgba(8, 51, 68, 0.18); }
+    span.ok { background: #10b981; }
+}
+
+/* ---------- Cadastro ---------- */
+
+.guia-estreito h2, .guia-estreito .guia-sub { text-align: center !important; }
+
+.guia-campos {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding-top: 18px;
+    gap: 4px;
+
+    label { margin: 8px 0 2px; font-size: 0.85em; color: var(--guia-tinta); }
+    label i { color: var(--guia-ciano); margin-right: 6px; width: 14px; }
+
+    input {
+        width: 100%;
+        height: 2.9em;
+        margin-bottom: 0;
+        color: var(--guia-tinta);
+        border-radius: 0.6em 0.15em;
+        font-family: var(--guia-sans);
+        font-size: 1em;
+    }
+
+    small { font-family: var(--guia-sans); font-size: 0.78em; color: var(--guia-suave); }
+
+    .button.guia-principal { width: 100%; margin-top: 18px; }
+}
+
+/* ---------- Discord ---------- */
+
+.guia-timeline {
+    width: min(760px, 100%);
+    list-style: none;
     display: flex;
     flex-direction: column;
     gap: 14px;
-    padding-left: 1.2em;
-    font-family: system-ui, "Segoe UI", sans-serif;
-    font-size: 1.02em;
-    line-height: 1.5;
+    margin-bottom: 18px;
+    flex-shrink: 0;
+
+    li {
+        position: relative;
+        display: flex;
+        gap: 16px;
+        padding: 18px 20px;
+        border-radius: 1.2em 0.3em;
+        background: var(--guia-vidro);
+        border: 1px solid var(--guia-borda);
+        box-shadow: 0 8px 22px rgba(8, 51, 68, 0.1);
+    }
+
+    /* Liga os passos: a linha passa por tras entre um cartao e outro. */
+    li + li::before {
+        content: "";
+        position: absolute;
+        left: 39px;
+        top: -15px;
+        width: 3px;
+        height: 16px;
+        background: rgba(14, 116, 144, 0.35);
+    }
+
+    .passo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        color: #fff;
+        font-size: 1.05em;
+        background: linear-gradient(135deg, var(--guia-ciano), var(--guia-ciano-claro));
+    }
+
+    div { flex: 1; min-width: 0; }
+    h3 { color: var(--guia-tinta); margin-bottom: 6px; font-size: 1em; }
+
+    p {
+        font-family: var(--guia-sans);
+        color: var(--guia-texto);
+        text-align: left !important;
+        line-height: 1.5;
+    }
+
+    small { display: block; margin-top: 8px; font-family: var(--guia-sans); font-size: 0.82em; color: var(--guia-suave); }
 }
 
-.guia-link {
+.guia-discord {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    margin-left: 4px;
-    padding: 4px 12px;
-    border-radius: 0.6em 0.15em;
+    gap: 10px;
+    margin-top: 4px;
+    padding: 10px 20px;
+    border-radius: 0.7em 0.2em;
     background: #5865f2;
     color: #fff;
     text-decoration: none;
     font-weight: 600;
+    box-shadow: 0 6px 16px rgba(88, 101, 242, 0.35);
+    transition: transform 0.15s ease, background 0.2s ease;
+
+    i { font-size: 1.3em; }
 }
 
-.guia-link:hover { background: #4752c4; }
+.guia-discord:hover { background: #4752c4; transform: translateY(-1px); }
 
-.guia-comandos {
-    display: flex;
-    flex-wrap: wrap;
+.guia-cmds {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
     gap: 10px;
-    margin: 8px 0;
-    justify-content: center;
-
-    div {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        padding: 8px 12px;
-        border-radius: 0.6em 0.15em;
-        background: rgba(255, 255, 255, 0.6);
-        border: 1px solid rgba(0, 91, 99, 0.3);
-    }
-
-    small { color: #33484b; font-size: 0.75em; }
-    code { font-size: 1em; }
+    width: 100%;
+    margin: 10px 0 4px;
 }
 
-.guia-resultado {
+.cmd {
+    position: relative;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    width: 80%;
-    margin-top: 12px;
-    text-align: center;
+    gap: 4px;
+    padding: 9px 44px 9px 12px;
+    border-radius: 0.7em 0.2em;
+    background: rgba(8, 51, 68, 0.9);
+    text-align: left;
 
-    p { text-align: center !important; font-family: system-ui, "Segoe UI", sans-serif; }
-}
+    small { margin: 0 !important; color: #a5f3fc !important; font-size: 0.7em !important; letter-spacing: 1px; }
+    code { font-family: Consolas, "Courier New", monospace; color: #fff; background: none; font-size: 0.95em; padding: 0; }
 
-.guia-lema { margin-top: 24px; text-shadow: 1px 1px 1px #fff; }
-
-@media (max-width: 840px) {
-    /* No celular so a etapa atual mostra o nome; as outras ficam no numero. */
-    .guia-progresso {
-        li { flex: 0 0 auto; font-size: 0; padding: 5px; gap: 6px; }
-        li.atual { flex: 1; font-size: 0.75em; }
-        li span { font-size: 11px; }
+    .copiar {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 30px;
+        height: 30px;
+        border: 0;
+        border-radius: 8px;
+        color: #a5f3fc;
+        background: rgba(255, 255, 255, 0.1);
+        cursor: pointer;
     }
 
-    .guia-pergunta, .guia-passos, .guia-resultado { width: 100%; }
-    .guia-pergunta { grid-template-columns: 1fr; }
+    .copiar:hover { background: rgba(255, 255, 255, 0.2); }
+}
 
-    /* No celular o painel cresce com o conteudo: o video segue a largura. */
+.content code {
+    font-family: Consolas, "Courier New", monospace;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 4px;
+    padding: 1px 5px;
+}
+
+/* ---------- Final ---------- */
+
+.guia-final .guia-cmds { max-width: 560px; }
+
+/* Conthax, e nao a Vermin do logo: a Vermin nao tem acento e o "à" virava "A". */
+.guia-bemvindo {
+    margin-top: 14px;
+    font-family: Conthax;
+    font-size: 1.7em;
+    letter-spacing: 0.5px;
+    line-height: 1.15;
+    background: linear-gradient(135deg, var(--guia-tinta), var(--guia-ciano));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+}
+
+/* ---------- Celular ---------- */
+
+@media (max-width: 840px) {
+    /* O painel cresce com o conteudo: o video segue a largura. */
     .content.guia-modo-video { overflow: visible; }
     .guia-video { width: 100%; height: auto; }
     .button.guia-continuar { width: 80%; }
+
+    .guia-stepper .nome { font-size: 0.85em; }
+    .guia-stepper li:not(.atual) .nome { display: none; }
+
+    .guia-cartao { padding: 20px 16px; }
+    .quiz-opcoes { grid-template-columns: 1fr; }
+    .guia-timeline li { padding: 16px 14px; gap: 12px; }
+    .guia-timeline li + li::before { left: 33px; }
+    .guia-bemvindo { font-size: 1.25em; }
 }
