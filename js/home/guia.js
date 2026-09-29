@@ -246,6 +246,17 @@ function renderGuiaDiscord() {
         <p class="guia-links"><a href="#" onclick="guiaIr(3); return false;">Já tenho o Discord vinculado ao meu nick</a></p>`;
 }
 
+// No Apocalipse o convite NAO vem da Eternity nem da ETY: vem da ETZ, a porta de
+// entrada, enviado pela Coagula1999 -- que mora no Genesis e precisa viajar ate
+// o Apocalipse, o que leva alguns minutos. Recruta que esperava outra coisa
+// ignorava o convite da ETZ ou saia antes de ele chegar, e nunca entrava.
+const GUIA_AVISO_CONVITE = `
+    <div class="guia-aviso-convite">
+        <p><i class="fa-solid fa-envelope-open-text"></i> <b>No Apocalipse, o convite vem do clã ETZ</b>, a porta de entrada da Eternity. <b>Aceite o convite da ETZ</b>: é por ele que você entra no clã.</p>
+        <p><i class="fa-solid fa-hourglass-half"></i> Quem envia é a conta <b>Coagula1999</b>, que precisa vir até o Apocalipse. <b>Pode levar alguns minutos</b> — fique online e aguarde.</p>
+        <p class="guia-sub">No Gênesis, o convite vem direto da ETY.</p>
+    </div>`;
+
 function renderGuiaConvite() {
     const lema = '<h2 class="guia-bemvindo">Seja bem-vindo à Eternity!</h2>';
     if (guia.doJogo) {
@@ -253,7 +264,8 @@ function renderGuiaConvite() {
         <div class="guia-cartao guia-centro guia-final">
             <div class="guia-selo sucesso"><i class="fa-solid fa-check"></i></div>
             <h2>Tudo pronto!</h2>
-            <p>A conta do clã já está acompanhando você no jogo. Em instantes chega o <b>convite do clã</b> — <b>agora é só aceitar no jogo</b>.</p>
+            <p>A conta do clã já está acompanhando você no jogo e manda o <b>convite do clã</b> sozinha.</p>
+            ${GUIA_AVISO_CONVITE}
             <p class="guia-sub">Se estiver offline, entre no servidor: o convite sai assim que você aparecer.</p>
             ${lema}
         </div>`;
@@ -264,7 +276,8 @@ function renderGuiaConvite() {
             <h2>Última etapa!</h2>
             <p>Entre no jogo e chame a conta do clã no privado:</p>
             <div class="guia-cmds">${guiaComando('Apocalipse', '/m Eternity quero entrar')}${guiaComando('Gênesis', '/m Coagula1999 quero entrar')}</div>
-            <p>Ela confere o Discord e manda o <b>convite do clã</b>. É só aceitar no jogo.</p>
+            <p>Ela confere o Discord e manda o <b>convite do clã</b>.</p>
+            ${GUIA_AVISO_CONVITE}
             ${lema}
         </div>
         <p class="guia-rodape"><a href="#" onclick="guiaRecomecar(event)">Recomeçar</a></p>`;
