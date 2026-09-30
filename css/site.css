@@ -209,12 +209,15 @@ body.site::before {
     height: 38px;
     color: var(--nevoa);
     font-size: 1.1rem;
+    text-decoration: none;
     border-radius: 50%;
     transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease;
 }
 
 .nav-actions .social-link:hover { color: var(--gelo); background: var(--aqua-suave); transform: translateY(-2px); }
 .nav-actions .admin-link { margin-left: 4px; font-size: 1rem; }
+/* O admin e .itens (entra na rota), mas icone nao leva o sublinhado dos links. */
+.nav-links .nav-actions .admin-link::after { display: none; }
 .nav-actions .admin-link.select { color: var(--aqua); background: var(--aqua-suave); }
 
 .menu-toggle { display: none; }
@@ -1208,13 +1211,15 @@ main { padding-top: var(--nav); }
 
     .menu-veu.open { opacity: 1; pointer-events: auto; }
 
-    /* Menu como painel flutuante sob o botao, e nao em tela cheia. Absoluto, e
-       nao fixed: o backdrop-filter da navbar vira o bloco de contencao dos fixed
-       dentro dela, e o menu ficava com altura zero. */
+    /* Menu como painel flutuante centralizado sob a navbar, e nao em tela cheia.
+       Absoluto, e nao fixed: o backdrop-filter da navbar vira o bloco de
+       contencao dos fixed dentro dela, e o menu ficava com altura zero. */
     .nav-links {
         position: absolute;
         top: calc(100% + 8px);
-        right: var(--lado);
+        left: 0;
+        right: 0;
+        margin-inline: auto;
         width: min(300px, calc(100vw - 2 * var(--lado)));
         height: auto;
         max-height: calc(100dvh - var(--nav) - 24px);
@@ -1231,7 +1236,7 @@ main { padding-top: var(--nav); }
         opacity: 0;
         pointer-events: none;
         transform: translateY(-8px) scale(0.98);
-        transform-origin: top right;
+        transform-origin: top center;
         transition: opacity 0.2s ease, transform 0.2s ease;
     }
 
