@@ -1255,6 +1255,19 @@ main { padding-top: var(--nav); }
 
     .nav-actions { justify-content: center; margin-top: 16px; }
 
+    /* No celular a barra do IP quebra em linhas: pilula vira cartao, com o
+       status e o IP em cima e o botao de copiar na largura toda embaixo. */
+    .ip-barra {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px 14px;
+        max-width: 420px;
+        padding: 14px 16px;
+        border-radius: 16px;
+    }
+
+    .ip-copiar { flex: 1 1 100%; justify-content: center; padding: 0.85em 1.1em; border-radius: 10px; }
+
     .hero { padding-bottom: 150px; }
     .hero::before {
         background:
