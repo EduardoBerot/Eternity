@@ -1,9 +1,12 @@
 const app = document.getElementById("app");
 const menuToggle = document.getElementById("menu-toggle");
 const mainMenu = document.getElementById("main-menu");
+const menuVeu = document.getElementById("menu-veu");
 
 function setMenuOpen(isOpen) {
     mainMenu.classList.toggle('open', isOpen);
+    menuVeu.classList.toggle('open', isOpen);
+    document.body.classList.toggle('menu-aberto', isOpen);
     menuToggle.classList.toggle('open', isOpen);
     menuToggle.setAttribute('aria-expanded', String(isOpen));
     menuToggle.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
@@ -12,6 +15,8 @@ function setMenuOpen(isOpen) {
 menuToggle.addEventListener('click', () => {
     setMenuOpen(!mainMenu.classList.contains('open'));
 });
+
+menuVeu.addEventListener('click', () => setMenuOpen(false));
 
 document.addEventListener('keydown', event => {
     if (event.key === 'Escape') {
