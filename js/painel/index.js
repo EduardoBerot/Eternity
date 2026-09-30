@@ -767,8 +767,7 @@ function init() {
     const nick = getCookie(ETY_ADM_LOGIN_COOKIE);
     const element = document.querySelector('#title_nick');
     const head = document.querySelector('#admin_profile_head');
-    const msg = `Saudações ${nick}!`;
-    element.textContent = msg;
+    element.textContent = nick;
     head.src = `https://mc-heads.net/head/${encodeURIComponent(nick)}`;
     head.alt = `Head do jogador ${nick}`;
     head.addEventListener('error', () => { head.hidden = true; }, { once: true });

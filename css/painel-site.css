@@ -1,0 +1,379 @@
+/* Painel da staff no tema do site (29/09/2026). Carregado por ultimo em
+   painel.html: reaproveita tokens, navbar e botoes do site.css e escurece o
+   que o painel.css desenhava claro -- tabelas, cards de pendencia, formularios,
+   conversa do recruta e os graficos de recrutamento. */
+
+/* ---------- Estrutura ---------- */
+
+.painel main {
+    display: block;
+    width: 100%;
+    height: auto;
+    padding-top: var(--nav);
+}
+
+.painel-selo {
+    padding: 0.3em 0.8em;
+    margin-left: -12px;
+    border-radius: 999px;
+    border: 1px solid rgba(46, 230, 240, 0.35);
+    color: var(--aqua);
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+/* O painel.css estiliza `nav` e `nav a` pelo elemento (largura de 90%, fundo
+   no hover), e a navbar nova tambem e um <nav>: aqui ela volta ao desenho do site. */
+.painel .nav-links { width: auto; margin-top: 0; justify-content: flex-start; }
+.painel .nav-actions { margin-left: auto; }
+.painel nav a:hover,
+.painel nav a:focus,
+.painel nav a.select { background: none; border-radius: 0; }
+.painel .nav-actions .social-link:hover { background: var(--aqua-suave); border-radius: 50%; }
+
+/* O [hidden] da aba de recrutamento (so lideres) tem de vencer o display do link. */
+.nav-links a.itens[hidden] { display: none; }
+
+.painel .nav-links a.itens { cursor: pointer; }
+
+.admin-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px 4px 4px;
+    margin-right: 4px;
+    border: 1px solid var(--linha);
+    border-radius: 999px;
+    background: rgba(232, 244, 248, 0.04);
+    color: var(--gelo);
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    white-space: nowrap;
+
+    img { width: 28px; height: 28px; border-radius: 50%; image-rendering: pixelated; filter: none; }
+}
+
+.painel .content {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 22px;
+    width: 100%;
+    max-width: 1280px;
+    height: auto;
+    margin: 0 auto;
+    padding: 40px var(--lado) 72px;
+    overflow: visible;
+    color: var(--gelo);
+    font-family: var(--sans);
+}
+
+.painel .content h1 {
+    margin: 0;
+    font-family: Conthax;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    line-height: 1.1;
+    color: var(--gelo);
+    text-shadow: none;
+}
+
+.painel .tittle { text-align: left; }
+
+/* ---------- Cabecalhos de pagina ---------- */
+
+.pending-page, .members-page { gap: 26px; padding-bottom: 0; }
+
+.pending-page__intro,
+.members-page__header {
+    padding: 0 0 22px;
+    border-bottom: 1px solid var(--linha);
+}
+
+/* Rotulo em caixa alta acima do titulo: sobra de template, o titulo ja diz. */
+.pending-page__eyebrow { display: none; }
+
+.pending-page__intro h1,
+.members-page__header h1 { margin-bottom: 10px; color: var(--gelo); }
+
+.pending-page__intro p,
+.pending-card__header p,
+.members-page__header p,
+.pending-subsection__header p {
+    color: var(--nevoa);
+    font-family: var(--sans);
+}
+
+/* ---------- Cards de pendencia ---------- */
+
+.pending-list { gap: 18px; }
+
+.pending-card {
+    border: 1px solid var(--linha);
+    border-radius: 14px;
+    background: rgba(15, 28, 43, 0.72);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
+    transition: border-color 0.25s ease;
+}
+
+.pending-card:hover { border-color: rgba(46, 230, 240, 0.22); }
+
+.pending-card__header { border-bottom: 1px solid var(--linha); }
+.pending-card__header h2 { color: var(--gelo); font-family: Conthax; }
+.pending-subsection__header h3 { color: var(--gelo); font-family: Conthax; }
+
+.pending-card__count {
+    border: 1px solid rgba(46, 230, 240, 0.35);
+    background: var(--aqua-suave);
+    color: var(--aqua);
+    box-shadow: none;
+    font-family: Conthax;
+}
+
+.pending-subsection--divided { border-top: 1px dashed var(--linha); }
+.pending-disclosure__content { border-top: 1px solid var(--linha); }
+
+.pending-disclosure > summary { transition: background 0.2s ease; }
+.pending-disclosure > summary::after { border-color: var(--aqua); }
+
+.pending-disclosure > summary:hover,
+.pending-disclosure > summary:focus-visible { background: rgba(46, 230, 240, 0.06); }
+
+.pending-disclosure > summary:focus-visible { outline: 2px solid var(--aqua); }
+
+.pending-card__loading,
+.table-message { color: var(--nevoa); font-family: var(--sans); }
+
+/* ---------- Tabelas ---------- */
+
+.painel table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    color: var(--gelo);
+}
+
+.painel table thead th {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(46, 230, 240, 0.3);
+    background: rgba(4, 8, 15, 0.5);
+    color: var(--nevoa);
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-shadow: none;
+    white-space: nowrap;
+}
+
+.painel th[id]:not([id=""]) { transition: color 0.2s ease, background 0.2s ease; }
+.painel th[id]:not([id=""]):hover { background: var(--aqua-suave); color: var(--aqua); }
+.painel th[id]:not([id=""]):active { background: rgba(46, 230, 240, 0.22); }
+.painel th[id]:not([id=""])::after { content: "↕"; opacity: 0.5; margin-left: 6px; }
+
+.painel table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--linha);
+}
+
+.painel tr:nth-child(even) { background: rgba(232, 244, 248, 0.02); }
+
+.painel tbody tr { transition: background 0.18s ease; }
+.painel tbody tr:hover { background: rgba(46, 230, 240, 0.07); }
+
+.pending-card__table tbody tr:hover { background: rgba(46, 230, 240, 0.07); }
+
+/* Icones de acao (aceitar, negar, editar, banir): alvo redondo com hover. */
+.painel table img[onclick] {
+    width: 34px;
+    height: 34px;
+    padding: 6px;
+    border-radius: 50%;
+    background: rgba(232, 244, 248, 0.05);
+    filter: none;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.painel table img[onclick]:hover { background: rgba(232, 244, 248, 0.14); transform: scale(1.1); filter: none; }
+
+.pending-actions { gap: 6px; }
+.pending-actions img { width: 34px; height: 34px; }
+
+.painel img:hover { filter: none; }
+
+.discord-link-status.is-linked { background: rgba(46, 230, 240, 0.12); color: var(--aqua); }
+.discord-link-status.is-linked:hover,
+.discord-link-status.is-linked:focus-visible { background: var(--aqua); color: var(--noite); }
+.discord-link-status.is-pending { background: rgba(255, 210, 63, 0.12); color: var(--c-estagiario); }
+
+/* ---------- Busca e alternador ---------- */
+
+.painel .form-label { gap: 6px; }
+
+.painel .form-label label,
+.painel #count_search { color: var(--nevoa); font-family: var(--sans); font-size: 0.85rem; }
+
+.painel input,
+.painel select {
+    height: 2.8em;
+    margin-bottom: 12px;
+    padding: 0 14px;
+    color: var(--gelo);
+    background: var(--aco);
+    border: 1px solid var(--linha);
+    border-radius: 10px;
+    box-shadow: none;
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    color-scheme: dark;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.painel input:focus,
+.painel select:focus { outline: none; border: 1px solid var(--aqua); box-shadow: 0 0 0 3px var(--aqua-suave); }
+
+.painel #search { max-width: 460px; border-radius: 999px; }
+
+.member-toggle {
+    padding: 4px;
+    border: 1px solid var(--linha);
+    border-radius: 999px;
+    background: var(--aco);
+}
+
+.member-toggle__button {
+    padding: 7px 16px;
+    border-radius: 999px;
+    color: var(--nevoa);
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+.member-toggle__button:hover,
+.member-toggle__button:focus-visible { background: rgba(232, 244, 248, 0.06); color: var(--gelo); }
+
+.member-toggle__button.is-active { background: var(--aqua); color: var(--noite); box-shadow: none; }
+
+/* ---------- Formularios (Adicionar e Editar) ---------- */
+
+.painel form#form_adicionar,
+.painel form#form_editar {
+    width: min(480px, 100%);
+    align-items: stretch;
+    gap: 4px;
+    padding: 26px 28px;
+    margin: 0;
+    border: 1px solid var(--linha);
+    border-radius: 14px;
+    background: rgba(15, 28, 43, 0.72);
+}
+
+.painel form input,
+.painel form select { width: 100%; }
+
+.painel form label { color: var(--nevoa); font-family: var(--sans); }
+
+.painel form button {
+    height: 3em;
+    margin-top: 10px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--aqua);
+    color: var(--noite);
+    box-shadow: none;
+    font-family: Conthax;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.painel form button:hover,
+.painel form button:focus { background: var(--aqua); box-shadow: 0 0 26px rgba(46, 230, 240, 0.45); transform: translateY(-2px); }
+
+#form-label-editar-btn .edit-action--back {
+    border: 1px solid rgba(255, 77, 94, 0.5);
+    background: rgba(255, 77, 94, 0.1);
+    color: var(--c-fundador);
+}
+
+#form-label-editar-btn .edit-action--back:hover,
+#form-label-editar-btn .edit-action--back:focus { background: rgba(255, 77, 94, 0.2); border-color: var(--c-fundador); box-shadow: none; }
+
+.edit-help {
+    border-left: 3px solid var(--aqua);
+    background: var(--aqua-suave);
+    color: var(--nevoa);
+}
+
+/* ---------- Botoes .btn ---------- */
+
+.btn {
+    border: 1px solid var(--linha);
+    border-radius: 999px;
+    box-shadow: none;
+    font-family: var(--sans);
+}
+
+.btn:hover, .btn:focus { box-shadow: none; filter: brightness(1.15); }
+.btn-success { background: rgba(61, 220, 132, 0.14); color: var(--c-auxiliar); border-color: rgba(61, 220, 132, 0.4); }
+.btn-secondary { background: rgba(232, 244, 248, 0.06); color: var(--gelo); }
+.btn-danger { background: rgba(255, 77, 94, 0.12); color: var(--c-fundador); border-color: rgba(255, 77, 94, 0.4); }
+.btn-primary { background: var(--aqua); color: var(--noite); border-color: var(--aqua); }
+
+/* ---------- Conversa do recruta ---------- */
+
+.recruta-log__fala { background: rgba(232, 244, 248, 0.06); color: var(--gelo); font-family: var(--sans); }
+.recruta-log__fala--eternity { background: rgba(46, 230, 240, 0.1); }
+.recruta-log__fala--jogador { background: rgba(61, 220, 132, 0.1); }
+
+/* ---------- Graficos de recrutamento ---------- */
+
+/* Mesmas identidades de cor, clareadas para o fundo escuro: o verde e o roxo
+   escuros da paleta clara sumiam sobre a superficie noturna. */
+.painel .viz-root {
+    --viz-surface: #0b1624;
+    --viz-ink: #e8f4f8;
+    --viz-ink-2: #9fb4c4;
+    --viz-track: #1a2b3d;
+    --viz-1: #4d9dff;
+    --viz-2: #ff8a55;
+    --viz-3: #2fd39b;
+    --viz-4: #ffc233;
+    --viz-5: #f28cb8;
+    --viz-6: #6fdc5b;
+    --viz-7: #a78bfa;
+    --viz-8: #ff6b6b;
+    --viz-bar: #4d9dff;
+    --viz-bar-forte: #9ec8ff;
+    --viz-novos: #3d6ea8;
+    --viz-entraram: #4d9dff;
+}
+
+.painel .viz-tile { border: 1px solid var(--linha); border-radius: 12px; }
+.painel .viz-tile__valor { font-family: Conthax; font-weight: normal; }
+.painel .viz-chip { border: 1px solid var(--linha); }
+.painel .viz-chip:hover, .painel .viz-chip:focus-visible { background: var(--aco-claro); }
+.painel .viz-plot { border-radius: 0 0 14px 14px; }
+.painel .viz-semana:hover, .painel .viz-semana.is-active { background: rgba(77, 157, 255, 0.1); }
+
+.viz-tooltip {
+    background: #e8f4f8;
+    color: #070d16;
+    font-family: var(--sans);
+}
+
+/* ---------- Carregando ---------- */
+
+.painel #loading { color: var(--nevoa); font-family: var(--sans); font-size: 1rem; }
+
+/* ---------- Celular ---------- */
+
+@media (max-width: 900px) {
+    .painel-selo { display: none; }
+    /* O responsive_panel.css separava os itens com borda preta. */
+    .painel .nav-links a.itens { padding-right: 4px; border-right: 0; }
+    .painel .nav-actions { flex-direction: column; gap: 14px; }
+    .painel #app { font-size: 0.9em; }
+    .painel .content { padding-top: 24px; }
+    .painel form#form_adicionar,
+    .painel form#form_editar { padding: 20px 16px; }
+}
