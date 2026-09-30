@@ -21,15 +21,18 @@ document.addEventListener('keydown', event => {
 });
 
 function selectItem(itemSelect) {
-    const itens = document.querySelectorAll(".itens");
-    for (const item of itens) {
-        if (item != itemSelect) {
-            item.classList.remove("select");
-        } else {
-            item.classList.add("select");
-        }
+    for (const item of document.querySelectorAll(".itens")) {
+        const atual = item === itemSelect;
+        item.classList.toggle("select", atual);
+        if (atual) item.setAttribute('aria-current', 'page');
+        else item.removeAttribute('aria-current');
     }
 };
+
+// Texto vindo da API vai para innerHTML: tudo passa por aqui.
+function escHtml(texto) {
+    return String(texto ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
 
 const loadingHTML = `
     <div id="loading" style="display:flex;flex-direction:column;align-items:center;margin-top:1em;">
@@ -38,9 +41,6 @@ const loadingHTML = `
     `
 
 const pages_content = {
-    home: `<h1>Como usar nosso site?</h1></br><p>Use o menu de navegação para solicitar recrutamento, acessar nossos meios de comunicação e saber mais sobre nos</p></br><h1 style="margin-top:150px">Uni-vos pela Eternidade!</h1>`,
-
-    about: `<h1>Missão, propósito e valores</h1></br><p>Desde 2020, o Clã Eternity tem sido uma comunidade calorosa no Minecraft, unindo jogadores para construir, explorar e crescer juntos. Evoluindo ao longo dos anos, nossa visão resultou em uma cidade vibrante, o coração do servidor.</p><p>Valorizamos a cooperação e o trabalho em equipe, mantendo farms comunitárias para garantir recursos compartilhados. Essa abordagem promove solidariedade e uma comunidade unida.</p><p>Nossos valores - união, respeito e honestidade - são a base de nossa comunidade, construindo confiança e um ambiente acolhedor para todos.</p>`,
 
     // "Juntar-se" abre o Guia do Recruta (guia.js). Este e o formulario de
     // atualizacao cadastral de quem ja e membro, que nao passa pelo teste.
@@ -61,27 +61,52 @@ const pages_content = {
 
     city: `<h1>Conheça nossa cidade</h1></br><p>Nossa cidade no servidor de sobrevivência é mais do que apenas blocos e estruturas. É um lar acolhedor, onde todos contribuem para algo maior. Cada pedra conta uma história de cooperação e criatividade.</p><div id="gallery"><a href="/imgs/City00.jpg"><img class="cityimgs" src="/imgs/City00.jpg" alt="city00"></a><a href="/imgs/City01.jpg"><img class="cityimgs" src="/imgs/City01.jpg" alt="city01"></a><a href="/imgs/City02.jpg"><img class="cityimgs" src="/imgs/City02.jpg" alt="city02"></a><a href="/imgs/City03.jpg"><img class="cityimgs" src="/imgs/City03.jpg" alt="city03"></a><a href="/imgs/City04.jpg"><img class="cityimgs" src="/imgs/City04.jpg" alt="city04"></a><a href="/imgs/City05.jpg"><img class="cityimgs" src="/imgs/City05.jpg" alt="city05"></a></div>`,
 
-    administracao: `${loadingHTML}<form onsubmit="validationLogin(event)" style="display:none;"><h1>Login</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>`,
-
-    hall: `<h1>Membros</h1><hr style="width:100%;margin-bottom:1em;"><div id="hall-da-fama" style="display:flex;flex-wrap:wrap;gap:1em;justify-content:center;padding-top:8px; margin-bottom:16px;">${loadingHTML}</div>`,
+    administracao: `${loadingHTML}<form onsubmit="validationLogin(event)" style="display:none;"><h1>Login da staff</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>`,
 };
 
-async function render(event) {
-    const id = event.target.id;
-    selectItem(event.target);
-    setMenuOpen(false);
-    if (id == 'join') {
-        history.replaceState(null, '', '#guia');
-        openGuia();
-        return;
-    }
-    app.innerHTML = pages_content[id];
+// Rotas por hash (#inicio, #membros...): cada pagina tem endereco proprio. O
+// `?nick=Fulano#guia` que a Eternity manda no jogo continua caindo no Guia.
+// `menu` e o id do link da navbar que fica aceso.
+const ROTAS = {
+    inicio: { menu: 'inicio', render: () => renderInicio() },
+    guia: { menu: 'join', render: () => openGuia() },
+    membros: { menu: 'hall', render: () => renderMembros() },
+    wiki: { menu: 'wiki', render: () => renderWiki() },
+    cidade: {
+        menu: 'city',
+        render: () => {
+            app.innerHTML = pages_content.city;
+            renderGallery('city');
+        },
+    },
+    admin: {
+        menu: 'administracao',
+        render: () => {
+            app.innerHTML = pages_content.administracao;
+            renderFormAdmin('administracao');
+        },
+    },
+    atualizar: { menu: null, render: () => openAtualizar() },
+};
 
-    renderGallery(id);
-    renderFormJoin(id);
-    renderFormAdmin(id);
-    await renderHall(id);
+function route() {
+    const nome = location.hash.replace(/^#/, '').split(/[?&]/)[0] || 'inicio';
+    const rota = ROTAS[nome] || ROTAS.inicio;
+    // A classe da pagina zera a do Guia (guia-modo-video) e deixa cada tela
+    // ajustar o proprio painel.
+    app.className = `content page-${ROTAS[nome] ? nome : 'inicio'}`;
+    setMenuOpen(false);
+    selectItem(rota.menu ? document.getElementById(rota.menu) : null);
+    rota.render();
+    app.scrollTo({ top: 0 });
 }
+
+function navigate(nome) {
+    if (location.hash === `#${nome}`) route();
+    else location.hash = nome;
+}
+
+window.addEventListener('hashchange', route);
 
 function renderGallery(id) {
     if (id == "city") {
@@ -120,87 +145,6 @@ function renderFormJoin(id) {
                 console.error('There has been a problem with your fetch operation:', error);
             });
     }
-}
-
-async function renderHall(id) {
-    if (id == 'hall') {
-        const hall = document.getElementById('hall-da-fama');
-        let playersHTML = "";
-        const hierarquia = {
-            "Fundador":99,
-            "Dono":90,
-            "Heika":80,
-            "Coordenador":70,
-            "Sohei":60,
-            "Supervisor":50,
-            "Ikko":45,
-            "Auxiliar":40,
-            "Daimyo":30,
-            "Estagiário":20,
-            "Admin":10,
-            "Membro":1,
-        };
-        
-        const resposta = await fetch(`${URL_BASE}/api/membros/ativos`);
-        document.getElementById('loading').style.display = 'none';
-        let membros = await resposta.json();
-        
-        membros = membros.sort((a,b)=>hierarquia[a.cargo]<hierarquia[b.cargo]? 1 : -1);
-        
-        const staffs = membros.filter(m=>m.cargo != "Membro");
-        let membros_padrao = membros.filter(m=>m.cargo == "Membro");
-        membros_padrao = membros_padrao.sort((a,b)=>a.data_entrada>b.data_entrada? 1 : -1);
-
-        membros_padrao.map(membro=>staffs.push(membro));
-
-        for (const membro of staffs) {
-            const playerHTML = `
-            <div class="card-staff ${membro.cargo.toLowerCase()}" style="display:flex; flex-direction:column; align-items:center;">
-                <img width="100" src="https://mc-heads.net/head/${membro.nick}" alt="skin do player ${membro.nick}">
-                <div style="display:flex; flex-direction:column;align-items:center;margin-top:8px;">
-                <p>${membro.nick}</p>
-                    <h3>${membro.cargo}</h3>
-                    <em style="font-size:0.8em">${calculateInYearOrDays(membro.data_entrada)}</em>
-                </div>
-            </div>
-            `;
-            
-            playersHTML += playerHTML;
-        }
-        
-
-        hall.innerHTML = playersHTML;
-    }
-}
-
-function calculateInYearOrDays(incomeDate) {
-    if (!incomeDate) return 'Cadastro incompleto';
-
-    function calculateAge(birthDate) {
-        const today = new Date();
-
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const m = today.getMonth() - birthDate.getMonth();
-
-        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-        }
-        return age;
-    }
-
-    function calculateAgeInDays(birthDate) {
-        const today = new Date();
-        const timeDifference = today - new Date(birthDate);
-        const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-        return Math.max(0, daysDifference);
-    }
-
-    incomeDate = new Date(incomeDate);
-    if (Number.isNaN(incomeDate.getTime())) return 'Cadastro incompleto';
-    let age = calculateAge(incomeDate);
-    let ageInDays = calculateAgeInDays(incomeDate);
-    if (ageInDays > 365) return `Membro a +${age} anos`;
-    return `Membro a ${ageInDays} dias`;
 }
 
 function renderDate() {
@@ -247,13 +191,6 @@ async function validationLogin(event) {
 
 }
 
-// Link direto para o guia (a Eternity manda este endereco no jogo). Espera o
-// DOMContentLoaded porque o guia.js carrega depois deste arquivo.
-document.addEventListener('DOMContentLoaded', () => {
-    if (location.hash === '#guia') {
-        selectItem(document.getElementById('join'));
-        openGuia();
-    } else {
-        app.innerHTML = pages_content.home;
-    }
-});
+// Espera o DOMContentLoaded porque inicio.js, membros.js, wiki.js e guia.js
+// carregam depois deste arquivo.
+document.addEventListener('DOMContentLoaded', route);

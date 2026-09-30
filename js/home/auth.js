@@ -65,6 +65,5 @@ async function send (event){
 };
 
 function goHome() {
-    join.classList.remove('select');
-    app.innerHTML = pages_content.home;
+    navigate('inicio');
 }

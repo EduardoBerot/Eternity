@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="./css/layout.css">
     <link rel="stylesheet" href="./css/index.css" />
     <link rel="stylesheet" href="./css/guia.css" />
+    <link rel="stylesheet" href="./css/site.css" />
     <link rel="icon" href="imgs/favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="./imgs/pwa/eternity-icon-192.png">
     <link rel="manifest" href="./manifest.json">
@@ -28,8 +29,32 @@
 </head>
 
 <body>
-    <header>
-        <h1 class="title">Eternity</h1>
+    <!-- Navbar no topo (29/09/2026): substituiu o menu lateral. Cada link leva a
+         uma rota de hash (#inicio, #membros...), para dar para compartilhar o
+         endereco de uma pagina. -->
+    <header class="topbar">
+        <a class="brand" href="#inicio" aria-label="Eternity - Início">Eternity</a>
+        <nav id="main-menu" class="nav-links" aria-label="Navegação principal">
+            <a class="itens" id="inicio" href="#inicio">Início</a>
+            <a class="itens" id="join" href="#guia">Juntar-se</a>
+            <a class="itens" id="hall" href="#membros">Membros</a>
+            <a class="itens" id="wiki" href="#wiki">Wiki</a>
+            <a class="itens" id="city" href="#cidade">Cidade</a>
+            <div class="nav-actions">
+                <a class="social-link" href="https://discord.gg/vj4eNDJqct" target="_blank" rel="noopener noreferrer" aria-label="Discord do Eternity" title="Discord">
+                    <i class="fa-brands fa-discord" aria-hidden="true"></i>
+                </a>
+                <a class="social-link" href="https://chat.whatsapp.com/L3P1OvMnrVpJ3cj849ZoIw" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp do Eternity" title="WhatsApp">
+                    <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
+                </a>
+                <a class="social-link" href="https://www.youtube.com/@Eternity-Armaggedon" target="_blank" rel="noopener noreferrer" aria-label="YouTube do Eternity" title="YouTube">
+                    <i class="fa-brands fa-youtube" aria-hidden="true"></i>
+                </a>
+                <a class="social-link admin-link itens" id="administracao" href="#admin" aria-label="Administração" title="Administração">
+                    <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                </a>
+            </div>
+        </nav>
         <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Abrir menu" aria-controls="main-menu" aria-expanded="false">
             <span></span>
             <span></span>
@@ -37,31 +62,17 @@
         </button>
     </header>
     <main>
-        <nav id="main-menu">
-            <a class="itens" tabindex="0" id="about" onkeypress="render(event)" onclick="render(event)">Sobre nos</a>
-            <a class="itens" tabindex="0" id="join" onkeypress="render(event)" onclick="render(event)">Juntar-se</a>
-            <a class="itens" tabindex="0" id="city" onkeypress="render(event)" onclick="render(event)">Cidade</a>
-            <a class="itens" tabindex="0" id="hall" onkeypress="render(event)" onclick="render(event)">Membros</a>
-            <a class="itens" tabindex="0" id="administracao" onkeypress="render(event)" onclick="render(event)">Administração</a>
-            <div class="social-links" aria-label="Redes sociais do Eternity">
-                <a class="social-link discord" href="https://discord.gg/vj4eNDJqct" target="_blank" rel="noopener noreferrer" aria-label="Discord do Eternity" title="Discord">
-                    <i class="fa-brands fa-discord" aria-hidden="true"></i>
-                </a>
-                <a class="social-link whatsapp" href="https://chat.whatsapp.com/L3P1OvMnrVpJ3cj849ZoIw" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp do Eternity" title="WhatsApp">
-                    <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
-                </a>
-                <a class="social-link youtube" href="https://www.youtube.com/@Eternity-Armaggedon" target="_blank" rel="noopener noreferrer" aria-label="YouTube do Eternity" title="YouTube">
-                    <i class="fa-brands fa-youtube" aria-hidden="true"></i>
-                </a>
-            </div>
-        </nav>
         <section id="app" class="content"></section>
     </main>
+    <dialog id="membro-dialog" class="membro-dialog" aria-labelledby="membro-dialog-nick"></dialog>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery-js/1.4.0/js/lightgallery.min.js"></script>
     <script src="js/plugins/lg-zoom.js"></script>
     <script src="js/plugins/lg-autoplay.js"></script>
     <script src="js/global.js"></script>
     <script src="js/home/index.js"></script>
+    <script src="js/home/inicio.js"></script>
+    <script src="js/home/membros.js"></script>
+    <script src="js/home/wiki.js"></script>
     <script src="js/home/auth.js"></script>
     <script src="js/home/guia.js"></script>
 </body>
