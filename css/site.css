@@ -133,6 +133,10 @@ body.site::before {
 
 .brand:hover { color: var(--aqua); text-shadow: 0 0 18px rgba(46, 230, 240, 0.6); }
 
+/* No Inicio o logo da navbar espera a marca do hero chegar ate ele. */
+.brand.aguardando { opacity: 0; pointer-events: none; }
+.hero-marca.recolhida { visibility: hidden; }
+
 .nav-links {
     display: flex;
     align-items: center;
@@ -315,7 +319,7 @@ main { padding-top: var(--nav); }
     border-bottom: 1px solid var(--linha);
 }
 
-/* A cidade de verdade atras do hero, apagando para a esquerda, onde fica o texto. */
+/* A imagem de fundo de sempre atras do hero, apagando para a esquerda, onde fica o texto. */
 .hero::before {
     content: "";
     position: absolute;
@@ -324,7 +328,7 @@ main { padding-top: var(--nav); }
     background:
         linear-gradient(90deg, var(--noite) 18%, rgba(7, 13, 22, 0.75) 48%, rgba(7, 13, 22, 0.2) 100%),
         linear-gradient(0deg, var(--noite) 0%, transparent 40%),
-        url(../imgs/City02.jpg) center / cover no-repeat;
+        url(../imgs/BodyBG.png) center / cover no-repeat;
     transform: scale(1.04);
     animation: heroFundo 1.6s ease-out both;
 }
@@ -332,6 +336,13 @@ main { padding-top: var(--nav); }
 @keyframes heroFundo { from { opacity: 0; transform: scale(1.1); } }
 
 .hero-marca {
+    /* Largura do texto, e nao da coluna: e ela que vira o logo da navbar ao
+       rolar (inicio.js), e a escala sai da razao entre as duas larguras. */
+    position: relative;
+    z-index: 60;
+    width: fit-content;
+    transform-origin: center;
+    will-change: transform;
     font-family: Vermin;
     font-size: clamp(4.2rem, 14vw, 10.5rem);
     line-height: 0.9;
@@ -1215,7 +1226,7 @@ main { padding-top: var(--nav); }
     .hero::before {
         background:
             linear-gradient(0deg, var(--noite) 10%, rgba(7, 13, 22, 0.8) 60%, rgba(7, 13, 22, 0.55) 100%),
-            url(../imgs/City02.jpg) center / cover no-repeat;
+            url(../imgs/BodyBG.png) center / cover no-repeat;
     }
     .fatos span { padding: 4px 12px; }
     .duas-colunas { grid-template-columns: 1fr; }

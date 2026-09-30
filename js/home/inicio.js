@@ -71,7 +71,57 @@ function renderInicio() {
         ${rodapeSite()}`;
     carregarMembrosInicio();
     carregarStatusServidor();
+    atualizarMarca();
 }
+
+// A marca do hero vira o logo da navbar com a rolagem: encolhe e desliza ate o
+// lugar dele, e so ai o logo aparece. A distancia de rolagem e a que a marca
+// levaria para subir sozinha ate a altura do logo, entao na vertical ela so
+// acompanha a pagina; o que a animacao faz e o deslize para a esquerda e a
+// escala. Tudo sai de offsetLeft/offsetTop, que ignoram o transform aplicado.
+const reduzirMovimento = window.matchMedia('(prefers-reduced-motion: reduce)');
+let quadroMarca = null;
+
+function atualizarMarca() {
+    const marca = document.querySelector('.hero-marca');
+    const logo = document.querySelector('.topbar .brand');
+    if (!logo) return;
+    if (!marca || reduzirMovimento.matches) {
+        logo.classList.remove('aguardando');
+        return;
+    }
+    const hero = marca.offsetParent.getBoundingClientRect();
+    const alvo = logo.getBoundingClientRect();
+    const largura = marca.offsetWidth;
+    const altura = marca.offsetHeight;
+    // Centro da marca onde ela estaria sem transform, na tela e com a pagina no topo.
+    const centroX = hero.left + marca.offsetLeft + largura / 2;
+    const centroY = hero.top + marca.offsetTop + altura / 2;
+    const centroYNoTopo = centroY + window.scrollY;
+    const alvoX = alvo.left + alvo.width / 2;
+    const alvoY = alvo.top + alvo.height / 2;
+    const percurso = Math.max(120, centroYNoTopo - alvoY);
+    const p = Math.min(1, window.scrollY / percurso);
+
+    const escala = 1 + p * (alvo.width / largura - 1);
+    const dx = p * (alvoX - centroX);
+    // Corrige o que a rolagem nao cobre sozinha (percurso minimo em tela baixa).
+    const dy = p * (alvoY - (centroYNoTopo - percurso)) ;
+    marca.style.transform = p > 0 ? `translate(${dx}px, ${dy}px) scale(${escala})` : '';
+
+    const chegou = p >= 1;
+    marca.classList.toggle('recolhida', chegou);
+    logo.classList.toggle('aguardando', !chegou);
+}
+
+window.addEventListener('scroll', () => {
+    if (quadroMarca) return;
+    quadroMarca = requestAnimationFrame(() => {
+        quadroMarca = null;
+        atualizarMarca();
+    });
+}, { passive: true });
+window.addEventListener('resize', atualizarMarca);
 
 function rodapeSite() {
     return `

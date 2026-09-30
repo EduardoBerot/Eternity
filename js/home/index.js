@@ -99,6 +99,8 @@ function route() {
     selectItem(rota.menu ? document.getElementById(rota.menu) : null);
     rota.render();
     window.scrollTo({ top: 0 });
+    // Fora do Inicio nao ha marca no hero: o logo da navbar volta na hora.
+    atualizarMarca();
 }
 
 function navigate(nome) {
