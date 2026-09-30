@@ -51,23 +51,30 @@ function dataBr(valor) {
 
 async function renderMembros() {
     app.innerHTML = `
-        <section class="pagina-cabeca">
-            <div>
-                <p class="eyebrow">Comunidade do clã</p>
-                <h1>Nossos membros</h1>
+        <header class="cabeca-pagina">
+            <div class="miolo cabeca-linha">
+                <div>
+                    <h1>Membros</h1>
+                    <p class="texto">Quem faz parte da Eternity hoje. Clique em alguém para ver o perfil.</p>
+                </div>
+                <span class="contagem" id="membros-contagem"></span>
             </div>
-            <span class="contagem" id="membros-contagem"></span>
-        </section>
-        <section class="cartao membros-filtros">
-            <div class="busca">
-                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                <input type="search" id="membros-busca" placeholder="Pesquisar por nick…" aria-label="Pesquisar por nick" oninput="filtrarMembros({ busca: this.value })">
+        </header>
+        <div class="membros-controles">
+            <div class="miolo">
+                <div class="busca">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    <input type="search" id="membros-busca" placeholder="Pesquisar por nick" aria-label="Pesquisar por nick" oninput="filtrarMembros({ busca: this.value })">
+                </div>
+                <div class="chips" id="membros-servidores" role="group" aria-label="Filtrar por servidor"></div>
+                <div class="chips" id="membros-cargos" role="group" aria-label="Filtrar por cargo"></div>
             </div>
-            <div class="chips" id="membros-servidores" role="group" aria-label="Filtrar por servidor"></div>
-            <div class="chips" id="membros-cargos" role="group" aria-label="Filtrar por cargo"></div>
-        </section>
-        <section class="membros-grade" id="membros-grade">${loadingHTML}</section>
-        <p class="membros-rodape">Data de entrada errada? Peça a correção com <code>/entrada</code> no nosso Discord.</p>`;
+        </div>
+        <div class="miolo">
+            <section class="membros-grade" id="membros-grade">${loadingHTML}</section>
+            <p class="membros-rodape">Data de entrada errada? Peça a correção com <code>/entrada</code> no nosso Discord.</p>
+        </div>
+        ${rodapeSite()}`;
 
     membrosEstado = { membros: [], perfis: new Map(), busca: '', cargo: 'todos', servidor: 'todos' };
     try {

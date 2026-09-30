@@ -59,7 +59,7 @@ const pages_content = {
         <button class="button">Enviar atualização</button>
     </form>`,
 
-    city: `<h1>Conheça nossa cidade</h1></br><p>Nossa cidade no servidor de sobrevivência é mais do que apenas blocos e estruturas. É um lar acolhedor, onde todos contribuem para algo maior. Cada pedra conta uma história de cooperação e criatividade.</p><div id="gallery"><a href="/imgs/City00.jpg"><img class="cityimgs" src="/imgs/City00.jpg" alt="city00"></a><a href="/imgs/City01.jpg"><img class="cityimgs" src="/imgs/City01.jpg" alt="city01"></a><a href="/imgs/City02.jpg"><img class="cityimgs" src="/imgs/City02.jpg" alt="city02"></a><a href="/imgs/City03.jpg"><img class="cityimgs" src="/imgs/City03.jpg" alt="city03"></a><a href="/imgs/City04.jpg"><img class="cityimgs" src="/imgs/City04.jpg" alt="city04"></a><a href="/imgs/City05.jpg"><img class="cityimgs" src="/imgs/City05.jpg" alt="city05"></a></div>`,
+    city: `<header class="cabeca-pagina"><div class="miolo"><h1>Cidade</h1><p class="texto">A cidade da Eternity no servidor de sobrevivência: casas e terrenos gratuitos, farms coletivas e um lugar para cada membro. Clique numa foto para ampliar. Para visitar: <code>/go ETY</code>.</p></div></header><div class="miolo"><div id="gallery"><a href="/imgs/City00.jpg"><img class="cityimgs" src="/imgs/City00.jpg" alt="Cidade da Eternity, vista 1"></a><a href="/imgs/City01.jpg"><img class="cityimgs" src="/imgs/City01.jpg" alt="Cidade da Eternity, vista 2"></a><a href="/imgs/City02.jpg"><img class="cityimgs" src="/imgs/City02.jpg" alt="Cidade da Eternity, vista 3"></a><a href="/imgs/City03.jpg"><img class="cityimgs" src="/imgs/City03.jpg" alt="Cidade da Eternity, vista 4"></a><a href="/imgs/City04.jpg"><img class="cityimgs" src="/imgs/City04.jpg" alt="Cidade da Eternity, vista 5"></a><a href="/imgs/City05.jpg"><img class="cityimgs" src="/imgs/City05.jpg" alt="Cidade da Eternity, vista 6"></a></div></div>`,
 
     administracao: `${loadingHTML}<form onsubmit="validationLogin(event)" style="display:none;"><h1>Login da staff</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>`,
 };
@@ -75,7 +75,7 @@ const ROTAS = {
     cidade: {
         menu: 'city',
         render: () => {
-            app.innerHTML = pages_content.city;
+            app.innerHTML = pages_content.city + rodapeSite();
             renderGallery('city');
         },
     },
@@ -98,7 +98,7 @@ function route() {
     setMenuOpen(false);
     selectItem(rota.menu ? document.getElementById(rota.menu) : null);
     rota.render();
-    app.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0 });
 }
 
 function navigate(nome) {
@@ -107,6 +107,12 @@ function navigate(nome) {
 }
 
 window.addEventListener('hashchange', route);
+
+// A navbar fica mais opaca quando a pagina rola, para o texto nao brigar com o
+// conteudo que passa por baixo.
+window.addEventListener('scroll', () => {
+    document.querySelector('.topbar')?.classList.toggle('rolou', window.scrollY > 8);
+}, { passive: true });
 
 function renderGallery(id) {
     if (id == "city") {
