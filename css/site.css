@@ -1191,14 +1191,19 @@ main { padding-top: var(--nav); }
     .menu-toggle.open span:nth-child(2) { opacity: 0; }
     .menu-toggle.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
-    /* Menu em tela cheia sob a navbar. */
+    /* Menu em tela cheia sob a navbar. Absoluto, e nao fixed: o backdrop-filter
+       da navbar vira o bloco de contencao dos fixed dentro dela, e o menu ficava
+       com altura zero -- os links vazavam por cima da pagina, sem fundo. */
     .nav-links {
-        position: fixed;
-        inset: var(--nav) 0 0 0;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
         flex-direction: column;
         align-items: stretch;
         gap: 0;
-        height: auto;
+        height: calc(100dvh - var(--nav));
+        overflow-y: auto;
         padding: 16px var(--lado) 32px;
         background: rgba(4, 8, 15, 0.97);
         opacity: 0;
