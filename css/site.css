@@ -794,6 +794,19 @@ main { padding-top: var(--nav); }
     strong { color: #8b95ff; font-family: var(--sans); }
 }
 
+.discord-link {
+    width: fit-content;
+    padding: 6px 12px 6px 6px;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: background 0.2s ease;
+
+    i { font-size: 0.75rem; color: var(--nevoa-escura); transition: color 0.2s ease; }
+}
+
+.discord-link:hover { background: rgba(139, 149, 255, 0.12); }
+.discord-link:hover i { color: #8b95ff; }
+
 /* ---------- Wiki ---------- */
 
 .wiki-secoes {

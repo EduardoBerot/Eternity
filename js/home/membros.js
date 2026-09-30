@@ -170,12 +170,20 @@ function abrirMembro(nick) {
     const jogo = perfil.jogo || {};
     const online = jogo.visto === 'Online';
 
-    const blocoDiscord = perfil.discord
-        ? `<div class="discord-linha">
-               ${perfil.discord.avatar ? `<img src="${escHtml(perfil.discord.avatar)}" alt="" width="40" height="40">` : ''}
-               <strong>${escHtml(perfil.discord.nome || nick)}</strong>
-           </div>`
-        : '<p class="info-vazio">Sem Discord vinculado.</p>';
+    // Com o id (snowflake, validado na API) a linha abre o perfil no Discord.
+    const discordId = /^\d{17,20}$/.test(String(perfil.discord?.id || '')) ? perfil.discord.id : null;
+    const conteudoDiscord = perfil.discord
+        ? `${perfil.discord.avatar ? `<img src="${escHtml(perfil.discord.avatar)}" alt="" width="40" height="40">` : ''}
+           <strong>${escHtml(perfil.discord.nome || nick)}</strong>`
+        : '';
+    const blocoDiscord = !perfil.discord
+        ? '<p class="info-vazio">Sem Discord vinculado.</p>'
+        : discordId
+            ? `<a class="discord-linha discord-link" href="https://discord.com/users/${discordId}" target="_blank" rel="noopener noreferrer" title="Abrir perfil no Discord">
+                   ${conteudoDiscord}
+                   <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+               </a>`
+            : `<div class="discord-linha">${conteudoDiscord}</div>`;
 
     const liga = perfil.liga;
     const blocoLiga = liga
