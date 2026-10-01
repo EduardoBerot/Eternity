@@ -512,6 +512,68 @@ main { padding-top: var(--nav); }
 
 .lider:hover img { transform: translateY(-6px) rotate(-4deg); filter: drop-shadow(0 8px 14px var(--cor, var(--aqua))); }
 
+/* Hall: ultimos eventos semanais e de fim de semana vencidos pelo cla. */
+.hall {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.hall-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(232, 244, 248, 0.03);
+    border: 1px solid var(--linha);
+    border-left: 3px solid var(--aqua);
+    transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+
+    img { width: 48px; height: 48px; image-rendering: pixelated; flex-shrink: 0; }
+}
+
+.hall-card:hover { transform: translateY(-2px); background: rgba(46, 230, 240, 0.06); border-color: rgba(46, 230, 240, 0.35); }
+
+/* Fim de semana (Pre Guerra): mesmo peso dos semanais, outra cor de destaque. */
+.hall-fim-de-semana { border-left-color: #ffd23f; }
+
+.hall-escudo {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: var(--aqua-suave);
+    color: var(--aqua);
+    font-size: 1.4rem;
+}
+
+.hall-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    flex: 1;
+
+    .hall-evento { font-size: 0.9rem; color: var(--gelo); }
+    .hall-vencedor { font-family: var(--sans); font-size: 0.82rem; color: var(--nevoa); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
+.hall-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    color: var(--nevoa);
+
+    .hall-servidor { padding: 1px 8px; border-radius: 999px; background: rgba(167, 139, 250, 0.15); color: var(--c-coordenador); font-size: 0.7rem; }
+}
+
 .chamada {
     padding: clamp(56px, 8vw, 96px) 0;
     background:
@@ -783,6 +845,49 @@ main { padding-top: var(--nav); }
 
 .info-linha:last-child { border-bottom: 0; }
 .info-vazio { font-family: var(--sans); font-size: 0.85rem; color: var(--nevoa); }
+
+.info-bloco-largo { grid-column: 1 / -1; }
+.info-bloco h3 small { margin-left: auto; font-family: var(--sans); font-size: 0.72rem; font-weight: normal; color: var(--nevoa-escura); }
+
+/* Seletor de mes da Liga, no titulo do bloco. */
+.mes-liga,
+.mes-liga-fixo { margin-left: auto; font-family: var(--sans); font-size: 0.78rem; font-weight: normal; color: var(--nevoa); }
+
+.mes-liga {
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--linha);
+    background: rgba(4, 8, 15, 0.8);
+    color: var(--gelo);
+    cursor: pointer;
+}
+
+.mes-liga:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px var(--aqua-suave); }
+
+/* Eventos vencidos: um chip por evento, semanais em destaque. */
+.eventos-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--linha);
+        font-family: var(--sans);
+        font-size: 0.8rem;
+        color: var(--nevoa);
+    }
+    li strong { color: var(--gelo); font-weight: 600; }
+    li.evento-semanal { border-color: rgba(46, 230, 240, 0.35); background: var(--aqua-suave); color: var(--gelo); }
+    li.evento-semanal strong { color: var(--aqua); }
+}
 
 .discord-linha {
     display: flex;

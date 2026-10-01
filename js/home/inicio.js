@@ -58,6 +58,14 @@ function renderInicio() {
             </div>
         </section>
 
+        <section class="faixa">
+            <div class="miolo">
+                <h2>Hall</h2>
+                <p class="texto">Os últimos eventos semanais e de fim de semana vencidos pela Eternity.</p>
+                <div class="hall" id="inicio-hall">${loadingHTML}</div>
+            </div>
+        </section>
+
         <section class="chamada">
             <div class="miolo">
                 <div>
@@ -70,6 +78,7 @@ function renderInicio() {
 
         ${rodapeSite()}`;
     carregarMembrosInicio();
+    carregarHall();
     carregarStatusServidor();
     atualizarMarca();
 }
@@ -153,6 +162,41 @@ async function carregarMembrosInicio() {
     } catch (_) {
         const lideres = document.getElementById('inicio-lideres');
         if (lideres) lideres.innerHTML = '<p class="texto">A lista da staff não carregou. Tente de novo em instantes.</p>';
+    }
+}
+
+// Hall: o bot publica os ultimos eventos semanais e de fim de semana vencidos
+// pelo cla (/api/hall). Evento de equipe (Duo, Trio, Guerra, Pre Guerra) vem
+// creditado ao proprio cla e aparece com o escudo no lugar da cabeca.
+async function carregarHall() {
+    const hall = document.getElementById('inicio-hall');
+    if (!hall) return;
+    try {
+        const eventos = await (await fetch(`${URL_BASE}/api/hall`)).json();
+        if (!Array.isArray(eventos) || !eventos.length) {
+            hall.innerHTML = '<p class="texto">Nenhum evento registrado ainda.</p>';
+            return;
+        }
+        hall.innerHTML = eventos.map(evento => {
+            const [, mes, dia] = String(evento.data).split('-');
+            const avatar = evento.equipe
+                ? '<span class="hall-escudo" aria-hidden="true"><i class="fa-solid fa-shield-halved"></i></span>'
+                : `<img src="https://mc-heads.net/avatar/${encodeURIComponent(evento.vencedor)}/48" alt="" loading="lazy" width="48" height="48">`;
+            return `
+                <article class="hall-card${evento.semanal ? '' : ' hall-fim-de-semana'}">
+                    ${avatar}
+                    <div class="hall-info">
+                        <span class="hall-evento">${escHtml(evento.evento)}</span>
+                        <span class="hall-vencedor">${evento.equipe ? 'Clã (equipe)' : escHtml(evento.vencedor)}</span>
+                    </div>
+                    <div class="hall-meta">
+                        <span class="hall-data">${escHtml(dia)}/${escHtml(mes)}</span>
+                        ${evento.servidor === 'genesis' ? '<span class="hall-servidor">Gênesis</span>' : ''}
+                    </div>
+                </article>`;
+        }).join('');
+    } catch (_) {
+        hall.innerHTML = '<p class="texto">O Hall não carregou. Tente de novo em instantes.</p>';
     }
 }
 

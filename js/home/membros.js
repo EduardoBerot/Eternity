@@ -159,6 +159,37 @@ function linhaInfo(rotulo, valor) {
     return valor ? `<div class="info-linha"><span>${rotulo}</span><strong>${valor}</strong></div>` : '';
 }
 
+function linhaPodios(podios) {
+    return `<div class="info-linha"><span>Pódios</span><strong class="podios">🥇 ${escHtml(podios?.ouro ?? 0)} &nbsp; 🥈 ${escHtml(podios?.prata ?? 0)} &nbsp; 🥉 ${escHtml(podios?.bronze ?? 0)}</strong></div>`;
+}
+
+// Mes corrente do perfil antigo (sem `ligaMeses`).
+function conteudoLiga(liga) {
+    return `${linhaInfo('Pontos', escHtml(liga.pontos))}
+        ${linhaInfo('Posição', liga.posicao ? `${escHtml(liga.posicao)}º de ${escHtml(liga.participantes)}` : 'Sem pontos ainda')}
+        ${linhaPodios(liga.podios)}
+        ${linhaInfo('Domínio', liga.dominio ? `🔥 ${escHtml(liga.dominio)} dia(s) seguidos` : '')}
+        ${linhaInfo('Desafios completos', liga.desafios ? `${escHtml(liga.desafios)} dia(s)` : '')}`;
+}
+
+// Um mes de `ligaMeses`. O Dominio e uma sequencia ao vivo: so faz sentido no
+// mes corrente (o primeiro da lista).
+function conteudoLigaMes(perfil, indice) {
+    const mes = perfil.ligaMeses?.[indice];
+    if (!mes) return '<p class="info-vazio">Sem dados da Liga.</p>';
+    const dominio = indice === 0 ? perfil.liga?.dominio : 0;
+    return `${linhaInfo('Pontos', escHtml(mes.pontos))}
+        ${linhaInfo('Posição', mes.posicao ? `${escHtml(mes.posicao)}º de ${escHtml(mes.participantes)}` : 'Sem pontos no mês')}
+        ${linhaPodios(mes.podios)}
+        ${linhaInfo('Domínio', dominio ? `🔥 ${escHtml(dominio)} dia(s) seguidos` : '')}
+        ${linhaInfo('Desafios completos', mes.desafios ? `${escHtml(mes.desafios)} dia(s)` : '')}`;
+}
+
+function trocarMesLiga(indice) {
+    const alvo = document.getElementById('liga-conteudo');
+    if (alvo && membrosEstado.aberto) alvo.innerHTML = conteudoLigaMes(membrosEstado.aberto, Number(indice));
+}
+
 function abrirMembro(nick) {
     const membro = membrosEstado.membros.find(m => m.nick === nick);
     if (!membro) return;
@@ -185,14 +216,29 @@ function abrirMembro(nick) {
                </a>`
             : `<div class="discord-linha">${conteudoDiscord}</div>`;
 
+    // Liga com seletor de mes (01/10/2026): `ligaMeses` traz todos os meses
+    // guardados, do mais recente ao mais antigo. Perfil antigo, sem a lista, so
+    // tem o mes corrente.
     const liga = perfil.liga;
-    const blocoLiga = liga
-        ? `${linhaInfo('Pontos', escHtml(liga.pontos))}
-           ${linhaInfo('Posição', liga.posicao ? `${escHtml(liga.posicao)}º de ${escHtml(liga.participantes)}` : 'Sem pontos ainda')}
-           <div class="info-linha"><span>Pódios</span><strong class="podios">🥇 ${escHtml(liga.podios?.ouro ?? 0)} &nbsp; 🥈 ${escHtml(liga.podios?.prata ?? 0)} &nbsp; 🥉 ${escHtml(liga.podios?.bronze ?? 0)}</strong></div>
-           ${linhaInfo('Domínio', liga.dominio ? `🔥 ${escHtml(liga.dominio)} dia(s) seguidos` : '')}
-           ${linhaInfo('Desafios completos', liga.desafios ? `${escHtml(liga.desafios)} dia(s)` : '')}`
-        : '<p class="info-vazio">Sem dados da Liga.</p>';
+    const meses = Array.isArray(perfil.ligaMeses) && perfil.ligaMeses.length ? perfil.ligaMeses : null;
+    membrosEstado.aberto = perfil;
+    const cabecalhoLiga = meses && meses.length > 1
+        ? `<select class="mes-liga" aria-label="Mês da Liga" onchange="trocarMesLiga(this.value)">
+               ${meses.map((mes, i) => `<option value="${i}">${escHtml(mes.rotulo || `${mes.mes}/${mes.ano}`)}</option>`).join('')}
+           </select>`
+        : `<span class="mes-liga-fixo">${escHtml(meses?.[0]?.rotulo || liga?.mes || '')}</span>`;
+    const blocoLiga = meses ? conteudoLigaMes(perfil, 0) : liga ? conteudoLiga(liga) : '<p class="info-vazio">Sem dados da Liga.</p>';
+
+    const eventos = perfil.eventos;
+    const blocoEventos = eventos?.lista?.length
+        ? `${linhaInfo('Total de vitórias', escHtml(eventos.total))}
+           <ul class="eventos-lista">
+               ${eventos.lista.map(item => `
+                   <li class="${item.semanal ? 'evento-semanal' : ''}" title="${item.ultimo ? `Última vitória em ${escHtml(dataBr(item.ultimo))}` : ''}">
+                       <span>${escHtml(item.nome)}</span><strong>×${escHtml(item.vezes)}</strong>
+                   </li>`).join('')}
+           </ul>`
+        : '<p class="info-vazio">Nenhum evento vencido ainda.</p>';
 
     const banco = perfil.banco;
     const blocoBanco = banco && banco.total
@@ -226,12 +272,16 @@ function abrirMembro(nick) {
                 ${blocoDiscord}
             </section>
             <section class="info-bloco">
-                <h3><i class="fa-solid fa-trophy"></i> Liga${liga?.mes ? ` de ${escHtml(liga.mes)}` : ''}</h3>
-                ${blocoLiga}
+                <h3><i class="fa-solid fa-trophy"></i> Liga ${cabecalhoLiga}</h3>
+                <div id="liga-conteudo">${blocoLiga}</div>
             </section>
             <section class="info-bloco">
                 <h3><i class="fa-solid fa-building-columns"></i> Banco do clã</h3>
                 ${blocoBanco}
+            </section>
+            <section class="info-bloco info-bloco-largo">
+                <h3><i class="fa-solid fa-medal"></i> Eventos vencidos <small>desde agosto de 2026</small></h3>
+                ${blocoEventos}
             </section>
         </div>`;
     dialogo.showModal();
