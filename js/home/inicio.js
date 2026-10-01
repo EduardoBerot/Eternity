@@ -37,7 +37,7 @@ function renderInicio() {
             <div class="miolo duas-colunas">
                 <div>
                     <h2>Uma cidade construída a várias mãos</h2>
-                    <p class="texto">Desde 2020, a Eternity une jogadores para construir, explorar e crescer juntos. A cidade é o coração do clã: casas e terrenos são gratuitos, e as farms coletivas garantem recursos para todos.</p>
+                    <p class="texto">Desde 2020, a Eternity une jogadores para construir, explorar e crescer juntos. A cidade, no servidor <b>Apocalipse</b> (<code>/apocalipse</code>), é o coração do clã: casas e terrenos são gratuitos, e as farms coletivas garantem recursos para todos.</p>
                     <p class="texto">Nossos valores são <b>união, justiça e honestidade</b>. Quem está começando encontra ajuda aqui.</p>
                     <a class="link-seta" href="#cidade">Ver a galeria da cidade <i class="fa-solid fa-arrow-right"></i></a>
                 </div>

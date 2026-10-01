@@ -72,7 +72,7 @@ const GUIA_REGRAS = `
         </section>
         <section class="guia-card">
             <h3><i class="fa-solid fa-city"></i> A cidade</h3>
-            <p>Visite com <code>/go ETY</code>. Casas e terrenos são gratuitos.</p>
+            <p>A cidade fica no <b>Apocalipse</b>: entre com <code>/apocalipse</code> e visite com <code>/go ETY</code>. Casas e terrenos são gratuitos.</p>
             <p>Vai construir? Use <b>somente estilo moderno</b>.</p>
         </section>
         <section class="guia-card">
@@ -87,6 +87,7 @@ const GUIA_REGRAS = `
         </section>
         <section class="guia-card">
             <h3><i class="fa-solid fa-seedling"></i> Farms e warps</h3>
+            <p>Todos os warps e farms do clã ficam no <b>Apocalipse</b> (<code>/apocalipse</code>).</p>
             <p>Farms coletivas de batata, herbalismo e a mega farm liberam trust para quem é confiável (a mega farm pede Herbalismo 100 no mcMMO). Peça à Eternity no privado.</p>
             <p>Outros warps: <code>/go ETYShop</code>, <code>/go ETYHistoria</code>, <code>/go ETYTrofeus</code>, <code>/go ETYXp</code>, <code>/go ETYSpawners</code> e mais.</p>
         </section>

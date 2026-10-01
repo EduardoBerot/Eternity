@@ -11,7 +11,58 @@ const HIERARQUIA = {
 
 const SERVIDORES = { apocalipse: 'Apocalipse', genesis: 'Gênesis' };
 
-let membrosEstado = { membros: [], perfis: new Map(), busca: '', cargo: 'todos', servidor: 'todos' };
+let membrosEstado = { membros: [], perfis: new Map(), busca: '', servidor: 'todos', ordem: 'cargo' };
+
+// Ordenacoes da aba (01/10/2026; o filtro por cargo saiu). A atividade sai do
+// "visto por ultimo" do jogo: Online, Hoje, "1 dia", "12 dias".
+const ORDENS = {
+    cargo: 'Cargo',
+    atividade: 'Atividade',
+    tempo: 'Tempo de clã',
+    liga: 'Pontos na Liga',
+    nick: 'Nick (A–Z)',
+};
+
+function diasOffline(perfil) {
+    const visto = String(perfil?.jogo?.visto || '').trim().toLowerCase();
+    if (visto === 'online') return -1;
+    if (visto === 'hoje') return 0;
+    const dias = visto.match(/^(\d+)\s*dias?$/);
+    return dias ? Number(dias[1]) : Infinity;
+}
+
+function perfilDe(membro) {
+    return membrosEstado.perfis.get(String(membro.nick).toLowerCase());
+}
+
+function porCargo(a, b) {
+    return nivelCargo(b.cargo) - nivelCargo(a.cargo) || String(a.data_entrada || '').localeCompare(String(b.data_entrada || ''));
+}
+
+function compararMembros(a, b) {
+    switch (membrosEstado.ordem) {
+        case 'atividade': return diasOffline(perfilDe(a)) - diasOffline(perfilDe(b)) || porCargo(a, b);
+        case 'tempo': return String(a.data_entrada || '9999').localeCompare(String(b.data_entrada || '9999')) || porCargo(a, b);
+        case 'liga': return (perfilDe(b)?.liga?.pontos ?? -1) - (perfilDe(a)?.liga?.pontos ?? -1) || porCargo(a, b);
+        // O `*` de alguns nicks do servidor nao conta na ordem alfabetica.
+        case 'nick': return String(a.nick).replace(/^\*+/, '').localeCompare(String(b.nick).replace(/^\*+/, ''), 'pt-BR', { sensitivity: 'base' });
+        default: return porCargo(a, b);
+    }
+}
+
+// Linha de baixo do card: o dado da ordenacao escolhida, quando ela nao e o
+// tempo de cla de sempre.
+function detalheCard(membro, perfil) {
+    if (membrosEstado.ordem === 'atividade') {
+        const dias = diasOffline(perfil);
+        if (dias === -1) return 'Online agora';
+        if (dias === 0) return 'Visto hoje';
+        return Number.isFinite(dias) ? `Visto há ${dias} dia${dias === 1 ? '' : 's'}` : 'Sem registro de atividade';
+    }
+    if (membrosEstado.ordem === 'liga') return `${perfil?.liga?.pontos ?? 0} pts na Liga do mês`;
+    const tempo = tempoNoCla(membro.data_entrada);
+    return tempo ? `No clã ${tempo}` : 'Cadastro incompleto';
+}
 
 function nivelCargo(cargo) {
     return HIERARQUIA[cargo] ?? 0;
@@ -67,7 +118,12 @@ async function renderMembros() {
                     <input type="search" id="membros-busca" placeholder="Pesquisar por nick" aria-label="Pesquisar por nick" oninput="filtrarMembros({ busca: this.value })">
                 </div>
                 <div class="chips" id="membros-servidores" role="group" aria-label="Filtrar por servidor"></div>
-                <div class="chips" id="membros-cargos" role="group" aria-label="Filtrar por cargo"></div>
+                <label class="ordenar">
+                    <span>Ordenar por</span>
+                    <select id="membros-ordem" onchange="filtrarMembros({ ordem: this.value })">
+                        ${Object.entries(ORDENS).map(([valor, rotulo]) => `<option value="${valor}">${rotulo}</option>`).join('')}
+                    </select>
+                </label>
             </div>
         </div>
         <div class="miolo">
@@ -76,15 +132,13 @@ async function renderMembros() {
         </div>
         ${rodapeSite()}`;
 
-    membrosEstado = { membros: [], perfis: new Map(), busca: '', cargo: 'todos', servidor: 'todos' };
+    membrosEstado = { membros: [], perfis: new Map(), busca: '', servidor: 'todos', ordem: 'cargo' };
     try {
         const [membros, perfis] = await Promise.all([
             fetch(`${URL_BASE}/api/membros/ativos`).then(r => r.json()),
             fetch(`${URL_BASE}/api/perfis`).then(r => (r.ok ? r.json() : [])).catch(() => []),
         ]);
-        membrosEstado.membros = (Array.isArray(membros) ? membros : []).sort((a, b) =>
-            nivelCargo(b.cargo) - nivelCargo(a.cargo)
-            || String(a.data_entrada || '').localeCompare(String(b.data_entrada || '')));
+        membrosEstado.membros = Array.isArray(membros) ? membros : [];
         membrosEstado.perfis = new Map((Array.isArray(perfis) ? perfis : []).map(p => [String(p.nick).toLowerCase(), p]));
     } catch (error) {
         console.error(error);
@@ -96,16 +150,9 @@ async function renderMembros() {
 }
 
 function desenharFiltros() {
-    const cargos = [...new Set(membrosEstado.membros.map(m => m.cargo).filter(Boolean))]
-        .sort((a, b) => nivelCargo(b) - nivelCargo(a));
-    const chip = (grupo, valor, rotulo, extra = '') =>
-        `<button type="button" class="chip ${extra} ${membrosEstado[grupo] === valor ? 'ativo' : ''}" aria-pressed="${membrosEstado[grupo] === valor}"
+    const chip = (grupo, valor, rotulo) =>
+        `<button type="button" class="chip ${membrosEstado[grupo] === valor ? 'ativo' : ''}" aria-pressed="${membrosEstado[grupo] === valor}"
             onclick="filtrarMembros({ ${grupo}: '${valor}' })">${escHtml(rotulo)}</button>`;
-    document.getElementById('membros-cargos').innerHTML = [
-        chip('cargo', 'todos', 'Todos'),
-        chip('cargo', 'staff', 'Staff'),
-        ...cargos.map(cargo => chip('cargo', cargo, cargo, `cargo-${classeCargo(cargo)}`)),
-    ].join('');
     document.getElementById('membros-servidores').innerHTML = [
         chip('servidor', 'todos', 'Todos os servidores'),
         chip('servidor', 'apocalipse', 'Apocalipse'),
@@ -115,7 +162,7 @@ function desenharFiltros() {
 
 function filtrarMembros(mudanca) {
     Object.assign(membrosEstado, mudanca);
-    if (!('busca' in mudanca)) desenharFiltros();
+    if ('servidor' in mudanca) desenharFiltros();
     desenharMembros();
 }
 
@@ -123,11 +170,9 @@ function membrosVisiveis() {
     const busca = membrosEstado.busca.trim().toLowerCase();
     return membrosEstado.membros.filter(m => {
         if (busca && !String(m.nick).toLowerCase().includes(busca)) return false;
-        if (membrosEstado.cargo === 'staff' && nivelCargo(m.cargo) <= 1) return false;
-        if (!['todos', 'staff'].includes(membrosEstado.cargo) && m.cargo !== membrosEstado.cargo) return false;
         if (membrosEstado.servidor !== 'todos' && !servidoresDe(m).includes(membrosEstado.servidor)) return false;
         return true;
-    });
+    }).sort(compararMembros);
 }
 
 function desenharMembros() {
@@ -137,12 +182,11 @@ function desenharMembros() {
         lista.length === total ? `${total} membros` : `${lista.length} de ${total} membros`;
     const grade = document.getElementById('membros-grade');
     if (!lista.length) {
-        grade.innerHTML = '<p class="vazio">Nenhum membro encontrado com esses filtros.</p>';
+        grade.innerHTML = '<p class="vazio">Nenhum membro encontrado com essa busca.</p>';
         return;
     }
     grade.innerHTML = lista.map(m => {
-        const tempo = tempoNoCla(m.data_entrada);
-        const perfil = membrosEstado.perfis.get(String(m.nick).toLowerCase());
+        const perfil = perfilDe(m);
         const online = perfil?.jogo?.visto === 'Online';
         return `
         <button type="button" class="card-staff ${escHtml(classeCargo(m.cargo))}" onclick="abrirMembro('${escHtml(m.nick)}')" aria-label="Ver perfil de ${escHtml(m.nick)}">
@@ -150,7 +194,7 @@ function desenharMembros() {
             <img width="96" height="96" loading="lazy" src="https://mc-heads.net/head/${encodeURIComponent(m.nick)}" alt="">
             <span class="card-nick">${escHtml(m.nick)}</span>
             <span class="card-cargo">${escHtml(m.cargo || 'Membro')}</span>
-            <em>${tempo ? `No clã ${escHtml(tempo)}` : 'Cadastro incompleto'}</em>
+            <em>${escHtml(detalheCard(m, perfil))}</em>
         </button>`;
     }).join('');
 }

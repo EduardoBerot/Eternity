@@ -602,19 +602,21 @@ main { padding-top: var(--nav); }
     position: sticky;
     top: var(--nav);
     z-index: 10;
-    padding: 14px 0;
+    padding: 10px 0;
     background: rgba(4, 8, 15, 0.96);
     border-bottom: 1px solid var(--linha);
 
-    .miolo { display: flex; flex-direction: column; gap: 12px; }
+    /* Uma linha so (01/10/2026): busca, servidor e ordenacao lado a lado. */
+    .miolo { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
 }
 
 .busca {
     display: flex;
     align-items: center;
-    gap: 12px;
-    max-width: 460px;
-    padding: 0 16px;
+    gap: 10px;
+    flex: 1 1 240px;
+    max-width: 380px;
+    padding: 0 14px;
     border-radius: 999px;
     background: var(--aco);
     border: 1px solid var(--linha);
@@ -624,7 +626,7 @@ main { padding-top: var(--nav); }
     input {
         flex: 1;
         width: 100%;
-        height: 2.7em;
+        height: 2.2em;
         margin: 0;
         padding: 0;
         border: 0;
@@ -641,8 +643,30 @@ main { padding-top: var(--nav); }
 
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 
+.ordenar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    color: var(--nevoa);
+
+    select {
+        padding: 0.35em 0.7em;
+        border-radius: 999px;
+        border: 1px solid var(--linha);
+        background: var(--aco);
+        color: var(--gelo);
+        font-family: var(--sans);
+        font-size: 0.82rem;
+        cursor: pointer;
+    }
+    select:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px var(--aqua-suave); }
+}
+
 .chip {
-    padding: 0.45em 0.95em;
+    padding: 0.35em 0.9em;
     border-radius: 999px;
     border: 1px solid var(--linha);
     background: transparent;

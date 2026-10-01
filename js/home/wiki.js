@@ -131,7 +131,7 @@ function renderWiki() {
         <section class="secao-wiki" id="wiki-warps">
             <div class="miolo">
                 <h2>Warps</h2>
-                <p class="texto">Cada warp é um lugar separado. Clique em um para copiar o comando.</p>
+                <p class="texto">Todos os warps ficam no servidor <b>Apocalipse</b>: entre com <code>/apocalipse</code> antes de usar o <code>/go</code>. Cada warp é um lugar separado; clique em um para copiar o comando.</p>
                 <div class="warps">
                     ${WIKI_WARPS.map(([comando, texto]) => `
                         <button type="button" class="warp" onclick="copiarWarp(this, '${comando}')"><code>${comando}</code><span>${texto}</span><i class="fa-regular fa-copy" aria-hidden="true"></i></button>`).join('')}
