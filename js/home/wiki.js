@@ -175,6 +175,7 @@ async function preencherOcupantes() {
         return;
     }
     if (!Array.isArray(membros)) return;
+    membros = semContasDoCla(membros);
     for (const sala of document.querySelectorAll('#wiki-torre .sala')) {
         const cargo = sala.dataset.cargo;
         const ocupantes = membros.filter(m => m.cargo === cargo);

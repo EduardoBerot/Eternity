@@ -144,8 +144,9 @@ function rodapeSite() {
 
 async function carregarMembrosInicio() {
     try {
-        const membros = await (await fetch(`${URL_BASE}/api/membros/ativos`)).json();
-        if (!Array.isArray(membros)) return;
+        const resposta = await (await fetch(`${URL_BASE}/api/membros/ativos`)).json();
+        if (!Array.isArray(resposta)) return;
+        const membros = semContasDoCla(resposta);
         const total = document.getElementById('inicio-membros');
         if (total) total.textContent = membros.length;
         const lideres = document.getElementById('inicio-lideres');

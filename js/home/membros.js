@@ -138,7 +138,7 @@ async function renderMembros() {
             fetch(`${URL_BASE}/api/membros/ativos`).then(r => r.json()),
             fetch(`${URL_BASE}/api/perfis`).then(r => (r.ok ? r.json() : [])).catch(() => []),
         ]);
-        membrosEstado.membros = Array.isArray(membros) ? membros : [];
+        membrosEstado.membros = semContasDoCla(membros);
         membrosEstado.perfis = new Map((Array.isArray(perfis) ? perfis : []).map(p => [String(p.nick).toLowerCase(), p]));
     } catch (error) {
         console.error(error);

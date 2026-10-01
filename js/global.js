@@ -9,6 +9,16 @@ const URL_STAFFMEMBERS_NAMES = `${URL_BASE}/api/staffs`;
 const ETY_ADM_LOGIN_COOKIE = 'eternity-adm-login';
 const ETY_ADM_PASS_COOKIE = 'eternity-adm';
 
+// Contas dos bots do cla (Eternity no Apocalipse, Coagula1999 no Genesis).
+// Estao no cla para conduzir recrutamento e convites, mas nao sao pessoas: as
+// paginas publicas as escondem da lista, da contagem e dos cargos.
+const CONTAS_DO_CLA = ['eternity', 'coagula1999'];
+
+function semContasDoCla(membros) {
+    return (Array.isArray(membros) ? membros : [])
+        .filter(m => !CONTAS_DO_CLA.includes(String(m?.nick || '').trim().toLowerCase()));
+}
+
 const CARGOS = ['Membro','Estagiário','Daimyo', 'Auxiliar', 'Ikko', 'Supervisor', 'Sohei', 'Coordenador', 'Heika', 'Dono', 'Fundador']
 
 const clearAPP = (element=APP) => element.innerHTML = ''; 
