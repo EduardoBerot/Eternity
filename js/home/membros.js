@@ -201,20 +201,18 @@ function abrirMembro(nick) {
     const jogo = perfil.jogo || {};
     const online = jogo.visto === 'Online';
 
+    // Discord e banco viraram linhas do bloco "No clã" (01/10/2026): em blocos
+    // proprios ocupavam espaco demais e a janela ganhava rolagem.
     // Com o id (snowflake, validado na API) a linha abre o perfil no Discord.
     const discordId = /^\d{17,20}$/.test(String(perfil.discord?.id || '')) ? perfil.discord.id : null;
     const conteudoDiscord = perfil.discord
-        ? `${perfil.discord.avatar ? `<img src="${escHtml(perfil.discord.avatar)}" alt="" width="40" height="40">` : ''}
-           <strong>${escHtml(perfil.discord.nome || nick)}</strong>`
+        ? `${perfil.discord.avatar ? `<img src="${escHtml(perfil.discord.avatar)}" alt="" width="20" height="20">` : ''}${escHtml(perfil.discord.nome || nick)}`
         : '';
-    const blocoDiscord = !perfil.discord
-        ? '<p class="info-vazio">Sem Discord vinculado.</p>'
-        : discordId
-            ? `<a class="discord-linha discord-link" href="https://discord.com/users/${discordId}" target="_blank" rel="noopener noreferrer" title="Abrir perfil no Discord">
-                   ${conteudoDiscord}
-                   <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
-               </a>`
-            : `<div class="discord-linha">${conteudoDiscord}</div>`;
+    const linhaDiscord = !perfil.discord
+        ? linhaInfo('Discord', '<small>Não vinculado</small>')
+        : linhaInfo('Discord', discordId
+            ? `<a class="discord-chip discord-link" href="https://discord.com/users/${discordId}" target="_blank" rel="noopener noreferrer" title="Abrir perfil no Discord">${conteudoDiscord} <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>`
+            : `<span class="discord-chip">${conteudoDiscord}</span>`);
 
     // Liga com seletor de mes (01/10/2026): `ligaMeses` traz todos os meses
     // guardados, do mais recente ao mais antigo. Perfil antigo, sem a lista, so
@@ -241,10 +239,10 @@ function abrirMembro(nick) {
         : '<p class="info-vazio">Nenhum evento vencido ainda.</p>';
 
     const banco = perfil.banco;
-    const blocoBanco = banco && banco.total
-        ? `${linhaInfo('Total depositado', `$ ${escHtml(Number(banco.total).toLocaleString('pt-BR'))}`)}
-           ${linhaInfo('Posição', banco.posicao ? `${escHtml(banco.posicao)}º de ${escHtml(banco.apoiadores)} apoiadores` : '')}`
-        : '<p class="info-vazio">Nenhum depósito registrado.</p>';
+    const valorBanco = Number(banco?.total) || 0;
+    const linhaBanco = linhaInfo('Banco do clã', valorBanco
+        ? `<span title="$ ${escHtml(valorBanco.toLocaleString('pt-BR'))}">$ ${escHtml(new Intl.NumberFormat('pt-BR', { notation: 'compact', maximumFractionDigits: 2 }).format(valorBanco))}</span>${banco.posicao ? ` <small>(${escHtml(banco.posicao)}º de ${escHtml(banco.apoiadores)})</small>` : ''}`
+        : '<small>Sem depósitos</small>');
 
     dialogo.innerHTML = `
         <div class="dialogo-topo card-staff-borda ${escHtml(classeCargo(membro.cargo))}">
@@ -264,20 +262,14 @@ function abrirMembro(nick) {
                 <h3><i class="fa-solid fa-shield-halved"></i> No clã</h3>
                 ${linhaInfo('Clã', escHtml(jogo.cla || membro.clan_origem || ''))}
                 ${linhaInfo('Servidor', escHtml(servidores))}
-                ${linhaInfo('Tempo de clã', tempo ? `${escHtml(tempo)}${entrada ? ` <small>(desde ${escHtml(entrada)})</small>` : ''}` : 'Cadastro incompleto')}
+                ${linhaInfo('Tempo de clã', tempo ? `<span title="${entrada ? `Desde ${escHtml(entrada)}` : ''}">${escHtml(tempo)}</span>` : 'Cadastro incompleto')}
                 ${linhaInfo('Recrutador', escHtml(membro.recrutador || ''))}
-            </section>
-            <section class="info-bloco">
-                <h3><i class="fa-brands fa-discord"></i> Discord</h3>
-                ${blocoDiscord}
+                ${linhaDiscord}
+                ${linhaBanco}
             </section>
             <section class="info-bloco">
                 <h3><i class="fa-solid fa-trophy"></i> Liga ${cabecalhoLiga}</h3>
                 <div id="liga-conteudo">${blocoLiga}</div>
-            </section>
-            <section class="info-bloco">
-                <h3><i class="fa-solid fa-building-columns"></i> Banco do clã</h3>
-                ${blocoBanco}
             </section>
             <section class="info-bloco info-bloco-largo">
                 <h3><i class="fa-solid fa-medal"></i> Eventos vencidos <small>desde agosto de 2026</small></h3>

@@ -838,7 +838,7 @@ main { padding-top: var(--nav); }
     font-size: 0.86rem;
     border-bottom: 1px dashed var(--linha);
 
-    span { color: var(--nevoa); }
+    > span { color: var(--nevoa); white-space: nowrap; }
     strong { color: var(--gelo); text-align: right; font-family: var(--sans); font-weight: 600; }
     small { font-weight: normal; color: var(--nevoa); }
 }
@@ -899,6 +899,20 @@ main { padding-top: var(--nav); }
     strong { color: #8b95ff; font-family: var(--sans); }
 }
 
+/* Discord numa linha do bloco "No clã": avatar pequeno + nome. */
+.discord-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    color: #8b95ff;
+    font-weight: 600;
+    text-decoration: none;
+
+    img { border-radius: 50%; flex-shrink: 0; }
+    i { font-size: 0.7rem; color: var(--nevoa-escura); }
+}
+
 .discord-link {
     width: fit-content;
     padding: 6px 12px 6px 6px;
@@ -910,6 +924,7 @@ main { padding-top: var(--nav); }
 }
 
 .discord-link:hover { background: rgba(139, 149, 255, 0.12); }
+.discord-chip.discord-link { padding: 2px 8px 2px 2px; }
 .discord-link:hover i { color: #8b95ff; }
 
 /* ---------- Wiki ---------- */
