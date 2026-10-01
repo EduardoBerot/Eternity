@@ -1,0 +1,8 @@
+{
+  "name": "eternity-site",
+  "private": true,
+  "description": "Site estatico da Eternity. Sem build: este arquivo so fixa o Node do build da Vercel (o 20.x foi descontinuado e as configuracoes do projeto nao estao acessiveis pela integracao).",
+  "engines": {
+    "node": "24.x"
+  }
+}
