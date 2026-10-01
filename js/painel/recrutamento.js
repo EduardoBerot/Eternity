@@ -4,8 +4,14 @@ const URL_RECRUTAS = `${URL_BASE}/api/recrutamento/recrutas`;
 // Estado da tela. O servidor e filtro de servidor (o backend consulta so aquele
 // funil); etapa, desfecho e semana sao recortes locais, feitos sobre a lista que
 // ja veio, para cada clique num grafico responder na hora.
+// O Guia do site substituiu placas e teste no chat em 28/09/2026 (meia-noite em
+// Sao Paulo). O painel abre nesse recorte: misturar as duas jornadas faria o
+// funil comparar degraus que nao existem mais com os de agora.
+const INICIO_MODELO_GUIA = '2026-09-28T03:00:00.000Z';
+
 const painelRecrutamento = {
     servidor: '',
+    periodo: 'guia',
     etapa: null,
     desfecho: null,
     semana: null,
@@ -16,19 +22,34 @@ const painelRecrutamento = {
 const ETAPAS_LABEL = {
     candidato: 'Visto no chat',
     abordado: 'Abordado',
-    convertido: 'Aceitou o convite',
+    convertido: 'Topou entrar',
     recusou: 'Pediu para parar',
     sem_resposta: 'Sem resposta',
     encerrado: 'Encerrado',
     inelegivel: 'Inelegível',
-    visit: 'Lendo as placas',
-    quiz: 'No teste',
-    site: 'Falta o cadastro',
-    discord: 'Falta o Discord',
+    visit: 'Placas (modelo antigo)',
+    quiz: 'Teste no chat (modelo antigo)',
+    site: 'No Guia',
+    discord: 'Discord vinculado',
     invited: 'Convite enviado',
-    returning: 'Voltando ao clã',
+    returning: 'Convite de volta enviado',
     complete: 'Entrou',
     expirado: 'Encerrado por inatividade',
+};
+
+// O que falta para a pessoa andar, dito do jeito que um lider resolveria. No
+// modelo do Guia quase tudo depende do recruta; o unico passo do bot e o
+// convite logo depois do vinculo.
+const PROXIMO_PASSO = {
+    candidato: 'Responder à Eternity',
+    abordado: 'Responder à Eternity',
+    convertido: 'Confirmar que quer entrar',
+    visit: 'Falar com a Eternity para migrar ao Guia',
+    quiz: 'Falar com a Eternity para migrar ao Guia',
+    site: 'Terminar o Guia no site',
+    discord: 'Bot enviar o convite',
+    invited: 'Aceitar o convite da ETZ no jogo',
+    returning: 'Aceitar o convite de volta no jogo',
 };
 
 // A cor seque o desfecho, nunca a posicao dele no ranking: filtrar a tela nao
@@ -45,8 +66,24 @@ const DESFECHOS = [
     { id: 'expirado', nome: 'Encerrado por 10 dias parado', cor: 'var(--viz-8)' },
 ];
 
-function rotuloEtapa(valor) {
+function rotuloEtapa(valor, retorno = false) {
+    // Ex-membro em `discord` ainda NAO vinculou: e a etapa em que ele espera o
+    // vinculo para receber o convite de volta.
+    if (retorno && valor === 'discord') return 'Falta o Discord';
     return ETAPAS_LABEL[valor] || valor || '—';
+}
+
+function proximoPasso(item) {
+    if (item.desfecho !== 'em_andamento' && item.desfecho !== 'aguardando') return '—';
+    if (item.retorno && item.etapa === 'discord') return 'Vincular o Discord';
+    return PROXIMO_PASSO[item.etapa] || '—';
+}
+
+function horasLegiveis(horas) {
+    if (horas === null || horas === undefined) return '—';
+    if (horas >= 48) return `${Math.round(horas / 24)}d`;
+    if (horas >= 1) return `${Math.round(horas)}h`;
+    return `${Math.max(1, Math.round(horas * 60))}min`;
 }
 
 function textoSeguro(valor) {
@@ -78,6 +115,10 @@ function renderRecrutamento() {
                 <h1>Recrutamento</h1>
                 <p id="aviso_cobertura">Carregando...</p>
                 <div class="viz-filtros">
+                    <div class="member-toggle" id="filtro_periodo">
+                        <button type="button" class="member-toggle__button is-active" onclick="filtrarPeriodo(event,'guia')">Desde o Guia (28/09)</button>
+                        <button type="button" class="member-toggle__button" onclick="filtrarPeriodo(event,'tudo')">Tudo</button>
+                    </div>
                     <div class="member-toggle" id="filtro_servidor">
                         <button type="button" class="member-toggle__button is-active" onclick="filtrarServidor(event,'')">Todos</button>
                         <button type="button" class="member-toggle__button" onclick="filtrarServidor(event,'apocalipse')">Apocalipse</button>
@@ -94,7 +135,7 @@ function renderRecrutamento() {
                     <div class="pending-card__header">
                         <div>
                             <h2>Onde o funil vaza</h2>
-                            <p>Quantos chegaram a cada degrau. Clique num degrau para ver quem está nele.</p>
+                            <p>Do chat ao clã, pelo Guia do site. Clique num degrau para ver quem está parado nele. Ex-membros voltando ficam fora.</p>
                         </div>
                     </div>
                     <div class="viz-plot" id="viz_funil"></div>
@@ -110,6 +151,16 @@ function renderRecrutamento() {
                     <div class="viz-plot" id="viz_semanas"></div>
                 </section>
             </div>
+
+            <section class="pending-card viz-card">
+                <div class="pending-card__header">
+                    <div>
+                        <h2>Teste do Guia no site</h2>
+                        <p>Contagem anônima, sem nick, igual para os dois servidores. Recarregar a página conta como outro teste aberto.</p>
+                    </div>
+                </div>
+                <div class="viz-plot" id="viz_guia"></div>
+            </section>
 
             <section class="pending-card viz-card">
                 <div class="pending-card__header">
@@ -150,8 +201,25 @@ function filtrarServidor(event, servidor) {
     carregarRecrutamento();
 }
 
+function filtrarPeriodo(event, periodo) {
+    painelRecrutamento.periodo = periodo;
+    for (const botao of document.querySelectorAll('#filtro_periodo .member-toggle__button')) {
+        botao.classList.remove('is-active');
+    }
+    event.currentTarget.classList.add('is-active');
+    carregarRecrutamento();
+}
+
+function queryRecrutamento() {
+    const params = new URLSearchParams();
+    if (painelRecrutamento.servidor) params.set('servidor', painelRecrutamento.servidor);
+    if (painelRecrutamento.periodo === 'guia') params.set('desde', INICIO_MODELO_GUIA);
+    const texto = params.toString();
+    return texto ? `?${texto}` : '';
+}
+
 function carregarRecrutamento() {
-    const query = painelRecrutamento.servidor ? `?servidor=${painelRecrutamento.servidor}` : '';
+    const query = queryRecrutamento();
     const cabecalhos = { headers: getAdminRequestHeaders() };
 
     Promise.all([
@@ -174,8 +242,9 @@ function carregarRecrutamento() {
             painelRecrutamento.semana = null;
             document.getElementById('loading_lista').style.display = 'none';
             renderCobertura(metricas.cobertura);
-            renderTiles(metricas.kpis);
+            renderTiles(metricas.kpis, metricas.tempos);
             renderFunil(metricas.funil);
+            renderGuia(metricas.guia);
             renderSemanas(metricas.serie);
             renderDesfechos(metricas.desfechos);
             renderTabela();
@@ -189,7 +258,7 @@ function carregarRecrutamento() {
 function renderCobertura(cobertura) {
     const aviso = document.getElementById('aviso_cobertura');
     if (!cobertura || !cobertura.parcial) {
-        aviso.textContent = 'Quem está solto, o que converte e quanto tempo leva.';
+        aviso.textContent = 'Chat → Guia no site (vídeo, teste, Discord) → convite da ETZ → clã. Quem está solto, onde e há quanto tempo.';
         return;
     }
     // Sem este aviso, as primeiras taxas parecem desempenho péssimo quando são,
@@ -203,19 +272,18 @@ function renderCobertura(cobertura) {
 /* ---------------------------------------------------------------------------
  * Cartões. Números soltos são números, não gráficos de uma barra só.
  * ------------------------------------------------------------------------- */
-function renderTiles(kpis) {
-    const horas = kpis.horasMedianasAteEntrar;
-    const tempo = horas === null
-        ? '—'
-        : (horas >= 48 ? `${Math.round(horas / 24)}d` : `${horas}h`);
+function renderTiles(kpis, tempos = {}) {
+    // Agrupados pela pergunta que respondem: quanto converte, onde as pessoas
+    // estao paradas agora (site ou jogo) e quanto tempo cada trecho leva.
     const tiles = [
-        { valor: `${kpis.taxaConversao}%`, nome: 'Conversão', nota: `${kpis.entraram} de ${kpis.total}`, destaque: true },
-        { valor: kpis.abordados, nome: 'Abordados' },
-        { valor: kpis.interessados, nome: 'Interessados' },
-        { valor: kpis.entraram, nome: 'Entraram' },
-        { valor: kpis.parados, nome: 'Travados', nota: `${kpis.paradosMaisDeUmaSemana} há mais de 7 dias` },
+        { valor: `${kpis.taxaConversao}%`, nome: 'Conversão', nota: `${kpis.entraram} entraram de ${kpis.total}`, destaque: true },
+        { valor: kpis.noGuia ?? '—', nome: 'Parados no Guia', nota: 'vídeo, teste ou Discord' },
+        { valor: kpis.esperandoConvite ?? '—', nome: 'Esperando aceitar', nota: 'convite da ETZ' },
+        { valor: kpis.parados, nome: 'Travados no total', nota: `${kpis.paradosMaisDeUmaSemana} há mais de 7 dias` },
         { valor: kpis.aguardando, nome: 'Sem responder ainda', nota: 'fecham sozinhos em 48h' },
-        { valor: tempo, nome: 'Até entrar', nota: 'mediana' },
+        { valor: horasLegiveis(tempos.guia), nome: 'Para fazer o Guia', nota: 'mediana, do link ao vínculo' },
+        { valor: horasLegiveis(tempos.convite), nome: 'Para aceitar o convite', nota: 'mediana' },
+        { valor: kpis.retornos ?? 0, nome: 'Ex-membros voltando', nota: `${kpis.retornosEntraram ?? 0} já voltaram` },
     ];
     document.getElementById('viz_tiles').innerHTML = tiles.map(tile => `
         <div class="viz-tile${tile.destaque ? ' viz-tile--destaque' : ''}">
@@ -227,16 +295,47 @@ function renderTiles(kpis) {
 }
 
 /* ---------------------------------------------------------------------------
+ * Teste do Guia. O teste nao guarda quem passou, entao isto nao e um degrau do
+ * funil por pessoa: e o volume do site, contado por dia. Fica num card a parte
+ * para ninguem dividir um pelo outro.
+ * ------------------------------------------------------------------------- */
+function renderGuia(guia) {
+    const alvo = document.getElementById('viz_guia');
+    if (!guia) {
+        alvo.innerHTML = '<p class="table-message">Contagem do Guia indisponível agora.</p>';
+        return;
+    }
+    if (!guia.aberto && !guia.aprovado && !guia.reprovado) {
+        alvo.innerHTML = '<p class="table-message">Nenhum teste aberto neste período. A contagem começou em 01/10/2026.</p>';
+        return;
+    }
+    const tiles = [
+        { valor: guia.aberto, nome: 'Testes abertos', nota: 'chegaram ao fim do vídeo' },
+        { valor: guia.aprovado, nome: 'Aprovados', nota: guia.passaram === null ? '' : `${guia.passaram}% dos abertos` },
+        { valor: guia.reprovado, nome: 'Tentativas reprovadas' },
+        { valor: guia.aprovacao === null ? '—' : `${guia.aprovacao}%`, nome: 'Aprovação', nota: 'por tentativa corrigida' },
+    ];
+    alvo.innerHTML = `<div class="viz-tiles">${tiles.map(tile => `
+        <div class="viz-tile">
+            <span class="viz-tile__valor">${tile.valor}</span>
+            <span class="viz-tile__nome">${tile.nome}</span>
+            ${tile.nota ? `<span class="viz-tile__nota">${tile.nota}</span>` : ''}
+        </div>
+    `).join('')}</div>`;
+}
+
+/* ---------------------------------------------------------------------------
  * Funil. Uma cor só: o comprimento carrega a magnitude e a posição vertical já
  * carrega a ordem. Pintar cada degrau de um tom diferente gastaria o único
  * canal livre repetindo o que a barra mostra.
  * ------------------------------------------------------------------------- */
 function renderFunil(funil) {
     const maior = Math.max(...funil.map(degrau => degrau.total), 1);
-    const clicaveis = new Set(['visit', 'quiz', 'site', 'discord', 'invited', 'complete']);
     document.getElementById('viz_funil').innerHTML = funil.map(degrau => {
         const largura = Math.max((degrau.total / maior) * 100, degrau.total ? 2 : 0);
-        const clicavel = clicaveis.has(degrau.id);
+        // So e clicavel o degrau que corresponde a etapas da maquina de
+        // estados; "abordado" e "interesse" sao marcos da prospeccao.
+        const clicavel = Array.isArray(degrau.etapas) && degrau.etapas.length > 0;
         const ativo = painelRecrutamento.etapa === degrau.id;
         return `
             <button type="button"
@@ -367,10 +466,17 @@ function mesmaSemana(iso, semana) {
     return data >= inicio && data < fim;
 }
 
+function degrauDoFunil(id) {
+    return (painelRecrutamento.metricas?.funil || []).find(degrau => degrau.id === id) || null;
+}
+
 function listaFiltrada() {
     const { etapa, desfecho, semana } = painelRecrutamento;
+    // Um degrau do funil cobre mais de uma etapa (o Guia inclui quem ainda esta
+    // nas placas antigas); ex-membros voltando nunca estao nele.
+    const etapas = etapa ? new Set(degrauDoFunil(etapa)?.etapas || [etapa]) : null;
     return painelRecrutamento.lista
-        .filter(item => (etapa ? item.etapa === etapa : true))
+        .filter(item => (etapas ? etapas.has(item.etapa) && !item.retorno : true))
         .filter(item => (desfecho ? item.desfecho === desfecho : true))
         .filter(item => (semana ? mesmaSemana(item.iniciado_em, semana) || mesmaSemana(item.concluido_em, semana) : true));
 }
@@ -378,7 +484,7 @@ function listaFiltrada() {
 function renderChips() {
     const { etapa, desfecho, semana } = painelRecrutamento;
     const chips = [];
-    if (etapa) chips.push(['Etapa: ' + rotuloEtapa(etapa), `filtrarEtapa('${etapa}')`]);
+    if (etapa) chips.push(['Degrau: ' + (degrauDoFunil(etapa)?.nome || rotuloEtapa(etapa)), `filtrarEtapa('${etapa}')`]);
     if (desfecho) {
         const nome = (DESFECHOS.find(item => item.id === desfecho) || {}).nome || desfecho;
         chips.push(['Desfecho: ' + nome, `filtrarDesfecho('${desfecho}')`]);
@@ -404,14 +510,15 @@ function renderTabela() {
     document.getElementById('count_lista').textContent = visiveis.length;
 
     document.getElementById('tb_recrutas').innerHTML = visiveis.length ? `
-        <thead><tr><th>Nick</th><th>Servidor</th><th>Origem</th><th>Etapa</th><th>Parado há</th><th>Log</th></tr></thead>
+        <thead><tr><th>Nick</th><th>Servidor</th><th>Origem</th><th>Etapa</th><th>Próximo passo</th><th>Parado há</th><th>Log</th></tr></thead>
         <tbody>
             ${visiveis.map(item => `
                 <tr>
                     <td>${textoSeguro(item.nick)}</td>
                     <td>${item.servidor === 'genesis' ? 'Gênesis' : 'Apocalipse'}</td>
-                    <td>${item.origem === 'prospeccao' ? 'Prospecção' : 'Orgânico'}</td>
-                    <td>${rotuloEtapa(item.etapa)}</td>
+                    <td>${item.retorno ? 'Ex-membro' : (item.origem === 'prospeccao' ? 'Prospecção' : 'Orgânico')}</td>
+                    <td>${rotuloEtapa(item.etapa, item.retorno)}</td>
+                    <td>${proximoPasso(item)}</td>
                     <td>${item.dias_parado === null ? '—' : `${item.dias_parado} dia(s)`}</td>
                     <td>
                         <button type="button" class="btn btn-secondary" value="${item.id}"
