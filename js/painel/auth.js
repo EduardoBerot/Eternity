@@ -27,8 +27,10 @@ async function authenticate() {
             // menu e conveniencia de interface -- quem autoriza de verdade e o
             // middleware do backend em cada requisicao.
             if (valid && lider) {
-                const item = document.getElementById('recrutamento');
-                if (item) item.hidden = false;
+                for (const id of ['recrutamento', 'analises']) {
+                    const item = document.getElementById(id);
+                    if (item) item.hidden = false;
+                }
             }
 
             if (!valid){

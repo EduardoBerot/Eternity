@@ -7,9 +7,13 @@ const pages_content = {
     excluidos: renderExcluidos,
     historico: renderHistorico,
     recrutamento: renderRecrutamento,
+    analises: renderAnalises,
 }
 
 function render(event) {
+    // A aba Analises trava a rolagem da pagina para caber na janela; qualquer
+    // outra aba devolve.
+    anSairDaAba();
     APP.innerHTML = '';
     const id = event.target.id;
     const fn = pages_content[id];

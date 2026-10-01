@@ -1,0 +1,457 @@
+/* Aba Analises do painel (so lideres), 01/10/2026.
+
+   A tela inteira cabe na janela: nada rola. O #app perde a largura maxima e o
+   respiro do resto do painel e vira uma grade que divide a altura que sobra
+   abaixo da navbar. Os graficos sao SVG desenhados no tamanho medido de cada
+   caixa (analises.js), entao a grade decide o tamanho e o desenho acompanha.
+
+   Cores das origens: os seis primeiros slots da paleta categorica, nos passos
+   do escuro, validados contra a superficie #0b1624 (faixa de luz, croma,
+   daltonismo, visao normal e contraste). A ordem e fixa e presa a origem:
+   filtrar nunca repinta quem sobrou. Ajustes (banimento, correcoes) e o
+   "outros" da paleta: cinza. */
+
+body.painel--analises { overflow: hidden; }
+/* O responsive_panel.css da 16px de margem ao main no celular: aqui eles
+   viravam rolagem. */
+body.painel--analises main { margin: 0; }
+
+.painel.painel--analises .content {
+    max-width: none;
+    height: calc(100dvh - var(--nav));
+    padding: 12px clamp(10px, 1.4vw, 20px);
+    gap: 0;
+    overflow: hidden;
+}
+
+.an-root {
+    --an-surface: #0b1624;
+    --an-surface-2: #0f1c2b;
+    --an-borda: rgba(46, 230, 240, 0.16);
+    --an-ink: #e8f4f8;
+    --an-ink-2: #9fb4c4;
+    --an-ink-3: #6b8193;
+    --an-grid: rgba(232, 244, 248, 0.07);
+    --an-acento: #2ee6f0;
+    --an-torneios: #3987e5;
+    --an-eventos: #d95926;
+    --an-desafios: #199e70;
+    --an-votos: #c98500;
+    --an-vip: #d55181;
+    --an-ajustes: #6b8193;
+
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 10px;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    color: var(--an-ink);
+    font-family: var(--sans);
+}
+
+/* O layout.css poe a Conthax em `*`. Aqui ela fica so nos titulos e no numero
+   grande: em rotulo de 11px a fonte larga estoura cartao e legenda. */
+.an-root * { font-family: var(--sans); }
+.an-root .an-titulo h1,
+.an-root .an-card h2,
+.an-root .an-hero__valor { font-family: Conthax, var(--sans); }
+
+/* ---------- Cabecalho: titulo, filtros e legenda numa faixa so ---------- */
+
+.an-topo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    min-width: 0;
+}
+
+.an-root .an-titulo {
+    display: flex;
+    flex-direction: column;
+    margin-right: auto;
+    min-width: 0;
+
+    h1 {
+        margin: 0;
+        font-size: clamp(1.05rem, 1.6vw, 1.45rem);
+        line-height: 1.15;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+        color: var(--an-ink);
+    }
+
+    small { color: var(--an-ink-3); font-size: 0.72rem; }
+}
+
+.an-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.an-seg {
+    display: inline-flex;
+    padding: 3px;
+    border: 1px solid var(--an-borda);
+    border-radius: 999px;
+    background: var(--an-surface);
+}
+
+.an-seg button {
+    border: 0;
+    border-radius: 999px;
+    padding: 5px 12px;
+    background: none;
+    color: var(--an-ink-2);
+    font: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.an-seg button:hover { color: var(--an-ink); }
+.an-seg button:focus-visible { outline: 2px solid var(--an-acento); outline-offset: 1px; }
+.an-seg button.is-on { background: var(--an-acento); color: #04121a; font-weight: 600; }
+
+.an-root select.an-select {
+    height: auto;
+    margin: 0;
+    box-shadow: none;
+    appearance: none;
+    max-width: 190px;
+    padding: 6px 30px 6px 12px;
+    border: 1px solid var(--an-borda);
+    border-radius: 999px;
+    background: var(--an-surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239fb4c4' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+    color: var(--an-ink);
+    font: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+}
+
+.an-root select.an-select:focus-visible { outline: 2px solid var(--an-acento); outline-offset: 1px; }
+.an-select option { background: var(--an-surface); color: var(--an-ink); }
+
+.an-legenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.an-leg {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 9px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: none;
+    color: var(--an-ink-2);
+    font: inherit;
+    font-size: 0.74rem;
+    cursor: pointer;
+}
+
+.an-leg i { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.an-leg:hover { color: var(--an-ink); border-color: var(--an-borda); }
+.an-leg:focus-visible { outline: 2px solid var(--an-acento); outline-offset: 1px; }
+.an-leg.is-on { color: var(--an-ink); border-color: var(--an-acento); }
+.an-legenda.tem-foco .an-leg:not(.is-on) { opacity: 0.45; }
+
+.an-limpar {
+    border: 1px dashed var(--an-borda);
+    border-radius: 999px;
+    padding: 4px 10px;
+    background: none;
+    color: var(--an-ink-2);
+    font: inherit;
+    font-size: 0.74rem;
+    cursor: pointer;
+}
+
+.an-limpar:hover { color: var(--an-ink); }
+
+/* ---------- Grade ----------
+   3 colunas x 3 linhas no PC: a coluna da direita e o ranking inteiro, como no
+   modelo; o hero e a rosca dividem a do meio. */
+
+.an-grade {
+    display: grid;
+    grid-template-columns: minmax(0, 2.15fr) minmax(0, 1fr) minmax(0, 1.05fr);
+    grid-template-rows: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 0.9fr);
+    grid-template-areas:
+        "semanas hero    ranking"
+        "partic  origem  ranking"
+        "meses   meses   ranking";
+    gap: 10px;
+    min-height: 0;
+}
+
+.an-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    padding: 10px 14px 8px;
+    border: 1px solid var(--an-borda);
+    border-radius: 4px 16px 4px 16px;
+    background: linear-gradient(180deg, var(--an-surface-2), var(--an-surface));
+}
+
+.an-card header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+
+    h2 {
+        margin: 0;
+        font-size: 0.86rem;
+        font-weight: 600;
+        color: var(--an-ink);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    span { color: var(--an-ink-3); font-size: 0.7rem; white-space: nowrap; }
+}
+
+.an-plot { position: relative; flex: 1; min-height: 0; margin-top: 6px; }
+.an-plot svg { position: absolute; inset: 0; display: block; overflow: visible; }
+
+.an-c-semanas { grid-area: semanas; }
+.an-c-hero { grid-area: hero; }
+.an-c-partic { grid-area: partic; }
+.an-c-origem { grid-area: origem; }
+.an-c-ranking { grid-area: ranking; }
+.an-c-meses { grid-area: meses; }
+
+/* ---------- Hero: o numero que importa, e os de apoio embaixo ---------- */
+
+.an-hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(2px, 0.8vh, 6px);
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+    text-align: center;
+}
+
+.an-hero__rotulo { color: var(--an-ink-2); font-size: 0.8rem; }
+
+.an-hero__valor {
+    /* Cresce com a largura E com a altura: em tela baixa o numero nao empurra
+       os cartoes de apoio para fora. */
+    font-size: clamp(1.4rem, min(3.4vw, 5.8vh), 3.2rem);
+    line-height: 1;
+    color: var(--an-acento);
+    font-variant-numeric: tabular-nums;
+}
+
+.an-hero__liga { color: var(--an-ink-2); font-size: 0.78rem; }
+.an-hero__liga strong { color: var(--an-ink); }
+.an-hero__nota { color: var(--an-ink-3); font-size: 0.7rem; }
+
+.an-mini {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.an-mini div {
+    display: flex;
+    flex-direction: column;
+    padding: 6px 4px;
+    border-radius: 8px;
+    background: rgba(232, 244, 248, 0.04);
+}
+
+.an-mini b { font-size: clamp(0.85rem, 2vh, 1.05rem); font-variant-numeric: tabular-nums; }
+.an-mini span { color: var(--an-ink-3); font-size: 0.66rem; line-height: 1.2; }
+
+/* ---------- Marcas dos SVG ---------- */
+
+.an-root svg text { font-family: var(--sans); fill: var(--an-ink-2); font-size: 11px; }
+.an-root svg .an-forte { fill: var(--an-ink); font-weight: 600; }
+.an-root svg .an-fraco { fill: var(--an-ink-3); }
+.an-root svg .an-grid { stroke: var(--an-grid); stroke-width: 1; }
+.an-root svg .an-base { stroke: rgba(232, 244, 248, 0.22); stroke-width: 1; }
+.an-root svg .an-hit { fill: transparent; cursor: pointer; }
+.an-root svg .an-hit:hover { fill: rgba(232, 244, 248, 0.05); }
+.an-root svg .an-esmaecido { opacity: 0.32; }
+.an-root svg .an-cross { stroke: rgba(232, 244, 248, 0.35); stroke-width: 1; stroke-dasharray: 3 3; pointer-events: none; }
+.an-root svg .an-sel { fill: rgba(46, 230, 240, 0.08); }
+
+.an-vazio {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    color: var(--an-ink-3);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+/* Rosca: legenda ao lado, com valor e fatia. */
+.an-origem {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-height: 0;
+}
+
+.an-origem .an-plot { height: 100%; margin: 0; }
+
+.an-origem ul {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    min-width: 0;
+}
+
+.an-origem li button {
+    display: grid;
+    grid-template-columns: 10px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 3px 6px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    color: var(--an-ink-2);
+    font: inherit;
+    font-size: 0.74rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.an-origem li button:hover { background: rgba(232, 244, 248, 0.05); color: var(--an-ink); }
+.an-origem li button.is-on { background: rgba(46, 230, 240, 0.1); color: var(--an-ink); }
+.an-origem li i { width: 10px; height: 10px; border-radius: 3px; }
+.an-origem li b { color: var(--an-ink); font-variant-numeric: tabular-nums; font-weight: 600; }
+.an-origem li small { color: var(--an-ink-3); margin-left: 4px; }
+.an-origem .an-nota { color: var(--an-ink-3); font-size: 0.66rem; padding: 2px 6px; }
+
+.an-tooltip {
+    position: fixed;
+    z-index: 200;
+    max-width: 260px;
+    padding: 8px 10px;
+    border: 1px solid var(--an-borda);
+    border-radius: 8px;
+    background: rgba(4, 10, 18, 0.96);
+    color: var(--an-ink);
+    font-family: var(--sans);
+    font-size: 0.76rem;
+    line-height: 1.45;
+    pointer-events: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.an-tooltip strong { display: block; margin-bottom: 2px; }
+.an-tooltip .an-tt-linha { display: grid; grid-template-columns: 10px 1fr auto; gap: 6px; align-items: center; }
+.an-tooltip .an-tt-linha i { width: 8px; height: 8px; border-radius: 2px; }
+.an-tooltip .an-tt-linha b { font-variant-numeric: tabular-nums; }
+.an-tooltip .an-tt-nota { color: var(--an-ink-2); margin-top: 2px; }
+
+/* ---------- Abas do celular: um grafico por vez, sem rolagem ---------- */
+
+.an-abas { display: none; }
+
+@media (max-width: 900px) {
+    .an-root { grid-template-rows: auto auto minmax(0, 1fr); gap: 8px; }
+    .an-topo { flex-wrap: nowrap; flex-direction: column; align-items: stretch; gap: 6px; }
+    .an-titulo small { display: none; }
+
+    /* Filtros e legenda numa faixa so, que desliza de lado: empilhados, eles
+       comiam um quarto da tela. */
+    .an-filtros {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding-bottom: 2px;
+    }
+
+    .an-filtros::-webkit-scrollbar { display: none; }
+    .an-filtros > * { flex-shrink: 0; }
+    .an-legenda { flex-wrap: nowrap; }
+    .an-root select.an-select { max-width: 150px; }
+
+    .an-abas {
+        display: flex;
+        gap: 4px;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .an-abas::-webkit-scrollbar { display: none; }
+
+    .an-abas button {
+        flex-shrink: 0;
+        padding: 6px 12px;
+        border: 1px solid var(--an-borda);
+        border-radius: 999px;
+        background: none;
+        color: var(--an-ink-2);
+        font: inherit;
+        font-size: 0.76rem;
+    }
+
+    .an-abas button.is-on { background: var(--an-acento); border-color: var(--an-acento); color: #04121a; font-weight: 600; }
+
+    .an-grade {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr);
+        grid-template-areas: "unico";
+    }
+
+    .an-card { grid-area: unico; display: none; }
+    .an-card.is-aba { display: flex; }
+
+    /* O resumo junta hero e rosca, empilhados. */
+    .an-grade[data-aba="resumo"] { grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "hero" "origem"; }
+    .an-grade[data-aba="resumo"] .an-c-hero { grid-area: hero; }
+    .an-grade[data-aba="resumo"] .an-c-origem { grid-area: origem; }
+    .an-origem { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .an-root svg rect, .an-root svg path { transition: opacity 0.15s ease; }
+}
+
+/* Notebook baixo (600-760px de altura): a legenda da rosca e os cartoes de
+   apoio do hero se apertam em vez de vazar do cartao. */
+@media (min-width: 901px) and (max-height: 760px) {
+    .an-card { padding: 7px 12px 6px; }
+    .an-origem li button { padding: 1px 6px; font-size: 0.7rem; }
+    .an-origem .an-nota { padding: 0 6px; font-size: 0.62rem; }
+    .an-mini div { padding: 3px 4px; }
+    .an-mini span { font-size: 0.62rem; }
+    .an-hero__liga, .an-hero__nota { font-size: 0.68rem; }
+}
+
+@media (min-width: 901px) and (max-height: 660px) {
+    .an-origem .an-nota { display: none; }
+    .an-hero__nota { display: none; }
+    .an-mini b { font-size: 0.85rem; }
+}
+
+/* Janela muito baixa: os cartoes de apoio saem (os numeros estao na rosca e
+   nos graficos), e o hero fica so com o total e a Liga. */
+@media (min-width: 901px) and (max-height: 590px) {
+    .an-mini { display: none; }
+    .an-origem li button { padding: 0 6px; font-size: 0.66rem; }
+}
