@@ -67,6 +67,22 @@ async function renderFormEdit(data){
     const STAFFMEMBERS = await getStaffsNames();
     createOptions('recrutador', STAFFMEMBERS, data.recrutador);
     createOptions('cargo', CARGOS, data.cargo);
+    // Cargo so o Fundador muda (o backend confere de novo): para os outros o
+    // campo fica travado, com o motivo a vista.
+    const cargo = document.getElementById('cargo');
+    cargo.dataset.original = data.cargo || '';
+    if (!ehFundadorLogado()) {
+        cargo.disabled = true;
+        cargo.title = 'Só o Fundador muda o cargo. A mudança vale no jogo e no Discord.';
+    }
+}
+
+// Logins que mudam cargo pelo painel. O backend tem a mesma lista
+// (ETERNITY_FOUNDER_LOGINS); aqui so decide se o campo abre.
+const LOGINS_FUNDADOR = ['ducred22'];
+
+function ehFundadorLogado() {
+    return LOGINS_FUNDADOR.includes(String(getCookie(ETY_ADM_LOGIN_COOKIE) || '').trim().toLowerCase());
 }
 
 function goBackMembers() {
@@ -78,6 +94,13 @@ function submitEditar(event) {
     event.preventDefault();
     const data = getFormData();
     const id = event.target.getAttribute('value');
+    const cargoCampo = document.getElementById('cargo');
+    const mudouCargo = Boolean(cargoCampo && !cargoCampo.disabled && cargoCampo.value !== cargoCampo.dataset.original);
+    // Campo travado nao vai no formulario: sem cargo, o backend nao mexe nele.
+    if (cargoCampo?.disabled) delete data.cargo;
+    if (mudouCargo && !confirm(`Mudar o cargo de ${cargoCampo.dataset.original || 'Membro'} para ${cargoCampo.value}?
+
+A mudança vai para o jogo e para o Discord, com anúncio (promoção) ou mensagem privada (rebaixamento).`)) return;
 
     const opcoes = {
         method: 'PATCH', 
@@ -86,14 +109,18 @@ function submitEditar(event) {
     };
 
     fetch(`${URL_PATH_MEMBRO}/${id}`, opcoes)
-        .then(response => {
+        .then(async response => {
             if (response.ok) {
                 return response.json();
             }
+            const corpo = await response.json().catch(() => ({}));
+            if (corpo?.message) alert(corpo.message);
             throw new Error('Algo deu errado na requisição: ' + response.statusText);
         })
         .then(data => {
-            alert(`O membro foi alterado com sucesso!`);
+            alert(mudouCargo
+                ? 'Membro alterado! O novo cargo chega ao jogo e ao Discord nos próximos minutos.'
+                : 'O membro foi alterado com sucesso!');
             getRedirectElement()?.click()
         })
         .catch(error => {

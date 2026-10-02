@@ -31,6 +31,9 @@ async function authenticate() {
                     const item = document.getElementById(id);
                     if (item) item.hidden = false;
                 }
+                // Quem depende de saber que e lider (link da conversa vindo do
+                // Telegram) espera este sinal.
+                document.dispatchEvent(new Event('painel:lider'));
             }
 
             if (!valid){

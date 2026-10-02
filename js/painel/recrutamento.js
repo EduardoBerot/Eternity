@@ -585,7 +585,67 @@ function ligarDicas() {
 // Sem modal: o painel não tem um, e a sub-view dentro do #app é o caminho que a
 // tela de edição já usa.
 function renderConversaRecruta(event) {
-    const id = event.currentTarget.getAttribute('value');
+    abrirConversaRecruta(event.currentTarget.getAttribute('value'));
+}
+
+/* ---------------------------------------------------------------------------
+ * Link direto da conversa: painel.html#log=<servidor>/<nick>. E o botao do
+ * aviso de prospeccao no Telegram (01/10/2026). Quem chega sem login passa pela
+ * tela de login e perde o hash, entao ele fica guardado na sessao ate o painel
+ * confirmar que e lider.
+ * ------------------------------------------------------------------------- */
+const LOG_PENDENTE = 'ety-log-pendente';
+
+function lerLinkDeConversa() {
+    const doHash = /^#log=([^/]+)\/(.+)$/.exec(location.hash);
+    if (doHash) {
+        try { sessionStorage.setItem(LOG_PENDENTE, location.hash); } catch (_) {}
+        return { servidor: decodeURIComponent(doHash[1]), nick: decodeURIComponent(doHash[2]) };
+    }
+    let guardado = null;
+    try { guardado = sessionStorage.getItem(LOG_PENDENTE); } catch (_) {}
+    const match = guardado && /^#log=([^/]+)\/(.+)$/.exec(guardado);
+    return match ? { servidor: decodeURIComponent(match[1]), nick: decodeURIComponent(match[2]) } : null;
+}
+
+async function abrirConversaDoLink() {
+    const pedido = lerLinkDeConversa();
+    if (!pedido) return;
+    try { sessionStorage.removeItem(LOG_PENDENTE); } catch (_) {}
+    history.replaceState(null, '', location.pathname + location.search);
+    const aba = document.getElementById('recrutamento');
+    if (aba) selectItem(aba);
+    APP.innerHTML = '';
+    renderLoading(APP);
+    try {
+        const resposta = await fetch(`${URL_RECRUTAS}?servidor=${encodeURIComponent(pedido.servidor)}&estado=todos`, { headers: getAdminRequestHeaders() });
+        if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+        const lista = await resposta.json();
+        const alvo = String(pedido.nick).trim().toLowerCase();
+        const recruta = lista.find(item => String(item.nick).trim().toLowerCase() === alvo);
+        if (recruta) {
+            abrirConversaRecruta(recruta.id);
+            return;
+        }
+        APP.innerHTML = `
+            <div class="pending-page">
+                <header class="pending-page__intro">
+                    <span class="pending-page__eyebrow">Conversa</span>
+                    <h1>${textoSeguro(pedido.nick)}</h1>
+                    <p>A conversa ainda não chegou ao site: o bot sincroniza o funil a cada 30 minutos. Tente de novo daqui a pouco.</p>
+                    <button type="button" class="btn btn-danger" onclick="recrutamento.click()">Ir para o Recrutamento</button>
+                </header>
+            </div>`;
+    } catch (erro) {
+        APP.innerHTML = '<p class="table-message">Não foi possível abrir a conversa.</p>';
+        console.error('Link da conversa:', erro);
+    }
+}
+
+lerLinkDeConversa();
+document.addEventListener('painel:lider', abrirConversaDoLink);
+
+function abrirConversaRecruta(id) {
     APP.innerHTML = '';
     renderLoading(APP);
 
