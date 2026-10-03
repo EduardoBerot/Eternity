@@ -189,7 +189,9 @@ async function enviarTeste(event) {
         const resposta = await fetch(URL_TESTE, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: form.dataset.token, respostas }),
+            // Nick so quando veio do link do bot (?nick=): e o que marca a
+            // integracao de quem entrou por convite direto (03/10/2026).
+            body: JSON.stringify({ token: form.dataset.token, respostas, ...(guia.doJogo && guia.nick ? { nick: guia.nick } : {}) }),
         });
         const resultado = await resposta.json();
         if (!resposta.ok) throw new Error(resultado?.message || 'Falha ao corrigir.');

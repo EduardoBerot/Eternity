@@ -56,6 +56,7 @@ function renderSolicitacoes() {
     const table_id = 'tb_solicitacoes';
     const incompleteTableId = 'tb_cadastros_incompletos';
     const unlinkedTableId = 'tb_nao_vinculados';
+    const notIntegratedTableId = 'tb_nao_integrados';
     const updateTableId = 'tb_atualizacoes_cadastrais';
     const properties = ['nick', 'data_nascimento', 'data_entrada'];
     const fieldDataEntrada = 'Tempo de Solicitação'
@@ -112,6 +113,19 @@ function renderSolicitacoes() {
                         <div class="pending-disclosure__content">
                             <div class="pending-card__loading" id="loading_nao_vinculados">Carregando membros não vinculados...</div>
                             <div class="pending-card__table"><table id="${unlinkedTableId}"></table></div>
+                        </div>
+                    </details>
+                    <details class="pending-subsection pending-subsection--divided pending-disclosure">
+                        <summary class="pending-subsection__header">
+                            <div>
+                                <h3>Não integrados</h3>
+                                <p>Entraram por convite direto, sem passar pelo recrutamento, e ainda não fizeram o Guia do clã (vídeo e teste). O bot já mandou o link; cobre no jogo.</p>
+                            </div>
+                            <span class="pending-card__count pending-card__count--small" id="count_nao_integrados" data-pending-group="cadastros">—</span>
+                        </summary>
+                        <div class="pending-disclosure__content">
+                            <div class="pending-card__loading" id="loading_nao_integrados">Carregando membros não integrados...</div>
+                            <div class="pending-card__table"><table id="${notIntegratedTableId}"></table></div>
                         </div>
                     </details>
                     <div class="pending-subsection pending-subsection--divided">
@@ -184,6 +198,31 @@ function renderSolicitacoes() {
             groupCountId: 'count_cadastros_total',
             filterData: member => member.discord_vinculado !== true,
             emptyMessage: 'Todos os membros ativos estão vinculados ao Discord.'
+        },
+    );
+
+    // Integracao de quem entrou por convite manual (03/10/2026): cadastro criado
+    // pela sincronizacao do cla (origem 'minecraft') desde 01/10, sem o teste do
+    // Guia feito pelo link com o nick. Mesma regra de naoIntegrado() na API.
+    fetchDataAndRenderTable(
+        URL_GET_MEMBROS_ATIVOS,
+        notIntegratedTableId,
+        ['nick', 'servidor', 'recrutador', 'createdAt'],
+        undefined,
+        () => {
+            const cabecalho = document.getElementById(notIntegratedTableId)?.querySelector('th[id$="-createdAt"]');
+            if (cabecalho) cabecalho.textContent = 'Entrou há';
+            convertDatesToAges(notIntegratedTableId, 'Entrou há', true);
+        },
+        { headers: getAdminRequestHeaders() },
+        {
+            loadingId: 'loading_nao_integrados',
+            countId: 'count_nao_integrados',
+            groupCountId: 'count_cadastros_total',
+            filterData: member => member.origem === 'minecraft'
+                && !member.guia_concluido_em
+                && new Date(member.createdAt) >= new Date('2026-10-01T00:00:00Z'),
+            emptyMessage: 'Todos os membros que entraram por convite direto já fizeram o Guia.'
         },
     );
 
