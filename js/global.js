@@ -54,16 +54,6 @@ function createOptionsHTML(id, options, defaultValue) {
     });
 }
 
-function selectOptionByValue(selectId, optionValue) {
-    const selectElement = document.getElementById(selectId);
-    for (const i = 0; i < selectElement.options.length; i++) {
-        if (selectElement.options[i].value === optionValue) {
-            selectElement.selectedIndex = i;
-            break;
-        }
-    }
-}
-
 function getDate(defaultDate='', brOrder=false) {
     if (arguments.length > 0 && !defaultDate) return '';
     const f = (str)=>String(str).padStart(2, '0');
@@ -84,6 +74,25 @@ function birthDateRangeAttrs() {
     const hoje = new Date();
     const dia = `${f(hoje.getMonth()+1)}-${f(hoje.getDate())}`;
     return `min="${hoje.getFullYear()-100}-${dia}" max="${hoje.getFullYear()-5}-${dia}"`;
+}
+
+// Le a resposta do backend. Se falhou, lanca um erro com a mensagem que ele
+// mandou ("So o Fundador muda o cargo", "Data de nascimento no futuro"...), em
+// vez de a staff ver so "nao foi possivel".
+async function lerResposta(response) {
+    const texto = await response.text();
+    let corpo = null;
+    try { corpo = texto ? JSON.parse(texto) : null; } catch { corpo = null; }
+    if (response.ok) return corpo;
+    const erro = new Error(corpo?.message || `Falha HTTP ${response.status}`);
+    erro.doBackend = Boolean(corpo?.message);
+    throw erro;
+}
+
+// Mostra o motivo do backend quando ele mandou um; senao, a mensagem padrao.
+function avisarFalha(error, padrao) {
+    console.error(error);
+    alert(error?.doBackend ? error.message : padrao);
 }
 
 function getFormData() {

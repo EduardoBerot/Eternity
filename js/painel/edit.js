@@ -109,21 +109,12 @@ A mudança vai para o jogo e para o Discord, com anúncio (promoção) ou mensag
     };
 
     fetch(`${URL_PATH_MEMBRO}/${id}`, opcoes)
-        .then(async response => {
-            if (response.ok) {
-                return response.json();
-            }
-            const corpo = await response.json().catch(() => ({}));
-            if (corpo?.message) alert(corpo.message);
-            throw new Error('Algo deu errado na requisição: ' + response.statusText);
-        })
+        .then(lerResposta)
         .then(data => {
             alert(mudouCargo
                 ? 'Membro alterado! O novo cargo chega ao jogo e ao Discord nos próximos minutos.'
                 : 'O membro foi alterado com sucesso!');
             getRedirectElement()?.click()
         })
-        .catch(error => {
-            console.error('Erro durante a requisição:', error);
-        });
+        .catch(error => avisarFalha(error, 'Não foi possível alterar o membro.'));
 }

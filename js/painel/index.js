@@ -268,25 +268,15 @@ async function checkOutProfileUpdate(event) {
         ? { comentario: prompt('Motivo da recusa:') || '' }
         : {};
     try {
-        const response = await fetch(`${URL_PATH_ATUALIZACOES}/${id}/${action}`, {
+        await lerResposta(await fetch(`${URL_PATH_ATUALIZACOES}/${id}/${action}`, {
             method: 'PATCH',
             headers: getAdminRequestHeaders(),
             body: JSON.stringify(body),
-        });
-        if (!response.ok) {
-            const corpo = await response.json().catch(() => ({}));
-            // 400: a solicitacao traz data recusada pelo backend (ex.: nascimento no futuro).
-            if (response.status === 400 && corpo?.message) {
-                alert(corpo.message);
-                return;
-            }
-            throw new Error(`Falha HTTP ${response.status}`);
-        }
+        }));
         alert(`Atualização cadastral ${action === 'aprovar' ? 'aprovada' : 'negada'}!`);
         getRedirectElement()?.click();
     } catch (error) {
-        console.error('Erro ao analisar atualização cadastral:', error);
-        alert('Não foi possível analisar a atualização cadastral.');
+        avisarFalha(error, 'Não foi possível analisar a atualização cadastral.');
     }
 }
 
@@ -438,19 +428,12 @@ async function checkOutSolicitation(event){
         };
     
         fetch(`${URL_PATH_ATIVAR_MEMBRO}/${id}`, opcoes)
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                }
-                throw new Error('Algo deu errado na requisição: ' + response.statusText);
-            })
+            .then(lerResposta)
             .then(_ => {
                 alert(`O membro foi definido como Ativo!`);
                 getRedirectElement()?.click()
             })
-            .catch(error => {
-                console.error('Erro durante a requisição:', error);
-            });
+            .catch(error => avisarFalha(error, 'Não foi possível ativar o membro.'));
     }
     
     function excludeMember(id, comentario) {
@@ -462,18 +445,11 @@ async function checkOutSolicitation(event){
             body: JSON.stringify({comentario, recrutador})
         }
         fetch(`${URL_KICK_MEMBRO}/${id}`, opcoes)
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                }
-                throw new Error('Algo deu errado na requisição: ' + response.statusText);
-            })
+            .then(lerResposta)
             .then(_ => {
                 getRedirectElement()?.click()
             })
-            .catch(error => {
-                console.error('Erro durante a requisição:', error);
-            });
+            .catch(error => avisarFalha(error, 'Não foi possível remover o membro.'));
     }
     
     function banMember(id, comentario) {
@@ -485,18 +461,11 @@ async function checkOutSolicitation(event){
             body: JSON.stringify({comentario, recrutador})
         }
         fetch(`${URL_BAN_MEMBRO}/${id}`, opcoes)
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                }
-                throw new Error('Algo deu errado na requisição: ' + response.statusText);
-            })
+            .then(lerResposta)
             .then(_ => {
                 getRedirectElement()?.click()
             })
-            .catch(error => {
-                console.error('Erro durante a requisição:', error);
-            });
+            .catch(error => avisarFalha(error, 'Não foi possível banir o membro.'));
     }
 }
 
@@ -515,28 +484,19 @@ async function submitAdicionar(event) {
     const data = getFormData();
 
     try {
-        let response = await fetch(URL_MEMBERS,
+        await lerResposta(await fetch(URL_MEMBERS,
             {
                 method: "POST",
-                // Sem o login da staff o site trata como formulario publico,
-                // que exige o teste do Guia e grava so uma solicitacao.
+                // Sem o login da staff o backend recusa: o recruta entra pelo
+                // vinculo do Discord, nao por aqui.
                 headers: getAdminRequestHeaders(),
                 body: JSON.stringify(data),
             }
-        );
-
-        if (!response.ok) {
-            const corpo = await response.json().catch(() => ({}));
-            if (response.status === 400 && corpo?.message) {
-                alert(corpo.message);
-                return;
-            }
-            throw new Error("Network response was not ok");
-        }
+        ));
         alert("Cadastro realizado com sucesso!");
         cleanForm();
     } catch (error) {
-        alert(`Não foi possível realizar o cadastro. Verifique se não há um membro cadastrado com o nick "${data.nick}"`);
+        avisarFalha(error, 'Não foi possível realizar o cadastro.');
     }
 
     function cleanForm() {
