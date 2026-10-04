@@ -2,7 +2,6 @@ const URL_BASE = "https://eternity-crud.onrender.com"
 // const URL_BASE = "http://localhost:5000"
 
 const URL_MEMBERS = `${URL_BASE}/api/membro`;
-const URL_MEMBER_UPDATES = `${URL_BASE}/api/solicitacoes/atualizacao`;
 const URL_STAFFMEMBERS = `${URL_BASE}/api/membros/staffs`;
 const URL_STAFFMEMBERS_NAMES = `${URL_BASE}/api/staffs`;
 

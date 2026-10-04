@@ -47,22 +47,15 @@ const loadingHTML = `
 
 const pages_content = {
 
-    // "Juntar-se" abre o Guia do Recruta (guia.js). Este e o formulario de
-    // atualizacao cadastral de quem ja e membro, que nao passa pelo teste.
+    // "Juntar-se" abre o Guia do Recruta (guia.js). A atualizacao cadastral de
+    // quem ja e membro saiu do site em 03/10/2026: o formulario era aberto e
+    // qualquer um mandava data para o nick de outro. No Discord o nick sai do
+    // vinculo, entao so o proprio membro pede a mudanca.
     atualizar: `<h1>Atualizar cadastro</h1>
-    </br><p id="msg">Para quem já está no clã: informe seu nick e a data de nascimento. A mudança vai para análise da staff. Ainda não é membro? Faça o <a href="#guia" onclick="openGuia()">Recrutamento</a>.</p>
-    </br>${loadingHTML}
-    <form onsubmit="send(event)" style="display:none;">
-        <label>Nick</label>
-        <input type="text" id="nick" placeholder="Nick" required>
-        <label>Data de Nascimento</label>
-        <input type="date" id="data_nascimento" ${birthDateRangeAttrs()} required>
-        <input type="text" id="recrutador" value="" style="display:none;" readonly>
-        <input type="text" id="cargo" value="Membro" style="display:none;" readonly>
-        <input type="text" id="data_entrada" style="display:none;" readonly>
-        <input type="text" id="status" value="Pendente" style="display:none;" readonly>
-        <button class="button">Enviar atualização</button>
-    </form>`,
+    </br><p>A atualização do cadastro agora é feita no <a href="https://discord.gg/vj4eNDJqct" target="_blank" rel="noopener">Discord da Eternity</a>, com a conta vinculada ao seu nick:</p>
+    </br><p><code>/aniversario</code> — corrige a sua data de nascimento.</p>
+    <p><code>/entrada</code> — corrige a data em que você entrou no clã.</p>
+    </br><p>A mudança vai para análise da staff. Ainda não vinculou o Discord? Use o botão <b>Vincular minha conta</b> no canal <b>#saudações</b>. Ainda não é membro? Faça o <a href="#guia" onclick="openGuia()">Recrutamento</a>.</p>`,
 
     city: `<header class="cabeca-pagina"><div class="miolo"><h1>Cidade</h1><p class="texto">A cidade da Eternity fica no servidor <b>Apocalipse</b>: casas e terrenos gratuitos, farms coletivas e um lugar para cada membro. Clique numa foto para ampliar. Para visitar: <code>/apocalipse</code> e depois <code>/go ETY</code>.</p></div></header><div class="miolo"><div id="gallery"><a href="/imgs/City00.jpg"><img class="cityimgs" src="/imgs/City00.jpg" alt="Cidade da Eternity, vista 1"></a><a href="/imgs/City01.jpg"><img class="cityimgs" src="/imgs/City01.jpg" alt="Cidade da Eternity, vista 2"></a><a href="/imgs/City02.jpg"><img class="cityimgs" src="/imgs/City02.jpg" alt="Cidade da Eternity, vista 3"></a><a href="/imgs/City03.jpg"><img class="cityimgs" src="/imgs/City03.jpg" alt="Cidade da Eternity, vista 4"></a><a href="/imgs/City04.jpg"><img class="cityimgs" src="/imgs/City04.jpg" alt="Cidade da Eternity, vista 5"></a><a href="/imgs/City05.jpg"><img class="cityimgs" src="/imgs/City05.jpg" alt="Cidade da Eternity, vista 6"></a></div></div>`,
 
@@ -143,32 +136,6 @@ function renderFormAdmin(id) {
     }
 }
 
-function renderFormJoin(id) {
-    if (id == 'atualizar') {
-        fetch(URL_BASE)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                document.getElementById('loading').style.display = 'none';
-                document.querySelector('form').style.display = 'flex';
-                renderDate();
-            })
-            .catch(error => {
-                console.error('There has been a problem with your fetch operation:', error);
-            });
-    }
-}
-
-function renderDate() {
-    const today = new Date();
-    const dd = String(today.getDate()).padStart(2, '0');
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const yyyy = today.getFullYear();
-
-    const formattedDate = yyyy + '-' + mm + '-' + dd;
-    document.getElementById('data_entrada').value = formattedDate;
-}
 
 async function validationLogin(event) {
     event.preventDefault();

@@ -316,9 +316,8 @@ function openGuia() {
     renderGuia();
 }
 
-// Atualizacao cadastral de quem ja e membro: o formulario antigo, sem teste.
+// Atualizacao cadastral de quem ja e membro: so a explicacao do /aniversario.
 function openAtualizar(event) {
     event?.preventDefault();
     document.getElementById('app').innerHTML = pages_content.atualizar;
-    renderFormJoin('atualizar');
 }
