@@ -989,36 +989,85 @@ main { padding-top: var(--nav); }
 
 .secao-wiki > .miolo > h2 { margin: 0 0 10px; font-size: clamp(1.8rem, 4vw, 2.8rem); }
 
-/* A torre: cada cargo e um andar, mais estreito quanto mais alto. A largura
-   vem de --andar (0 = topo). */
-.torre {
+/* O organograma: Fundador no topo, dois ramos (Gestao e PvP) lado a lado e o
+   Estagiario e o Membro na base. As linhas sao bordas e pseudo-elementos; os
+   ramos ficam em colunas de meia largura sem gap, entao o centro de cada um cai
+   em 25% e 75%, exatamente onde as pontes descem e sobem. */
+.org {
+    --fio: color-mix(in srgb, var(--aqua) 45%, transparent);
+    --elo: 26px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
     margin-top: 44px;
 }
 
-.torre-trilhas {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+.org-unico { width: min(100%, 520px); }
+.org-unico:last-child { width: 100%; }
+.org-unico .sala, .org-no .sala { height: 100%; }
+
+.org-elo { width: 2px; height: var(--elo); background: var(--fio); }
+
+/* Abre: desce do centro e se divide em 25% / 75%. Fecha: o inverso. */
+.org-ponte {
+    position: relative;
     width: 100%;
-    font-family: var(--sans);
-    font-size: 0.85rem;
-    color: var(--nevoa);
-    margin-bottom: 6px;
+    height: calc(var(--elo) * 1.6);
 
-    span:last-child { text-align: right; }
+    &::before, &::after { content: ""; position: absolute; }
+    &::before { left: calc(50% - 1px); width: 2px; height: 50%; background: var(--fio); }
+    &::after { left: 25%; right: 25%; height: 50%; border: 2px solid var(--fio); }
+    &.abre::before { top: 0; }
+    &.abre::after { bottom: 0; border-bottom: 0; }
+    &.fecha::before { bottom: 0; }
+    &.fecha::after { top: 0; border-top: 0; }
 }
 
-.andar {
-    width: calc(46% + var(--andar) * 9%);
+.org-ramos {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 6px;
+    row-gap: var(--elo);
+    width: 100%;
 }
 
-.andar.inteiro { grid-template-columns: 1fr; }
+/* O nome do ramo e um selo sobre o fio, que passa por tras dele sem cortar. */
+.org-rotulo {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-bottom: calc(var(--elo) * -1);
+    padding-bottom: var(--elo);
+
+    &::before { content: ""; position: absolute; left: calc(50% - 1px); top: 0; bottom: 0; width: 2px; background: var(--fio); }
+    span {
+        position: relative;
+        padding: 3px 12px;
+        border: 1px solid var(--fio);
+        border-radius: 999px;
+        background: #0b1624;
+        font-family: var(--sans);
+        font-size: 0.78rem;
+        color: var(--nevoa);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+    }
+}
+
+.org-no {
+    position: relative;
+    padding: 0 8px;
+
+    /* O fio ate o cargo de baixo, atravessando o row-gap. */
+    &:not(.ultimo)::after {
+        content: "";
+        position: absolute;
+        left: calc(50% - 1px);
+        top: 100%;
+        width: 2px;
+        height: var(--elo);
+        background: var(--fio);
+    }
+}
 
 .sala {
     position: relative;
@@ -1090,14 +1139,6 @@ main { padding-top: var(--nav); }
 .sala:hover .ocupantes img { transform: translateY(-4px); }
 .sala:hover .ocupantes img:nth-child(2n) { transition-delay: 0.04s; }
 .sala:hover .ocupantes img:nth-child(3n) { transition-delay: 0.08s; }
-
-.torre-chao {
-    width: 100%;
-    height: 3px;
-    margin-top: 2px;
-    background: linear-gradient(90deg, transparent, var(--aqua), transparent);
-    box-shadow: 0 0 20px var(--aqua);
-}
 
 /* Titulos por tempo: a subida de Tyrael a Raziel. */
 .subida {
@@ -1434,8 +1475,14 @@ main { padding-top: var(--nav); }
     .fatos span { padding: 4px 12px; }
     .duas-colunas { grid-template-columns: 1fr; }
     .mosaico { height: 260px; }
-    .andar { width: 100%; grid-template-columns: 1fr; }
-    .torre-trilhas { display: none; }
+    /* Uma coluna: o ramo de Gestao inteiro, depois o de PvP (--ordem), com o
+       fio descendo pelo centro. As pontes viram um fio reto. */
+    .org-ramos { grid-template-columns: 1fr; }
+    .org-ramos > * { order: var(--ordem); }
+    .org-rotulo:not(:first-child) { margin-top: var(--elo); }
+    .org-no { padding: 0; }
+    .org-ponte { width: 2px; background: var(--fio); }
+    .org-ponte::after, .org-ponte::before { display: none; }
     .sala { min-height: 0; flex-wrap: wrap; }
     .ocupantes { max-width: 100%; justify-content: flex-start; }
     .subida { grid-template-columns: repeat(3, 1fr); row-gap: 28px; }

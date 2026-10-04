@@ -103,11 +103,7 @@ function renderWiki() {
             <div class="miolo">
                 <h2>Hierarquia</h2>
                 <p class="texto">A cor define o nível e o cargo define a função. No mesmo andar, os cargos de gestão e de PvP valem o mesmo.</p>
-                <div class="torre" id="wiki-torre">
-                    <div class="torre-trilhas" style="width:calc(46% + 1 * 9%)"><span>Gestão</span><span>PvP</span></div>
-                    ${WIKI_TORRE.map(andarHtml).join('')}
-                    <div class="torre-chao"></div>
-                </div>
+                ${organogramaHtml()}
             </div>
         </section>
 
@@ -151,17 +147,40 @@ function renderWiki() {
     preencherOcupantes();
 }
 
-function andarHtml({ andar, salas }) {
+function salaHtml({ cargo, funcao }) {
     return `
-        <div class="andar ${salas.length === 1 ? 'inteiro' : ''}" style="--andar:${Math.min(andar, 6)}">
-            ${salas.map(({ cargo, funcao }) => `
-                <div class="sala ${classeCargo(cargo)}" data-cargo="${cargo}">
-                    <div class="sala-texto">
-                        <strong class="sala-cargo">${cargo}</strong>
-                        <span class="sala-funcao">${funcao}</span>
-                    </div>
-                    <div class="ocupantes"></div>
-                </div>`).join('')}
+        <div class="sala ${classeCargo(cargo)}" data-cargo="${cargo}">
+            <div class="sala-texto">
+                <strong class="sala-cargo">${cargo}</strong>
+                <span class="sala-funcao">${funcao}</span>
+            </div>
+            <div class="ocupantes"></div>
+        </div>`;
+}
+
+// Organograma (03/10/2026, no lugar da torre): o Fundador no topo abre em dois
+// ramos, Gestao e PvP, que descem lado a lado e se juntam no Estagiario e no
+// Membro. Cada nivel de dois cargos e uma linha da grade, entao Dono e Heika
+// (e cada par abaixo) ficam sempre na mesma altura. No celular a grade vira
+// uma coluna: `--ordem` poe o ramo de Gestao inteiro antes do de PvP.
+function organogramaHtml() {
+    const duplos = WIKI_TORRE.filter(nivel => nivel.salas.length === 2);
+    const [topo, ...base] = WIKI_TORRE.filter(nivel => nivel.salas.length === 1);
+    const no = (sala, ordem, ultimo) => `<div class="org-no ${ultimo ? 'ultimo' : ''}" style="--ordem:${ordem}">${salaHtml(sala)}</div>`;
+    return `
+        <div class="org" id="wiki-torre">
+            <div class="org-unico">${salaHtml(topo.salas[0])}</div>
+            <div class="org-ponte abre"></div>
+            <div class="org-ramos">
+                <div class="org-rotulo" style="--ordem:0"><span>Gestão</span></div>
+                <div class="org-rotulo" style="--ordem:10"><span>PvP</span></div>
+                ${duplos.map((nivel, i) => {
+                    const ultimo = i === duplos.length - 1;
+                    return no(nivel.salas[0], 1 + i, ultimo) + no(nivel.salas[1], 11 + i, ultimo);
+                }).join('')}
+            </div>
+            <div class="org-ponte fecha"></div>
+            ${base.map((nivel, i) => `${i ? '<div class="org-elo"></div>' : ''}<div class="org-unico">${salaHtml(nivel.salas[0])}</div>`).join('')}
         </div>`;
 }
 
