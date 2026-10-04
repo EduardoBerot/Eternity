@@ -56,7 +56,7 @@ const pages_content = {
         <label>Nick</label>
         <input type="text" id="nick" placeholder="Nick" required>
         <label>Data de Nascimento</label>
-        <input type="date" id="data_nascimento" required>
+        <input type="date" id="data_nascimento" ${birthDateRangeAttrs()} required>
         <input type="text" id="recrutador" value="" style="display:none;" readonly>
         <input type="text" id="cargo" value="Membro" style="display:none;" readonly>
         <input type="text" id="data_entrada" style="display:none;" readonly>

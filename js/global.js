@@ -78,6 +78,15 @@ function getDate(defaultDate='', brOrder=false) {
     return date_str
 }
 
+// Limites do campo de nascimento: de 5 a 100 anos atras. O calendario nem
+// oferece data fora disso e o navegador barra o envio; o backend confere de novo.
+function birthDateRangeAttrs() {
+    const f = (n)=>String(n).padStart(2, '0');
+    const hoje = new Date();
+    const dia = `${f(hoje.getMonth()+1)}-${f(hoje.getDate())}`;
+    return `min="${hoje.getFullYear()-100}-${dia}" max="${hoje.getFullYear()-5}-${dia}"`;
+}
+
 function getFormData() {
     const data = {
         nick: document.getElementById('nick')?.value,

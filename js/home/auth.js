@@ -45,6 +45,12 @@ async function send (event){
             );
     
             if (!response.ok) {
+                const corpo = await response.json().catch(() => ({}));
+                // 400 e recusa do backend (data fora da faixa etc.): mostrar o motivo.
+                if (response.status === 400 && corpo?.message) {
+                    alert(corpo.message);
+                    return;
+                }
                 throw new Error("Network response was not ok");
             }
 

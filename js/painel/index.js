@@ -196,7 +196,8 @@ function renderSolicitacoes() {
             loadingId: 'loading_nao_vinculados',
             countId: 'count_nao_vinculados',
             groupCountId: 'count_cadastros_total',
-            filterData: member => member.discord_vinculado !== true,
+            // Os bots do cla nao tem Discord para vincular.
+            filterData: member => member.discord_vinculado !== true && semContasDoCla([member]).length > 0,
             emptyMessage: 'Todos os membros ativos estão vinculados ao Discord.'
         },
     );
@@ -272,7 +273,15 @@ async function checkOutProfileUpdate(event) {
             headers: getAdminRequestHeaders(),
             body: JSON.stringify(body),
         });
-        if (!response.ok) throw new Error(`Falha HTTP ${response.status}`);
+        if (!response.ok) {
+            const corpo = await response.json().catch(() => ({}));
+            // 400: a solicitacao traz data recusada pelo backend (ex.: nascimento no futuro).
+            if (response.status === 400 && corpo?.message) {
+                alert(corpo.message);
+                return;
+            }
+            throw new Error(`Falha HTTP ${response.status}`);
+        }
         alert(`Atualização cadastral ${action === 'aprovar' ? 'aprovada' : 'negada'}!`);
         getRedirectElement()?.click();
     } catch (error) {
@@ -291,7 +300,7 @@ async function renderAdicionar() {
         </div>
         <div class="form-label">
             <label for="data_nascimento">Data de Nascimento</label>
-            <input type="date" value="2002-06-30" id="data_nascimento" required>
+            <input type="date" value="2002-06-30" id="data_nascimento" ${birthDateRangeAttrs()} required>
         </div>
         <div class="form-label">
             <label for="cargo">Cargo</label>        
@@ -517,6 +526,11 @@ async function submitAdicionar(event) {
         );
 
         if (!response.ok) {
+            const corpo = await response.json().catch(() => ({}));
+            if (response.status === 400 && corpo?.message) {
+                alert(corpo.message);
+                return;
+            }
             throw new Error("Network response was not ok");
         }
         alert("Cadastro realizado com sucesso!");
