@@ -80,47 +80,75 @@ function renderInicio() {
     carregarMembrosInicio();
     carregarHall();
     carregarStatusServidor();
-    atualizarMarca();
+    marcaNoLogo = false;
+    atualizarMarca(true);
 }
 
-// A marca do hero vira o logo da navbar com a rolagem: encolhe e desliza ate o
-// lugar dele, e so ai o logo aparece. A distancia de rolagem e a que a marca
-// levaria para subir sozinha ate a altura do logo, entao na vertical ela so
-// acompanha a pagina; o que a animacao faz e o deslize para a esquerda e a
-// escala. Tudo sai de offsetLeft/offsetTop, que ignoram o transform aplicado.
+// A marca do hero vira o logo da navbar com a rolagem. Desde 05/10/2026 a
+// troca e de uma vez: ate LIMIAR_MARCA px a marca fica no hero; passou disso,
+// ela faz a viagem inteira ate o logo numa animacao so, e o logo aparece quando
+// ela chega. Voltando acima do limiar, ela faz o caminho inverso. (Antes a
+// viagem acompanhava a rolagem pixel a pixel.) Tudo sai de
+// offsetLeft/offsetTop, que ignoram o transform aplicado.
 const reduzirMovimento = window.matchMedia('(prefers-reduced-motion: reduce)');
+const LIMIAR_MARCA = 80;
+const DURACAO_MARCA = 550;
 let quadroMarca = null;
+let marcaNoLogo = false;
+let fimMarca = null;
 
-function atualizarMarca() {
+// `instantaneo`: sem animacao (pagina recem-montada, resize).
+function atualizarMarca(instantaneo = false) {
     const marca = document.querySelector('.hero-marca');
     const logo = document.querySelector('.topbar .brand');
     if (!logo) return;
     if (!marca || reduzirMovimento.matches) {
+        marcaNoLogo = false;
         logo.classList.remove('aguardando');
         return;
     }
-    const hero = marca.offsetParent.getBoundingClientRect();
-    const alvo = logo.getBoundingClientRect();
-    const largura = marca.offsetWidth;
-    const altura = marca.offsetHeight;
-    // Centro da marca onde ela estaria sem transform, na tela e com a pagina no topo.
-    const centroX = hero.left + marca.offsetLeft + largura / 2;
-    const centroY = hero.top + marca.offsetTop + altura / 2;
-    const centroYNoTopo = centroY + window.scrollY;
-    const alvoX = alvo.left + alvo.width / 2;
-    const alvoY = alvo.top + alvo.height / 2;
-    const percurso = Math.max(120, centroYNoTopo - alvoY);
-    const p = Math.min(1, window.scrollY / percurso);
+    // A transform que leva a marca ate o logo, com a pagina onde ela esta agora.
+    const ateOLogo = () => {
+        const hero = marca.offsetParent.getBoundingClientRect();
+        const alvo = logo.getBoundingClientRect();
+        const centroX = hero.left + marca.offsetLeft + marca.offsetWidth / 2;
+        const centroY = hero.top + marca.offsetTop + marca.offsetHeight / 2;
+        const dx = alvo.left + alvo.width / 2 - centroX;
+        const dy = alvo.top + alvo.height / 2 - centroY;
+        return `translate(${dx}px, ${dy}px) scale(${alvo.width / marca.offsetWidth})`;
+    };
+    const transicao = `transform ${DURACAO_MARCA}ms cubic-bezier(0.2, 0.8, 0.2, 1)`;
+    marca.style.transition = instantaneo ? 'none' : transicao;
 
-    const escala = 1 + p * (alvo.width / largura - 1);
-    const dx = p * (alvoX - centroX);
-    // Corrige o que a rolagem nao cobre sozinha (percurso minimo em tela baixa).
-    const dy = p * (alvoY - (centroYNoTopo - percurso)) ;
-    marca.style.transform = p > 0 ? `translate(${dx}px, ${dy}px) scale(${escala})` : '';
+    if (window.scrollY > LIMIAR_MARCA) {
+        // Recalcula a cada rolagem: no meio da viagem a pagina ainda anda, e a
+        // marca precisa terminar em cima do logo, nao onde ele estava.
+        marca.style.transform = ateOLogo();
+        if (!marcaNoLogo) {
+            marcaNoLogo = true;
+            clearTimeout(fimMarca);
+            fimMarca = setTimeout(() => {
+                if (!marcaNoLogo) return;
+                marca.classList.add('recolhida');
+                logo.classList.remove('aguardando');
+            }, instantaneo ? 0 : DURACAO_MARCA);
+        }
+        return;
+    }
 
-    const chegou = p >= 1;
-    marca.classList.toggle('recolhida', chegou);
-    logo.classList.toggle('aguardando', !chegou);
+    if (marcaNoLogo) {
+        // Escondida, a marca ficou com a transform da ultima rolagem; parte do
+        // logo de agora, senao a volta comecaria de um ponto qualquer da tela.
+        marcaNoLogo = false;
+        clearTimeout(fimMarca);
+        marca.style.transition = 'none';
+        marca.style.transform = ateOLogo();
+        marca.getBoundingClientRect();
+        marca.style.transition = instantaneo ? 'none' : transicao;
+    }
+    marca.classList.remove('recolhida');
+    logo.classList.add('aguardando');
+    marca.style.transform = '';
 }
 
 window.addEventListener('scroll', () => {
@@ -130,7 +158,7 @@ window.addEventListener('scroll', () => {
         atualizarMarca();
     });
 }, { passive: true });
-window.addEventListener('resize', atualizarMarca);
+window.addEventListener('resize', () => atualizarMarca(true));
 
 function rodapeSite() {
     return `
