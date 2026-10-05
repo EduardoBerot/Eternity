@@ -1,0 +1,199 @@
+/* Aba Cidade do painel (05/10/2026): mapa com as casas e os pedidos de trust. */
+
+.cidade { padding: 18px clamp(12px, 3vw, 32px) 32px; }
+
+.cidade-topo {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px 24px;
+    margin-bottom: 14px;
+
+    h1 { margin: 0; font-size: clamp(1.6rem, 3vw, 2.2rem); }
+}
+
+.cidade-dica { margin: 4px 0 0; color: var(--nevoa); font-family: var(--sans); font-size: 0.9rem; }
+
+.cidade-legenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    color: var(--nevoa);
+
+    li { display: flex; align-items: center; gap: 6px; }
+    span { width: 12px; height: 12px; border-radius: 50%; background: var(--cor); border: 2px solid #04080f; }
+    span.pendente { background: transparent; border: 2px dashed var(--aqua); }
+}
+
+.cidade-corpo {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 16px;
+    height: calc(100dvh - var(--nav) - 150px);
+    min-height: 420px;
+}
+
+.cidade-mapa {
+    border: 1px solid var(--linha);
+    border-radius: 8px;
+    background: #04080f;
+    overflow: hidden;
+}
+
+/* 1 pixel por bloco: o zoom tem de mostrar blocos, nao borrao. */
+.cidade-mapa-img { image-rendering: pixelated; }
+
+.cidade-lado {
+    overflow-y: auto;
+    border: 1px solid var(--linha);
+    border-radius: 8px;
+    background: #0b1624;
+    padding: 14px;
+
+    h2 { margin: 0 0 10px; font-size: 1rem; }
+}
+
+.cidade-pendencias {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+
+    button {
+        width: 100%;
+        text-align: left;
+        padding: 10px 12px;
+        border-radius: 6px;
+        border: 1px solid rgba(46, 230, 240, 0.25);
+        background: rgba(46, 230, 240, 0.05);
+        color: var(--gelo);
+        cursor: pointer;
+        font-family: var(--sans);
+    }
+    button:hover { border-color: var(--aqua); }
+    strong, span { display: block; }
+    span { margin-top: 3px; font-size: 0.8rem; color: var(--nevoa); }
+}
+
+.cidade .vazio, .cidade-modal .vazio { color: var(--nevoa); font-family: var(--sans); font-size: 0.88rem; }
+
+/* Popup da casa / do pedido. */
+.cidade-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    background: rgba(4, 8, 15, 0.72);
+}
+
+.cidade-modal[hidden] { display: none; }
+
+.cidade-modal-caixa {
+    position: relative;
+    width: min(560px, 100%);
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    padding: 22px 22px 18px;
+    border-radius: 10px;
+    border: 1px solid rgba(46, 230, 240, 0.3);
+    background: #0b1624;
+    font-family: var(--sans);
+
+    h2 { margin: 0 32px 4px 0; font-size: 1.3rem; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    h3 { margin: 18px 0 8px; font-size: 0.95rem; color: var(--aqua); }
+    ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+}
+
+.cidade-fechar {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    border: 0;
+    background: none;
+    color: var(--nevoa);
+    font-size: 1.6rem;
+    cursor: pointer;
+}
+
+.cidade-coord { margin: 0; color: var(--nevoa); font-size: 0.85rem; }
+
+.cidade-estado {
+    font-size: 0.75rem;
+    padding: 2px 10px;
+    border-radius: 999px;
+    color: var(--cor);
+    border: 1px solid var(--cor);
+}
+
+.cidade-moradores li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    img { image-rendering: pixelated; border-radius: 3px; }
+    div { flex: 1; min-width: 0; }
+    small { display: block; color: var(--nevoa); }
+}
+
+.cidade-pedido {
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--linha);
+    background: rgba(232, 244, 248, 0.03);
+
+    small { display: block; color: var(--nevoa); margin-top: 3px; }
+    p { margin: 6px 0 0; font-size: 0.88rem; }
+    .motivo { color: #ff9aa4; }
+    .selo { font-size: 0.72rem; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--linha); color: var(--nevoa); }
+}
+
+.cidade-pedido.status-pendente { border-color: rgba(46, 230, 240, 0.45); }
+.cidade-pedido.status-pendente .selo { color: var(--aqua); border-color: var(--aqua); }
+
+.cidade-acoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+
+.cidade-form, .cidade-recusa, .cidade-renomear {
+    display: grid;
+    gap: 10px;
+    margin-top: 12px;
+
+    label { display: grid; gap: 4px; font-size: 0.88rem; color: var(--nevoa); }
+    input, textarea {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: 1px solid var(--linha);
+        background: #04080f;
+        color: var(--gelo);
+        font: inherit;
+    }
+    .cidade-check { display: flex; align-items: center; gap: 8px; }
+    .cidade-check input { width: auto; }
+}
+
+.cidade-renomear { grid-template-columns: 1fr auto; }
+
+/* O display: grid acima venceria o [hidden] do formulario de recusa. */
+.cidade-recusa[hidden] { display: none; }
+
+.cidade-aviso { margin: 0; font-size: 0.8rem; color: var(--nevoa); }
+
+.cidade-novo { margin-top: 12px; }
+.cidade-novo summary { cursor: pointer; color: var(--aqua); font-size: 0.9rem; }
+
+.cidade-apagar { margin-top: 16px; }
+
+@media (max-width: 900px) {
+    .cidade-corpo { grid-template-columns: 1fr; height: auto; }
+    .cidade-mapa { height: 70dvh; }
+    .cidade-lado { max-height: none; }
+}

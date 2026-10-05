@@ -8,6 +8,7 @@ const pages_content = {
     historico: renderHistorico,
     recrutamento: renderRecrutamento,
     analises: renderAnalises,
+    cidade: renderCidade,
 }
 
 function render(event) {
