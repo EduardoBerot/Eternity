@@ -1,19 +1,65 @@
 /* Aba Cidade do painel (05/10/2026): mapa com as casas e os pedidos de trust. */
 
-.cidade { padding: 18px clamp(12px, 3vw, 32px) 32px; }
+/* A aba cabe na janela, sem rolagem: o mesmo travamento da aba Analises. */
+body.painel--cidade { overflow: hidden; }
+body.painel--cidade main { margin: 0; }
+
+.painel.painel--cidade .content {
+    max-width: none;
+    height: calc(100dvh - var(--nav));
+    padding: 10px clamp(10px, 1.4vw, 20px) 12px;
+    overflow: hidden;
+}
+
+.cidade {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
+    min-height: 0;
+}
 
 .cidade-topo {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 12px 24px;
-    margin-bottom: 14px;
+    align-items: center;
+    gap: 8px 22px;
+    flex-shrink: 0;
 
-    h1 { margin: 0; font-size: clamp(1.6rem, 3vw, 2.2rem); }
+    h1 { margin: 0; font-size: clamp(1.3rem, 2.4vw, 1.8rem); line-height: 1.1; }
 }
 
-.cidade-dica { margin: 4px 0 0; color: var(--nevoa); font-family: var(--sans); font-size: 0.9rem; }
+.cidade-titulo { flex: 1 1 320px; min-width: 0; }
+
+.cidade-dica { margin: 2px 0 0; color: var(--nevoa); font-family: var(--sans); font-size: 0.82rem; }
+
+/* As pendencias de trust como selo de status; o clique abre a lista. */
+.cidade-status {
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--linha);
+    background: transparent;
+    color: var(--nevoa);
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    white-space: nowrap;
+
+    i { margin-right: 6px; }
+}
+
+.cidade-status.tem {
+    border-color: var(--aqua);
+    color: var(--aqua);
+    background: rgba(46, 230, 240, 0.08);
+    cursor: pointer;
+    animation: cidadePulso 2.4s ease-in-out infinite;
+}
+
+.cidade-status.tem:hover { background: rgba(46, 230, 240, 0.16); }
+
+@keyframes cidadePulso {
+    50% { box-shadow: 0 0 0 4px rgba(46, 230, 240, 0.12); }
+}
 
 .cidade-legenda {
     display: flex;
@@ -31,15 +77,9 @@
     span.pendente { background: transparent; border: 2px dashed var(--aqua); }
 }
 
-.cidade-corpo {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 16px;
-    height: calc(100dvh - var(--nav) - 150px);
-    min-height: 420px;
-}
-
 .cidade-mapa {
+    flex: 1;
+    min-height: 0;
     border: 1px solid var(--linha);
     border-radius: 8px;
     background: #04080f;
@@ -48,16 +88,6 @@
 
 /* 1 pixel por bloco: o zoom tem de mostrar blocos, nao borrao. */
 .cidade-mapa-img { image-rendering: pixelated; }
-
-.cidade-lado {
-    overflow-y: auto;
-    border: 1px solid var(--linha);
-    border-radius: 8px;
-    background: #0b1624;
-    padding: 14px;
-
-    h2 { margin: 0 0 10px; font-size: 1rem; }
-}
 
 .cidade-pendencias {
     margin: 0;
@@ -192,8 +222,11 @@
 
 .cidade-apagar { margin-top: 16px; }
 
+/* No celular o topo encolhe para sobrar altura ao mapa. */
 @media (max-width: 900px) {
-    .cidade-corpo { grid-template-columns: 1fr; height: auto; }
-    .cidade-mapa { height: 70dvh; }
-    .cidade-lado { max-height: none; }
+    .cidade-topo { gap: 6px 12px; }
+    .cidade-titulo { flex-basis: 100%; }
+    .cidade-dica { font-size: 0.76rem; }
+    .cidade-legenda { font-size: 0.74rem; gap: 4px 10px; }
+    .cidade-status { padding: 5px 12px; font-size: 0.78rem; }
 }

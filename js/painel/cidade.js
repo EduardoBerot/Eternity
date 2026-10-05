@@ -33,12 +33,22 @@ async function cidadeApi(caminho, opcoes = {}) {
     return lerResposta(await fetch(`${URL_CIDADE}${caminho}`, { ...opcoes, headers: getAdminRequestHeaders() }));
 }
 
-async function renderCidade() {
+// A aba cabe na janela, sem rolagem (como a Analises): o mapa ocupa o que
+// sobra abaixo do topo e sempre enquadra a cidade inteira, inclusive quando a
+// janela muda de tamanho. render() chama cidadeSairDaAba() ao trocar de aba.
+function cidadeSairDaAba() {
+    document.body.classList.remove('painel--cidade');
+    if (cidade.observador) { cidade.observador.disconnect(); cidade.observador = null; }
     if (cidade.mapa) { cidade.mapa.remove(); cidade.mapa = null; }
+}
+
+async function renderCidade() {
+    cidadeSairDaAba();
+    document.body.classList.add('painel--cidade');
     APP.innerHTML = `
         <section class="cidade">
             <header class="cidade-topo">
-                <div>
+                <div class="cidade-titulo">
                     <h1>Cidade</h1>
                     <p class="cidade-dica" id="cidade_dica">Carregando o mapa...</p>
                 </div>
@@ -46,14 +56,9 @@ async function renderCidade() {
                     ${Object.values(CIDADE_ESTADOS).map(e => `<li><span style="--cor:${e.cor}"></span>${e.rotulo}</li>`).join('')}
                     <li><span class="pendente"></span>Pedido pendente</li>
                 </ul>
+                <button type="button" id="cidade_status" class="cidade-status" onclick="abrirPendencias()" disabled>...</button>
             </header>
-            <div class="cidade-corpo">
-                <div id="cidade_mapa" class="cidade-mapa"></div>
-                <aside class="cidade-lado">
-                    <h2>Pendências de trust <span id="cidade_qtd"></span></h2>
-                    <ul id="cidade_pendencias" class="cidade-pendencias"></ul>
-                </aside>
-            </div>
+            <div id="cidade_mapa" class="cidade-mapa"></div>
         </section>
         <div id="cidade_modal" class="cidade-modal" hidden>
             <div class="cidade-modal-caixa" role="dialog" aria-modal="true">
@@ -96,12 +101,19 @@ function montarMapaCidade() {
     const { largura, altura } = cidade.dados.mapa;
     const limites = [[-altura, 0], [0, largura]];
     const mapa = L.map('cidade_mapa', {
-        crs: L.CRS.Simple, minZoom: -2, maxZoom: 3, zoomSnap: 0.25, attributionControl: false,
+        crs: L.CRS.Simple, minZoom: -2, maxZoom: 3, zoomSnap: 0, zoomDelta: 0.5, wheelPxPerZoomLevel: 120, attributionControl: false,
         maxBounds: L.latLngBounds(limites).pad(0.15),
     });
     L.imageOverlay(cidade.imagem, limites, { className: 'cidade-mapa-img' }).addTo(mapa);
     mapa.fitBounds(limites);
     cidade.mapa = mapa;
+    // A caixa do mapa muda com a janela (e com a fonte carregando no topo):
+    // reenquadra a cidade inteira a cada mudanca.
+    cidade.observador = new ResizeObserver(() => {
+        mapa.invalidateSize();
+        mapa.fitBounds(limites);
+    });
+    cidade.observador.observe(document.getElementById('cidade_mapa'));
     cidade.camada = L.layerGroup().addTo(mapa);
 
     const pedir = cidade.dados.permissoes.pedir;
@@ -123,16 +135,30 @@ function desenharCasas() {
         marca.on('click', () => abrirCasa(casa.id));
         marca.addTo(cidade.camada);
     }
-    const pendentes = cidade.dados.casas.flatMap(casa => casa.pedidos
+    // As pendencias viram um selo de status no topo; o clique abre a lista.
+    const total = pendenciasCidade().length;
+    const status = document.getElementById('cidade_status');
+    status.disabled = !total;
+    status.classList.toggle('tem', total > 0);
+    status.innerHTML = total
+        ? `<i class="fa-solid fa-key" aria-hidden="true"></i> ${total} ${total === 1 ? 'pedido de trust pendente' : 'pedidos de trust pendentes'}`
+        : '<i class="fa-solid fa-check" aria-hidden="true"></i> Nenhum trust pendente';
+}
+
+function pendenciasCidade() {
+    return cidade.dados.casas.flatMap(casa => casa.pedidos
         .filter(p => p.status === 'Pendente').map(p => ({ casa, p })));
-    document.getElementById('cidade_qtd').textContent = pendentes.length ? `(${pendentes.length})` : '';
-    document.getElementById('cidade_pendencias').innerHTML = pendentes.length
-        ? pendentes.map(({ casa, p }) => `
+}
+
+function abrirPendencias() {
+    const pendentes = pendenciasCidade();
+    abrirModal(`
+        <h2>Pedidos de trust pendentes</h2>
+        <ul class="cidade-pendencias">${pendentes.map(({ casa, p }) => `
             <li><button type="button" onclick="irParaCasa(${casa.id})">
                 <strong>${p.tipo === 'retirar' ? 'Retirar' : 'Conceder'} trust · ${cEsc(p.nick)}</strong>
                 <span>${cEsc(casa.nome || `X ${casa.x}, Z ${casa.z}`)} · pedido por ${cEsc(p.pedido_por)} em ${cData(p.createdAt)}</span>
-            </button></li>`).join('')
-        : '<li class="vazio">Nenhum pedido pendente.</li>';
+            </button></li>`).join('') || '<li class="vazio">Nenhum pedido pendente.</li>'}</ul>`);
 }
 
 function irParaCasa(id) {

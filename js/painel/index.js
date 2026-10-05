@@ -12,9 +12,10 @@ const pages_content = {
 }
 
 function render(event) {
-    // A aba Analises trava a rolagem da pagina para caber na janela; qualquer
-    // outra aba devolve.
+    // As abas Analises e Cidade travam a rolagem da pagina para caber na
+    // janela; qualquer outra aba devolve.
     anSairDaAba();
+    cidadeSairDaAba();
     APP.innerHTML = '';
     const id = event.target.id;
     const fn = pages_content[id];
