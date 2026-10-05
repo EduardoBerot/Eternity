@@ -85,17 +85,30 @@ function renderInicio() {
 }
 
 // A marca do hero vira o logo da navbar com a rolagem. Desde 05/10/2026 a
-// troca e de uma vez: ate LIMIAR_MARCA px a marca fica no hero; passou disso,
-// ela faz a viagem inteira ate o logo numa animacao so, e o logo aparece quando
-// ela chega. Voltando acima do limiar, ela faz o caminho inverso. (Antes a
-// viagem acompanhava a rolagem pixel a pixel.) Tudo sai de
+// troca e de uma vez: enquanto a marca nao encosta na navbar ela fica no hero;
+// no limiar, ela faz a viagem inteira ate o logo numa animacao so, e o logo
+// aparece quando ela chega. Voltando acima do limiar, ela faz o caminho
+// inverso. (Antes a viagem acompanhava a rolagem pixel a pixel.) Tudo sai de
 // offsetLeft/offsetTop, que ignoram o transform aplicado.
+//
+// O limiar e a rolagem que leva o topo da marca ate FOLGA_MARCA px abaixo da
+// navbar. Um numero fixo (80 px) disparava tarde: a marca ja invadia a navbar.
 const reduzirMovimento = window.matchMedia('(prefers-reduced-motion: reduce)');
-const LIMIAR_MARCA = 80;
+const FOLGA_MARCA = 12;
 const DURACAO_MARCA = 550;
 let quadroMarca = null;
 let marcaNoLogo = false;
 let fimMarca = null;
+
+// Quanto as letras passam acima da caixa da marca. Com line-height 0.9 a Vermin
+// desenha o topo (o "Y", sobretudo) acima do elemento, e era essa parte que
+// invadia a navbar antes do limiar. Medido nos pixels da tela em 05/10/2026:
+// 9 px com a fonte em 168 px e 4 px em 67 px, ~5,5% do tamanho da fonte. (O
+// canvas.measureText da a metade disso para a Vermin; por isso a proporcao.)
+const SOBRA_LETRAS = 0.06;
+function sobraDasLetras(marca) {
+    return parseFloat(getComputedStyle(marca).fontSize) * SOBRA_LETRAS;
+}
 
 // `instantaneo`: sem animacao (pagina recem-montada, resize).
 function atualizarMarca(instantaneo = false) {
@@ -120,7 +133,12 @@ function atualizarMarca(instantaneo = false) {
     const transicao = `transform ${DURACAO_MARCA}ms cubic-bezier(0.2, 0.8, 0.2, 1)`;
     marca.style.transition = instantaneo ? 'none' : transicao;
 
-    if (window.scrollY > LIMIAR_MARCA) {
+    const topoNoTopo = marca.offsetParent.getBoundingClientRect().top + marca.offsetTop + window.scrollY
+        - sobraDasLetras(marca);
+    const fundoNavbar = document.querySelector('.topbar').getBoundingClientRect().bottom;
+    const limiar = Math.max(0, topoNoTopo - fundoNavbar - FOLGA_MARCA);
+
+    if (window.scrollY > limiar) {
         // Recalcula a cada rolagem: no meio da viagem a pagina ainda anda, e a
         // marca precisa terminar em cima do logo, nao onde ele estava.
         marca.style.transform = ateOLogo();
