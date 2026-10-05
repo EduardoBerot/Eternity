@@ -19,29 +19,25 @@ body.painel--cidade main { margin: 0; }
     min-height: 0;
 }
 
-.cidade-topo {
+/* Rodape do mapa: legenda pequena a esquerda, status das pendencias a direita. */
+.cidade-rodape {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px 22px;
+    justify-content: space-between;
+    gap: 6px 16px;
     flex-shrink: 0;
-
-    h1 { margin: 0; font-size: clamp(1.3rem, 2.4vw, 1.8rem); line-height: 1.1; }
 }
-
-.cidade-titulo { flex: 1 1 320px; min-width: 0; }
-
-.cidade-dica { margin: 2px 0 0; color: var(--nevoa); font-family: var(--sans); font-size: 0.82rem; }
 
 /* As pendencias de trust como selo de status; o clique abre a lista. */
 .cidade-status {
-    padding: 7px 14px;
+    padding: 4px 12px;
     border-radius: 999px;
     border: 1px solid var(--linha);
     background: transparent;
     color: var(--nevoa);
     font-family: var(--sans);
-    font-size: 0.85rem;
+    font-size: 0.76rem;
     white-space: nowrap;
 
     i { margin-right: 6px; }
@@ -64,16 +60,16 @@ body.painel--cidade main { margin: 0; }
 .cidade-legenda {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px 16px;
+    gap: 4px 12px;
     margin: 0;
     padding: 0;
     list-style: none;
     font-family: var(--sans);
-    font-size: 0.82rem;
+    font-size: 0.72rem;
     color: var(--nevoa);
 
-    li { display: flex; align-items: center; gap: 6px; }
-    span { width: 12px; height: 12px; border-radius: 50%; background: var(--cor); border: 2px solid #04080f; }
+    li { display: flex; align-items: center; gap: 5px; }
+    span { width: 9px; height: 9px; border-radius: 50%; background: var(--cor); border: 1.5px solid #04080f; }
     span.pendente { background: transparent; border: 2px dashed var(--aqua); }
 }
 
@@ -222,11 +218,5 @@ body.painel--cidade main { margin: 0; }
 
 .cidade-apagar { margin-top: 16px; }
 
-/* No celular o topo encolhe para sobrar altura ao mapa. */
-@media (max-width: 900px) {
-    .cidade-topo { gap: 6px 12px; }
-    .cidade-titulo { flex-basis: 100%; }
-    .cidade-dica { font-size: 0.76rem; }
-    .cidade-legenda { font-size: 0.74rem; gap: 4px 10px; }
-    .cidade-status { padding: 5px 12px; font-size: 0.78rem; }
-}
+/* Hover da casa: o nick de quem mora la. */
+.leaflet-tooltip small { color: #6b8193; }

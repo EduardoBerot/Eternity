@@ -47,18 +47,14 @@ async function renderCidade() {
     document.body.classList.add('painel--cidade');
     APP.innerHTML = `
         <section class="cidade">
-            <header class="cidade-topo">
-                <div class="cidade-titulo">
-                    <h1>Cidade</h1>
-                    <p class="cidade-dica" id="cidade_dica">Carregando o mapa...</p>
-                </div>
+            <div id="cidade_mapa" class="cidade-mapa"></div>
+            <footer class="cidade-rodape">
                 <ul class="cidade-legenda">
                     ${Object.values(CIDADE_ESTADOS).map(e => `<li><span style="--cor:${e.cor}"></span>${e.rotulo}</li>`).join('')}
                     <li><span class="pendente"></span>Pedido pendente</li>
                 </ul>
-                <button type="button" id="cidade_status" class="cidade-status" onclick="abrirPendencias()" disabled>...</button>
-            </header>
-            <div id="cidade_mapa" class="cidade-mapa"></div>
+                <button type="button" id="cidade_status" class="cidade-status" onclick="abrirPendencias()" disabled>Carregando o mapa...</button>
+            </footer>
         </section>
         <div id="cidade_modal" class="cidade-modal" hidden>
             <div class="cidade-modal-caixa" role="dialog" aria-modal="true">
@@ -83,7 +79,7 @@ async function renderCidade() {
         desenharCasas();
     } catch (error) {
         console.error('Falha ao carregar a cidade:', error);
-        document.getElementById('cidade_dica').textContent = 'Não foi possível carregar o mapa da cidade.';
+        document.getElementById('cidade_status').textContent = 'Não foi possível carregar o mapa da cidade.';
     }
 }
 
@@ -116,11 +112,8 @@ function montarMapaCidade() {
     cidade.observador.observe(document.getElementById('cidade_mapa'));
     cidade.camada = L.layerGroup().addTo(mapa);
 
-    const pedir = cidade.dados.permissoes.pedir;
-    document.getElementById('cidade_dica').textContent = pedir
-        ? 'Clique numa casa para ver os detalhes. Botão direito (ou toque longo) num lugar vazio marca uma casa nova e pede o trust.'
-        : 'Clique numa casa para ver os detalhes.';
-    if (pedir) mapa.on('contextmenu', e => abrirNovaCasa(latLngParaBloco(e.latlng)));
+    // Botao direito (toque longo no celular) num lugar vazio marca casa nova.
+    if (cidade.dados.permissoes.pedir) mapa.on('contextmenu', e => abrirNovaCasa(latLngParaBloco(e.latlng)));
 }
 
 function desenharCasas() {
@@ -131,11 +124,11 @@ function desenharCasas() {
             radius: 7, weight: casa.pendentes ? 3 : 2, color: casa.pendentes ? '#2ee6f0' : '#04080f',
             dashArray: casa.pendentes ? '3 3' : null, fillColor: estado.cor, fillOpacity: 0.95,
         });
-        marca.bindTooltip(cEsc(casa.nome || `X ${casa.x}, Z ${casa.z}`), { direction: 'top', offset: [0, -6] });
+        marca.bindTooltip(rotuloDaCasa(casa), { direction: 'top', offset: [0, -6] });
         marca.on('click', () => abrirCasa(casa.id));
         marca.addTo(cidade.camada);
     }
-    // As pendencias viram um selo de status no topo; o clique abre a lista.
+    // As pendencias viram um selo de status no rodape; o clique abre a lista.
     const total = pendenciasCidade().length;
     const status = document.getElementById('cidade_status');
     status.disabled = !total;
@@ -143,6 +136,13 @@ function desenharCasas() {
     status.innerHTML = total
         ? `<i class="fa-solid fa-key" aria-hidden="true"></i> ${total} ${total === 1 ? 'pedido de trust pendente' : 'pedidos de trust pendentes'}`
         : '<i class="fa-solid fa-check" aria-hidden="true"></i> Nenhum trust pendente';
+}
+
+// O hover mostra quem mora la. Sem morador, quem esta pedindo; senao, "Livre".
+function rotuloDaCasa(casa) {
+    if (casa.moradores.length) return casa.moradores.map(m => cEsc(m.nick)).join(', ');
+    const pedindo = casa.pedidos.filter(p => p.status === 'Pendente' && p.tipo === 'conceder').map(p => cEsc(p.nick));
+    return pedindo.length ? `${pedindo.join(', ')} <small>(pendente)</small>` : 'Livre';
 }
 
 function pendenciasCidade() {
