@@ -12,8 +12,8 @@
 const URL_CIDADE_PUBLICA = `${URL_BASE}/api/cidade`;
 
 const CASA_ESTADOS = {
-    aberta: { rotulo: 'Aberta para ocupação', cor: '#b98cff' },
-    ocupada: { rotulo: 'Ocupada', cor: '#3ddc84' },
+    aberta: { rotulo: 'Aberta para ocupação', cor: '#3ddc84' },
+    ocupada: { rotulo: 'Ocupada', cor: '#2ee6f0' },
     fechada: { rotulo: 'Indisponível', cor: '#9fb4c4' },
 };
 

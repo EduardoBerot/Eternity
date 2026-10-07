@@ -12,8 +12,8 @@ const URL_CIDADE = `${URL_BASE}/api/cidade`;
 
 const CIDADE_ESTADOS = {
     livre: { rotulo: 'Vazia', cor: '#9fb4c4' },
-    aberta: { rotulo: 'Aberta para ocupação', cor: '#b98cff' },
-    ocupada: { rotulo: 'Ocupada', cor: '#3ddc84' },
+    aberta: { rotulo: 'Aberta para ocupação', cor: '#3ddc84' },
+    ocupada: { rotulo: 'Ocupada', cor: '#2ee6f0' },
     inativa: { rotulo: 'Morador inativo', cor: '#ffd23f' },
     liberar: { rotulo: 'Retirar trust', cor: '#ff4d5e' },
 };
