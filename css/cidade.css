@@ -1,4 +1,5 @@
-/* Aba Cidade do painel (05/10/2026): mapa com as casas e os pedidos de trust. */
+/* Cidade (05/10/2026): o mapa com as casas e os pedidos de trust, na aba do
+   painel e, desde 06/10/2026, tambem na pagina publica (fim do arquivo). */
 
 /* A aba cabe na janela, sem rolagem: o mesmo travamento da aba Analises. */
 body.painel--cidade { overflow: hidden; }
@@ -218,5 +219,95 @@ body.painel--cidade main { margin: 0; }
 
 .cidade-apagar { margin-top: 16px; }
 
+/* Morador que saiu do cla: o trust esta pendente de retirada. */
+.cidade-moradores li.a-retirar strong { color: #ff4d5e; }
+
 /* Hover da casa: o nick de quem mora la. */
 .leaflet-tooltip small { color: #6b8193; }
+
+/* ---------- Pagina publica (#cidade do site) ---------- */
+
+.cidade-publica {
+    display: grid;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.cidade-dica { margin: 0; color: var(--nevoa); font-family: var(--sans); font-size: 0.92rem; }
+
+/* O Leaflet empilha painel e controles ate z-index 1000; isolado aqui, o mapa
+   nao passa por cima da navbar fixa ao rolar. O card da casa fica por cima do
+   mapa, dentro da mesma caixa. */
+.cidade-mapa--publica {
+    position: relative;
+    z-index: 0;
+    isolation: isolate;
+    height: min(72vh, 680px);
+    min-height: 360px;
+}
+
+.cidade-mapa-leaflet { position: absolute; inset: 0; background: #04080f; }
+
+.cidade-carregando {
+    margin: 0;
+    display: grid;
+    place-items: center;
+    height: 100%;
+    color: var(--nevoa);
+    font-family: var(--sans);
+}
+
+/* Card ao lado da casa (posicionado pelo JS). */
+.cidade-card {
+    position: absolute;
+    z-index: 1100;
+    width: 280px;
+    max-height: calc(100% - 16px);
+    overflow-y: auto;
+    padding: 16px 16px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(46, 230, 240, 0.3);
+    background: rgba(11, 22, 36, 0.96);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    font-family: var(--sans);
+    animation: cidadeCard 0.25s ease;
+
+    h3 { margin: 0 28px 6px 0; font-size: 1.1rem; }
+    .cidade-estado { display: inline-block; margin-bottom: 6px; }
+    .cidade-coord { margin-bottom: 8px; }
+    ul { margin: 0 0 10px; padding: 0; list-style: none; display: grid; gap: 6px; }
+    .botao { width: 100%; justify-content: center; }
+    .cidade-fechar { top: 6px; right: 8px; font-size: 1.4rem; }
+    .cidade-form { margin-top: 4px; }
+    .cidade-aviso { margin: 0 0 8px; }
+}
+
+.cidade-card[hidden] { display: none; }
+
+@keyframes cidadeCard {
+    from { opacity: 0; transform: translateY(6px); }
+}
+
+.cidade-erro { margin: 0; color: #ffb3ba; font-size: 0.85rem; }
+.cidade-erro[hidden] { display: none; }
+
+.cidade-enviado {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(88, 101, 242, 0.6);
+    background: rgba(88, 101, 242, 0.12);
+
+    i { color: #8c96ff; font-size: 1.4rem; margin-top: 2px; }
+    p { margin: 0; font-size: 0.88rem; }
+}
+
+/* No celular o card vira uma faixa no pe do mapa. */
+@media (max-width: 640px) {
+    .cidade-card { left: 8px; right: 8px; bottom: 8px; top: auto; width: auto; max-height: 70%; }
+}
+
+.cidade-galeria-titulo { margin: 40px 0 0; }
+.site .page-cidade .cidade-galeria-titulo + #gallery { margin-top: 16px; }

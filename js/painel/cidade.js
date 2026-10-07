@@ -1,23 +1,24 @@
-// Aba Cidade (05/10/2026): o mapa da cidade da ETY com as casas e os pedidos de
-// trust. O supervisor marca a casa com o botao direito (toque longo no
-// celular) e pede o trust de um membro; um lider da o /trust no jogo e aprova
-// aqui. A retirada, quando o morador sai do cla e os itens vao ao banco de
-// itens, segue o mesmo caminho.
+// Aba Cidade (05/10/2026; refeita em 06/10/2026): o mapa da cidade da ETY com
+// as casas. A staff (Supervisor ou acima) marca a casa com o botao direito
+// (toque longo no celular) e a abre para ocupacao. Os membros pedem a casa no
+// site publico, logados com o Discord, e um lider da o /trust no jogo e aprova
+// aqui. Quando o morador sai do cla, a casa fica pendente de retirar o trust:
+// o lider tira no jogo, leva os itens ao banco de itens e marca aqui.
 //
-// O mapa (1 pixel por bloco) vem do backend so para staff logada, e por isso
-// e baixado com o token e virado em blob. Leaflet com CRS.Simple: lat = -linha,
-// lng = coluna, e o bloco do mundo e (x0 + coluna, z0 + linha).
+// Leaflet com CRS.Simple: lat = -linha, lng = coluna, e o bloco do mundo e
+// (x0 + coluna, z0 + linha). O mapa (1 pixel por bloco) e publico.
 
 const URL_CIDADE = `${URL_BASE}/api/cidade`;
 
 const CIDADE_ESTADOS = {
-    livre: { rotulo: 'Livre', cor: '#9fb4c4' },
+    livre: { rotulo: 'Vazia', cor: '#9fb4c4' },
+    aberta: { rotulo: 'Aberta para ocupação', cor: '#b98cff' },
     ocupada: { rotulo: 'Ocupada', cor: '#3ddc84' },
     inativa: { rotulo: 'Morador inativo', cor: '#ffd23f' },
-    liberar: { rotulo: 'A liberar', cor: '#ff4d5e' },
+    liberar: { rotulo: 'Retirar trust', cor: '#ff4d5e' },
 };
 
-const cidade = { mapa: null, camada: null, imagem: null, dados: null, membros: null };
+const cidade = { mapa: null, camada: null, dados: null };
 
 function cEsc(texto) {
     return String(texto ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -65,16 +66,7 @@ async function renderCidade() {
     document.getElementById('cidade_modal').addEventListener('click', e => { if (e.target.id === 'cidade_modal') cidadeFechar(); });
 
     try {
-        const [dados, blob] = await Promise.all([
-            cidadeApi(''),
-            fetch(`${URL_CIDADE}/mapa`, { headers: getAdminRequestHeaders() }).then(r => {
-                if (!r.ok) throw new Error(`mapa HTTP ${r.status}`);
-                return r.blob();
-            }),
-        ]);
-        cidade.dados = dados;
-        if (cidade.imagem) URL.revokeObjectURL(cidade.imagem);
-        cidade.imagem = URL.createObjectURL(blob);
+        cidade.dados = await cidadeApi('');
         montarMapaCidade();
         desenharCasas();
     } catch (error) {
@@ -100,7 +92,7 @@ function montarMapaCidade() {
         crs: L.CRS.Simple, minZoom: -2, maxZoom: 3, zoomSnap: 0, zoomDelta: 0.5, wheelPxPerZoomLevel: 120, attributionControl: false,
         maxBounds: L.latLngBounds(limites).pad(0.15),
     });
-    L.imageOverlay(cidade.imagem, limites, { className: 'cidade-mapa-img' }).addTo(mapa);
+    L.imageOverlay(`${URL_CIDADE}/mapa`, limites, { className: 'cidade-mapa-img' }).addTo(mapa);
     mapa.fitBounds(limites);
     cidade.mapa = mapa;
     // A caixa do mapa muda com a janela (e com a fonte carregando no topo):
@@ -113,7 +105,7 @@ function montarMapaCidade() {
     cidade.camada = L.layerGroup().addTo(mapa);
 
     // Botao direito (toque longo no celular) num lugar vazio marca casa nova.
-    if (cidade.dados.permissoes.pedir) mapa.on('contextmenu', e => abrirNovaCasa(latLngParaBloco(e.latlng)));
+    if (cidade.dados.permissoes.gerir) mapa.on('contextmenu', e => abrirNovaCasa(latLngParaBloco(e.latlng)));
 }
 
 function desenharCasas() {
@@ -134,31 +126,43 @@ function desenharCasas() {
     status.disabled = !total;
     status.classList.toggle('tem', total > 0);
     status.innerHTML = total
-        ? `<i class="fa-solid fa-key" aria-hidden="true"></i> ${total} ${total === 1 ? 'pedido de trust pendente' : 'pedidos de trust pendentes'}`
+        ? `<i class="fa-solid fa-key" aria-hidden="true"></i> ${total} ${total === 1 ? 'pendência de trust' : 'pendências de trust'}`
         : '<i class="fa-solid fa-check" aria-hidden="true"></i> Nenhum trust pendente';
 }
 
-// O hover mostra quem mora la. Sem morador, quem esta pedindo; senao, "Livre".
+// O hover mostra quem mora la. Sem morador, quem esta pedindo; senao, o estado.
 function rotuloDaCasa(casa) {
     if (casa.moradores.length) return casa.moradores.map(m => cEsc(m.nick)).join(', ');
     const pedindo = casa.pedidos.filter(p => p.status === 'Pendente' && p.tipo === 'conceder').map(p => cEsc(p.nick));
-    return pedindo.length ? `${pedindo.join(', ')} <small>(pendente)</small>` : 'Livre';
+    if (pedindo.length) return `${pedindo.join(', ')} <small>(pendente)</small>`;
+    return (CIDADE_ESTADOS[casa.estado] || CIDADE_ESTADOS.livre).rotulo;
 }
 
+// Pedidos a decidir e moradores que sairam do cla (trust a retirar).
 function pendenciasCidade() {
-    return cidade.dados.casas.flatMap(casa => casa.pedidos
-        .filter(p => p.status === 'Pendente').map(p => ({ casa, p })));
+    return cidade.dados.casas.flatMap(casa => [
+        ...casa.pedidos.filter(p => p.status === 'Pendente').map(p => ({
+            casa,
+            titulo: `${p.tipo === 'retirar' ? 'Retirar' : 'Conceder'} trust · ${p.nick}`,
+            detalhe: `pedido em ${cData(p.createdAt)}`,
+        })),
+        ...casa.moradores.filter(m => m.retirar).map(m => ({
+            casa,
+            titulo: `Retirar trust · ${m.nick}`,
+            detalhe: m.status_membro === 'Fora do cadastro' ? 'fora do cadastro' : `membro ${m.status_membro.toLowerCase()}`,
+        })),
+    ]);
 }
 
 function abrirPendencias() {
     const pendentes = pendenciasCidade();
     abrirModal(`
-        <h2>Pedidos de trust pendentes</h2>
-        <ul class="cidade-pendencias">${pendentes.map(({ casa, p }) => `
+        <h2>Pendências de trust</h2>
+        <ul class="cidade-pendencias">${pendentes.map(({ casa, titulo, detalhe }) => `
             <li><button type="button" onclick="irParaCasa(${casa.id})">
-                <strong>${p.tipo === 'retirar' ? 'Retirar' : 'Conceder'} trust · ${cEsc(p.nick)}</strong>
-                <span>${cEsc(casa.nome || `X ${casa.x}, Z ${casa.z}`)} · pedido por ${cEsc(p.pedido_por)} em ${cData(p.createdAt)}</span>
-            </button></li>`).join('') || '<li class="vazio">Nenhum pedido pendente.</li>'}</ul>`);
+                <strong>${cEsc(titulo)}</strong>
+                <span>${cEsc(casa.nome || `X ${casa.x}, Z ${casa.z}`)} · ${cEsc(detalhe)}</span>
+            </button></li>`).join('') || '<li class="vazio">Nenhuma pendência.</li>'}</ul>`);
 }
 
 function irParaCasa(id) {
@@ -166,18 +170,6 @@ function irParaCasa(id) {
     if (!casa) return;
     cidade.mapa.setView(blocoParaLatLng(casa.x, casa.z), 1);
     abrirCasa(id);
-}
-
-async function membrosAtivosCidade() {
-    if (!cidade.membros) {
-        try {
-            const lista = await fetch(URL_GET_MEMBROS_ATIVOS, { headers: getAdminRequestHeaders() }).then(r => r.json());
-            cidade.membros = semContasDoCla(lista).map(m => m.nick).sort((a, b) => a.localeCompare(b));
-        } catch (_) {
-            cidade.membros = [];
-        }
-    }
-    return cidade.membros;
 }
 
 function abrirModal(html) {
@@ -189,42 +181,36 @@ function cidadeFechar() {
     document.getElementById('cidade_modal').hidden = true;
 }
 
-async function campoNick() {
-    const nicks = await membrosAtivosCidade();
-    return `<label>Membro<input name="nick" list="cidade_nicks" required maxlength="17" autocomplete="off" placeholder="Nick do membro"></label>
-        <datalist id="cidade_nicks">${nicks.map(n => `<option value="${cEsc(n)}">`).join('')}</datalist>`;
-}
-
-async function abrirNovaCasa({ x, z }) {
+function abrirNovaCasa({ x, z }) {
     const { x0, z0, largura, altura } = cidade.dados.mapa;
     if (x < x0 || z < z0 || x >= x0 + largura || z >= z0 + altura) return;
     abrirModal(`
         <h2>Nova casa</h2>
         <p class="cidade-coord">X ${x}, Z ${z}</p>
-        <form class="cidade-form" onsubmit="enviarPedidoCidade(event, { x: ${x}, z: ${z}, tipo: 'conceder' })">
+        <form class="cidade-form" onsubmit="criarCasa(event, ${x}, ${z})">
             <label><span>Nome da casa <small>(opcional)</small></span><input name="nome" maxlength="60" placeholder="Ex.: Casa da praia"></label>
-            ${await campoNick()}
-            <label><span>Observação <small>(opcional)</small></span><textarea name="observacao" maxlength="500" rows="2"></textarea></label>
-            <p class="cidade-aviso">O pedido vai para um líder, que dá o trust no jogo e aprova.</p>
-            <button class="botao botao-principal" type="submit">Pedir trust</button>
+            <label class="cidade-check"><input type="checkbox" name="aberta" checked> Abrir para ocupação</label>
+            <p class="cidade-aviso">Aberta, a casa aparece no site para os membros pedirem. Um líder dá o trust no jogo e aprova aqui.</p>
+            <button class="botao botao-principal" type="submit">Marcar casa</button>
         </form>`);
 }
 
 function linhaPedido(p, lider) {
     const final = p.status === 'Pendente' ? '' : ` · ${cEsc(p.status)} por ${cEsc(p.decidido_por)} em ${cData(p.decidido_em)}`;
+    const autor = p.tipo === 'conceder' && p.pedido_por === p.nick ? 'Pedido pelo membro' : `Pedido por ${cEsc(p.pedido_por)}`;
     const acoes = lider && p.status === 'Pendente' ? `
         <div class="cidade-acoes">
-            <button class="botao botao-principal" type="button" onclick="decidirPedidoCidade(${p.id}, true)">${p.tipo === 'retirar' ? 'Aprovar retirada' : 'Aprovar e conceder'}</button>
+            <button class="botao botao-principal" type="button" onclick="decidirPedidoCidade(${p.id}, true)">${p.tipo === 'retirar' ? 'Aprovar retirada' : 'Dei o trust, aprovar'}</button>
             <button class="botao" type="button" onclick="mostrarRecusa(${p.id})">Recusar</button>
         </div>
         <form class="cidade-recusa" id="recusa_${p.id}" hidden onsubmit="decidirPedidoCidade(${p.id}, false, event)">
-            <input name="motivo" maxlength="500" placeholder="Motivo da recusa">
+            <input name="motivo" maxlength="500" placeholder="Motivo da recusa (o membro vê no site)">
             <button class="botao" type="submit">Confirmar recusa</button>
         </form>` : '';
     return `
         <li class="cidade-pedido status-${cEsc(p.status.toLowerCase())}">
             <div><strong>${p.tipo === 'retirar' ? 'Retirar' : 'Conceder'} · ${cEsc(p.nick)}</strong> <span class="selo">${cEsc(p.status)}</span></div>
-            <small>Pedido por ${cEsc(p.pedido_por)} em ${cData(p.createdAt)}${final}</small>
+            <small>${autor} em ${cData(p.createdAt)}${final}</small>
             ${p.tipo === 'retirar' ? `<small>Itens no banco de itens: ${p.itens_no_banco ? 'sim' : 'não'}</small>` : ''}
             ${p.observacao ? `<p>${cEsc(p.observacao)}</p>` : ''}
             ${p.motivo ? `<p class="motivo">Motivo: ${cEsc(p.motivo)}</p>` : ''}
@@ -232,35 +218,33 @@ function linhaPedido(p, lider) {
         </li>`;
 }
 
-async function abrirCasa(id) {
+function abrirCasa(id) {
     const casa = cidade.dados.casas.find(c => c.id === id);
     if (!casa) return;
-    const { pedir, lider } = cidade.dados.permissoes;
+    const { gerir, lider } = cidade.dados.permissoes;
     const estado = CIDADE_ESTADOS[casa.estado] || CIDADE_ESTADOS.livre;
     const moradores = casa.moradores.length
         ? casa.moradores.map(m => `
-            <li>
+            <li class="${m.retirar ? 'a-retirar' : ''}">
                 <img src="https://mc-heads.net/avatar/${encodeURIComponent(m.nick)}/24" alt="" width="24" height="24">
                 <div><strong>${cEsc(m.nick)}</strong>
                 <small>Trust desde ${cData(m.desde)} · ${cEsc(m.status_membro)}${m.inativo_ate ? ` até ${cData(m.inativo_ate)}` : ''}</small></div>
-                ${pedir && !casa.pedidos.some(p => p.status === 'Pendente' && p.tipo === 'retirar' && p.nick === m.nick)
-                    ? `<button class="botao" type="button" onclick="abrirRetirada(${casa.id}, '${cEsc(m.nick)}')">Pedir retirada</button>` : ''}
+                ${lider ? `<button class="botao" type="button" onclick="abrirRetirada(${casa.id}, '${cEsc(m.nick)}')">Retirar trust</button>` : ''}
             </li>`).join('')
         : '<li class="vazio">Ninguém mora aqui.</li>';
+    const ocupacao = gerir && !casa.moradores.length
+        ? `<button class="botao ${casa.aberta ? '' : 'botao-principal'}" type="button" onclick="alternarOcupacao(${casa.id}, ${!casa.aberta})">
+            ${casa.aberta ? 'Fechar para ocupação' : 'Abrir para ocupação'}</button>`
+        : '';
     abrirModal(`
         <h2>${cEsc(casa.nome || 'Casa sem nome')} <span class="cidade-estado" style="--cor:${estado.cor}">${estado.rotulo}</span></h2>
         <p class="cidade-coord">X ${casa.x}, Z ${casa.z}</p>
-        ${pedir ? `<form class="cidade-renomear" onsubmit="renomearCasa(event, ${casa.id})">
+        ${gerir ? `<form class="cidade-renomear" onsubmit="renomearCasa(event, ${casa.id})">
             <input name="nome" maxlength="60" value="${cEsc(casa.nome || '')}" placeholder="Nome da casa">
             <button class="botao" type="submit">Salvar nome</button></form>` : ''}
+        ${ocupacao ? `<div class="cidade-acoes">${ocupacao}</div>` : ''}
         <h3>Moradores</h3>
         <ul class="cidade-moradores">${moradores}</ul>
-        ${pedir ? `<details class="cidade-novo"><summary>Pedir trust para outro membro</summary>
-            <form class="cidade-form" onsubmit="enviarPedidoCidade(event, { casa_id: ${casa.id}, tipo: 'conceder' })">
-                ${await campoNick()}
-                <label><span>Observação <small>(opcional)</small></span><textarea name="observacao" maxlength="500" rows="2"></textarea></label>
-                <button class="botao botao-principal" type="submit">Pedir trust</button>
-            </form></details>` : ''}
         <h3>Pedidos</h3>
         <ul class="cidade-pedidos">${casa.pedidos.map(p => linhaPedido(p, lider)).join('') || '<li class="vazio">Nenhum pedido.</li>'}</ul>
         ${lider && !casa.moradores.length && !casa.pendentes
@@ -272,11 +256,11 @@ function abrirRetirada(casaId, nick) {
     abrirModal(`
         <h2>Retirar trust · ${cEsc(nick)}</h2>
         <p class="cidade-coord">${cEsc(casa?.nome || '')} X ${casa?.x}, Z ${casa?.z}</p>
-        <form class="cidade-form" onsubmit="enviarPedidoCidade(event, { casa_id: ${casaId}, tipo: 'retirar', nick: '${cEsc(nick)}' })">
-            <label class="cidade-check"><input type="checkbox" name="itens_no_banco"> Levei os itens da casa ao banco de itens</label>
+        <form class="cidade-form" onsubmit="retirarTrust(event, ${casaId}, '${cEsc(nick)}')">
+            <label class="cidade-check"><input type="checkbox" name="itens_no_banco"> Os itens da casa foram ao banco de itens</label>
             <label><span>Observação <small>(opcional)</small></span><textarea name="observacao" maxlength="500" rows="2" placeholder="O que foi guardado, em qual baú..."></textarea></label>
-            <p class="cidade-aviso">O pedido vai para um líder, que tira o trust no jogo e aprova.</p>
-            <button class="botao botao-principal" type="submit">Pedir retirada</button>
+            <p class="cidade-aviso">Tire o trust no jogo antes de marcar aqui.</p>
+            <button class="botao botao-principal" type="submit">Trust retirado</button>
         </form>`);
 }
 
@@ -292,47 +276,43 @@ async function recarregarCidade(casaId) {
     else cidadeFechar();
 }
 
-async function enviarPedidoCidade(event, base) {
-    event.preventDefault();
-    const form = event.target;
-    const dados = new FormData(form);
-    const corpo = {
-        ...base,
-        nick: base.nick || String(dados.get('nick') || '').trim(),
-        nome: dados.get('nome') ?? undefined,
-        observacao: dados.get('observacao') || '',
-        itens_no_banco: dados.get('itens_no_banco') === 'on',
-    };
-    form.querySelector('button[type=submit]').disabled = true;
+async function enviarCidade(event, caminho, metodo, corpo, casaId, falha) {
+    event?.preventDefault();
+    const botao = event?.target.querySelector?.('button[type=submit]');
+    if (botao) botao.disabled = true;
     try {
-        const { casa } = await cidadeApi('/pedidos', { method: 'POST', body: JSON.stringify(corpo) });
-        await recarregarCidade(casa.id);
+        const resposta = await cidadeApi(caminho, { method: metodo, body: JSON.stringify(corpo) });
+        await recarregarCidade(casaId ?? resposta?.id);
     } catch (error) {
-        avisarFalha(error, 'Não foi possível enviar o pedido.');
-        form.querySelector('button[type=submit]').disabled = false;
+        avisarFalha(error, falha);
+        if (botao) botao.disabled = false;
     }
 }
 
-async function decidirPedidoCidade(id, aprovar, event) {
-    event?.preventDefault();
+function criarCasa(event, x, z) {
+    const dados = new FormData(event.target);
+    enviarCidade(event, '/casas', 'POST', { x, z, nome: dados.get('nome'), aberta: dados.get('aberta') === 'on' }, null, 'Não foi possível marcar a casa.');
+}
+
+function retirarTrust(event, casaId, nick) {
+    const dados = new FormData(event.target);
+    enviarCidade(event, `/casas/${casaId}/retirar`, 'POST', {
+        nick, observacao: dados.get('observacao') || '', itens_no_banco: dados.get('itens_no_banco') === 'on',
+    }, casaId, 'Não foi possível retirar o trust.');
+}
+
+function renomearCasa(event, id) {
+    enviarCidade(event, `/casas/${id}`, 'PATCH', { nome: new FormData(event.target).get('nome') }, id, 'Não foi possível renomear a casa.');
+}
+
+function alternarOcupacao(id, aberta) {
+    enviarCidade(null, `/casas/${id}`, 'PATCH', { aberta }, id, 'Não foi possível mudar a ocupação da casa.');
+}
+
+function decidirPedidoCidade(id, aprovar, event) {
     const casa = cidade.dados.casas.find(c => c.pedidos.some(p => p.id === id));
     const motivo = aprovar ? undefined : document.querySelector(`#recusa_${id} input`)?.value || '';
-    try {
-        await cidadeApi(`/pedidos/${id}/${aprovar ? 'aprovar' : 'recusar'}`, { method: 'PATCH', body: JSON.stringify({ motivo }) });
-        await recarregarCidade(casa?.id);
-    } catch (error) {
-        avisarFalha(error, 'Não foi possível decidir o pedido.');
-    }
-}
-
-async function renomearCasa(event, id) {
-    event.preventDefault();
-    try {
-        await cidadeApi(`/casas/${id}`, { method: 'PATCH', body: JSON.stringify({ nome: new FormData(event.target).get('nome') }) });
-        await recarregarCidade(id);
-    } catch (error) {
-        avisarFalha(error, 'Não foi possível renomear a casa.');
-    }
+    enviarCidade(event, `/pedidos/${id}/${aprovar ? 'aprovar' : 'recusar'}`, 'PATCH', { motivo }, casa?.id, 'Não foi possível decidir o pedido.');
 }
 
 async function apagarCasa(id) {

@@ -57,7 +57,7 @@ const pages_content = {
     <p><code>/entrada</code> — corrige a data em que você entrou no clã.</p>
     </br><p>A mudança vai para análise da staff. Ainda não vinculou o Discord? Use o botão <b>Vincular minha conta</b> no canal <b>#saudações</b>. Ainda não é membro? Faça o <a href="#guia" onclick="openGuia()">Recrutamento</a>.</p>`,
 
-    city: `<header class="cabeca-pagina"><div class="miolo"><h1>Cidade</h1><p class="texto">A cidade da Eternity fica no servidor <b>Apocalipse</b>: casas e terrenos gratuitos, farms coletivas e um lugar para cada membro. Clique numa foto para ampliar. Para visitar: <code>/apocalipse</code> e depois <code>/go ETY</code>.</p></div></header><div class="miolo"><div id="gallery"><a href="/imgs/City00.jpg"><img class="cityimgs" src="/imgs/City00.jpg" alt="Cidade da Eternity, vista 1"></a><a href="/imgs/City01.jpg"><img class="cityimgs" src="/imgs/City01.jpg" alt="Cidade da Eternity, vista 2"></a><a href="/imgs/City02.jpg"><img class="cityimgs" src="/imgs/City02.jpg" alt="Cidade da Eternity, vista 3"></a><a href="/imgs/City03.jpg"><img class="cityimgs" src="/imgs/City03.jpg" alt="Cidade da Eternity, vista 4"></a><a href="/imgs/City04.jpg"><img class="cityimgs" src="/imgs/City04.jpg" alt="Cidade da Eternity, vista 5"></a><a href="/imgs/City05.jpg"><img class="cityimgs" src="/imgs/City05.jpg" alt="Cidade da Eternity, vista 6"></a></div></div>`,
+    // A Cidade (mapa, galeria e pedido de casa) fica em cidade.js.
 
     administracao: `${loadingHTML}<form onsubmit="validationLogin(event)" style="display:none;"><h1>Login da staff</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>`,
 };
@@ -70,13 +70,7 @@ const ROTAS = {
     guia: { menu: 'join', render: () => openGuia() },
     membros: { menu: 'hall', render: () => renderMembros() },
     wiki: { menu: 'wiki', render: () => renderWiki() },
-    cidade: {
-        menu: 'city',
-        render: () => {
-            app.innerHTML = pages_content.city + rodapeSite();
-            renderGallery('city');
-        },
-    },
+    cidade: { menu: 'city', render: () => renderCidadePublica() },
     admin: {
         menu: 'administracao',
         render: () => {
@@ -113,12 +107,6 @@ window.addEventListener('hashchange', route);
 window.addEventListener('scroll', () => {
     document.querySelector('.topbar')?.classList.toggle('rolou', window.scrollY > 8);
 }, { passive: true });
-
-function renderGallery(id) {
-    if (id == "city") {
-        lightGallery(document.getElementById("gallery"), { download: false });
-    }
-}
 
 function renderFormAdmin(id) {
     if (id == 'administracao') {
