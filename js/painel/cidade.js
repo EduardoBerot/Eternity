@@ -96,7 +96,7 @@ function montarMapaCidade() {
         crs: L.CRS.Simple, minZoom: -2, maxZoom: 3, zoomSnap: 0, zoomDelta: 0.5, wheelPxPerZoomLevel: 120, attributionControl: false,
         maxBounds: L.latLngBounds(limites).pad(0.15),
     });
-    L.imageOverlay(`${URL_CIDADE}/mapa`, limites, { className: 'cidade-mapa-img' }).addTo(mapa);
+    L.imageOverlay(`${URL_CIDADE}/mapa?v=${encodeURIComponent(cidade.dados.mapa.versao || '')}`, limites, { className: 'cidade-mapa-img' }).addTo(mapa);
     mapa.fitBounds(limites);
     cidade.mapa = mapa;
     // A caixa do mapa muda com a janela (e com a fonte carregando no topo):

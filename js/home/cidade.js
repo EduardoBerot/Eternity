@@ -88,7 +88,7 @@ function montarMapaPublico() {
         crs: L.CRS.Simple, minZoom: -2, maxZoom: 3, zoomSnap: 0, zoomDelta: 0.5, wheelPxPerZoomLevel: 120, attributionControl: false,
         maxBounds: L.latLngBounds(limites).pad(0.15),
     });
-    L.imageOverlay(`${URL_CIDADE_PUBLICA}/mapa`, limites, { className: 'cidade-mapa-img' }).addTo(mapa);
+    L.imageOverlay(`${URL_CIDADE_PUBLICA}/mapa?v=${encodeURIComponent(cidadePub.dados.mapa.versao || '')}`, limites, { className: 'cidade-mapa-img' }).addTo(mapa);
     mapa.fitBounds(limites);
     cidadePub.mapa = mapa;
     for (const casa of cidadePub.dados.casas) {
