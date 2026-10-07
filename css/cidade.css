@@ -72,6 +72,103 @@ body.painel--cidade main { margin: 0; }
     li { display: flex; align-items: center; gap: 5px; }
     span { width: 9px; height: 9px; border-radius: 50%; background: var(--cor); border: 1.5px solid #04080f; }
     span.pendente { background: transparent; border: 2px dashed var(--aqua); }
+    span.quadrado { border-radius: 2px; }
+    i { font-size: 0.7rem; color: var(--aqua); }
+}
+
+/* ---------- Marcadores (js/cidade-marcas.js) ---------- */
+
+.cidade-pino-caixa { background: none; border: 0; }
+
+.cidade-pino {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--cor);
+    border: 2px solid #04080f;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.cidade-pino:hover { transform: scale(1.2); }
+.cidade-pino--terreno { border-radius: 3px; }
+.cidade-pino--pendente { border: 2.5px dashed var(--aqua); }
+
+.cidade-local {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #0b1624;
+    border: 2px solid var(--aqua);
+    color: var(--aqua);
+    font-size: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.cidade-local:hover { transform: scale(1.15); }
+
+/* Abas do "Marcar no mapa" (casa, terreno, local) e grade de icones. */
+.cidade-abas { display: flex; gap: 6px; margin: 12px 0 4px; flex-wrap: wrap; }
+
+.cidade-aba {
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--linha);
+    background: transparent;
+    color: var(--nevoa);
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+
+    i { margin-right: 4px; }
+}
+
+.cidade-aba.ativa { border-color: var(--aqua); color: var(--aqua); background: rgba(46, 230, 240, 0.08); }
+
+.cidade-icones {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+
+    legend { padding: 0; margin-bottom: 4px; font-size: 0.88rem; color: var(--nevoa); }
+}
+
+.cidade-form .cidade-icone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 4px;
+    border-radius: 6px;
+    border: 1px solid var(--linha);
+    cursor: pointer;
+    text-align: center;
+    font-size: 0.72rem;
+
+    input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+    i { font-size: 1.05rem; color: var(--gelo); }
+}
+
+.cidade-form .cidade-icone:has(input:checked) { border-color: var(--aqua); background: rgba(46, 230, 240, 0.1); }
+.cidade-form .cidade-icone:has(input:checked) i { color: var(--aqua); }
+.cidade-form .cidade-icone:has(input:focus-visible) { outline: 2px solid var(--aqua); }
+
+.cidade-renomear select {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--linha);
+    background: #04080f;
+    color: var(--gelo);
+    font: inherit;
 }
 
 .cidade-mapa {
@@ -207,7 +304,7 @@ body.painel--cidade main { margin: 0; }
     .cidade-check input { width: auto; }
 }
 
-.cidade-renomear { grid-template-columns: 1fr auto; }
+.cidade-renomear { grid-template-columns: 1fr auto auto; }
 
 /* O display: grid acima venceria o [hidden] do formulario de recusa. */
 .cidade-recusa[hidden] { display: none; }
@@ -280,6 +377,8 @@ body.painel--cidade main { margin: 0; }
     .cidade-fechar { top: 6px; right: 8px; font-size: 1.4rem; }
     .cidade-form { margin-top: 4px; }
     .cidade-aviso { margin: 0 0 8px; }
+    .cidade-card-icone { color: var(--aqua); margin-right: 4px; }
+    .cidade-warp, .cidade-descricao { margin: 0 0 8px; font-size: 0.88rem; }
 }
 
 .cidade-card[hidden] { display: none; }

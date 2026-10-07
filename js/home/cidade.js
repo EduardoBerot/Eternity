@@ -1,6 +1,7 @@
-// Cidade no site publico (06/10/2026): o mapa com as casas, aberto a qualquer
-// um, e o pedido de casa. Clicar numa casa da zoom nela e abre um card ao lado;
-// numa casa aberta para ocupacao, "Solicitar trust" pede o nick. O nick tem de
+// Cidade no site publico (06/10/2026): o mapa com as casas, os terrenos e os
+// locais importantes, aberto a qualquer um, e o pedido de trust. Clicar numa
+// marca da zoom nela e abre um card ao lado; numa casa ou terreno aberto para
+// ocupacao, "Solicitar trust" pede o nick. Marcadores em js/cidade-marcas.js. O nick tem de
 // ser de um membro ativo com Discord vinculado: o bot manda DM para esse
 // Discord, e so a confirmacao la faz o pedido chegar aos lideres. Assim
 // ninguem pede casa no nome de outro. Um lider da o /trust no jogo e aprova no
@@ -19,11 +20,20 @@ const CASA_ESTADOS = {
 
 const ZOOM_NA_CASA = 1.5;
 
-const cidadePub = { mapa: null, dados: null, casaAberta: null };
+const cidadePub = { mapa: null, dados: null, alvo: null };
+
+// Distancia do card ate a marca, em pixels.
+const FOLGA_CARD = 40;
+
+function oTipo(casa) {
+    return casa.tipo === 'terreno'
+        ? { nome: 'terreno', este: 'este terreno', aberto: 'aberto' }
+        : { nome: 'casa', este: 'esta casa', aberto: 'aberta' };
+}
 
 function renderCidadePublica() {
     if (cidadePub.mapa) { cidadePub.mapa.remove(); cidadePub.mapa = null; }
-    cidadePub.casaAberta = null;
+    cidadePub.alvo = null;
     app.innerHTML = `
         <header class="cabeca-pagina"><div class="miolo">
             <h1>Cidade</h1>
@@ -31,13 +41,17 @@ function renderCidadePublica() {
         </div></header>
         <div class="miolo">
             <section class="cidade-publica">
-                <p class="cidade-dica">Quer uma casa? Clique numa casa <b>aberta para ocupação</b> e solicite o trust. A confirmação chega por DM no Discord vinculado ao seu nick.</p>
+                <p class="cidade-dica">Quer uma casa ou um terreno? Clique num lugar <b>livre</b> no mapa e solicite o trust. A confirmação chega por DM no Discord vinculado ao seu nick.</p>
                 <div class="cidade-mapa cidade-mapa--publica">
                     <div id="cidade_mapa" class="cidade-mapa-leaflet"><p class="cidade-carregando">Carregando o mapa...</p></div>
                     <div id="cidade_card" class="cidade-card" hidden role="dialog" aria-live="polite"></div>
                 </div>
                 <ul class="cidade-legenda">
-                    ${Object.values(CASA_ESTADOS).map(e => `<li><span style="--cor:${e.cor}"></span>${e.rotulo}</li>`).join('')}
+                    <li><span style="--cor:${CASA_ESTADOS.aberta.cor}"></span>Casa livre</li>
+                    <li><span class="quadrado" style="--cor:${CIDADE_COR_TERRENO_LIVRE}"></span>Terreno livre</li>
+                    <li><span style="--cor:${CASA_ESTADOS.ocupada.cor}"></span>Ocupado</li>
+                    <li><span style="--cor:${CASA_ESTADOS.fechada.cor}"></span>Indisponível</li>
+                    <li><i class="fa-solid fa-signs-post" aria-hidden="true"></i>Local importante</li>
                 </ul>
             </section>
             <h2 class="cidade-galeria-titulo">Galeria</h2>
@@ -79,13 +93,17 @@ function montarMapaPublico() {
     cidadePub.mapa = mapa;
     for (const casa of cidadePub.dados.casas) {
         const estado = CASA_ESTADOS[casa.estado] || CASA_ESTADOS.fechada;
-        const marca = L.circleMarker(blocoPublico(casa.x, casa.z), {
-            radius: casa.estado === 'aberta' ? 8 : 6, weight: 2, color: '#04080f', fillColor: estado.cor, fillOpacity: 0.95,
-            // Sem isso o clique sobe ao mapa, que fecha o card logo depois de abrir.
-            bubblingMouseEvents: false,
-        });
-        marca.bindTooltip(casa.moradores.length ? casa.moradores.map(escHtml).join(', ') : estado.rotulo, { direction: 'top', offset: [0, -6] });
+        const cor = casa.tipo === 'terreno' && casa.estado === 'aberta' ? CIDADE_COR_TERRENO_LIVRE : estado.cor;
+        const marca = cidadeMarcaCasa(blocoPublico(casa.x, casa.z), { tipo: casa.tipo, cor, destaque: casa.estado === 'aberta' });
+        const rotulo = casa.moradores.length ? casa.moradores.map(escHtml).join(', ') : `${cidadeRotuloTipo(casa.tipo)} · ${estado.rotulo.toLowerCase()}`;
+        marca.bindTooltip(rotulo, { direction: 'top', offset: [0, -10] });
         marca.on('click', () => focarCasa(casa.id));
+        marca.addTo(mapa);
+    }
+    for (const local of cidadePub.dados.locais || []) {
+        const marca = cidadeMarcaLocal(blocoPublico(local.x, local.z), local.icone);
+        marca.bindTooltip(escHtml(local.nome), { direction: 'top', offset: [0, -14] });
+        marca.on('click', () => focarLocal(local.id));
         marca.addTo(mapa);
     }
     // O card acompanha a casa quando o mapa anda ou muda de zoom.
@@ -93,23 +111,39 @@ function montarMapaPublico() {
     mapa.on('click', fecharCardCasa);
 }
 
-// Zoom na casa e o card ao lado dela.
+// Zoom na marca e o card ao lado dela.
+function focarEm(alvo) {
+    cidadePub.alvo = alvo;
+    const zoom = Math.max(cidadePub.mapa.getZoom(), ZOOM_NA_CASA);
+    cidadePub.mapa.flyTo(blocoPublico(alvo.x, alvo.z), zoom, { duration: 0.6 });
+}
+
 function focarCasa(id) {
     const casa = cidadePub.dados.casas.find(c => c.id === id);
     if (!casa) return;
-    cidadePub.casaAberta = casa;
-    const zoom = Math.max(cidadePub.mapa.getZoom(), ZOOM_NA_CASA);
-    cidadePub.mapa.flyTo(blocoPublico(casa.x, casa.z), zoom, { duration: 0.6 });
+    focarEm(casa);
     mostrarCardCasa(casa);
+}
+
+function focarLocal(id) {
+    const local = (cidadePub.dados.locais || []).find(l => l.id === id);
+    if (!local) return;
+    focarEm(local);
+    abrirCard(`
+        <button type="button" class="cidade-fechar" onclick="fecharCardCasa()" aria-label="Fechar">&times;</button>
+        <h3><i class="${cidadeIconeClasse(local.icone)} cidade-card-icone" aria-hidden="true"></i> ${escHtml(local.nome)}</h3>
+        <p class="cidade-coord">X ${local.x}, Z ${local.z}</p>
+        ${local.warp ? `<p class="cidade-warp">Para ir: <code>${escHtml(local.warp)}</code></p>` : ''}
+        ${local.descricao ? `<p class="cidade-descricao">${escHtml(local.descricao)}</p>` : ''}`);
 }
 
 function cartaoCasa(casa, corpo) {
     const estado = CASA_ESTADOS[casa.estado] || CASA_ESTADOS.fechada;
     return `
         <button type="button" class="cidade-fechar" onclick="fecharCardCasa()" aria-label="Fechar">&times;</button>
-        <h3>${escHtml(casa.nome || 'Casa')}</h3>
+        <h3>${escHtml(casa.nome || cidadeRotuloTipo(casa.tipo))}</h3>
         <span class="cidade-estado" style="--cor:${estado.cor}">${estado.rotulo}</span>
-        <p class="cidade-coord">X ${casa.x}, Z ${casa.z}</p>
+        <p class="cidade-coord">${cidadeRotuloTipo(casa.tipo)} · X ${casa.x}, Z ${casa.z}</p>
         ${casa.moradores.length ? `<ul class="cidade-moradores">${casa.moradores.map(nick => `
             <li><img src="https://mc-heads.net/avatar/${encodeURIComponent(nick)}/20" alt="" width="20" height="20"><div><strong>${escHtml(nick)}</strong></div></li>`).join('')}</ul>` : ''}
         ${corpo}`;
@@ -119,10 +153,11 @@ function mostrarCardCasa(casa) {
     let corpo = '';
     if (casa.estado === 'aberta') {
         corpo = `
-            ${casa.em_analise ? `<p class="cidade-aviso">${casa.em_analise} ${casa.em_analise === 1 ? 'pedido' : 'pedidos'} em análise para esta casa.</p>` : ''}
+            ${casa.em_analise ? `<p class="cidade-aviso">${casa.em_analise} ${casa.em_analise === 1 ? 'pedido' : 'pedidos'} em análise para ${oTipo(casa).este}.</p>` : ''}
             <button type="button" class="botao botao-principal" onclick="abrirSolicitacao(${casa.id})">Solicitar trust</button>`;
     } else if (casa.estado === 'fechada') {
-        corpo = '<p class="cidade-aviso">Esta casa não está aberta para ocupação.</p>';
+        const t = oTipo(casa);
+        corpo = `<p class="cidade-aviso">${t.este[0].toUpperCase()}${t.este.slice(1)} não está ${t.aberto} para ocupação.</p>`;
     }
     abrirCard(cartaoCasa(casa, corpo));
 }
@@ -179,14 +214,14 @@ function abrirCard(html) {
 function fecharCardCasa() {
     const card = document.getElementById('cidade_card');
     if (card) card.hidden = true;
-    cidadePub.casaAberta = null;
+    cidadePub.alvo = null;
 }
 
 // Ao lado da casa: a direita, ou a esquerda se nao couber. No celular o card
 // vira uma faixa no pe do mapa (CSS), e aqui so se limpa a posicao.
 function posicionarCard() {
     const card = document.getElementById('cidade_card');
-    const casa = cidadePub.casaAberta;
+    const casa = cidadePub.alvo;
     if (!card || card.hidden || !casa || !cidadePub.mapa) return;
     if (window.matchMedia('(max-width: 640px)').matches) {
         card.style.left = card.style.top = '';
@@ -195,7 +230,7 @@ function posicionarCard() {
     const ponto = cidadePub.mapa.latLngToContainerPoint(blocoPublico(casa.x, casa.z));
     const largura = card.offsetWidth;
     const caixa = cidadePub.mapa.getSize();
-    const folga = 18;
+    const folga = FOLGA_CARD;
     const x = ponto.x + folga + largura <= caixa.x - 8 ? ponto.x + folga : Math.max(8, ponto.x - folga - largura);
     const y = Math.min(Math.max(8, ponto.y - card.offsetHeight / 2), Math.max(8, caixa.y - card.offsetHeight - 8));
     card.style.left = `${x}px`;
