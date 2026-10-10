@@ -234,6 +234,22 @@ function trocarMesLiga(indice) {
     if (alvo && membrosEstado.aberto) alvo.innerHTML = conteudoLigaMes(membrosEstado.aberto, Number(indice));
 }
 
+// Titulos conquistados (09/10/2026), como aparecem no jogo, do mais alto para o
+// mais baixo; o que a pessoa usa agora vem primeiro e marcado. Faixa fina
+// entre o topo e os blocos: a janela continua sem rolagem.
+function faixaTitulos(titulos) {
+    const lista = (Array.isArray(titulos) ? titulos : [])
+        .map(titulo => ({ ...titulo, info: TITULOS_POR_NOME.get(titulo.nome) }))
+        .filter(titulo => titulo.info)
+        .sort((a, b) => Number(Boolean(b.atual)) - Number(Boolean(a.atual)) || b.info.nivel - a.info.nivel);
+    if (!lista.length) return '';
+    return `
+        <div class="dialogo-titulos" aria-label="Títulos conquistados">
+            <span class="dialogo-titulos-rotulo"><i class="fa-solid fa-award" aria-hidden="true"></i> Títulos</span>
+            ${lista.map(titulo => `<span class="titulo-chip" title="${titulo.atual ? 'Usando agora' : 'Conquistado'}">${tituloHtml(titulo.nome, titulo.info, { atual: titulo.atual })}</span>`).join('')}
+        </div>`;
+}
+
 function abrirMembro(nick) {
     const membro = membrosEstado.membros.find(m => m.nick === nick);
     if (!membro) return;
@@ -301,6 +317,7 @@ function abrirMembro(nick) {
             </div>
             <button type="button" class="dialogo-fechar" onclick="fecharMembro()" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
         </div>
+        ${faixaTitulos(perfil.titulos)}
         <div class="dialogo-grade">
             <section class="info-bloco">
                 <h3><i class="fa-solid fa-shield-halved"></i> No clã</h3>

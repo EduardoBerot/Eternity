@@ -1,0 +1,237 @@
+/* Titulos do cla (09/10/2026): o nome como aparece no jogo -- icones brancos,
+   letras em degrade da familia (--de -> --ate) e, no nivel mais dificil, o
+   embaralhado (&k) das pontas como caracteres que trocam sem parar. Usado na
+   Wiki (familias) e na janela do membro (faixa de titulos). Catalogo em
+   js/titulos.js. */
+
+.titulo-nome {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    font-family: var(--sans);
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+
+.titulo-grad {
+    background: linear-gradient(90deg, var(--de, var(--aqua)), var(--ate, var(--gelo)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* Ponta escura do degrade (poder mcMMO) ainda le no fundo noturno. */
+    filter: drop-shadow(0 0 0.5px rgba(232, 244, 248, 0.35));
+}
+
+.titulo-ic { color: #fff; font-weight: 400; opacity: 0.92; }
+
+/* O &k: um caractere que troca a cada quadro, como no jogo. */
+.titulo-k::before {
+    content: "▚";
+    display: inline-block;
+    width: 0.7em;
+    color: rgba(232, 244, 248, 0.85);
+    font-weight: 400;
+    animation: tituloK 0.45s steps(1) infinite;
+}
+
+@keyframes tituloK {
+    0% { content: "▚"; }
+    20% { content: "▞"; }
+    40% { content: "▙"; }
+    60% { content: "▜"; }
+    80% { content: "▟"; }
+}
+
+.nivel-3 .titulo-grad {
+    background-size: 200% 100%;
+    background-image: linear-gradient(90deg, var(--de), var(--ate), var(--de));
+    animation: tituloBrilho 4s linear infinite;
+}
+
+@keyframes tituloBrilho {
+    to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .titulo-k::before, .nivel-3 .titulo-grad { animation: none; }
+}
+
+/* ---------- Janela do membro ---------- */
+
+.dialogo-titulos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--linha);
+    background: rgba(4, 8, 15, 0.35);
+}
+
+.dialogo-titulos-rotulo {
+    margin-right: 4px;
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--nevoa-escura);
+
+    i { color: var(--aqua); margin-right: 3px; }
+}
+
+.titulo-chip {
+    display: inline-flex;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--linha);
+    background: rgba(232, 244, 248, 0.04);
+    font-size: 0.82rem;
+}
+
+.titulo-chip:has(.titulo-atual) {
+    border-color: color-mix(in srgb, var(--aqua) 55%, transparent);
+    box-shadow: 0 0 0 1px rgba(46, 230, 240, 0.12), 0 0 14px rgba(46, 230, 240, 0.12);
+}
+
+/* ---------- Wiki ---------- */
+
+.titulos-regras {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 20px 0 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    color: var(--nevoa);
+
+    li {
+        font-family: var(--sans);
+        padding: 6px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--linha);
+        background: rgba(15, 28, 43, 0.55);
+    }
+    b { color: var(--gelo); }
+}
+
+.titulos-categoria { margin-top: 44px; }
+
+.titulos-categoria-cabeca {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+
+    > i {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+        border-radius: 12px;
+        border: 1px solid rgba(46, 230, 240, 0.35);
+        background: var(--aqua-suave);
+        color: var(--aqua);
+        font-size: 1.05rem;
+    }
+    h3 { margin: 0; font-size: 1.15rem; color: var(--gelo); }
+    p { margin: 2px 0 0; font-family: var(--sans); font-size: 0.86rem; color: var(--nevoa); }
+}
+
+.familias {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.familia {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    border: 1px solid var(--linha);
+    background: rgba(15, 28, 43, 0.6);
+    transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.familia:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--de) 45%, transparent);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35), 0 0 24px color-mix(in srgb, var(--ate) 14%, transparent);
+}
+
+.familia-faixa {
+    height: 4px;
+    background: linear-gradient(90deg, var(--de), var(--ate));
+}
+
+.familia-topo {
+    display: flex;
+    gap: 6px;
+    padding: 12px 16px 2px;
+}
+
+.familia-selo {
+    padding: 2px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--linha);
+    font-family: var(--sans);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--nevoa);
+}
+
+.familia-selo-posicao { color: #ffc46b; border-color: rgba(255, 196, 107, 0.35); }
+
+.familia-lista {
+    margin: 0;
+    padding: 4px 0 6px;
+    list-style: none;
+}
+
+.familia-titulo {
+    display: grid;
+    gap: 2px;
+    padding: 10px 16px;
+
+    & + & { border-top: 1px solid var(--linha); }
+}
+
+.familia-nome {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    font-size: 1.02rem;
+}
+
+.titulo-fem {
+    font-family: var(--sans);
+    font-size: 0.74rem;
+    color: var(--nevoa-escura);
+}
+
+.titulo-fem::before { content: "ou "; }
+
+.familia-req {
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    color: var(--nevoa);
+}
+
+/* O mais dificil da familia ganha um fundo com a cor dela. */
+.familia-titulo:has(.nivel-3) {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--de) 10%, transparent), transparent 70%);
+}
+
+@media (max-width: 760px) {
+    .familias { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+    .familia-nome { font-size: 0.95rem; }
+    .dialogo-titulos { padding: 10px 16px; }
+}

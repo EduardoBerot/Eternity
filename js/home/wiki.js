@@ -44,26 +44,41 @@ const WIKI_TORRE = [
     { andar: 6, salas: [{ cargo: 'Membro', funcao: 'Todo integrante da ETY e da ETZ.' }] },
 ];
 
-const WIKI_TITULOS_TEMPO = [
-    ['Tyrael', '120 dias'],
-    ['Haniel', '180 dias'],
-    ['Hamael', '1 ano'],
-    ['Uriel', '2 anos'],
-    ['Ariel', '3 anos'],
-    ['Raziel', '5 anos'],
-];
+// Titulos: catalogo em js/titulos.js (comum a janela do membro).
 
-const WIKI_TITULOS_MCMMO = [
-    ['Berserker', 'Machado 100', 'fa-fire'],
-    ['Paladino', 'Espada 100', 'fa-khanda'],
-    ['Arqueiro', 'Arco 100', 'fa-bullseye'],
-    ['Caçador', 'Besta 100', 'fa-crosshairs'],
-    ['Poseidon', 'Tridente 100', 'fa-water'],
-    ['Farmer', 'Habilidade passiva 100', 'fa-seedling'],
-    ['Lendário', 'Todas as habilidades de PvP 100', 'fa-bolt'],
-    ['Eternal', 'Todo o mcMMO 100', 'fa-infinity'],
-    ['Campeão', 'Primeiro lugar da Liga do mês', 'fa-crown'],
-];
+// Uma familia: a faixa do degrade e os tres titulos, com o avanco de icones.
+function familiaWikiHtml(familia) {
+    const linhas = familia.titulos.map((titulo, indice) => {
+        const info = { familia, ...tituloNivel(familia, indice) };
+        const fem = titulo.fem ? `<small class="titulo-fem">${escHtml(titulo.fem)}</small>` : '';
+        return `
+            <li class="familia-titulo">
+                <span class="familia-nome">${tituloHtml(titulo.nome, info)}${fem}</span>
+                <span class="familia-req">${escHtml(titulo.requisito)}</span>
+            </li>`;
+    }).join('');
+    const selo = familia.escada ? 'Escada' : 'Cada um';
+    return `
+        <article class="familia" style="--de:${familia.de};--ate:${familia.ate}">
+            <div class="familia-faixa" aria-hidden="true"></div>
+            <div class="familia-topo">
+                <span class="familia-selo">${selo}</span>
+                ${familia.posicao ? '<span class="familia-selo familia-selo-posicao" title="Sai sozinho quando a pessoa deixa de cumprir">Por posição</span>' : ''}
+            </div>
+            <ol class="familia-lista">${linhas}</ol>
+        </article>`;
+}
+
+function titulosWikiHtml() {
+    return TITULOS_CATEGORIAS.map(categoria => `
+        <div class="titulos-categoria">
+            <div class="titulos-categoria-cabeca">
+                <i class="fa-solid ${categoria.icone}" aria-hidden="true"></i>
+                <div><h3>${escHtml(categoria.nome)}</h3><p>${escHtml(categoria.texto)}</p></div>
+            </div>
+            <div class="familias">${categoria.familias.map(familiaWikiHtml).join('')}</div>
+        </div>`).join('');
+}
 
 const WIKI_WARPS = [
     ['/go ETY', 'A cidade e o ponto de encontro'],
@@ -115,15 +130,21 @@ function renderWiki() {
             <div class="miolo">
                 <h2>Títulos</h2>
                 <p class="texto">O título aparece ao lado do seu nick no clã. Para pedir o seu, mande no privado do jogo: <code>/m Eternity quero a tag &lt;nome&gt;</code></p>
-                <h3 class="subtitulo-wiki">Pelo tempo de clã</h3>
-                <div class="subida">
-                    ${WIKI_TITULOS_TEMPO.map(([nome, tempo]) => `
-                        <div class="degrau"><span class="marco"></span><strong>${nome}</strong><span>${tempo}</span></div>`).join('')}
-                </div>
-                <h3 class="subtitulo-wiki">Pelas habilidades do mcMMO</h3>
-                <div class="habilidades">
-                    ${WIKI_TITULOS_MCMMO.map(([nome, requisito, icone]) => `
-                        <div class="habilidade"><i class="fa-solid ${icone}" aria-hidden="true"></i><strong>${nome}</strong><span>${requisito}</span></div>`).join('')}
+                <ul class="titulos-regras">
+                    <li><b>Escada:</b> vale só o nível mais alto que você alcançou.</li>
+                    <li><b>Por posição:</b> top do clã, Liga e ofensiva saem sozinhos quando você deixa de cumprir.</li>
+                    <li><b>Feminino:</b> quem preferir pede a versão feminina (Mestra, Campeã…), que vale igual.</li>
+                </ul>
+                ${titulosWikiHtml()}
+                <div class="titulos-categoria">
+                    <div class="titulos-categoria-cabeca">
+                        <i class="fa-solid fa-hourglass-half" aria-hidden="true"></i>
+                        <div><h3>Tempo de clã</h3><p>Pela data de entrada no clã.</p></div>
+                    </div>
+                    <div class="subida">
+                        ${TITULOS_TEMPO.map(([nome, tempo]) => `
+                            <div class="degrau"><span class="marco"></span><strong>${nome}</strong><span>${tempo}</span></div>`).join('')}
+                    </div>
                 </div>
             </div>
         </section>
