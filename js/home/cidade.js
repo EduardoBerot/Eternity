@@ -37,25 +37,49 @@ function renderCidadePublica() {
     app.innerHTML = `
         <header class="cabeca-pagina"><div class="miolo">
             <h1>Cidade</h1>
-            <p class="texto">A cidade da Eternity fica no servidor <b>Apocalipse</b>: casas e terrenos gratuitos, farms coletivas e um lugar para cada membro. Para visitar: <code>/apocalipse</code> e depois <code>/go ETY</code>.</p>
+            <p class="texto">A cidade da Eternity fica no servidor <b>Apocalipse</b>: casas e terrenos gratuitos, farms coletivas e um lugar para cada membro.</p>
         </div></header>
         <div class="miolo">
             <section class="cidade-publica">
-                <p class="cidade-dica">Quer uma casa ou um terreno? Clique num lugar <b>livre</b> no mapa e solicite o trust. A confirmação chega por DM no Discord vinculado ao seu nick.</p>
                 <div class="cidade-mapa cidade-mapa--publica">
                     <div id="cidade_mapa" class="cidade-mapa-leaflet"><p class="cidade-carregando">Carregando o mapa...</p></div>
                     <div id="cidade_card" class="cidade-card" hidden role="dialog" aria-live="polite"></div>
                 </div>
-                <ul class="cidade-legenda">
-                    <li><span style="--cor:${CASA_ESTADOS.aberta.cor}"></span>Casa livre</li>
-                    <li><span class="quadrado" style="--cor:${CIDADE_COR_TERRENO_LIVRE}"></span>Terreno livre</li>
-                    <li><span style="--cor:${CASA_ESTADOS.ocupada.cor}"></span>Ocupado</li>
-                    <li><span style="--cor:${CASA_ESTADOS.fechada.cor}"></span>Indisponível</li>
-                    <li><i class="fa-solid fa-signs-post" aria-hidden="true"></i>Local importante</li>
-                </ul>
+                <aside class="cidade-lado">
+                    <dl class="cidade-numeros">
+                        <div><dt>Casas livres</dt><dd id="cidade_n_casas">–</dd></div>
+                        <div><dt>Terrenos livres</dt><dd id="cidade_n_terrenos">–</dd></div>
+                        <div><dt>Ocupados</dt><dd id="cidade_n_ocupados">–</dd></div>
+                    </dl>
+                    <div class="cidade-bloco">
+                        <h2>Como pedir o seu</h2>
+                        <ol class="cidade-passos">
+                            <li><span>Clique numa casa ou num terreno <b>livre</b> no mapa.</span></li>
+                            <li><span>Em <b>Solicitar trust</b>, digite o seu nick.</span></li>
+                            <li><span>Confirme pela DM do bot no Discord vinculado ao nick.</span></li>
+                            <li><span>Um líder dá o trust no jogo.</span></li>
+                        </ol>
+                    </div>
+                    <div class="cidade-bloco">
+                        <h2>Como visitar</h2>
+                        <p class="cidade-rota"><code>/apocalipse</code><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><code>/go ETY</code></p>
+                    </div>
+                    <ul class="cidade-legenda cidade-legenda--lado">
+                        <li><span style="--cor:${CASA_ESTADOS.aberta.cor}"></span>Casa livre</li>
+                        <li><span class="quadrado" style="--cor:${CIDADE_COR_TERRENO_LIVRE}"></span>Terreno livre</li>
+                        <li><span style="--cor:${CASA_ESTADOS.ocupada.cor}"></span>Ocupado</li>
+                        <li><span style="--cor:${CASA_ESTADOS.fechada.cor}"></span>Indisponível</li>
+                        <li><i class="fa-solid fa-signs-post" aria-hidden="true"></i>Local importante</li>
+                    </ul>
+                </aside>
             </section>
-            <h2 class="cidade-galeria-titulo">Galeria</h2>
-            <div id="gallery">${[0, 1, 2, 3, 4, 5].map(i => `<a href="/imgs/City0${i}.jpg"><img class="cityimgs" src="/imgs/City0${i}.jpg" alt="Cidade da Eternity, vista ${i + 1}" loading="lazy"></a>`).join('')}</div>
+            <section class="cidade-galeria">
+                <div class="cidade-galeria-cabeca">
+                    <h2>Galeria</h2>
+                    <p>Clique numa foto para ampliar.</p>
+                </div>
+                <div id="gallery">${[0, 1, 2, 3, 4, 5].map(i => `<a href="/imgs/City0${i}.jpg"><img class="cityimgs" src="/imgs/City0${i}.jpg" alt="Cidade da Eternity, vista ${i + 1}" loading="lazy"><i class="fa-solid fa-expand" aria-hidden="true"></i></a>`).join('')}</div>
+            </section>
         </div>
         ${rodapeSite()}`;
     lightGallery(document.getElementById('gallery'), { download: false });
@@ -65,12 +89,23 @@ function renderCidadePublica() {
 async function carregarCidadePublica() {
     try {
         cidadePub.dados = await fetch(`${URL_CIDADE_PUBLICA}/publico`).then(lerResposta);
+        contarCidade();
         montarMapaPublico();
     } catch (error) {
         console.error('Falha ao carregar a cidade:', error);
         const caixa = document.getElementById('cidade_mapa');
         if (caixa) caixa.innerHTML = '<p class="cidade-carregando">Não foi possível carregar o mapa da cidade.</p>';
     }
+}
+
+// Os numeros do painel ao lado do mapa.
+function contarCidade() {
+    const casas = cidadePub.dados.casas;
+    const conta = filtro => casas.filter(filtro).length;
+    const poe = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
+    poe('cidade_n_casas', conta(c => c.estado === 'aberta' && c.tipo !== 'terreno'));
+    poe('cidade_n_terrenos', conta(c => c.estado === 'aberta' && c.tipo === 'terreno'));
+    poe('cidade_n_ocupados', conta(c => c.estado === 'ocupada'));
 }
 
 function blocoPublico(x, z) {
@@ -84,6 +119,7 @@ function montarMapaPublico() {
     caixa.innerHTML = '';
     const { largura, altura } = cidadePub.dados.mapa;
     const limites = [[-altura, 0], [0, largura]];
+    cidadeProporcao(caixa.parentElement, largura, altura);
     const mapa = L.map(caixa, {
         crs: L.CRS.Simple, minZoom: -2, maxZoom: 3, zoomSnap: 0, zoomDelta: 0.5, wheelPxPerZoomLevel: 120, attributionControl: false,
         maxBounds: limites, maxBoundsViscosity: 1,

@@ -180,6 +180,22 @@ body.painel--cidade main { margin: 0; }
     overflow: hidden;
 }
 
+/* A caixa do mapa tem a proporcao do PNG (--proporcao, posta pelo JS): a cidade
+   inteira cabe nela, sem faixa preta e sem corte (09/10/2026). No painel ela e
+   a maior que cabe na area livre da aba, centralizada. */
+.cidade-moldura {
+    flex: 1;
+    min-height: 0;
+    container-type: size;
+    display: grid;
+    place-items: center;
+}
+
+.cidade-moldura .cidade-mapa {
+    width: min(100cqw, calc(100cqh * var(--proporcao, 1.28)));
+    aspect-ratio: var(--proporcao, 1.28);
+}
+
 /* 1 pixel por bloco: o zoom tem de mostrar blocos, nao borrao. */
 .cidade-mapa-img { image-rendering: pixelated; }
 
@@ -324,13 +340,15 @@ body.painel--cidade main { margin: 0; }
 
 /* ---------- Pagina publica (#cidade do site) ---------- */
 
+/* Mapa a esquerda, painel com os numeros, o passo a passo e a legenda a
+   direita (09/10/2026). */
 .cidade-publica {
     display: grid;
-    gap: 12px;
-    margin-top: 24px;
+    grid-template-columns: minmax(0, 1fr) 290px;
+    gap: 24px;
+    align-items: start;
+    margin-top: 32px;
 }
-
-.cidade-dica { margin: 0; color: var(--nevoa); font-family: var(--sans); font-size: 0.92rem; }
 
 /* O Leaflet empilha painel e controles ate z-index 1000; isolado aqui, o mapa
    nao passa por cima da navbar fixa ao rolar. O card da casa fica por cima do
@@ -339,8 +357,103 @@ body.painel--cidade main { margin: 0; }
     position: relative;
     z-index: 0;
     isolation: isolate;
-    height: min(72vh, 680px);
-    min-height: 360px;
+    width: 100%;
+    aspect-ratio: var(--proporcao, 1.28);
+    border-color: rgba(46, 230, 240, 0.18);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+/* O site poe a fonte de titulo em li/dt; aqui o texto corrido volta ao sans. */
+.cidade-lado {
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+    font-family: var(--sans);
+
+    li, dt, p, span { font-family: var(--sans); }
+}
+
+.cidade-numeros {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+
+    div {
+        padding: 12px 10px 10px;
+        border: 1px solid var(--linha);
+        border-radius: 8px;
+        background: rgba(15, 28, 43, 0.55);
+    }
+    dt { font-size: 0.66rem; color: var(--nevoa); text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.3; }
+    dd { margin: 6px 0 0; font-size: 1.7rem; font-weight: 700; line-height: 1; color: var(--gelo); font-variant-numeric: tabular-nums; }
+    div:first-child dd { color: #3ddc84; }
+    div:nth-child(2) dd { color: #29c76a; }
+    div:last-child dd { color: var(--aqua); }
+}
+
+.cidade-bloco {
+    padding: 16px 16px 14px;
+    border: 1px solid var(--linha);
+    border-radius: 8px;
+    background: rgba(15, 28, 43, 0.55);
+
+    h2 { margin: 0 0 12px; font-size: 0.95rem; letter-spacing: 0.02em; }
+}
+
+.cidade-passos {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: passo;
+    display: grid;
+    gap: 10px;
+
+    li {
+        counter-increment: passo;
+        display: grid;
+        grid-template-columns: 24px 1fr;
+        gap: 10px;
+        align-items: start;
+        font-size: 0.86rem;
+        line-height: 1.45;
+        color: var(--nevoa);
+    }
+    li::before {
+        content: counter(passo);
+        display: grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 1px solid rgba(46, 230, 240, 0.45);
+        color: var(--aqua);
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+    b { color: var(--gelo); }
+}
+
+.cidade-rota {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+
+    i { color: var(--nevoa-escura); font-size: 0.75rem; }
+}
+
+.cidade-legenda--lado {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+    padding: 0 4px;
+    font-size: 0.78rem;
+}
+
+@media (max-width: 900px) {
+    .cidade-publica { grid-template-columns: 1fr; gap: 16px; margin-top: 20px; }
 }
 
 .cidade-mapa-leaflet { position: absolute; inset: 0; background: #04080f; }
@@ -408,5 +521,17 @@ body.painel--cidade main { margin: 0; }
     .cidade-card { left: 8px; right: 8px; bottom: 8px; top: auto; width: auto; max-height: 70%; }
 }
 
-.cidade-galeria-titulo { margin: 40px 0 0; }
-.site .page-cidade .cidade-galeria-titulo + #gallery { margin-top: 16px; }
+/* Galeria: mosaico com a primeira foto grande (css/site.css, secao Cidade). */
+.cidade-galeria { margin: 64px 0 72px; }
+
+.cidade-galeria-cabeca {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+
+    h2 { margin: 0; }
+    p { margin: 0; color: var(--nevoa-escura); font-family: var(--sans); font-size: 0.82rem; }
+}

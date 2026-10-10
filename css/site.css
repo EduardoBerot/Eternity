@@ -1236,26 +1236,62 @@ main { padding-top: var(--nav); }
 
 /* ---------- Cidade ---------- */
 
+/* Mosaico: a primeira foto ocupa 2x2, as outras completam em volta. */
 .site .page-cidade #gallery {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin: 32px 0 64px;
+    grid-auto-rows: clamp(150px, 17vw, 210px);
+    gap: 12px;
+    margin: 0;
 
-    a { width: auto; overflow: hidden; border-radius: 6px; }
+    a {
+        position: relative;
+        width: auto;
+        overflow: hidden;
+        border-radius: 8px;
+        border: 1px solid var(--linha);
+        background: var(--aco);
+    }
+    a:first-child { grid-column: span 2; grid-row: span 2; }
+    a::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, transparent 55%, rgba(4, 8, 15, 0.55));
+        transition: opacity 0.4s ease;
+    }
+    a > i {
+        position: absolute;
+        z-index: 1;
+        right: 12px;
+        bottom: 12px;
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(4, 8, 15, 0.65);
+        color: var(--gelo);
+        font-size: 0.8rem;
+        opacity: 0;
+        transform: translateY(4px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    a:hover > i, a:focus-visible > i { opacity: 1; transform: none; }
+    a:hover::after { opacity: 0; }
 }
 
 .site .page-cidade .cityimgs {
     display: block;
     width: 100%;
-    aspect-ratio: 16 / 10;
+    height: 100%;
     object-fit: cover;
     border-radius: 0;
-    filter: brightness(0.85);
+    filter: brightness(0.88);
     transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s ease;
 }
 
-.site .page-cidade #gallery a:hover .cityimgs { transform: scale(1.06); filter: brightness(1.05); }
+.site .page-cidade #gallery a:hover .cityimgs { transform: scale(1.05); filter: brightness(1.05); }
 
 /* ---------- Guia, login e atualizar cadastro ---------- */
 
@@ -1441,7 +1477,26 @@ main { padding-top: var(--nav); }
     .subida { grid-template-columns: repeat(3, 1fr); row-gap: 28px; }
     .subida::before { display: none; }
     .dialogo-grade { grid-template-columns: 1fr; }
-    .site .page-cidade #gallery { grid-template-columns: 1fr; }
+    /* No celular a galeria vira carrossel: desliza de lado, sem uma coluna
+       de seis fotos gigantes. */
+    .site .page-cidade #gallery {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        align-items: stretch;
+        gap: 10px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        margin: 0 calc(-1 * var(--lado));
+        padding: 0 var(--lado) 6px;
+        scroll-padding: 0 var(--lado);
+        scrollbar-width: none;
+
+        a { flex: 0 0 84%; aspect-ratio: 16 / 10; scroll-snap-align: start; }
+        a > i { opacity: 1; transform: none; }
+    }
+    .site .page-cidade #gallery::-webkit-scrollbar { display: none; }
     .site .content.guia-modo-video { height: auto; overflow: visible; }
     .site .guia-video { width: 100%; height: auto; }
 }

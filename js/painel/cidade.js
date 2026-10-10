@@ -50,7 +50,7 @@ async function renderCidade() {
     document.body.classList.add('painel--cidade');
     APP.innerHTML = `
         <section class="cidade">
-            <div id="cidade_mapa" class="cidade-mapa"></div>
+            <div class="cidade-moldura"><div id="cidade_mapa" class="cidade-mapa"></div></div>
             <footer class="cidade-rodape">
                 <ul class="cidade-legenda">
                     ${Object.values(CIDADE_ESTADOS).map(e => `<li><span style="--cor:${e.cor}"></span>${e.rotulo}</li>`).join('')}
@@ -92,6 +92,7 @@ function latLngParaBloco(latlng) {
 function montarMapaCidade() {
     const { largura, altura } = cidade.dados.mapa;
     const limites = [[-altura, 0], [0, largura]];
+    cidadeProporcao(document.getElementById('cidade_mapa'), largura, altura);
     const mapa = L.map('cidade_mapa', {
         crs: L.CRS.Simple, minZoom: -2, maxZoom: 3, zoomSnap: 0, zoomDelta: 0.5, wheelPxPerZoomLevel: 120, attributionControl: false,
         maxBounds: limites, maxBoundsViscosity: 1,

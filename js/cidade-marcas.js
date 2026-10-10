@@ -41,9 +41,15 @@ function cidadeMarcaLocal(latlng, icone) {
     });
 }
 
-// Zoom que cobre a caixa inteira com o mapa (09/10/2026): sem faixa preta em
-// volta da cidade. Vira o zoom minimo, e o arraste para nas bordas da imagem.
-// Devolve o zoom de cobertura, ou null com a caixa ainda sem tamanho.
+// A caixa do mapa tem a proporcao do PNG (css/cidade.css, --proporcao): o zoom
+// que cobre a caixa mostra a cidade inteira, sem faixa preta e sem corte.
+function cidadeProporcao(elemento, largura, altura) {
+    elemento?.style.setProperty('--proporcao', String(largura / altura));
+}
+
+// Zoom que cobre a caixa inteira com o mapa (09/10/2026). Vira o zoom minimo,
+// e o arraste para nas bordas da imagem. Devolve o zoom de cobertura, ou null
+// com a caixa ainda sem tamanho.
 function cidadeAjustarZoomMinimo(mapa, limites) {
     const tamanho = mapa.getSize();
     if (!tamanho.x || !tamanho.y) return null;
@@ -53,14 +59,12 @@ function cidadeAjustarZoomMinimo(mapa, limites) {
     return cobre;
 }
 
-// Ao abrir, um pouco mais perto que o minimo, no centro da cidade.
-const CIDADE_ZOOM_INICIAL_EXTRA = 0.35;
-
-// Devolve false com a caixa ainda sem tamanho (aba escondida).
+// A cidade inteira na caixa. Devolve false com a caixa ainda sem tamanho (aba
+// escondida).
 function cidadeEnquadrar(mapa, limites) {
     const cobre = cidadeAjustarZoomMinimo(mapa, limites);
     if (cobre === null) return false;
-    mapa.setView(L.latLngBounds(limites).getCenter(), cobre + CIDADE_ZOOM_INICIAL_EXTRA, { animate: false });
+    mapa.setView(L.latLngBounds(limites).getCenter(), cobre, { animate: false });
     return true;
 }
 
