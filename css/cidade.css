@@ -650,3 +650,62 @@ body.painel--cidade main { margin: 0; }
 
     i { color: var(--aqua); margin-right: 4px; }
 }
+
+/* ---------- Pendencias da cidade (painel, 10/10/2026) ----------
+   Marcador em gota, com a cor do status e o icone do tipo, ancorado pela
+   ponta no bloco. */
+
+.cidade-pend {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    background: var(--cor);
+    border: 2px solid #04080f;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--cor) 35%, transparent), 0 4px 10px rgba(0, 0, 0, 0.5);
+    transition: transform 0.2s ease;
+
+    i { transform: rotate(45deg); font-size: 0.68rem; color: #04080f; }
+}
+
+.cidade-pend:hover { transform: rotate(-45deg) scale(1.2); }
+
+.cidade-legenda span.pend { border-radius: 50% 50% 50% 0; transform: rotate(-45deg); }
+
+.cidade-form[hidden] { display: none; }
+
+.cidade-pend-texto {
+    margin: 10px 0;
+    font-family: var(--sans);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.cidade-pend-link { color: var(--aqua); font-family: var(--sans); }
+
+.cidade-pend-aqui {
+    width: 100%;
+    margin-top: 12px;
+    justify-content: center;
+
+    i { color: #ff9f1c; margin-right: 6px; }
+}
+
+.cidade-editar-pend, .cidade-resolvidas {
+    margin-top: 12px;
+    font-family: var(--sans);
+
+    summary { cursor: pointer; color: var(--nevoa); font-size: 0.85rem; }
+    summary:hover { color: var(--gelo); }
+    .cidade-form, .cidade-pendencias { margin-top: 10px; }
+}
+
+/* Na lista do rodape, a borda da pendencia da cidade segue o status. */
+.cidade-pendencias button.pend-aberta { border-color: rgba(255, 77, 94, 0.45); background: rgba(255, 77, 94, 0.06); }
+.cidade-pendencias button.pend-andamento { border-color: rgba(255, 176, 32, 0.45); background: rgba(255, 176, 32, 0.06); }
+.cidade-pendencias button.pend-resolvida { border-color: rgba(61, 220, 132, 0.35); background: rgba(61, 220, 132, 0.05); }
+.cidade-pendencias button i { margin-right: 4px; }
+.cidade-modal h2 + .cidade-pendencias + h2 { margin-top: 22px; }

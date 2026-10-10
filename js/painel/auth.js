@@ -20,7 +20,15 @@ async function authenticate() {
                 throw new Error('Erro na requisição');
             }
 
-            const {valid, lider} = await response.json();
+            const {valid, lider, cidade} = await response.json();
+
+            // A aba Cidade e do nivel de Supervisor para cima (10/10/2026):
+            // Estagiario, Auxiliar e Daimyo nao a veem. So some quando o backend
+            // diz `false`; o backend recusa a aba de qualquer jeito.
+            if (valid && cidade === false) {
+                const item = document.getElementById('cidade');
+                if (item) item.hidden = true;
+            }
 
             // A aba de recrutamento nasce escondida no HTML: ela mostra
             // conversa privada de jogador e so lideres a enxergam. Esconder o

@@ -7,6 +7,14 @@
 // pendente retirar o trust: o lider tira no jogo, leva os itens ao banco de
 // itens e marca aqui. Os marcadores sao de js/cidade-marcas.js.
 //
+// Pendencias da cidade (10/10/2026): o que o Supervisor acha na ronda (grief,
+// farm quebrada, casa abandonada, informacao desatualizada). Aberta pelo
+// botao direito no mapa ou de dentro de uma casa/local, fica marcada no mapa
+// ate ser resolvida e entra no selo do rodape junto das pendencias de trust.
+// A aba inteira e do nivel de Supervisor para cima (auth.js esconde o menu de
+// quem esta abaixo; o backend confere em cada requisicao). Nunca vai ao site
+// publico.
+//
 // Leaflet com CRS.Simple: lat = -linha, lng = coluna, e o bloco do mundo e
 // (x0 + coluna, z0 + linha). O mapa (1 pixel por bloco) e publico.
 
@@ -18,6 +26,20 @@ const CIDADE_ESTADOS = {
     ocupada: { rotulo: 'Ocupada', cor: '#2ee6f0' },
     inativa: { rotulo: 'Morador inativo', cor: '#ffd23f' },
     liberar: { rotulo: 'Retirar trust', cor: '#ff4d5e' },
+};
+
+// Pendencia da cidade: a cor diz o status, o icone diz o tipo.
+const PENDENCIA_STATUS = {
+    Aberta: { cor: '#ff4d5e' },
+    'Em andamento': { cor: '#ffb020' },
+    Resolvida: { cor: '#3ddc84' },
+};
+const PENDENCIA_ICONE = {
+    grief: 'fa-burst',
+    farm: 'fa-wheat-awn',
+    abandonada: 'fa-house-crack',
+    informacao: 'fa-circle-info',
+    outro: 'fa-triangle-exclamation',
 };
 
 const cidade = { mapa: null, camada: null, dados: null };
@@ -57,6 +79,7 @@ async function renderCidade() {
                     <li><span class="quadrado" style="--cor:${CIDADE_COR_TERRENO_LIVRE}"></span>Terreno</li>
                     <li><span class="pendente"></span>Pedido pendente</li>
                     <li><i class="fa-solid fa-signs-post" aria-hidden="true"></i>Local</li>
+                    <li><span class="pend" style="--cor:${PENDENCIA_STATUS.Aberta.cor}"></span>Pendência da cidade</li>
                 </ul>
                 <button type="button" id="cidade_status" class="cidade-status" onclick="abrirPendencias()" disabled>Carregando o mapa...</button>
             </footer>
@@ -110,8 +133,32 @@ function montarMapaCidade() {
     cidade.camada = L.layerGroup().addTo(mapa);
 
     // Botao direito (toque longo no celular) num lugar vazio marca casa,
-    // terreno ou local.
-    if (cidade.dados.permissoes.gerir) mapa.on('contextmenu', e => abrirNovaMarca(latLngParaBloco(e.latlng)));
+    // terreno ou local (quem gere) ou abre uma pendencia (toda a aba).
+    const { gerir, ver = gerir } = cidade.dados.permissoes;
+    if (gerir || ver) mapa.on('contextmenu', e => abrirNovaMarca(latLngParaBloco(e.latlng)));
+}
+
+function pendenciasAbertas() {
+    return (cidade.dados.pendencias || []).filter(p => p.status !== 'Resolvida');
+}
+
+function rotuloTipoPendencia(tipo) {
+    return (cidade.dados.tipos_pendencia || []).find(t => t.chave === tipo)?.rotulo || tipo;
+}
+
+function marcaPendencia(p) {
+    const cor = (PENDENCIA_STATUS[p.status] || PENDENCIA_STATUS.Aberta).cor;
+    const icone = PENDENCIA_ICONE[p.tipo] || PENDENCIA_ICONE.outro;
+    return L.marker(blocoParaLatLng(p.x, p.z), {
+        icon: L.divIcon({
+            className: 'cidade-pino-caixa',
+            html: `<span class="cidade-pend" style="--cor:${cor}"><i class="fa-solid ${icone}" aria-hidden="true"></i></span>`,
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+        }),
+        riseOnHover: true,
+        zIndexOffset: 800,
+    });
 }
 
 function desenharCasas() {
@@ -132,14 +179,26 @@ function desenharCasas() {
         marca.on('click', () => abrirLocal(local.id));
         marca.addTo(cidade.camada);
     }
+    // Pendencias da cidade em aberto (as resolvidas saem do mapa).
+    for (const p of pendenciasAbertas()) {
+        const marca = marcaPendencia(p);
+        marca.bindTooltip(`${cEsc(rotuloTipoPendencia(p.tipo))} <small>(${cEsc(p.status.toLowerCase())})</small>`, { direction: 'top', offset: [0, -24] });
+        marca.on('click', () => abrirPendenciaCidade(p.id));
+        marca.addTo(cidade.camada);
+    }
     // As pendencias viram um selo de status no rodape; o clique abre a lista.
-    const total = pendenciasCidade().length;
+    const trust = pendenciasCidade().length;
+    const daCidade = pendenciasAbertas().length;
+    const total = trust + daCidade;
     const status = document.getElementById('cidade_status');
-    status.disabled = !total;
+    status.disabled = !total && !(cidade.dados.pendencias || []).length;
     status.classList.toggle('tem', total > 0);
+    const partes = [];
+    if (trust) partes.push(`${trust} de trust`);
+    if (daCidade) partes.push(`${daCidade} da cidade`);
     status.innerHTML = total
-        ? `<i class="fa-solid fa-key" aria-hidden="true"></i> ${total} ${total === 1 ? 'pendência de trust' : 'pendências de trust'}`
-        : '<i class="fa-solid fa-check" aria-hidden="true"></i> Nenhum trust pendente';
+        ? `<i class="fa-solid fa-list-check" aria-hidden="true"></i> ${total === 1 ? 'Pendência' : 'Pendências'}: ${partes.join(' · ')}`
+        : '<i class="fa-solid fa-check" aria-hidden="true"></i> Nenhuma pendência';
 }
 
 // O hover mostra quem mora la. Sem morador, quem esta pedindo; senao, o estado.
@@ -168,13 +227,35 @@ function pendenciasCidade() {
 
 function abrirPendencias() {
     const pendentes = pendenciasCidade();
+    const daCidade = pendenciasAbertas();
+    const resolvidas = (cidade.dados.pendencias || []).filter(p => p.status === 'Resolvida');
+    const itemCidade = p => `
+        <li><button type="button" class="pend-${p.status === 'Em andamento' ? 'andamento' : p.status === 'Resolvida' ? 'resolvida' : 'aberta'}" onclick="irParaPendencia(${p.id})">
+            <strong><i class="fa-solid ${PENDENCIA_ICONE[p.tipo] || PENDENCIA_ICONE.outro}" aria-hidden="true"></i> ${cEsc(rotuloTipoPendencia(p.tipo))} · ${cEsc(p.status)}</strong>
+            <span>X ${p.x}, Z ${p.z} · ${cEsc(p.descricao.slice(0, 90))}${p.descricao.length > 90 ? '…' : ''}</span>
+            <span>Aberta por ${cEsc(p.criado_por)} em ${cData(p.criado_em)}${p.responsavel && p.status !== 'Aberta' ? ` · com ${cEsc(p.responsavel)}` : ''}</span>
+        </button></li>`;
     abrirModal(`
+        <h2>Pendências da cidade</h2>
+        <ul class="cidade-pendencias">${daCidade.map(itemCidade).join('') || '<li class="vazio">Nenhuma pendência em aberto.</li>'}</ul>
         <h2>Pendências de trust</h2>
         <ul class="cidade-pendencias">${pendentes.map(({ casa, titulo, detalhe }) => `
             <li><button type="button" onclick="irParaCasa(${casa.id})">
                 <strong>${cEsc(titulo)}</strong>
                 <span>${cEsc(casa.nome || `X ${casa.x}, Z ${casa.z}`)} · ${cEsc(detalhe)}</span>
-            </button></li>`).join('') || '<li class="vazio">Nenhuma pendência.</li>'}</ul>`);
+            </button></li>`).join('') || '<li class="vazio">Nenhuma pendência.</li>'}</ul>
+        ${resolvidas.length ? `
+        <details class="cidade-resolvidas">
+            <summary>Resolvidas nos últimos 30 dias (${resolvidas.length})</summary>
+            <ul class="cidade-pendencias">${resolvidas.map(itemCidade).join('')}</ul>
+        </details>` : ''}`);
+}
+
+function irParaPendencia(id) {
+    const p = (cidade.dados.pendencias || []).find(item => item.id === id);
+    if (!p) return;
+    cidade.mapa.setView(blocoParaLatLng(p.x, p.z), 1);
+    abrirPendenciaCidade(id);
 }
 
 function irParaCasa(id) {
@@ -193,14 +274,27 @@ function cidadeFechar() {
     document.getElementById('cidade_modal').hidden = true;
 }
 
-// Botao direito: escolhe entre casa, terreno e local importante.
-function abrirNovaMarca({ x, z }, tipo = 'casa') {
+// Botao direito: escolhe entre casa, terreno, local importante (quem gere) e
+// pendencia da cidade (toda a aba).
+function abrirNovaMarca({ x, z }, tipo) {
     const { x0, z0, largura, altura } = cidade.dados.mapa;
     if (x < x0 || z < z0 || x >= x0 + largura || z >= z0 + altura) return;
-    const abas = [['casa', 'Casa', 'fa-house'], ['terreno', 'Terreno', 'fa-vector-square'], ['local', 'Local', 'fa-signs-post']]
+    const { gerir } = cidade.dados.permissoes;
+    tipo ??= gerir ? 'casa' : 'pendencia';
+    if (!gerir) tipo = 'pendencia';
+    const opcoes = [
+        ...(gerir ? [['casa', 'Casa', 'fa-house'], ['terreno', 'Terreno', 'fa-vector-square'], ['local', 'Local', 'fa-signs-post']] : []),
+        ['pendencia', 'Pendência', 'fa-triangle-exclamation'],
+    ];
+    const abas = opcoes
         .map(([valor, rotulo, icone]) => `<button type="button" class="cidade-aba ${valor === tipo ? 'ativa' : ''}" onclick="abrirNovaMarca({ x: ${x}, z: ${z} }, '${valor}')">
             <i class="fa-solid ${icone}" aria-hidden="true"></i> ${rotulo}</button>`).join('');
-    const corpo = tipo === 'local' ? `
+    const corpo = tipo === 'pendencia' ? `
+        <form class="cidade-form" onsubmit="criarPendenciaCidade(event, ${x}, ${z})">
+            ${camposPendencia({})}
+            <p class="cidade-aviso">Fica marcada no mapa do painel até ser resolvida. Não aparece no site.</p>
+            <button class="botao botao-principal" type="submit">Abrir pendência</button>
+        </form>` : tipo === 'local' ? `
         <form class="cidade-form" onsubmit="criarLocal(event, ${x}, ${z})">
             ${camposLocal({})}
             <button class="botao botao-principal" type="submit">Marcar local</button>
@@ -212,10 +306,110 @@ function abrirNovaMarca({ x, z }, tipo = 'casa') {
             <button class="botao botao-principal" type="submit">Marcar ${tipo === 'terreno' ? 'terreno' : 'casa'}</button>
         </form>`;
     abrirModal(`
-        <h2>Marcar no mapa</h2>
+        <h2>${gerir ? 'Marcar no mapa' : 'Abrir pendência'}</h2>
         <p class="cidade-coord">X ${x}, Z ${z}</p>
-        <div class="cidade-abas">${abas}</div>
+        ${opcoes.length > 1 ? `<div class="cidade-abas">${abas}</div>` : ''}
         ${corpo}`);
+}
+
+// ---------- Pendencias da cidade ----------
+
+function camposPendencia(p) {
+    const atual = p.tipo || cidade.dados.tipos_pendencia?.[0]?.chave;
+    const tipos = (cidade.dados.tipos_pendencia || []).map(t => `
+        <label class="cidade-icone" title="${cEsc(t.rotulo)}">
+            <input type="radio" name="tipo" value="${cEsc(t.chave)}" ${t.chave === atual ? 'checked' : ''}>
+            <i class="fa-solid ${PENDENCIA_ICONE[t.chave] || PENDENCIA_ICONE.outro}" aria-hidden="true"></i><span>${cEsc(t.rotulo)}</span>
+        </label>`).join('');
+    return `
+        <fieldset class="cidade-icones"><legend>Tipo</legend>${tipos}</fieldset>
+        <label><span>O que foi encontrado</span><textarea name="descricao" required maxlength="1000" rows="3" placeholder="Ex.: parede da casa do lado da praça quebrada, baú aberto">${cEsc(p.descricao || '')}</textarea></label>
+        <label><span>Link do print <small>(opcional)</small></span><input name="link" type="url" maxlength="500" value="${cEsc(p.link || '')}" placeholder="https://..."></label>`;
+}
+
+function dadosPendencia(form) {
+    const dados = new FormData(form);
+    return { tipo: dados.get('tipo'), descricao: dados.get('descricao'), link: dados.get('link') || '' };
+}
+
+async function enviarPendencia(event, caminho, metodo, corpo, falha, reabrirId) {
+    event?.preventDefault();
+    const botao = event?.target?.querySelector?.('button[type=submit]');
+    if (botao) botao.disabled = true;
+    try {
+        const resposta = await cidadeApi(caminho, { method: metodo, body: JSON.stringify(corpo) });
+        cidade.dados = await cidadeApi('');
+        desenharCasas();
+        const id = reabrirId ?? resposta?.id;
+        if (id && (cidade.dados.pendencias || []).some(p => p.id === id)) abrirPendenciaCidade(id);
+        else cidadeFechar();
+    } catch (error) {
+        avisarFalha(error, falha);
+        if (botao) botao.disabled = false;
+    }
+}
+
+function criarPendenciaCidade(event, x, z) {
+    enviarPendencia(event, '/pendencias', 'POST', { x, z, ...dadosPendencia(event.target) }, 'Não foi possível abrir a pendência.');
+}
+
+function salvarPendenciaCidade(event, id) {
+    enviarPendencia(event, `/pendencias/${id}`, 'PATCH', dadosPendencia(event.target), 'Não foi possível salvar a pendência.', id);
+}
+
+function mudarPendenciaCidade(id, status, event) {
+    const resolucao = status === 'Resolvida' ? document.querySelector('#pend_resolucao textarea')?.value || '' : undefined;
+    enviarPendencia(event, `/pendencias/${id}`, 'PATCH', { status, resolucao }, 'Não foi possível mudar a pendência.', id);
+}
+
+function mostrarResolucao() {
+    const form = document.getElementById('pend_resolucao');
+    if (form) { form.hidden = false; form.querySelector('textarea').focus(); }
+}
+
+async function apagarPendenciaCidade(id) {
+    try {
+        await lerResposta(await fetch(`${URL_CIDADE}/pendencias/${id}`, { method: 'DELETE', headers: getAdminRequestHeaders() }));
+        cidade.dados = await cidadeApi('');
+        desenharCasas();
+        cidadeFechar();
+    } catch (error) {
+        avisarFalha(error, 'Não foi possível apagar a pendência.');
+    }
+}
+
+function abrirPendenciaCidade(id) {
+    const p = (cidade.dados.pendencias || []).find(item => item.id === id);
+    if (!p) return;
+    const { lider } = cidade.dados.permissoes;
+    const cor = (PENDENCIA_STATUS[p.status] || PENDENCIA_STATUS.Aberta).cor;
+    const acoes = p.status === 'Resolvida' ? `
+        <div class="cidade-acoes"><button class="botao" type="button" onclick="mudarPendenciaCidade(${p.id}, 'Aberta')">Reabrir</button></div>` : `
+        <div class="cidade-acoes">
+            ${p.status === 'Aberta' ? `<button class="botao" type="button" onclick="mudarPendenciaCidade(${p.id}, 'Em andamento')">Assumir</button>` : ''}
+            <button class="botao botao-principal" type="button" onclick="mostrarResolucao()">Marcar como resolvida</button>
+        </div>
+        <form class="cidade-form" id="pend_resolucao" hidden onsubmit="mudarPendenciaCidade(${p.id}, 'Resolvida', event)">
+            <label><span>O que foi feito <small>(opcional)</small></span><textarea maxlength="1000" rows="2" placeholder="Ex.: replantei a farm; avisei um líder sobre o grief"></textarea></label>
+            <button class="botao botao-principal" type="submit">Confirmar resolução</button>
+        </form>`;
+    abrirModal(`
+        <h2><i class="fa-solid ${PENDENCIA_ICONE[p.tipo] || PENDENCIA_ICONE.outro}" aria-hidden="true"></i> ${cEsc(rotuloTipoPendencia(p.tipo))}
+            <span class="cidade-estado" style="--cor:${cor}">${cEsc(p.status)}</span></h2>
+        <p class="cidade-coord">X ${p.x}, Z ${p.z} · aberta por ${cEsc(p.criado_por)} em ${cData(p.criado_em)}</p>
+        ${p.responsavel && p.status !== 'Aberta' ? `<p class="cidade-coord">Responsável: ${cEsc(p.responsavel)}</p>` : ''}
+        <p class="cidade-pend-texto">${cEsc(p.descricao)}</p>
+        ${p.link ? `<p><a class="cidade-pend-link" href="${cEsc(p.link)}" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-image" aria-hidden="true"></i> Ver o print</a></p>` : ''}
+        ${p.status === 'Resolvida' ? `<p class="cidade-aviso">Resolvida por ${cEsc(p.resolvido_por)} em ${cData(p.resolvido_em)}${p.resolucao ? `: ${cEsc(p.resolucao)}` : '.'}</p>` : ''}
+        ${acoes}
+        <details class="cidade-editar-pend">
+            <summary>Corrigir a pendência</summary>
+            <form class="cidade-form" onsubmit="salvarPendenciaCidade(event, ${p.id})">
+                ${camposPendencia(p)}
+                <button class="botao" type="submit">Salvar</button>
+            </form>
+        </details>
+        ${lider ? `<button class="botao cidade-apagar" type="button" onclick="apagarPendenciaCidade(${p.id})">Apagar pendência aberta por engano</button>` : ''}`);
 }
 
 // Campos do local importante, com a grade de icones (lista do backend).
@@ -266,11 +460,19 @@ function abrirLocal(id) {
             ${camposLocal(local)}
             <button class="botao botao-principal" type="submit">Salvar</button>
         </form>
+        ${botaoPendenciaAqui(local)}
         <button class="botao cidade-apagar" type="button" onclick="apagarLocalCidade(${local.id})">Apagar local</button>` : `
         <h2><i class="${cidadeIconeClasse(local.icone)}" aria-hidden="true"></i> ${cEsc(local.nome)}</h2>
         <p class="cidade-coord">X ${local.x}, Z ${local.z}</p>
         ${local.warp ? `<p><code>${cEsc(local.warp)}</code></p>` : ''}
-        ${local.descricao ? `<p>${cEsc(local.descricao)}</p>` : ''}`);
+        ${local.descricao ? `<p>${cEsc(local.descricao)}</p>` : ''}
+        ${botaoPendenciaAqui(local)}`);
+}
+
+// Atalho para abrir uma pendencia no ponto de uma casa, terreno ou local.
+function botaoPendenciaAqui({ x, z }) {
+    return `<button class="botao cidade-pend-aqui" type="button" onclick="abrirNovaMarca({ x: ${x}, z: ${z} }, 'pendencia')">
+        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Abrir pendência aqui</button>`;
 }
 
 function linhaPedido(p, lider) {
@@ -329,6 +531,7 @@ function abrirCasa(id) {
         <ul class="cidade-moradores">${moradores}</ul>
         <h3>Pedidos</h3>
         <ul class="cidade-pedidos">${casa.pedidos.map(p => linhaPedido(p, lider)).join('') || '<li class="vazio">Nenhum pedido.</li>'}</ul>
+        ${botaoPendenciaAqui(casa)}
         ${lider && !casa.moradores.length && !casa.pendentes
             ? `<button class="botao cidade-apagar" type="button" onclick="apagarCasa(${casa.id})">Apagar marcação feita por engano</button>` : ''}`);
 }
