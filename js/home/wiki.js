@@ -10,37 +10,39 @@
 
 // A cor define o nivel e o cargo define a funcao: no mesmo andar, a trilha de
 // gestao (esquerda) e a de PvP (direita) tem o mesmo peso. `andar` 0 e o topo.
+// As funcoes seguem o funções-staff.md do repo do Harley (revisto em
+// 10/10/2026): mudou la, muda aqui.
 const WIKI_TORRE = [
     { andar: 0, salas: [{ cargo: 'Fundador', funcao: 'Fundou a Eternity em 01/08/2020.' }] },
     {
         andar: 1,
         salas: [
-            { cargo: 'Dono', funcao: 'Autonomia total sobre o clã.' },
+            { cargo: 'Dono', funcao: 'Conduz os ciclos e as promoções da staff.' },
             { cargo: 'Heika', funcao: 'Organiza as estratégias e decide os vencedores.' },
         ],
     },
     {
         andar: 2,
         salas: [
-            { cargo: 'Coordenador', funcao: 'Organiza projetos e cargos.' },
-            { cargo: 'Sohei', funcao: 'Organiza os itens e lidera os Samurais.' },
+            { cargo: 'Coordenador', funcao: 'Acompanha a staff de gestão e reporta aos líderes.' },
+            { cargo: 'Sohei', funcao: 'Coordena o PvP e os recursos do Bunker.' },
         ],
     },
     {
         andar: 3,
         salas: [
-            { cargo: 'Supervisor', funcao: 'Cuida da cidade, da atividade e dos kicks.' },
-            { cargo: 'Ikko', funcao: 'Convoca os eventos e promove os Ronins.' },
+            { cargo: 'Supervisor', funcao: 'Zela pela cidade e pelas farms do clã.' },
+            { cargo: 'Ikko', funcao: 'Abastece o Bunker com os itens da war.' },
         ],
     },
     {
         andar: 4,
         salas: [
-            { cargo: 'Auxiliar', funcao: 'Recruta e apoia os novatos.' },
-            { cargo: 'Daimyo', funcao: 'Treina e procura novos Ronins.' },
+            { cargo: 'Auxiliar', funcao: 'Apadrinha os novatos no primeiro mês.' },
+            { cargo: 'Daimyo', funcao: 'Treina novos Ronins para o PvP.' },
         ],
     },
-    { andar: 5, salas: [{ cargo: 'Estagiário', funcao: 'Primeiro cargo da staff.' }] },
+    { andar: 5, salas: [{ cargo: 'Estagiário', funcao: 'Destrava os recrutas e as pendências do site.' }] },
     { andar: 6, salas: [{ cargo: 'Membro', funcao: 'Todo integrante da ETY e da ETZ.' }] },
 ];
 
