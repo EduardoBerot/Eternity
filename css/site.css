@@ -1012,7 +1012,7 @@ main { padding-top: var(--nav); }
 
 .secao-wiki > .miolo > h2 { margin: 0 0 10px; font-size: clamp(1.8rem, 4vw, 2.8rem); }
 
-@media (min-width: 1100px) {
+@media (min-width: 1280px) {
     /* Mais larga que o .miolo das outras paginas: a navegacao fica afastada
        para a esquerda, longe do conteudo, e nao colada nele. */
     .wiki-corpo {
@@ -1043,7 +1043,7 @@ main { padding-top: var(--nav); }
     }
 }
 
-@media (max-width: 1099px) {
+@media (max-width: 1279px) {
     .wiki-secoes {
         position: sticky;
         top: var(--nav);
@@ -1108,7 +1108,7 @@ main { padding-top: var(--nav); }
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 10px 18px;
+    gap: 10px 14px;
     min-height: 96px;
     padding: 16px 20px;
     border-radius: 6px;
@@ -1167,9 +1167,15 @@ main { padding-top: var(--nav); }
 
 .sala-cargo {
     display: block;
-    font-size: clamp(1.1rem, 2.2vw, 1.55rem);
+    font-size: clamp(1.1rem, 2.2vw, 1.4rem);
     color: var(--cor);
     line-height: 1.1;
+}
+
+/* Onde a torre fica estreita (tablet, e entre 1280 e 1439px, com a navegacao lateral ao
+   lado) e o nome mais longo, Coordenador, empurrava as cabecas para baixo. */
+@media (min-width: 900px) and (max-width: 1099px), (min-width: 1280px) and (max-width: 1439px) {
+    .sala-cargo { font-size: 1.15rem; }
 }
 
 .sala-funcao {
@@ -1180,21 +1186,26 @@ main { padding-top: var(--nav); }
     color: var(--nevoa);
 }
 
-/* Sem espaco ao lado do nome do cargo, as cabecas descem para baixo dele. */
+/* As cabecas ficam sobrepostas, como uma pilha de avatares: ocupam menos
+   largura e cabem ao lado ate do nome mais longo (Coordenador), mantendo os
+   andares na mesma altura. Sem espaco nem assim, descem para baixo do nome. */
 .ocupantes {
     position: relative;
     margin-left: auto;
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
-    gap: 4px;
+    row-gap: 4px;
     max-width: 45%;
+    padding-left: 8px;
 
     img {
         width: 28px;
         height: 28px;
+        margin-left: -8px;
         image-rendering: pixelated;
-        border-radius: 3px;
+        border-radius: 4px;
+        box-shadow: 0 0 0 2px #0b1624;
         transition: transform 0.25s cubic-bezier(0.2, 1.4, 0.4, 1);
     }
     .mais { font-family: var(--sans); font-size: 0.78rem; color: var(--nevoa); align-self: center; margin-left: 4px; }

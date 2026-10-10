@@ -24,7 +24,7 @@ const WIKI_TORRE = [
     {
         andar: 2,
         salas: [
-            { cargo: 'Coordenador', funcao: 'Acompanha a staff de gestão e reporta aos líderes.' },
+            { cargo: 'Coordenador', funcao: 'Acompanha a gestão e reporta aos líderes.' },
             { cargo: 'Sohei', funcao: 'Coordena o PvP e os recursos do Bunker.' },
         ],
     },
