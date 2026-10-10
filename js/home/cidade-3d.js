@@ -264,41 +264,79 @@ async function montarCidade3d(palco) {
     sol.position.set(-0.6, 1, -0.35);
     cena.add(sol);
 
-    // Pinos: casas (bola), terrenos (cubo) e locais (diamante dourado), na
-    // altura do chao de cada um.
+    // Marcas: pontos planos virados para a camera, do mesmo tamanho na tela de
+    // perto e de longe, um pouco acima do telhado. Casa e redonda, terreno e
+    // quadrado e local e um losango dourado; livre ganha um miolo branco. As
+    // bolas com haste de antes cresciam com a distancia e cobriam a cidade.
     const alturaEm = (x, z) => {
         const cx = Math.min(W - 1, Math.max(0, x - mapa.x0)), cz = Math.min(D - 1, Math.max(0, z - mapa.z0));
         return alturas[cz * W + cx] - base;
     };
-    const pinos = new THREE.Group();
-    const cabecas = [];
-    const haste = new THREE.CylinderGeometry(0.6, 0.6, 14, 6);
-    const formas = {
-        casa: new THREE.SphereGeometry(4, 16, 12),
-        terreno: new THREE.BoxGeometry(6.5, 6.5, 6.5),
-        local: new THREE.OctahedronGeometry(5.5),
+    // A marca fica sobre o bloco mais alto num raio de 3: a coordenada da casa
+    // as vezes cai num vao (patio, buraco no telhado) e as paredes em volta a
+    // escondiam.
+    const alturaMarca = alvo => {
+        let maior = -Infinity;
+        for (let dz = -3; dz <= 3; dz++) {
+            for (let dx = -3; dx <= 3; dx++) maior = Math.max(maior, alturaEm(alvo.x + dx, alvo.z + dz));
+        }
+        return maior;
     };
-    function pino(alvo, forma, cor, dica) {
-        const grupo = new THREE.Group();
-        const material = new THREE.MeshLambertMaterial({ color: cor, emissive: cor, emissiveIntensity: 0.35 });
-        const corpo = new THREE.Mesh(haste, material);
-        corpo.position.y = 7;
-        const cabeca = new THREE.Mesh(formas[forma], material);
-        cabeca.position.y = 17;
-        cabeca.userData = { alvo, dica, grupo };
-        grupo.add(corpo, cabeca);
-        grupo.position.set(alvo.x - mapa.x0 + 0.5, alturaEm(alvo.x, alvo.z), alvo.z - mapa.z0 + 0.5);
-        pinos.add(grupo);
-        cabecas.push(cabeca);
+    const marcas = new THREE.Group();
+    const cabecas = [];
+    const texturas = new Map();
+    function texturaMarca(forma, cor, livre) {
+        const chave = `${forma}|${cor}|${livre}`;
+        if (texturas.has(chave)) return texturas.get(chave);
+        const t = 64, c = t / 2;
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = t;
+        const ctx = canvas.getContext('2d');
+        const brilho = ctx.createRadialGradient(c, c, 4, c, c, c);
+        brilho.addColorStop(0, `${cor}40`);
+        brilho.addColorStop(1, `${cor}00`);
+        ctx.fillStyle = brilho;
+        ctx.fillRect(0, 0, t, t);
+        const r = 13;
+        ctx.beginPath();
+        if (forma === 'terreno') ctx.rect(c - r + 2, c - r + 2, (r - 2) * 2, (r - 2) * 2);
+        else if (forma === 'local') { ctx.moveTo(c, c - r - 3); ctx.lineTo(c + r + 1, c); ctx.lineTo(c, c + r + 3); ctx.lineTo(c - r - 1, c); ctx.closePath(); }
+        else ctx.arc(c, c, r, 0, Math.PI * 2);
+        ctx.fillStyle = cor;
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'rgba(7, 13, 22, 0.9)';
+        ctx.stroke();
+        if (livre) {
+            ctx.beginPath();
+            ctx.arc(c, c, 4.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+        }
+        const textura = new THREE.CanvasTexture(canvas);
+        textura.colorSpace = THREE.SRGBColorSpace;
+        texturas.set(chave, textura);
+        return textura;
+    }
+    const TAMANHO_MARCA = 0.044;
+    function marca(alvo, forma, cor, dica, livre = false) {
+        const material = new THREE.SpriteMaterial({ map: texturaMarca(forma, cor, livre), sizeAttenuation: false, depthWrite: false, transparent: true });
+        const ponto = new THREE.Sprite(material);
+        ponto.scale.setScalar(TAMANHO_MARCA);
+        ponto.renderOrder = 10;
+        ponto.position.set(alvo.x - mapa.x0 + 0.5, alturaMarca(alvo) + 3, alvo.z - mapa.z0 + 0.5);
+        ponto.userData = { alvo, dica };
+        marcas.add(ponto);
+        cabecas.push(ponto);
     }
     for (const casa of casas) {
         const estado = CASA_ESTADOS[casa.estado] || CASA_ESTADOS.fechada;
         const cor = casa.tipo === 'terreno' && casa.estado === 'aberta' ? CIDADE_COR_TERRENO_LIVRE : estado.cor;
         const dica = casa.moradores.length ? casa.moradores.join(', ') : `${cidadeRotuloTipo(casa.tipo)} · ${estado.rotulo.toLowerCase()}`;
-        pino({ ...casa, tipoAlvo: 'casa' }, casa.tipo === 'terreno' ? 'terreno' : 'casa', cor, dica);
+        marca({ ...casa, tipoAlvo: 'casa' }, casa.tipo === 'terreno' ? 'terreno' : 'casa', cor, dica, casa.estado === 'aberta');
     }
-    for (const local of locais) pino({ ...local, tipoAlvo: 'local' }, 'local', CIDADE3D_COR_LOCAL, local.nome);
-    cena.add(pinos);
+    for (const local of locais) marca({ ...local, tipoAlvo: 'local' }, 'local', CIDADE3D_COR_LOCAL, local.nome);
+    cena.add(marcas);
 
     const camera = new THREE.PerspectiveCamera(42, 1, 1, 6000);
     const meio = new THREE.Vector3(W / 2, 70 - base, D / 2);
@@ -363,15 +401,18 @@ async function montarCidade3d(palco) {
         // O centro nao sai de cima da cidade.
         controles.target.x = Math.min(W, Math.max(0, controles.target.x));
         controles.target.z = Math.min(D, Math.max(0, controles.target.z));
-        // De longe o pino cresce, para nao sumir na tela nem ficar dificil de
-        // clicar; de perto fica no tamanho natural.
-        // O destaque do hover cresce so a cabeca, em volta do centro dela: se o
-        // pino inteiro crescesse a partir do chao, a cabeca sairia de baixo do
-        // cursor e o clique cairia no vazio.
-        for (const cabeca of cabecas) {
-            const grupo = cabeca.userData.grupo;
-            grupo.scale.setScalar(Math.max(1, camera.position.distanceTo(grupo.position) / 260));
-            cabeca.scale.setScalar(cabeca === sobre ? 1.35 : 1);
+        // Longe, as marcas encolhem ate a metade (a visao geral fica limpa); perto,
+        // ficam no tamanho cheio. A que esta sob o mouse cresce em volta do
+        // proprio centro, entao continua sob o cursor.
+        // A do card aberto aparece sempre, por cima de qualquer predio.
+        const aberto = cidadePub.alvo;
+        for (const ponto of cabecas) {
+            const alvo = ponto.userData.alvo;
+            const selecionado = Boolean(aberto) && aberto.id === alvo.id && ('moradores' in aberto) === (alvo.tipoAlvo === 'casa');
+            const perto = Math.min(1, Math.max(0.5, 300 / camera.position.distanceTo(ponto.position)));
+            ponto.scale.setScalar(TAMANHO_MARCA * perto * (ponto === sobre || selecionado ? 1.5 : 1));
+            ponto.material.depthTest = !selecionado;
+            ponto.renderOrder = selecionado ? 20 : 10;
         }
         renderer.render(cena, camera);
         posicionarCard();
@@ -427,7 +468,7 @@ async function montarCidade3d(palco) {
     });
 
     function voarPara(alvo) {
-        const destino = new THREE.Vector3(alvo.x - mapa.x0 + 0.5, alturaEm(alvo.x, alvo.z), alvo.z - mapa.z0 + 0.5);
+        const destino = new THREE.Vector3(alvo.x - mapa.x0 + 0.5, alturaMarca(alvo), alvo.z - mapa.z0 + 0.5);
         // Mesmo angulo de agora, mais perto.
         const direcao = camera.position.clone().sub(controles.target).normalize();
         const distancia = Math.min(camera.position.distanceTo(controles.target), 160);
@@ -444,9 +485,7 @@ async function montarCidade3d(palco) {
 
     // Ponto do alvo na tela, em pixels do palco (para o card ao lado).
     function pontoNaTela(alvo) {
-        const chao = new THREE.Vector3(alvo.x - mapa.x0 + 0.5, alturaEm(alvo.x, alvo.z), alvo.z - mapa.z0 + 0.5);
-        const escala = Math.max(1, camera.position.distanceTo(chao) / 260);
-        const p = chao.setY(chao.y + 17 * escala).project(camera);
+        const p = new THREE.Vector3(alvo.x - mapa.x0 + 0.5, alturaMarca(alvo) + 3, alvo.z - mapa.z0 + 0.5).project(camera);
         return { x: (p.x + 1) / 2 * palco.clientWidth, y: (1 - p.y) / 2 * palco.clientHeight };
     }
 
@@ -456,6 +495,8 @@ async function montarCidade3d(palco) {
         geo.dispose();
         textura.dispose();
         cidade.material.dispose();
+        for (const ponto of cabecas) ponto.material.dispose();
+        for (const textura of texturas.values()) textura.dispose();
         renderer.dispose();
         renderer.forceContextLoss();
     }
