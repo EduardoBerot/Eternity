@@ -574,3 +574,79 @@ body.painel--cidade main { margin: 0; }
     h2 { margin: 0; }
     p { margin: 0; color: var(--nevoa-escura); font-family: var(--sans); font-size: 0.82rem; }
 }
+
+/* ---------- Cidade 3D (js/home/cidade-3d.js), so no computador ----------
+   O palco fica por cima do Leaflet, na mesma caixa; no modo 2D ele some e o
+   mapa de sempre aparece. */
+
+.cidade-3d {
+    position: absolute;
+    inset: 0;
+    z-index: 500;
+    display: none;
+    background: radial-gradient(ellipse at 50% 35%, #12233a 0%, #070d16 70%);
+
+    canvas { display: block; width: 100%; height: 100%; }
+}
+
+.cidade-mapa--publica.em-3d .cidade-3d { display: block; }
+.cidade-mapa--publica.em-3d .cidade-mapa-leaflet { visibility: hidden; }
+
+.cidade-modo {
+    position: absolute;
+    z-index: 1050;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    padding: 3px;
+    border-radius: 999px;
+    border: 1px solid var(--linha);
+    background: rgba(4, 8, 15, 0.85);
+    backdrop-filter: blur(6px);
+
+    button {
+        padding: 6px 14px;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: var(--nevoa);
+        font: 700 0.78rem var(--sans);
+        letter-spacing: 0.06em;
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+    button:hover { color: var(--gelo); }
+    button.ativo { background: var(--aqua); color: var(--noite); }
+}
+
+/* O controle de zoom do Leaflet desce para nao ficar embaixo dos botoes. */
+.cidade-mapa--publica:has(.cidade-modo) .leaflet-top.leaflet-left { top: 46px; }
+
+.cidade-3d-dica {
+    position: absolute;
+    z-index: 2;
+    transform: translate(-50%, calc(-100% - 14px));
+    padding: 5px 10px;
+    border-radius: 6px;
+    background: rgba(11, 22, 36, 0.95);
+    border: 1px solid rgba(46, 230, 240, 0.3);
+    color: var(--gelo);
+    font: 0.8rem var(--sans);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.cidade-3d-ajuda {
+    position: absolute;
+    right: 12px;
+    bottom: 10px;
+    margin: 0;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(4, 8, 15, 0.7);
+    color: var(--nevoa);
+    font: 0.72rem var(--sans);
+    pointer-events: none;
+
+    i { color: var(--aqua); margin-right: 4px; }
+}

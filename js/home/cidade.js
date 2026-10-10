@@ -33,6 +33,7 @@ function oTipo(casa) {
 
 function renderCidadePublica() {
     if (cidadePub.mapa) { cidadePub.mapa.remove(); cidadePub.mapa = null; }
+    cidade3dDescartar();
     cidadePub.alvo = null;
     app.innerHTML = `
         <header class="cabeca-pagina"><div class="miolo">
@@ -91,6 +92,7 @@ async function carregarCidadePublica() {
         cidadePub.dados = await fetch(`${URL_CIDADE_PUBLICA}/publico`).then(lerResposta);
         contarCidade();
         montarMapaPublico();
+        cidade3dPreparar();
     } catch (error) {
         console.error('Falha ao carregar a cidade:', error);
         const caixa = document.getElementById('cidade_mapa');
@@ -159,6 +161,10 @@ function montarMapaPublico() {
 // Zoom na marca e o card ao lado dela.
 function focarEm(alvo) {
     cidadePub.alvo = alvo;
+    if (cidadePub.modo === '3d' && cidade3d) {
+        cidade3d.voarPara(alvo);
+        return;
+    }
     const zoom = Math.max(cidadePub.mapa.getZoom(), ZOOM_NA_CASA);
     cidadePub.mapa.flyTo(blocoPublico(alvo.x, alvo.z), zoom, { duration: 0.6 });
 }
@@ -272,9 +278,11 @@ function posicionarCard() {
         card.style.left = card.style.top = '';
         return;
     }
-    const ponto = cidadePub.mapa.latLngToContainerPoint(blocoPublico(casa.x, casa.z));
+    // No 3D o ponto e o pino projetado na tela (js/home/cidade-3d.js).
+    const em3d = cidadePub.modo === '3d' && cidade3d;
+    const ponto = em3d ? cidade3d.pontoNaTela(casa) : cidadePub.mapa.latLngToContainerPoint(blocoPublico(casa.x, casa.z));
     const largura = card.offsetWidth;
-    const caixa = cidadePub.mapa.getSize();
+    const caixa = em3d ? cidade3d.tamanho() : cidadePub.mapa.getSize();
     const folga = FOLGA_CARD;
     const x = ponto.x + folga + largura <= caixa.x - 8 ? ponto.x + folga : Math.max(8, ponto.x - folga - largura);
     const y = Math.min(Math.max(8, ponto.y - card.offsetHeight / 2), Math.max(8, caixa.y - card.offsetHeight - 8));
