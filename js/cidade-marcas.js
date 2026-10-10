@@ -41,6 +41,29 @@ function cidadeMarcaLocal(latlng, icone) {
     });
 }
 
+// Zoom que cobre a caixa inteira com o mapa (09/10/2026): sem faixa preta em
+// volta da cidade. Vira o zoom minimo, e o arraste para nas bordas da imagem.
+// Devolve o zoom de cobertura, ou null com a caixa ainda sem tamanho.
+function cidadeAjustarZoomMinimo(mapa, limites) {
+    const tamanho = mapa.getSize();
+    if (!tamanho.x || !tamanho.y) return null;
+    const cobre = mapa.getBoundsZoom(limites, true);
+    mapa.setMinZoom(cobre);
+    if (mapa.getZoom() < cobre) mapa.setZoom(cobre, { animate: false });
+    return cobre;
+}
+
+// Ao abrir, um pouco mais perto que o minimo, no centro da cidade.
+const CIDADE_ZOOM_INICIAL_EXTRA = 0.35;
+
+// Devolve false com a caixa ainda sem tamanho (aba escondida).
+function cidadeEnquadrar(mapa, limites) {
+    const cobre = cidadeAjustarZoomMinimo(mapa, limites);
+    if (cobre === null) return false;
+    mapa.setView(L.latLngBounds(limites).getCenter(), cobre + CIDADE_ZOOM_INICIAL_EXTRA, { animate: false });
+    return true;
+}
+
 function cidadeRotuloTipo(tipo) {
     return tipo === 'terreno' ? 'Terreno' : 'Casa';
 }

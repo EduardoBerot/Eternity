@@ -86,11 +86,20 @@ function montarMapaPublico() {
     const limites = [[-altura, 0], [0, largura]];
     const mapa = L.map(caixa, {
         crs: L.CRS.Simple, minZoom: -2, maxZoom: 3, zoomSnap: 0, zoomDelta: 0.5, wheelPxPerZoomLevel: 120, attributionControl: false,
-        maxBounds: L.latLngBounds(limites).pad(0.15),
+        maxBounds: limites, maxBoundsViscosity: 1,
     });
     L.imageOverlay(`${URL_CIDADE_PUBLICA}/mapa?v=${encodeURIComponent(cidadePub.dados.mapa.versao || '')}`, limites, { className: 'cidade-mapa-img' }).addTo(mapa);
-    mapa.fitBounds(limites);
+    let enquadrado = cidadeEnquadrar(mapa, limites);
     cidadePub.mapa = mapa;
+    // Janela mudou: so sobe o zoom minimo, sem tirar o visitante da casa que
+    // ele abriu. Enquadra uma vez quando a caixa ganha tamanho.
+    cidadePub.observador?.disconnect();
+    cidadePub.observador = new ResizeObserver(() => {
+        mapa.invalidateSize();
+        if (!enquadrado) enquadrado = cidadeEnquadrar(mapa, limites);
+        else cidadeAjustarZoomMinimo(mapa, limites);
+    });
+    cidadePub.observador.observe(caixa);
     for (const casa of cidadePub.dados.casas) {
         const estado = CASA_ESTADOS[casa.estado] || CASA_ESTADOS.fechada;
         const cor = casa.tipo === 'terreno' && casa.estado === 'aberta' ? CIDADE_COR_TERRENO_LIVRE : estado.cor;

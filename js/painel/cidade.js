@@ -94,16 +94,16 @@ function montarMapaCidade() {
     const limites = [[-altura, 0], [0, largura]];
     const mapa = L.map('cidade_mapa', {
         crs: L.CRS.Simple, minZoom: -2, maxZoom: 3, zoomSnap: 0, zoomDelta: 0.5, wheelPxPerZoomLevel: 120, attributionControl: false,
-        maxBounds: L.latLngBounds(limites).pad(0.15),
+        maxBounds: limites, maxBoundsViscosity: 1,
     });
     L.imageOverlay(`${URL_CIDADE}/mapa?v=${encodeURIComponent(cidade.dados.mapa.versao || '')}`, limites, { className: 'cidade-mapa-img' }).addTo(mapa);
-    mapa.fitBounds(limites);
+    cidadeEnquadrar(mapa, limites);
     cidade.mapa = mapa;
     // A caixa do mapa muda com a janela (e com a fonte carregando no topo):
-    // reenquadra a cidade inteira a cada mudanca.
+    // reenquadra a cidade a cada mudanca.
     cidade.observador = new ResizeObserver(() => {
         mapa.invalidateSize();
-        mapa.fitBounds(limites);
+        cidadeEnquadrar(mapa, limites);
     });
     cidade.observador.observe(document.getElementById('cidade_mapa'));
     cidade.camada = L.layerGroup().addTo(mapa);
