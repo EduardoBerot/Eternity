@@ -1,6 +1,6 @@
 // Aba Cidade (05/10/2026; refeita em 06/10/2026): o mapa da cidade da ETY com
-// as casas, os terrenos e os locais importantes. A staff (Supervisor ou acima)
-// marca com o botao direito (toque longo no celular): casa ou terreno, aberto
+// as casas, os terrenos e os locais importantes. So os lideres (10/10/2026)
+// marcam com o botao direito (toque longo no celular): casa ou terreno, aberto
 // para ocupacao, ou um local (warp, loja, farm...) com icone. Os membros pedem
 // casa/terreno no site publico pelo nick, confirmam por DM do bot, e um lider
 // da o /trust no jogo e aprova aqui. Quando o morador sai do cla, fica
