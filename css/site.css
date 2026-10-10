@@ -794,6 +794,22 @@ main { padding-top: var(--nav); }
 
 .dialogo-skin { image-rendering: pixelated; flex-shrink: 0; filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.6)); }
 
+/* Caixa da skin: mesmo tamanho com a imagem 2D e com a 3D, para o topo nao
+   pular quando a 3D entra. */
+.dialogo-skin-3d {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 120px;
+    height: 170px;
+    margin: -10px 0 -10px -8px;
+
+    canvas { cursor: grab; filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.55)); animation: skin-entra 0.35s ease; }
+    canvas:active { cursor: grabbing; }
+}
+
+@keyframes skin-entra { from { opacity: 0; transform: scale(0.94); } }
+
 .dialogo-titulo h2 { margin: 0 0 10px; font-size: 1.6rem; word-break: break-all; }
 
 .dialogo-selos { display: flex; flex-wrap: wrap; gap: 6px; }

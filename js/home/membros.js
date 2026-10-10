@@ -250,7 +250,7 @@ function faixaTitulos(titulos) {
     return `
         <div class="dialogo-titulos" aria-label="Títulos conquistados">
             <span class="dialogo-titulos-rotulo"><i class="fa-solid fa-award" aria-hidden="true"></i> Títulos</span>
-            ${lista.map(titulo => `<span class="titulo-chip" title="${titulo.atual ? 'Usando agora' : 'Conquistado'}">${tituloHtml(titulo.nome, titulo.info, { atual: titulo.atual })}</span>`).join('')}
+            ${lista.map(titulo => `<span class="titulo-chip holo" style="--de:${titulo.info.familia.de};--ate:${titulo.info.familia.ate}" title="${titulo.atual ? 'Usando agora' : 'Conquistado'}">${tituloHtml(titulo.nome, titulo.info, { atual: titulo.atual })}</span>`).join('')}
         </div>`;
 }
 
@@ -312,7 +312,9 @@ function abrirMembro(pedido) {
 
     dialogo.innerHTML = `
         <div class="dialogo-topo card-staff-borda ${escHtml(classeCargo(membro.cargo))}">
-            <img class="dialogo-skin" src="https://mc-heads.net/body/${encodeURIComponent(nick)}/110" alt="Skin de ${escHtml(nick)}" width="55" height="110">
+            <div class="dialogo-skin-3d" title="Arraste para girar">
+                <img class="dialogo-skin" src="https://mc-heads.net/body/${encodeURIComponent(nick)}/110" alt="Skin de ${escHtml(nick)}" width="55" height="110">
+            </div>
             <div class="dialogo-titulo">
                 <h2 id="membro-dialog-nick">${escHtml(nick)}</h2>
                 <div class="dialogo-selos">
@@ -344,6 +346,82 @@ function abrirMembro(pedido) {
             </section>
         </div>`;
     dialogo.showModal();
+    montarSkin3d(dialogo.querySelector('.dialogo-skin-3d'), nick);
+}
+
+// Skin 3D (skinview3d) no topo da janela do membro: gira sozinha devagar e com
+// o mouse/dedo. A biblioteca (~480 KB) so carrega na primeira janela aberta.
+// Sem WebGL, sem a biblioteca ou sem a textura, fica a imagem 2D de sempre.
+const SKINVIEW3D_URL = 'https://cdn.jsdelivr.net/npm/skinview3d@3.4.2/bundles/skinview3d.bundle.js';
+let skinview3dCarregando = null;
+let skinViewerAberto = null;
+
+function carregarSkinview3d() {
+    if (window.skinview3d) return Promise.resolve(window.skinview3d);
+    skinview3dCarregando ??= new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = SKINVIEW3D_URL;
+        script.async = true;
+        script.onload = () => (window.skinview3d ? resolve(window.skinview3d) : reject(new Error('skinview3d ausente')));
+        script.onerror = () => {
+            skinview3dCarregando = null;
+            reject(new Error('skinview3d nao carregou'));
+        };
+        document.head.appendChild(script);
+    });
+    return skinview3dCarregando;
+}
+
+function webglDisponivel() {
+    try {
+        const canvas = document.createElement('canvas');
+        return Boolean(canvas.getContext('webgl2') || canvas.getContext('webgl'));
+    } catch (_) {
+        return false;
+    }
+}
+
+function liberarSkin3d() {
+    skinViewerAberto?.dispose();
+    skinViewerAberto = null;
+}
+
+async function montarSkin3d(caixa, nick) {
+    liberarSkin3d();
+    if (!caixa || !webglDisponivel()) return;
+    let lib;
+    try {
+        lib = await carregarSkinview3d();
+    } catch (_) {
+        return;
+    }
+    // A janela pode ter fechado ou trocado de membro enquanto a biblioteca baixava.
+    if (!caixa.isConnected) return;
+    const canvas = document.createElement('canvas');
+    const viewer = new lib.SkinViewer({ canvas, width: 120, height: 170 });
+    try {
+        await viewer.loadSkin(`https://mc-heads.net/skin/${encodeURIComponent(nick)}`);
+    } catch (_) {
+        viewer.dispose();
+        return;
+    }
+    if (!caixa.isConnected) {
+        viewer.dispose();
+        return;
+    }
+    viewer.fov = 40;
+    viewer.zoom = 0.78;
+    viewer.controls.enableZoom = false;
+    viewer.controls.enablePan = false;
+    const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!quieto) {
+        viewer.animation = new lib.IdleAnimation();
+        viewer.autoRotate = true;
+        viewer.autoRotateSpeed = 0.6;
+    }
+    skinViewerAberto = viewer;
+    caixa.replaceChildren(canvas);
+    caixa.classList.add('em-3d');
 }
 
 function fecharMembro() {
@@ -353,6 +431,8 @@ function fecharMembro() {
 // Veio do link do Discord: fechou (botao, fundo ou Esc), o endereco volta a ser
 // so a pagina. replaceState nao dispara o hashchange.
 document.getElementById('membro-dialog')?.addEventListener('close', () => {
+    // O navegador limita os contextos WebGL abertos: cada skin sai junto com a janela.
+    liberarSkin3d();
     if (location.hash.includes('?membro=')) history.replaceState(null, '', '#membros');
 });
 

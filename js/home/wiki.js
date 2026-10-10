@@ -59,7 +59,7 @@ function familiaWikiHtml(familia) {
     }).join('');
     const selo = familia.escada ? 'Escada' : 'Cada um';
     return `
-        <article class="familia" style="--de:${familia.de};--ate:${familia.ate}">
+        <article class="familia holo" style="--de:${familia.de};--ate:${familia.ate}">
             <div class="familia-faixa" aria-hidden="true"></div>
             <div class="familia-topo">
                 <span class="familia-selo">${selo}</span>

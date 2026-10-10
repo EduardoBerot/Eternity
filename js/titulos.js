@@ -137,3 +137,40 @@ function tituloHtml(nome, { familia, nivel = 1 } = {}, { atual = false } = {}) {
     return `<span class="titulo-nome nivel-${nivel} ${atual ? 'titulo-atual' : ''}" style="${cor}">`
         + `<span class="titulo-grad">${escHtml(nome)}</span></span>`;
 }
+
+// Cartao holografico (10/10/2026): o elemento `.holo` inclina em 3D seguindo o
+// mouse e um brilho nas cores da familia corre por cima. Um ouvinte so, no
+// documento, serve a Wiki e a janela do membro (que sao trocadas pelo innerHTML).
+// So com mouse e sem "reduzir movimento": no toque e no modo quieto, nada muda.
+(() => {
+    const podeInclinar = window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)');
+    let ativo = null;
+
+    function soltar() {
+        if (!ativo) return;
+        ativo.classList.remove('holo-ativo');
+        for (const nome of ['--rx', '--ry', '--mx', '--my']) ativo.style.removeProperty(nome);
+        ativo = null;
+    }
+
+    document.addEventListener('pointermove', event => {
+        if (!podeInclinar.matches) return;
+        const alvo = event.target.closest?.('.holo');
+        if (alvo !== ativo) soltar();
+        if (!alvo) return;
+        ativo = alvo;
+        const caixa = alvo.getBoundingClientRect();
+        const x = (event.clientX - caixa.left) / caixa.width;
+        const y = (event.clientY - caixa.top) / caixa.height;
+        // Cartao grande inclina menos que chip pequeno, para nao parecer solto.
+        const forca = caixa.width > 240 ? 7 : 14;
+        alvo.classList.add('holo-ativo');
+        alvo.style.setProperty('--ry', `${((x - 0.5) * forca).toFixed(2)}deg`);
+        alvo.style.setProperty('--rx', `${((0.5 - y) * forca).toFixed(2)}deg`);
+        alvo.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`);
+        alvo.style.setProperty('--my', `${(y * 100).toFixed(1)}%`);
+    }, { passive: true });
+
+    document.addEventListener('pointerleave', soltar);
+    window.addEventListener('blur', soltar);
+})();
