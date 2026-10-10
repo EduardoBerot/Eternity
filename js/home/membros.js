@@ -147,6 +147,10 @@ async function renderMembros() {
     }
     desenharFiltros();
     desenharMembros();
+    // Botao "Ver no site" do /perfil do Discord: #membros?membro=Fulano ja abre
+    // a janela da pessoa.
+    const pedido = new URLSearchParams(location.hash.split('?')[1] || '').get('membro');
+    if (pedido) abrirMembro(pedido);
 }
 
 function desenharFiltros() {
@@ -250,9 +254,11 @@ function faixaTitulos(titulos) {
         </div>`;
 }
 
-function abrirMembro(nick) {
-    const membro = membrosEstado.membros.find(m => m.nick === nick);
+function abrirMembro(pedido) {
+    const membro = membrosEstado.membros.find(m => m.nick === pedido)
+        || membrosEstado.membros.find(m => String(m.nick).toLowerCase() === String(pedido).toLowerCase());
     if (!membro) return;
+    const nick = membro.nick;
     const perfil = membrosEstado.perfis.get(String(nick).toLowerCase()) || {};
     const dialogo = document.getElementById('membro-dialog');
     const tempo = tempoNoCla(membro.data_entrada);
@@ -343,6 +349,12 @@ function abrirMembro(nick) {
 function fecharMembro() {
     document.getElementById('membro-dialog')?.close();
 }
+
+// Veio do link do Discord: fechou (botao, fundo ou Esc), o endereco volta a ser
+// so a pagina. replaceState nao dispara o hashchange.
+document.getElementById('membro-dialog')?.addEventListener('close', () => {
+    if (location.hash.includes('?membro=')) history.replaceState(null, '', '#membros');
+});
 
 // Clique no fundo escurecido fecha: o alvo do clique e o proprio <dialog>, e
 // nao algo dentro dele. Esc ja fecha sozinho (comportamento nativo).
