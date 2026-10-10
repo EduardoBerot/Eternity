@@ -1,8 +1,6 @@
-/* Titulos do cla (09/10/2026): o nome como aparece no jogo -- icones brancos,
-   letras em degrade da familia (--de -> --ate) e, no nivel mais dificil, o
-   embaralhado (&k) das pontas como caracteres que trocam sem parar. Usado na
-   Wiki (familias) e na janela do membro (faixa de titulos). Catalogo em
-   js/titulos.js. */
+/* Titulos do cla (09/10/2026): o nome no degrade da familia (--de -> --ate).
+   Icones e &k ficam so no jogo (10/10/2026). Usado na Wiki (familias) e na
+   janela do membro (faixa de titulos). Catalogo em js/titulos.js. */
 
 .titulo-nome {
     display: inline-flex;
@@ -21,40 +19,6 @@
     color: transparent;
     /* Ponta escura do degrade (poder mcMMO) ainda le no fundo noturno. */
     filter: drop-shadow(0 0 0.5px rgba(232, 244, 248, 0.35));
-}
-
-.titulo-ic { color: #fff; font-weight: 400; opacity: 0.92; }
-
-/* O &k: um caractere que troca a cada quadro, como no jogo. */
-.titulo-k::before {
-    content: "▚";
-    display: inline-block;
-    width: 0.7em;
-    color: rgba(232, 244, 248, 0.85);
-    font-weight: 400;
-    animation: tituloK 0.45s steps(1) infinite;
-}
-
-@keyframes tituloK {
-    0% { content: "▚"; }
-    20% { content: "▞"; }
-    40% { content: "▙"; }
-    60% { content: "▜"; }
-    80% { content: "▟"; }
-}
-
-.nivel-3 .titulo-grad {
-    background-size: 200% 100%;
-    background-image: linear-gradient(90deg, var(--de), var(--ate), var(--de));
-    animation: tituloBrilho 4s linear infinite;
-}
-
-@keyframes tituloBrilho {
-    to { background-position: -200% 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .titulo-k::before, .nivel-3 .titulo-grad { animation: none; }
 }
 
 /* ---------- Janela do membro ---------- */

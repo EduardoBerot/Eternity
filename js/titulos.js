@@ -1,8 +1,8 @@
 // Catalogo dos titulos do cla (09/10/2026), comum a Wiki (js/home/wiki.js) e
 // a janela do membro (js/home/membros.js). Espelha o titles.js e o
-// clan-titles.js do bot: mesmos nomes, mesmo degrade de cada familia, mesmo
-// icone e o mesmo avanco -- 1 icone, 2 icones e, no mais dificil, o
-// embaralhado (&k) nas pontas, que aqui vira um brilho animado.
+// clan-titles.js do bot: mesmos nomes e o mesmo degrade de cada familia. O
+// icone e o nivel ficam no catalogo para a ordem, mas o site mostra so o
+// degrade.
 //
 // Cada familia e um trio. Nas escadas (`escada: true`) vale so o nivel mais
 // alto; nas outras os tres sao tipos diferentes, cada um com o seu icone.
@@ -15,8 +15,8 @@ const TITULOS_CATEGORIAS = [
         texto: 'Skills no nível máximo, o poder somado e o topo do clã.',
         familias: [
             { grupo: 'armas', de: '#03f0ee', ate: '#090de7', titulos: [
-                { nome: 'Vanguarda', icone: '⚔', requisito: 'Nível 100 em uma skill de arma empunhada' },
-                { nome: 'Atirador', fem: 'Atiradora', icone: '➶', requisito: 'Nível 100 em Arquearia ou Besta' },
+                { nome: 'Vanguarda', icone: '⚔', requisito: 'Nível 100 em Espada, Machado, Clava ou Lança' },
+                { nome: 'Atirador', fem: 'Atiradora', icone: '➶', requisito: 'Nível 100 em uma skill de arremesso: Arquearia, Besta ou Tridente' },
                 { nome: 'Farmer', icone: '✿', requisito: 'Nível 100 em uma skill de farm' },
             ] },
             { grupo: 'maestria', de: '#0101fa', ate: '#f80402', titulos: [
@@ -40,7 +40,7 @@ const TITULOS_CATEGORIAS = [
         id: 'desafios',
         nome: 'Desafios',
         icone: 'fa-fire',
-        texto: 'A ofensiva dos Dias de Domínio e os desafios diários completados.',
+        texto: 'A ofensiva dos Dias de Domínio e os dias com todos os desafios completos.',
         familias: [
             { grupo: 'ofensiva', de: '#ff0000', ate: '#fbff00', escada: true, posicao: true, icone: '♨', titulos: [
                 { nome: 'Incendiário', fem: 'Incendiária', requisito: '30 dias de ofensiva ativa' },
@@ -48,9 +48,9 @@ const TITULOS_CATEGORIAS = [
                 { nome: 'Fênix', requisito: '120 dias de ofensiva ativa' },
             ] },
             { grupo: 'desafios', de: '#04eae7', ate: '#da771d', escada: true, icone: '⚡', titulos: [
-                { nome: 'Persistente', requisito: '30 desafios completados' },
-                { nome: 'Obstinado', fem: 'Obstinada', requisito: '60 desafios completados' },
-                { nome: 'Implacável', requisito: '120 desafios completados' },
+                { nome: 'Persistente', requisito: '30 dias com todos os desafios completos' },
+                { nome: 'Obstinado', fem: 'Obstinada', requisito: '60 dias com todos os desafios completos' },
+                { nome: 'Implacável', requisito: '120 dias com todos os desafios completos' },
             ] },
         ],
     },
@@ -130,14 +130,10 @@ const TITULOS_POR_NOME = (() => {
     return mapa;
 })();
 
-// O titulo como aparece no jogo: icones brancos, nome em degrade e, no nivel
-// 3, o brilho no lugar do &k. `atual`: e o titulo que a pessoa usa agora.
-function tituloHtml(nome, { familia, nivel = 1, icone = '' } = {}, { atual = false } = {}) {
+// O titulo no site: so o nome no degrade da familia. Os icones e o &k ficam no
+// jogo (decisao do Fundador, 10/10/2026). `atual`: e o titulo em uso agora.
+function tituloHtml(nome, { familia, nivel = 1 } = {}, { atual = false } = {}) {
     const cor = familia ? `--de:${familia.de};--ate:${familia.ate}` : '';
-    const ic = icone ? `<span class="titulo-ic" aria-hidden="true">${icone}</span>` : '';
     return `<span class="titulo-nome nivel-${nivel} ${atual ? 'titulo-atual' : ''}" style="${cor}">`
-        + `${nivel === 3 ? '<span class="titulo-k" aria-hidden="true"></span>' : ''}${ic}`
-        + `<span class="titulo-grad">${escHtml(nome)}</span>`
-        + `${nivel >= 2 ? ic : ''}${nivel === 3 ? '<span class="titulo-k" aria-hidden="true"></span>' : ''}`
-        + `</span>`;
+        + `<span class="titulo-grad">${escHtml(nome)}</span></span>`;
 }
