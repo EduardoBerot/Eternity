@@ -71,7 +71,7 @@ body.painel--cidade main { margin: 0; }
 
     li { display: flex; align-items: center; gap: 5px; }
     span { width: 9px; height: 9px; border-radius: 50%; background: var(--cor); border: 1.5px solid #04080f; }
-    span.pendente { background: transparent; border: 2px dashed var(--aqua); }
+    span.pendente { background: #ff9f1c; border-color: #ff9f1c; box-shadow: 0 0 0 2px rgba(255, 159, 28, 0.35); }
     span.quadrado { border-radius: 2px; }
     i { font-size: 0.7rem; color: var(--aqua); }
 }
@@ -94,7 +94,46 @@ body.painel--cidade main { margin: 0; }
 
 .cidade-pino:hover { transform: scale(1.2); }
 .cidade-pino--terreno { border-radius: 3px; }
-.cidade-pino--pendente { border: 2.5px dashed var(--aqua); }
+/* Pedido pendente: anel laranja pulsando e selo de ampulheta no canto. */
+.cidade-pino--pendente {
+    position: relative;
+    border: 2.5px solid #ff9f1c;
+    box-shadow: 0 0 0 2px #04080f;
+}
+
+.cidade-pino--pendente::before {
+    content: "";
+    position: absolute;
+    inset: -7px;
+    border-radius: inherit;
+    border: 2px solid #ff9f1c;
+    animation: cidadePendente 1.6s ease-out infinite;
+    pointer-events: none;
+}
+
+@keyframes cidadePendente {
+    from { transform: scale(0.7); opacity: 0.9; }
+    to { transform: scale(1.35); opacity: 0; }
+}
+
+.cidade-pino-selo {
+    position: absolute;
+    top: -9px;
+    right: -9px;
+    display: grid;
+    place-items: center;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #ff9f1c;
+    border: 1.5px solid #04080f;
+    color: #04080f;
+    font-size: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cidade-pino--pendente::before { animation: none; transform: scale(1.1); opacity: 0.7; }
+}
 
 .cidade-local {
     display: grid;

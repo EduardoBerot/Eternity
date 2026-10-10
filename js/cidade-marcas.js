@@ -13,18 +13,21 @@ function cidadeIconeClasse(chave) {
 }
 
 // `tipo`: 'casa' | 'terreno'. `destaque`: um pouco maior (livre para pedir).
-// `pendente`: borda tracejada (pedido esperando um lider, so no painel).
+// `pendente`: pedido esperando um lider (so no painel). Maior, com anel
+// pulsando e selo de ampulheta: o tracejado de antes sumia no mapa (09/10/2026).
 function cidadeMarcaCasa(latlng, { tipo, cor, destaque = false, pendente = false }) {
-    const tamanho = destaque ? 18 : 14;
+    const tamanho = pendente ? 20 : destaque ? 18 : 14;
     const classes = ['cidade-pino', tipo === 'terreno' ? 'cidade-pino--terreno' : '', pendente ? 'cidade-pino--pendente' : ''].join(' ');
+    const selo = pendente ? '<i class="cidade-pino-selo fa-solid fa-hourglass-half" aria-hidden="true"></i>' : '';
     return L.marker(latlng, {
         icon: L.divIcon({
             className: 'cidade-pino-caixa',
-            html: `<span class="${classes}" style="--cor:${cor}"></span>`,
+            html: `<span class="${classes}" style="--cor:${cor}">${selo}</span>`,
             iconSize: [tamanho, tamanho],
             iconAnchor: [tamanho / 2, tamanho / 2],
         }),
         riseOnHover: true,
+        zIndexOffset: pendente ? 400 : 0,
     });
 }
 
