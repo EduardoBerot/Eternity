@@ -953,41 +953,99 @@ main { padding-top: var(--nav); }
 
 /* ---------- Wiki ---------- */
 
-.wiki-secoes {
-    position: sticky;
-    top: var(--nav);
-    z-index: 10;
-    background: rgba(4, 8, 15, 0.96);
-    border-bottom: 1px solid var(--linha);
+/* Navegacao das secoes: coluna fixa a esquerda no computador, faixa de
+   pilulas presa no topo no celular. As secoes ficam na coluna da direita, e o
+   .miolo de cada uma so herda a largura dela. */
+.wiki-conteudo { min-width: 0; }
+.wiki-conteudo .miolo { max-width: none; padding: 0; }
 
-    .miolo { display: flex; gap: 6px; overflow-x: auto; }
+.wiki-secoes {
     a {
-        position: relative;
-        padding: 16px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
         color: var(--nevoa);
         text-decoration: none;
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         white-space: nowrap;
-        transition: color 0.2s ease;
+        transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
     }
-    a::after {
-        content: "";
-        position: absolute;
-        left: 14px;
-        right: 14px;
-        bottom: -1px;
-        height: 2px;
-        background: var(--aqua);
-        transform: scaleX(0);
-        transition: transform 0.25s ease;
-    }
+    a i { width: 16px; text-align: center; font-size: 0.85rem; color: var(--nevoa-escura); transition: color 0.2s ease; }
     a:hover { color: var(--gelo); }
-    a:hover::after { transform: scaleX(1); }
+    a.ativo { color: var(--aqua); }
+    a.ativo i, a:hover i { color: var(--aqua); }
 }
 
-.secao-wiki { padding: clamp(56px, 8vw, 96px) 0; border-bottom: 1px solid var(--linha); scroll-margin-top: calc(var(--nav) + 52px); }
+.wiki-secoes-titulo {
+    color: var(--nevoa-escura);
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.secao-wiki { padding: clamp(56px, 8vw, 96px) 0; border-bottom: 1px solid var(--linha); scroll-margin-top: calc(var(--nav) + 24px); }
+.secao-wiki:last-child { border-bottom: 0; }
 
 .secao-wiki > .miolo > h2 { margin: 0 0 10px; font-size: clamp(1.8rem, 4vw, 2.8rem); }
+
+@media (min-width: 1100px) {
+    .wiki-corpo {
+        display: grid;
+        grid-template-columns: 190px minmax(0, 1fr);
+        gap: 56px;
+        align-items: start;
+    }
+
+    .wiki-secoes {
+        position: sticky;
+        top: calc(var(--nav) + 32px);
+        margin-top: clamp(56px, 8vw, 96px);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        border-left: 1px solid var(--linha);
+
+        .wiki-secoes-titulo { padding: 0 0 12px 18px; }
+        a {
+            margin-left: -1px;
+            padding: 10px 16px;
+            border-left: 2px solid transparent;
+            border-radius: 0 8px 8px 0;
+        }
+        a:hover { background: rgba(232, 244, 248, 0.04); }
+        a.ativo { border-left-color: var(--aqua); background: var(--aqua-suave); }
+    }
+}
+
+@media (max-width: 1099px) {
+    .wiki-secoes {
+        position: sticky;
+        top: var(--nav);
+        z-index: 10;
+        margin: 0 calc(-1 * var(--lado));
+        padding: 10px var(--lado);
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+        background: rgba(4, 8, 15, 0.96);
+        border-bottom: 1px solid var(--linha);
+
+        &::-webkit-scrollbar { display: none; }
+        .wiki-secoes-titulo { display: none; }
+        a {
+            flex: none;
+            padding: 8px 14px;
+            border: 1px solid var(--linha);
+            border-radius: 999px;
+        }
+        a.ativo { border-color: var(--aqua); background: var(--aqua-suave); }
+    }
+
+    .secao-wiki { scroll-margin-top: calc(var(--nav) + 64px); }
+}
 
 /* A torre: cada cargo e um andar, mais estreito quanto mais alto. A largura
    vem de --andar (0 = topo). */

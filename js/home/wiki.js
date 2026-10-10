@@ -105,14 +105,13 @@ function renderWiki() {
                 <p class="texto">Como a Eternity se organiza: os cargos, os títulos que dá para conquistar, os lugares do clã e as regras.</p>
             </div>
         </header>
+        <div class="wiki-corpo miolo">
         <nav class="wiki-secoes" aria-label="Seções da wiki">
-            <div class="miolo">
-                <a href="#wiki" onclick="irSecaoWiki(event, 'wiki-hierarquia')">Hierarquia</a>
-                <a href="#wiki" onclick="irSecaoWiki(event, 'wiki-titulos')">Títulos</a>
-                <a href="#wiki" onclick="irSecaoWiki(event, 'wiki-warps')">Warps</a>
-                <a href="#wiki" onclick="irSecaoWiki(event, 'wiki-regras')">Regras</a>
-            </div>
+            <span class="wiki-secoes-titulo">Nesta página</span>
+            ${WIKI_SECOES.map(([id, nome, icone]) => `
+                <a href="#wiki" data-secao="${id}" onclick="irSecaoWiki(event, '${id}')"><i class="fa-solid ${icone}" aria-hidden="true"></i>${nome}</a>`).join('')}
         </nav>
+        <div class="wiki-conteudo">
 
         <section class="secao-wiki" id="wiki-hierarquia">
             <div class="miolo">
@@ -126,7 +125,7 @@ function renderWiki() {
             </div>
         </section>
 
-        <section class="secao-wiki faixa-escura" id="wiki-titulos">
+        <section class="secao-wiki" id="wiki-titulos">
             <div class="miolo">
                 <h2>Títulos</h2>
                 <p class="texto">O título aparece ao lado do seu nick no clã. Para pedir o seu, mande no privado do jogo: <code>/m Eternity quero a tag &lt;nome&gt;</code></p>
@@ -167,9 +166,45 @@ function renderWiki() {
                 ${GUIA_REGRAS}
             </div>
         </section>
+        </div>
+        </div>
 
         ${rodapeSite()}`;
     preencherOcupantes();
+    acompanharSecaoWiki();
+}
+
+// Itens da navegacao lateral: [id da secao, nome, icone].
+const WIKI_SECOES = [
+    ['wiki-hierarquia', 'Hierarquia', 'fa-sitemap'],
+    ['wiki-titulos', 'Títulos', 'fa-crown'],
+    ['wiki-warps', 'Warps', 'fa-location-dot'],
+    ['wiki-regras', 'Regras', 'fa-scroll'],
+];
+
+// Marca na navegacao a secao que esta na faixa de leitura (logo abaixo do
+// topo). O observador anterior sai a cada render: a pagina e trocada inteira
+// pelo innerHTML e as secoes antigas deixam de existir.
+let wikiObservador = null;
+
+function marcarSecaoWiki(id) {
+    for (const link of document.querySelectorAll('.wiki-secoes a')) {
+        link.classList.toggle('ativo', link.dataset.secao === id);
+    }
+}
+
+function acompanharSecaoWiki() {
+    wikiObservador?.disconnect();
+    marcarSecaoWiki(WIKI_SECOES[0][0]);
+    if (!('IntersectionObserver' in window)) return;
+    wikiObservador = new IntersectionObserver(entradas => {
+        const visivel = entradas.find(entrada => entrada.isIntersecting);
+        if (visivel) marcarSecaoWiki(visivel.target.id);
+    }, { rootMargin: '-30% 0px -65% 0px' });
+    for (const [id] of WIKI_SECOES) {
+        const secao = document.getElementById(id);
+        if (secao) wikiObservador.observe(secao);
+    }
 }
 
 function andarHtml({ andar, salas }) {
@@ -210,6 +245,7 @@ async function preencherOcupantes() {
 
 function irSecaoWiki(event, id) {
     event.preventDefault();
+    marcarSecaoWiki(id);
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
