@@ -171,9 +171,18 @@ function renderWiki() {
         </div>
 
         ${rodapeSite()}`;
-    preencherOcupantes();
     inclinarTorre();
     acompanharSecaoWiki();
+    // Link direto para uma secao (anuncio dos titulos, 10/10/2026):
+    // #wiki?secao=titulos. O route() rola para o topo logo depois do render,
+    // entao a ida a secao espera o proximo quadro; e repete quando as cabecas
+    // da torre chegam, porque elas podem mudar a altura dos andares.
+    const secao = new URLSearchParams(location.hash.split('?')[1] || '').get('secao');
+    const irParaPedida = () => {
+        if (secao) document.getElementById(`wiki-${secao}`)?.scrollIntoView({ block: 'start' });
+    };
+    requestAnimationFrame(irParaPedida);
+    preencherOcupantes().finally(irParaPedida);
 }
 
 // Itens da navegacao lateral: [id da secao, nome, icone].
