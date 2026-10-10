@@ -690,9 +690,24 @@ main { padding-top: var(--nav); }
     padding: 32px 0 20px;
 }
 
+/* Inclinacao holografica (10/10/2026, .holo em js/titulos.js) no invólucro
+   .card-holo, nunca no card: a moldura e um ::before com z-index -1 atras do
+   card, e um transform nele a traria para a frente. Inclinando o invólucro,
+   card e moldura giram juntos e a moldura continua atras. O brilho usa a cor
+   do cargo. */
+.card-holo {
+    --de: var(--cor, var(--aqua));
+    --ate: var(--gelo);
+    display: flex;
+    border-radius: 16px;
+
+    > .card-staff { flex: 1; }
+}
+
+.card-holo.holo { overflow: visible; }
+
 /* O card de sempre (moldura na cor do cargo), no escuro. Sem transform no
-   proprio card: a moldura e um ::before com z-index -1 atras dele, e um
-   transform a traria para a frente. Quem se mexe e a cabeca. */
+   proprio card (ver .card-holo acima). Quem se mexe e a cabeca. */
 .membros-grade .card-staff {
     position: relative;
     width: auto;
@@ -1058,12 +1073,13 @@ main { padding-top: var(--nav); }
 
 /* A torre: cada cargo e um andar, mais estreito quanto mais alto. A largura
    vem de --andar (0 = topo). */
-.torre {
+.torre { margin-top: 44px; }
+
+.torre-3d {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    margin-top: 44px;
 }
 
 .torre-trilhas {
@@ -1090,15 +1106,19 @@ main { padding-top: var(--nav); }
 .sala {
     position: relative;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 18px;
+    gap: 10px 18px;
     min-height: 96px;
     padding: 16px 20px;
     border-radius: 6px;
     background: linear-gradient(135deg, color-mix(in srgb, var(--cor) 20%, #0b1624), #0b1624 75%);
     border: 1px solid color-mix(in srgb, var(--cor) 35%, transparent);
     overflow: hidden;
-    transition: box-shadow 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+    /* A "espessura" do andar: a borda de baixo do bloco, na cor do cargo. */
+    --espessura: 0 6px 0 -1px color-mix(in srgb, var(--cor) 28%, #04080f), 0 14px 22px -6px rgba(0, 0, 0, 0.55);
+    box-shadow: var(--espessura);
+    transition: box-shadow 0.3s ease, border-color 0.3s ease, background 0.3s ease, transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 /* As "janelas" acesas do andar: uma faixa de luz na cor do cargo. */
@@ -1114,12 +1134,36 @@ main { padding-top: var(--nav); }
 
 .sala:hover {
     border-color: var(--cor);
-    box-shadow: 0 0 36px -8px var(--cor), inset 0 0 40px -20px var(--cor);
+    box-shadow: var(--espessura), 0 0 36px -8px var(--cor), inset 0 0 40px -20px var(--cor);
+}
+
+/* Torre em 3D, so com mouse e tela grande (inclinacao em wiki.js): cada andar
+   numa profundidade (a base mais a frente), a torre inclinando para o
+   ponteiro e o andar sob o mouse saindo da torre. */
+@media (hover: hover) and (pointer: fine) and (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+    .torre { perspective: 1600px; perspective-origin: 50% 30%; }
+
+    /* A base vem para a frente e cresce um pouco: a folga evita que ela passe
+       da coluna (e crie rolagem lateral). */
+    .torre-3d {
+        width: 96%;
+        margin: 0 auto;
+        transform-style: preserve-3d;
+        transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+        transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+
+    .andar {
+        transform-style: preserve-3d;
+        transform: translateZ(calc(var(--andar) * 9px));
+    }
+
+    .sala:hover { transform: translateZ(34px) translateY(-3px); }
 }
 
 .sala:hover::before { width: 100%; opacity: 0.1; }
 
-.sala-texto { position: relative; flex: 1; min-width: 0; }
+.sala-texto { position: relative; flex: 1 1 0; min-width: min-content; }
 
 .sala-cargo {
     display: block;
@@ -1136,8 +1180,10 @@ main { padding-top: var(--nav); }
     color: var(--nevoa);
 }
 
+/* Sem espaco ao lado do nome do cargo, as cabecas descem para baixo dele. */
 .ocupantes {
     position: relative;
+    margin-left: auto;
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;

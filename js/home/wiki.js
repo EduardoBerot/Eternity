@@ -117,9 +117,11 @@ function renderWiki() {
                 <h2>Hierarquia</h2>
                 <p class="texto">A cor define o nível e o cargo define a função. No mesmo andar, os cargos de gestão e de PvP valem o mesmo.</p>
                 <div class="torre" id="wiki-torre">
+                    <div class="torre-3d">
                     <div class="torre-trilhas" style="width:calc(46% + 1 * 9%)"><span>Gestão</span><span>PvP</span></div>
                     ${WIKI_TORRE.map(andarHtml).join('')}
                     <div class="torre-chao"></div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -170,6 +172,7 @@ function renderWiki() {
 
         ${rodapeSite()}`;
     preencherOcupantes();
+    inclinarTorre();
     acompanharSecaoWiki();
 }
 
@@ -258,4 +261,27 @@ async function copiarWarp(botao, comando) {
             botao.querySelector('i').className = 'fa-regular fa-copy';
         }, 1400);
     } catch (_) { /* sem clipboard: o comando continua na tela */ }
+}
+
+// Torre em 3D (10/10/2026): com mouse, a torre inclina de leve para o lado do
+// ponteiro e os andares, cada um numa profundidade, se deslocam entre si. A
+// profundidade e o "andar saindo" no hover sao CSS (.torre-3d em site.css);
+// aqui so entram --rx/--ry. No toque e com "reduzir movimento", fica parada.
+function inclinarTorre() {
+    const torre = document.getElementById('wiki-torre');
+    const corpo = torre?.querySelector('.torre-3d');
+    if (!corpo) return;
+    const pode = window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 900px) and (prefers-reduced-motion: no-preference)');
+    torre.addEventListener('pointermove', event => {
+        if (!pode.matches) return;
+        const caixa = torre.getBoundingClientRect();
+        const x = (event.clientX - caixa.left) / caixa.width - 0.5;
+        const y = (event.clientY - caixa.top) / caixa.height - 0.5;
+        corpo.style.setProperty('--ry', `${(x * 10).toFixed(2)}deg`);
+        corpo.style.setProperty('--rx', `${(-y * 6).toFixed(2)}deg`);
+    });
+    torre.addEventListener('pointerleave', () => {
+        corpo.style.removeProperty('--ry');
+        corpo.style.removeProperty('--rx');
+    });
 }

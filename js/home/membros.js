@@ -193,13 +193,15 @@ function desenharMembros() {
         const perfil = perfilDe(m);
         const online = perfil?.jogo?.visto === 'Online';
         return `
+        <div class="card-holo holo cargo-${escHtml(classeCargo(m.cargo))}">
         <button type="button" class="card-staff ${escHtml(classeCargo(m.cargo))}" onclick="abrirMembro('${escHtml(m.nick)}')" aria-label="Ver perfil de ${escHtml(m.nick)}">
             ${online ? '<span class="card-online" title="Online agora"></span>' : ''}
             <img width="96" height="96" loading="lazy" src="https://mc-heads.net/head/${encodeURIComponent(m.nick)}" alt="">
             <span class="card-nick">${escHtml(m.nick)}</span>
             <span class="card-cargo">${escHtml(m.cargo || 'Membro')}</span>
             <em>${escHtml(detalheCard(m, perfil))}</em>
-        </button>`;
+        </button>
+        </div>`;
     }).join('');
 }
 
