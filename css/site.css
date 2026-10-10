@@ -976,24 +976,19 @@ main { padding-top: var(--nav); }
     a.ativo i, a:hover i { color: var(--aqua); }
 }
 
-.wiki-secoes-titulo {
-    color: var(--nevoa-escura);
-    font-family: var(--sans);
-    font-size: 0.7rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-}
-
 .secao-wiki { padding: clamp(56px, 8vw, 96px) 0; border-bottom: 1px solid var(--linha); scroll-margin-top: calc(var(--nav) + 24px); }
 .secao-wiki:last-child { border-bottom: 0; }
 
 .secao-wiki > .miolo > h2 { margin: 0 0 10px; font-size: clamp(1.8rem, 4vw, 2.8rem); }
 
 @media (min-width: 1100px) {
+    /* Mais larga que o .miolo das outras paginas: a navegacao fica afastada
+       para a esquerda, longe do conteudo, e nao colada nele. */
     .wiki-corpo {
+        max-width: 1440px;
         display: grid;
-        grid-template-columns: 190px minmax(0, 1fr);
-        gap: 56px;
+        grid-template-columns: 180px minmax(0, 1fr);
+        gap: clamp(56px, 7vw, 120px);
         align-items: start;
     }
 
@@ -1006,7 +1001,6 @@ main { padding-top: var(--nav); }
         gap: 2px;
         border-left: 1px solid var(--linha);
 
-        .wiki-secoes-titulo { padding: 0 0 12px 18px; }
         a {
             margin-left: -1px;
             padding: 10px 16px;
@@ -1034,7 +1028,6 @@ main { padding-top: var(--nav); }
         border-bottom: 1px solid var(--linha);
 
         &::-webkit-scrollbar { display: none; }
-        .wiki-secoes-titulo { display: none; }
         a {
             flex: none;
             padding: 8px 14px;

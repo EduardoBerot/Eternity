@@ -107,7 +107,6 @@ function renderWiki() {
         </header>
         <div class="wiki-corpo miolo">
         <nav class="wiki-secoes" aria-label="Seções da wiki">
-            <span class="wiki-secoes-titulo">Nesta página</span>
             ${WIKI_SECOES.map(([id, nome, icone]) => `
                 <a href="#wiki" data-secao="${id}" onclick="irSecaoWiki(event, '${id}')"><i class="fa-solid ${icone}" aria-hidden="true"></i>${nome}</a>`).join('')}
         </nav>
