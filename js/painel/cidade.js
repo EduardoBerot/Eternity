@@ -383,7 +383,10 @@ function abrirPendenciaCidade(id) {
     if (!p) return;
     const { lider } = cidade.dados.permissoes;
     const cor = (PENDENCIA_STATUS[p.status] || PENDENCIA_STATUS.Aberta).cor;
-    const acoes = p.status === 'Resolvida' ? `
+    // A staff so cria (11/10/2026): assumir, resolver e reabrir sao dos lideres;
+    // corrigir o texto, de quem abriu ou de um lider. O backend confere.
+    const meu = String(p.criado_por || '').toLowerCase() === String(getCookie(ETY_ADM_LOGIN_COOKIE) || '').toLowerCase();
+    const acoes = !lider ? '' : p.status === 'Resolvida' ? `
         <div class="cidade-acoes"><button class="botao" type="button" onclick="mudarPendenciaCidade(${p.id}, 'Aberta')">Reabrir</button></div>` : `
         <div class="cidade-acoes">
             ${p.status === 'Aberta' ? `<button class="botao" type="button" onclick="mudarPendenciaCidade(${p.id}, 'Em andamento')">Assumir</button>` : ''}
@@ -402,13 +405,14 @@ function abrirPendenciaCidade(id) {
         ${p.link ? `<p><a class="cidade-pend-link" href="${cEsc(p.link)}" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-image" aria-hidden="true"></i> Ver o print</a></p>` : ''}
         ${p.status === 'Resolvida' ? `<p class="cidade-aviso">Resolvida por ${cEsc(p.resolvido_por)} em ${cData(p.resolvido_em)}${p.resolucao ? `: ${cEsc(p.resolucao)}` : '.'}</p>` : ''}
         ${acoes}
-        <details class="cidade-editar-pend">
+        ${!lider && p.status !== 'Resolvida' ? '<p class="cidade-aviso">Um líder assume e resolve a pendência.</p>' : ''}
+        ${lider || meu ? `<details class="cidade-editar-pend">
             <summary>Corrigir a pendência</summary>
             <form class="cidade-form" onsubmit="salvarPendenciaCidade(event, ${p.id})">
                 ${camposPendencia(p)}
                 <button class="botao" type="submit">Salvar</button>
             </form>
-        </details>
+        </details>` : ''}
         ${lider ? `<button class="botao cidade-apagar" type="button" onclick="apagarPendenciaCidade(${p.id})">Apagar pendência aberta por engano</button>` : ''}`);
 }
 
