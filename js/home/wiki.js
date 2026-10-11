@@ -38,7 +38,7 @@ const WIKI_TORRE = [
     {
         andar: 4,
         salas: [
-            { cargo: 'Auxiliar', funcao: 'Apadrinha os novatos no primeiro mês.' },
+            { cargo: 'Auxiliar', funcao: 'Apadrinha os novatos recém-chegados.' },
             { cargo: 'Daimyo', funcao: 'Treina novos Ronins para o PvP.' },
         ],
     },
