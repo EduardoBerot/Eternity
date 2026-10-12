@@ -51,6 +51,35 @@ const ORDENS = {
     nick: 'Nick (A–Z)',
 };
 
+// Na lista de inativos a aba mostra e ordena pelo tempo de inatividade, e nao
+// pelo tempo de cla (12/10/2026).
+const ORDENS_INATIVOS = {
+    inativo: 'Tempo inativo',
+    cargo: 'Cargo',
+    nick: 'Nick (A–Z)',
+};
+
+function ordensDaLista() {
+    return membrosEstado.lista === 'inativos' ? ORDENS_INATIVOS : ORDENS;
+}
+
+// Desde quando a pessoa esta inativa. `inativo_desde` e gravado quando o
+// cadastro vira Inativo; os Excluidos antigos nao tem o campo, e para eles a
+// ultima atualizacao do cadastro e a passagem para Excluido.
+function diasInativo(membro) {
+    const desde = membro?.inativo_desde || (statusDe(membro) === 'excluido' ? membro?.updatedAt : null);
+    const data = desde ? new Date(desde) : null;
+    if (!data || Number.isNaN(data.getTime())) return Infinity;
+    return Math.max(0, Math.floor((Date.now() - data.getTime()) / 86_400_000));
+}
+
+function textoInativo(membro) {
+    const dias = diasInativo(membro);
+    if (!Number.isFinite(dias)) return 'Inativo';
+    if (dias === 0) return 'Inativo desde hoje';
+    return `Inativo há ${dias} dia${dias === 1 ? '' : 's'}`;
+}
+
 function diasOffline(perfil) {
     const visto = String(perfil?.jogo?.visto || '').trim().toLowerCase();
     if (visto === 'online') return -1;
@@ -69,6 +98,8 @@ function porCargo(a, b) {
 
 function compararMembros(a, b) {
     switch (membrosEstado.ordem) {
+        // Quem ficou inativo ha menos tempo primeiro.
+        case 'inativo': return diasInativo(a) - diasInativo(b) || porCargo(a, b);
         case 'atividade': return diasOffline(perfilDe(a)) - diasOffline(perfilDe(b)) || porCargo(a, b);
         case 'tempo': return String(a.data_entrada || '9999').localeCompare(String(b.data_entrada || '9999')) || porCargo(a, b);
         case 'liga': return (perfilDe(b)?.liga?.pontos ?? -1) - (perfilDe(a)?.liga?.pontos ?? -1) || porCargo(a, b);
@@ -81,6 +112,7 @@ function compararMembros(a, b) {
 // Linha de baixo do card: o dado da ordenacao escolhida, quando ela nao e o
 // tempo de cla de sempre.
 function detalheCard(membro, perfil) {
+    if (membrosEstado.lista === 'inativos') return textoInativo(membro);
     if (membrosEstado.ordem === 'atividade') {
         const dias = diasOffline(perfil);
         if (dias === -1) return 'Online agora';
@@ -207,6 +239,12 @@ function desenharFiltros() {
 function trocarLista(lista) {
     membrosEstado.lista = lista;
     membrosEstado.membros = lista === 'inativos' ? membrosEstado.inativos : membrosEstado.ativos;
+    // Cada lista abre na ordem dela: inativos pelo tempo inativo, ativos por cargo.
+    membrosEstado.ordem = lista === 'inativos' ? 'inativo' : 'cargo';
+    const seletor = document.getElementById('membros-ordem');
+    seletor.innerHTML = Object.entries(ordensDaLista())
+        .map(([valor, rotulo]) => `<option value="${valor}">${rotulo}</option>`).join('');
+    seletor.value = membrosEstado.ordem;
     desenharFiltros();
     desenharMembros();
 }
@@ -400,7 +438,9 @@ function abrirMembro(pedido) {
                 <h3><i class="fa-solid fa-shield-halved"></i> No clã</h3>
                 ${linhaInfo('Clã', escHtml(jogo.cla || membro.clan_origem || ''))}
                 ${linhaInfo('Servidor', escHtml(servidores))}
-                ${linhaInfo('Tempo de clã', tempo ? `<span title="${entrada ? `Desde ${escHtml(entrada)}` : ''}">${escHtml(tempo)}</span>` : 'Cadastro incompleto')}
+                ${inativo
+                    ? linhaInfo('Situação', escHtml(textoInativo(membro)))
+                    : linhaInfo('Tempo de clã', tempo ? `<span title="${entrada ? `Desde ${escHtml(entrada)}` : ''}">${escHtml(tempo)}</span>` : 'Cadastro incompleto')}
                 ${linhaInfo('Recrutador', escHtml(membro.recrutador || ''))}
                 ${linhaDiscord}
                 ${linhaAlts}
