@@ -2,9 +2,14 @@
 // lidera e a chamada para o recrutamento (redesign de 29/09/2026).
 
 const SERVIDOR_IP = 'armamc.com';
-// API publica de status de servidor Minecraft, com CORS aberto. Se ela cair, a
-// barra mostra so o IP -- o resto da pagina nao depende dela.
-const URL_STATUS_SERVIDOR = `https://api.mcsrvstat.us/3/${SERVIDOR_IP}`;
+// APIs publicas de status de servidor Minecraft, com CORS aberto, em ordem. A
+// mcsrvstat chegou a falhar o DNS do armamc.com e cachear "offline" com o
+// servidor no ar (12/10/2026), entao basta uma delas dizer online. Se todas
+// cairem, a barra mostra so o IP -- o resto da pagina nao depende delas.
+const URLS_STATUS_SERVIDOR = [
+    `https://api.mcstatus.io/v2/status/java/${SERVIDOR_IP}`,
+    `https://api.mcsrvstat.us/3/${SERVIDOR_IP}`,
+];
 
 function renderInicio() {
     app.innerHTML = `
@@ -249,19 +254,25 @@ async function carregarHall() {
 
 async function carregarStatusServidor() {
     const status = document.getElementById('servidor-status');
-    try {
-        const dados = await (await fetch(URL_STATUS_SERVIDOR)).json();
-        if (!status) return;
-        if (dados?.online) {
-            const on = dados.players?.online;
-            const max = dados.players?.max;
-            const jogadores = Number.isFinite(on) ? ` · ${on}${Number.isFinite(max) ? `/${max}` : ''} jogando` : '';
-            status.innerHTML = `<span class="ponto vivo"></span> Online${jogadores}`;
-        } else {
-            status.innerHTML = '<span class="ponto"></span> Servidor offline';
-        }
-    } catch (_) {
-        if (status) status.innerHTML = '<span class="ponto"></span> Servidor';
+    let dados = null;
+    for (const url of URLS_STATUS_SERVIDOR) {
+        try {
+            dados = await (await fetch(url)).json();
+            if (dados?.online) break;
+        } catch (_) { /* tenta a proxima */ }
+    }
+    if (!status) return;
+    if (!dados) {
+        status.innerHTML = '<span class="ponto"></span> Servidor';
+        return;
+    }
+    if (dados.online) {
+        const on = dados.players?.online;
+        const max = dados.players?.max;
+        const jogadores = Number.isFinite(on) ? ` · ${on}${Number.isFinite(max) ? `/${max}` : ''} jogando` : '';
+        status.innerHTML = `<span class="ponto vivo"></span> Online${jogadores}`;
+    } else {
+        status.innerHTML = '<span class="ponto"></span> Servidor offline';
     }
 }
 
