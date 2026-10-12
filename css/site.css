@@ -683,6 +683,11 @@ main { padding-top: var(--nav); }
 .chip[class*="cargo-"]:hover { border-color: var(--cor); }
 .chip[class*="cargo-"].ativo { color: var(--noite); background: var(--cor); border-color: var(--cor); }
 
+/* Inativos (12/10/2026): lista a parte, nunca misturada com a dos ativos. */
+.chip-inativos i { margin-right: 4px; }
+.card-inativo { filter: grayscale(0.65); opacity: 0.8; transition: filter 0.2s ease, opacity 0.2s ease; }
+.card-inativo:hover, .card-inativo:focus-within { filter: none; opacity: 1; }
+
 .membros-grade {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
@@ -846,6 +851,7 @@ main { padding-top: var(--nav); }
 .selo-tag { font-style: italic; color: var(--gelo); }
 .selo-online { color: #6ee7b7; }
 .selo-online .ponto { background: #34d399; }
+.selo-inativo { color: #fca5a5; background: rgba(248, 113, 113, 0.12); border-color: rgba(248, 113, 113, 0.45); font-weight: 700; }
 
 .dialogo-fechar {
     position: absolute;

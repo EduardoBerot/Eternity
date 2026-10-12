@@ -11,7 +11,35 @@ const HIERARQUIA = {
 
 const SERVIDORES = { apocalipse: 'Apocalipse', genesis: 'Gênesis' };
 
-let membrosEstado = { membros: [], perfis: new Map(), busca: '', servidor: 'todos', ordem: 'cargo' };
+// Inativos (12/10/2026): quem tomou kick de inatividade (cadastro Inativo ou
+// Excluido) continua com card, mas numa lista a parte, atras do botao
+// "Inativos". As duas listas nunca se misturam.
+const STATUS_INATIVOS = ['inativo', 'excluido'];
+
+function estadoInicial() {
+    return { membros: [], ativos: [], inativos: [], lista: 'ativos', perfis: new Map(), busca: '', servidor: 'todos', ordem: 'cargo' };
+}
+
+let membrosEstado = estadoInicial();
+
+function statusDe(membro) {
+    return String(membro?.status || '').trim().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+
+// O mesmo nick com um cadastro Excluido antigo e um Ativo novo fica so na lista
+// de ativos.
+function separarListas(membros) {
+    const ativos = membros.filter(m => statusDe(m) === 'ativo');
+    const chavesAtivas = new Set(ativos.map(m => String(m.nick).toLowerCase()));
+    const porNick = new Map();
+    for (const m of membros) {
+        const chave = String(m.nick).toLowerCase();
+        if (!STATUS_INATIVOS.includes(statusDe(m)) || chavesAtivas.has(chave)) continue;
+        const atual = porNick.get(chave);
+        if (!atual || (statusDe(atual) === 'excluido' && statusDe(m) === 'inativo')) porNick.set(chave, m);
+    }
+    return { ativos, inativos: [...porNick.values()] };
+}
 
 // Ordenacoes da aba (01/10/2026; o filtro por cargo saiu). A atividade sai do
 // "visto por ultimo" do jogo: Online, Hoje, "1 dia", "12 dias".
@@ -106,7 +134,7 @@ async function renderMembros() {
             <div class="miolo cabeca-linha">
                 <div>
                     <h1>Membros</h1>
-                    <p class="texto">Quem faz parte da Eternity hoje. Clique em alguém para ver o perfil.</p>
+                    <p class="texto" id="membros-descricao">Quem faz parte da Eternity hoje. Clique em alguém para ver o perfil.</p>
                 </div>
                 <span class="contagem" id="membros-contagem"></span>
             </div>
@@ -118,6 +146,7 @@ async function renderMembros() {
                     <input type="search" id="membros-busca" placeholder="Pesquisar por nick" aria-label="Pesquisar por nick" oninput="filtrarMembros({ busca: this.value })">
                 </div>
                 <div class="chips" id="membros-servidores" role="group" aria-label="Filtrar por servidor"></div>
+                <button type="button" class="chip chip-inativos" id="membros-inativos" aria-pressed="false" onclick="alternarInativos()"></button>
                 <label class="ordenar">
                     <span>Ordenar por</span>
                     <select id="membros-ordem" onchange="filtrarMembros({ ordem: this.value })">
@@ -132,13 +161,14 @@ async function renderMembros() {
         </div>
         ${rodapeSite()}`;
 
-    membrosEstado = { membros: [], perfis: new Map(), busca: '', servidor: 'todos', ordem: 'cargo' };
+    membrosEstado = estadoInicial();
     try {
         const [membros, perfis] = await Promise.all([
-            fetch(`${URL_BASE}/api/membros/ativos`).then(r => r.json()),
+            fetch(`${URL_BASE}/api/membros`).then(r => r.json()),
             fetch(`${URL_BASE}/api/perfis`).then(r => (r.ok ? r.json() : [])).catch(() => []),
         ]);
-        membrosEstado.membros = semContasDoCla(membros);
+        Object.assign(membrosEstado, separarListas(semContasDoCla(membros)));
+        membrosEstado.membros = membrosEstado.ativos;
         membrosEstado.perfis = new Map((Array.isArray(perfis) ? perfis : []).map(p => [String(p.nick).toLowerCase(), p]));
     } catch (error) {
         console.error(error);
@@ -162,6 +192,27 @@ function desenharFiltros() {
         chip('servidor', 'apocalipse', 'Apocalipse'),
         chip('servidor', 'genesis', 'Gênesis'),
     ].join('');
+    const inativos = membrosEstado.lista === 'inativos';
+    const botao = document.getElementById('membros-inativos');
+    botao.classList.toggle('ativo', inativos);
+    botao.setAttribute('aria-pressed', String(inativos));
+    botao.innerHTML = inativos
+        ? '<i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Voltar aos ativos'
+        : `<i class="fa-solid fa-user-clock" aria-hidden="true"></i> Inativos (${membrosEstado.inativos.length})`;
+    document.getElementById('membros-descricao').textContent = inativos
+        ? 'Quem saiu do clã por inatividade. Clique em alguém para ver o perfil.'
+        : 'Quem faz parte da Eternity hoje. Clique em alguém para ver o perfil.';
+}
+
+function trocarLista(lista) {
+    membrosEstado.lista = lista;
+    membrosEstado.membros = lista === 'inativos' ? membrosEstado.inativos : membrosEstado.ativos;
+    desenharFiltros();
+    desenharMembros();
+}
+
+function alternarInativos() {
+    trocarLista(membrosEstado.lista === 'inativos' ? 'ativos' : 'inativos');
 }
 
 function filtrarMembros(mudanca) {
@@ -182,18 +233,20 @@ function membrosVisiveis() {
 function desenharMembros() {
     const lista = membrosVisiveis();
     const total = membrosEstado.membros.length;
+    const inativos = membrosEstado.lista === 'inativos';
+    const rotulo = inativos ? 'inativos' : 'membros';
     document.getElementById('membros-contagem').textContent =
-        lista.length === total ? `${total} membros` : `${lista.length} de ${total} membros`;
+        lista.length === total ? `${total} ${rotulo}` : `${lista.length} de ${total} ${rotulo}`;
     const grade = document.getElementById('membros-grade');
     if (!lista.length) {
-        grade.innerHTML = '<p class="vazio">Nenhum membro encontrado com essa busca.</p>';
+        grade.innerHTML = `<p class="vazio">${inativos && !total ? 'Nenhum membro inativo.' : 'Nenhum membro encontrado com essa busca.'}</p>`;
         return;
     }
     grade.innerHTML = lista.map(m => {
         const perfil = perfilDe(m);
         const online = perfil?.jogo?.visto === 'Online';
         return `
-        <div class="card-holo holo cargo-${escHtml(classeCargo(m.cargo))}">
+        <div class="card-holo holo cargo-${escHtml(classeCargo(m.cargo))}${inativos ? ' card-inativo' : ''}">
         <button type="button" class="card-staff ${escHtml(classeCargo(m.cargo))}" onclick="abrirMembro('${escHtml(m.nick)}')" aria-label="Ver perfil de ${escHtml(m.nick)}">
             ${online ? '<span class="card-online" title="Online agora"></span>' : ''}
             <img width="96" height="96" loading="lazy" src="https://mc-heads.net/head/${encodeURIComponent(m.nick)}" alt="">
@@ -256,10 +309,17 @@ function faixaTitulos(titulos) {
         </div>`;
 }
 
+function acharMembro(lista, pedido) {
+    return lista.find(m => m.nick === pedido)
+        || lista.find(m => String(m.nick).toLowerCase() === String(pedido).toLowerCase());
+}
+
 function abrirMembro(pedido) {
-    const membro = membrosEstado.membros.find(m => m.nick === pedido)
-        || membrosEstado.membros.find(m => String(m.nick).toLowerCase() === String(pedido).toLowerCase());
+    let membro = acharMembro(membrosEstado.membros, pedido);
+    // "Ver no site" do /perfil de um inativo: abre a lista de inativos.
+    if (!membro && membrosEstado.lista === 'ativos' && (membro = acharMembro(membrosEstado.inativos, pedido))) trocarLista('inativos');
     if (!membro) return;
+    const inativo = STATUS_INATIVOS.includes(statusDe(membro));
     const nick = membro.nick;
     const perfil = membrosEstado.perfis.get(String(nick).toLowerCase()) || {};
     const dialogo = document.getElementById('membro-dialog');
@@ -327,6 +387,7 @@ function abrirMembro(pedido) {
                 <h2 id="membro-dialog-nick">${escHtml(nick)}</h2>
                 <div class="dialogo-selos">
                     <span class="selo cargo-${escHtml(classeCargo(membro.cargo))}">${escHtml(membro.cargo || 'Membro')}</span>
+                    ${inativo ? '<span class="selo selo-inativo">Inativo</span>' : ''}
                     ${jogo.tag && jogo.tag !== membro.cargo ? `<span class="selo selo-tag">${escHtml(jogo.tag)}</span>` : ''}
                     ${jogo.visto ? `<span class="selo ${online ? 'selo-online' : ''}"><span class="ponto"></span> ${online ? 'Online' : `Visto: ${escHtml(jogo.visto)}`}</span>` : ''}
                 </div>
