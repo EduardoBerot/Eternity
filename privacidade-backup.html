@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#070d16">
+    <meta name="robots" content="noindex">
+    <link rel="icon" href="imgs/favicon.ico" type="image/x-icon">
+    <title>Harley Backup | Política de Privacidade</title>
+    <!-- Pagina exigida pelo Google para publicar o app OAuth "Harley Backup"
+         (rclone do backup diario do Pi para o Drive, 12/10/2026). Fica fora do
+         SPA e sem analytics de proposito. -->
+    <style>
+        body {
+            margin: 0;
+            background: #070d16;
+            color: #d6dde8;
+            font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        }
+        main {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 48px 24px 64px;
+        }
+        h1 { color: #fff; font-size: 1.9rem; margin: 0 0 4px; }
+        h2 { color: #fff; font-size: 1.15rem; margin: 32px 0 8px; }
+        .atualizado { color: #8a96a8; margin: 0 0 32px; }
+        a { color: #7fb4ff; }
+        ul { padding-left: 22px; }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>Política de Privacidade — Harley Backup</h1>
+        <p class="atualizado">Última atualização: 12 de outubro de 2026</p>
+
+        <p>O <strong>Harley Backup</strong> é um aplicativo de uso pessoal. Ele faz uma cópia de
+            segurança diária dos dados de um servidor doméstico do próprio desenvolvedor para a conta
+            Google Drive dele. Não é oferecido ao público e não atende outros usuários.</p>
+
+        <h2>Dados acessados</h2>
+        <p>O aplicativo pede apenas a permissão <code>drive.file</code> do Google Drive, que dá acesso
+            somente aos arquivos que o próprio aplicativo cria. Ele não lê, não lista e não altera
+            nenhum outro arquivo do Drive, nem acessa e-mail, contatos, agenda ou qualquer outro dado
+            da conta Google.</p>
+
+        <h2>Como os dados são usados</h2>
+        <ul>
+            <li>O aplicativo envia arquivos de backup para uma pasta própria no Drive e apaga as cópias
+                antigas dessa mesma pasta, conforme o prazo de retenção configurado.</li>
+            <li>Os arquivos são criptografados antes do envio. O Google e quem tiver acesso à pasta veem
+                apenas nomes e conteúdos embaralhados.</li>
+            <li>Nenhum dado é vendido, compartilhado com terceiros ou usado para publicidade.</li>
+        </ul>
+
+        <h2>Armazenamento e segurança</h2>
+        <p>As credenciais de acesso ao Drive ficam guardadas apenas nas máquinas do desenvolvedor que
+            executam o backup. As chaves de criptografia nunca são enviadas ao Google.</p>
+
+        <h2>Retenção e exclusão</h2>
+        <p>Os backups diários são apagados automaticamente após o prazo configurado. O titular da conta
+            pode apagar a pasta de backup a qualquer momento e revogar o acesso do aplicativo em
+            <a href="https://myaccount.google.com/permissions" rel="noopener">myaccount.google.com/permissions</a>.</p>
+
+        <h2>Uso das informações recebidas das APIs do Google</h2>
+        <p>O uso e a transferência das informações recebidas das APIs do Google seguem a
+            <a href="https://developers.google.com/terms/api-services-user-data-policy" rel="noopener">Política
+                de Dados do Usuário dos Serviços de API do Google</a>, incluindo os requisitos de uso
+            limitado.</p>
+
+        <h2>Contato</h2>
+        <p>Dúvidas sobre esta política podem ser enviadas ao e-mail de suporte exibido na tela de
+            permissão do Google do aplicativo Harley Backup.</p>
+    </main>
+</body>
+
+</html>
