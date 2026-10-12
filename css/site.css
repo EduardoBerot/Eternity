@@ -982,6 +982,29 @@ main { padding-top: var(--nav); }
 .discord-chip.discord-link { padding: 2px 8px 2px 2px; }
 .discord-link:hover i { color: #8b95ff; }
 
+/* Alts numa linha do bloco "No clã" (12/10/2026): cabeca + nick, em pilulas. */
+.alts-lista {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+.alt-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px 2px 3px;
+    border: 1px solid var(--linha, rgba(232, 244, 248, 0.08));
+    border-radius: 999px;
+    background: rgba(232, 244, 248, 0.04);
+    color: var(--gelo);
+    font-size: 0.8rem;
+    font-weight: 500;
+
+    img { border-radius: 3px; image-rendering: pixelated; }
+}
+
 /* ---------- Wiki ---------- */
 
 /* Navegacao das secoes: coluna fixa a esquerda no computador, faixa de

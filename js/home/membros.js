@@ -306,6 +306,12 @@ function abrirMembro(pedido) {
            </ul>`
         : '<p class="info-vazio">Nenhum evento vencido ainda.</p>';
 
+    // Alts (12/10/2026): os outros nicks do mesmo vinculo do Discord.
+    const alts = Array.isArray(perfil.alts) ? perfil.alts : [];
+    const linhaAlts = linhaInfo('Alts', alts.length
+        ? `<span class="alts-lista">${alts.map(alt => `<span class="alt-chip"><img src="https://mc-heads.net/avatar/${encodeURIComponent(String(alt).replace(/^\*+/, ''))}/16" alt="" width="16" height="16" loading="lazy">${escHtml(alt)}</span>`).join('')}</span>`
+        : '');
+
     const banco = perfil.banco;
     const valorBanco = Number(banco?.total) || 0;
     const linhaBanco = linhaInfo('Banco do clã', valorBanco
@@ -336,6 +342,7 @@ function abrirMembro(pedido) {
                 ${linhaInfo('Tempo de clã', tempo ? `<span title="${entrada ? `Desde ${escHtml(entrada)}` : ''}">${escHtml(tempo)}</span>` : 'Cadastro incompleto')}
                 ${linhaInfo('Recrutador', escHtml(membro.recrutador || ''))}
                 ${linhaDiscord}
+                ${linhaAlts}
                 ${linhaBanco}
             </section>
             <section class="info-bloco">
