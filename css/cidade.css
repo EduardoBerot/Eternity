@@ -575,7 +575,7 @@ body.painel--cidade main { margin: 0; }
     p { margin: 0; color: var(--nevoa-escura); font-family: var(--sans); font-size: 0.82rem; }
 }
 
-/* ---------- Cidade 3D (js/home/cidade-3d.js), so no computador ----------
+/* ---------- Cidade 3D (js/home/cidade-3d.js) ----------
    O palco fica por cima do Leaflet, na mesma caixa; no modo 2D ele some e o
    mapa de sempre aparece. */
 
@@ -649,6 +649,18 @@ body.painel--cidade main { margin: 0; }
     pointer-events: none;
 
     i { color: var(--aqua); margin-right: 4px; }
+}
+
+/* No celular o card da casa e uma faixa no pe do mapa: a ajuda sobe para o
+   topo, ao lado dos botoes 2D/3D. */
+@media (max-width: 640px) {
+    .cidade-3d-ajuda {
+        top: 12px;
+        bottom: auto;
+        max-width: calc(100% - 140px);
+        font-size: 0.66rem;
+        text-align: right;
+    }
 }
 
 /* ---------- Pendencias da cidade (painel, 10/10/2026) ----------

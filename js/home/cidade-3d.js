@@ -1,6 +1,6 @@
 // Cidade em 3D (10/10/2026): o mesmo mapa da pagina Cidade, com cada coluna de
-// blocos na altura de verdade, so no computador. No celular (ou sem WebGL) fica
-// o mapa 2D do Leaflet, que continua sendo montado sempre por baixo.
+// blocos na altura de verdade. Sem WebGL 2 fica o mapa 2D do Leaflet, que
+// continua sendo montado sempre por baixo.
 //
 // O relevo e imgs/cidade-3d/altura.png, gerado pelo render-voxelmap.py (repo do
 // Harley) junto com o mapa de cor, do mesmo cache: altura + 1024 em R (byte
@@ -13,6 +13,11 @@
 // 13/10/2026: recorte ampliado (1840x1560, com a mata e o mar em volta), borda
 // que se desfaz em nuvem em vez do corte seco no ultimo bloco, e a maquete
 // girando sozinha ate a primeira mexida.
+//
+// 13/10/2026: liberado no celular. Na tela de toque o entorno vira degraus de
+// 8x8 (a cidade continua bloco a bloco), a resolucao vai ate 1,5x e o nome do
+// pino nao aparece no "passar por cima", que no dedo e o proprio arrasto -- o
+// toque no pino ja abre o card.
 
 const CIDADE3D_VERSAO = '2026-10-13';
 const CIDADE3D_ALTURA = '/imgs/cidade-3d/altura.png';
@@ -24,7 +29,8 @@ const CIDADE3D_PREFERENCIA = 'eternity-cidade-modo';
 // passava de 6 milhoes de vertices; assim fica em ~3,6 milhoes, perto dos 2,5
 // do mapa antigo, e o entorno ainda some na nevoa da borda.
 const CIDADE3D_NUCLEO = { x0: 7200, z0: 820, x1: 8480, z1: 1820 };
-const CIDADE3D_PASSO_ENTORNO = 4;
+const CIDADE3D_TOQUE = window.matchMedia('(pointer: coarse)').matches;
+const CIDADE3D_PASSO_ENTORNO = CIDADE3D_TOQUE ? 8 : 4;
 // Largura (em blocos) da faixa em que o terreno se desfaz ate a borda.
 const CIDADE3D_MARGEM_BORDA = 150;
 // Volta completa em ~2 min (o OrbitControls conta 30 s por volta na velocidade 2).
@@ -33,7 +39,6 @@ const CIDADE3D_GIRO = 0.5;
 let cidade3d = null;
 
 function cidade3dPossivel() {
-    if (!window.matchMedia('(min-width: 1100px) and (pointer: fine)').matches) return false;
     if (cidadePub.dados?.mapa?.versao !== CIDADE3D_VERSAO) return false;
     try {
         const canvas = document.createElement('canvas');
@@ -43,7 +48,7 @@ function cidade3dPossivel() {
     }
 }
 
-// Botoes 2D/3D no canto do mapa. O 3D e o padrao no computador; a escolha fica
+// Botoes 2D/3D no canto do mapa. O 3D e o padrao; a escolha fica
 // guardada no navegador.
 function cidade3dPreparar() {
     cidade3dDescartar();
@@ -298,8 +303,8 @@ async function montarCidade3d(palco) {
     textura.minFilter = THREE.LinearMipmapLinearFilter;
     textura.generateMipmaps = true;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const renderer = new THREE.WebGLRenderer({ antialias: !CIDADE3D_TOQUE, alpha: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, CIDADE3D_TOQUE ? 1.5 : 2));
     textura.anisotropy = renderer.capabilities.getMaxAnisotropy();
     const cena = new THREE.Scene();
     cena.fog = new THREE.Fog(0x070d16, 1400 * escala, 3200 * escala);
@@ -465,7 +470,9 @@ async function montarCidade3d(palco) {
     palco.appendChild(dica);
     const ajuda = document.createElement('p');
     ajuda.className = 'cidade-3d-ajuda';
-    ajuda.innerHTML = '<i class="fa-solid fa-computer-mouse" aria-hidden="true"></i> Arraste para girar · botão direito para mover · roda para aproximar';
+    ajuda.innerHTML = CIDADE3D_TOQUE
+        ? '<i class="fa-solid fa-hand-pointer" aria-hidden="true"></i> Arraste para girar · pinça para aproximar · dois dedos para mover'
+        : '<i class="fa-solid fa-computer-mouse" aria-hidden="true"></i> Arraste para girar · botão direito para mover · roda para aproximar';
     palco.appendChild(ajuda);
 
     function ajustarTamanho() {
@@ -543,6 +550,8 @@ async function montarCidade3d(palco) {
         pedirQuadro();
     }
     renderer.domElement.addEventListener('pointermove', event => {
+        // No dedo, mover e arrastar a camera: o nome viria a cada arrasto.
+        if (event.pointerType !== 'mouse') return;
         const cabeca = cabecaEm(event);
         destacar(cabeca);
         if (cabeca) {
