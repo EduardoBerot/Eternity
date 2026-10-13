@@ -9,12 +9,26 @@
 // mapa o 3D nao aparece, porque o relevo deixaria de bater com as cores.
 //
 // Three.js vem por import() so quando o 3D abre; quem nunca abre nao baixa.
+//
+// 13/10/2026: recorte ampliado (1840x1560, com a mata e o mar em volta), borda
+// que se desfaz em nuvem em vez do corte seco no ultimo bloco, e a maquete
+// girando sozinha ate a primeira mexida.
 
-const CIDADE3D_VERSAO = '2026-10-06';
+const CIDADE3D_VERSAO = '2026-10-13';
 const CIDADE3D_ALTURA = '/imgs/cidade-3d/altura.png';
 const CIDADE3D_THREE = 'https://cdn.jsdelivr.net/npm/three@0.170.0/+esm';
 const CIDADE3D_CONTROLES = 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js/+esm';
 const CIDADE3D_PREFERENCIA = 'eternity-cidade-modo';
+// A cidade de fato (o recorte antigo, em coordenadas do mundo) fica bloco a
+// bloco; o entorno vira degraus de 4x4. Com tudo em detalhe cheio a malha
+// passava de 6 milhoes de vertices; assim fica em ~3,6 milhoes, perto dos 2,5
+// do mapa antigo, e o entorno ainda some na nevoa da borda.
+const CIDADE3D_NUCLEO = { x0: 7200, z0: 820, x1: 8480, z1: 1820 };
+const CIDADE3D_PASSO_ENTORNO = 4;
+// Largura (em blocos) da faixa em que o terreno se desfaz ate a borda.
+const CIDADE3D_MARGEM_BORDA = 150;
+// Volta completa em ~2 min (o OrbitControls conta 30 s por volta na velocidade 2).
+const CIDADE3D_GIRO = 0.5;
 
 let cidade3d = null;
 
@@ -107,6 +121,43 @@ async function lerAlturas(largura, altura) {
     const alturas = new Int16Array(largura * altura);
     for (let i = 0; i < alturas.length; i++) alturas[i] = px[i * 4] * 256 + px[i * 4 + 1] - 1024;
     return alturas;
+}
+
+// Fora do nucleo, cada quadrado de PASSO x PASSO fica na altura do bloco mais
+// alto dele: menos degraus, malha bem menor. Muda o array no lugar.
+function simplificarEntorno(alturas, W, D, mapa) {
+    const passo = CIDADE3D_PASSO_ENTORNO;
+    const n = CIDADE3D_NUCLEO;
+    const nucleo = (x, z) => x + mapa.x0 >= n.x0 && x + mapa.x0 < n.x1 && z + mapa.z0 >= n.z0 && z + mapa.z0 < n.z1;
+    for (let bz = 0; bz < D; bz += passo) {
+        for (let bx = 0; bx < W; bx += passo) {
+            const zf = Math.min(D, bz + passo), xf = Math.min(W, bx + passo);
+            let maior = -Infinity;
+            for (let z = bz; z < zf; z++) for (let x = bx; x < xf; x++) if (!nucleo(x, z)) maior = Math.max(maior, alturas[z * W + x]);
+            if (maior === -Infinity) continue;
+            for (let z = bz; z < zf; z++) for (let x = bx; x < xf; x++) if (!nucleo(x, z)) alturas[z * W + x] = maior;
+        }
+    }
+}
+
+// Textura de nuvem: bolhas brancas suaves sobrepostas, desenhadas uma vez.
+function texturaNuvem(THREE) {
+    const t = 256;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = t;
+    const ctx = canvas.getContext('2d');
+    const bolhas = [[0.5, 0.55, 0.36], [0.32, 0.58, 0.24], [0.68, 0.6, 0.26], [0.45, 0.42, 0.24], [0.6, 0.45, 0.2]];
+    for (const [x, y, r] of bolhas) {
+        const g = ctx.createRadialGradient(x * t, y * t, 0, x * t, y * t, r * t);
+        g.addColorStop(0, 'rgba(236, 243, 250, 0.55)');
+        g.addColorStop(0.6, 'rgba(220, 232, 244, 0.25)');
+        g.addColorStop(1, 'rgba(210, 225, 240, 0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, t, t);
+    }
+    const textura = new THREE.CanvasTexture(canvas);
+    textura.colorSpace = THREE.SRGBColorSpace;
+    return textura;
 }
 
 // Arrays que crescem sozinhos (a malha passa de um milhao de vertices).
@@ -233,6 +284,9 @@ async function montarCidade3d(palco) {
         carregarTextura(THREE, `${URL_CIDADE_PUBLICA}/mapa?v=${encodeURIComponent(mapa.versao || '')}&uso=3d`),
     ]);
     if (!palco.isConnected) throw new Error('pagina trocada durante a montagem');
+    simplificarEntorno(alturas, W, D, mapa);
+    // Medidas da camera e da nevoa acompanham o tamanho do mapa (feitas para 1280).
+    const escala = Math.max(W, D) / 1280;
 
     let minimo = Infinity;
     for (const a of alturas) if (a < minimo) minimo = a;
@@ -248,16 +302,61 @@ async function montarCidade3d(palco) {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     textura.anisotropy = renderer.capabilities.getMaxAnisotropy();
     const cena = new THREE.Scene();
-    cena.fog = new THREE.Fog(0x070d16, 1400, 3200);
+    cena.fog = new THREE.Fog(0x070d16, 1400 * escala, 3200 * escala);
 
     const geo = malhaCidade(THREE, alturas, W, D, base);
-    const cidade = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ map: textura }));
+    // Perto da borda o terreno fica transparente aos poucos: o fundo da pagina
+    // (um degrade, por isso nao da para pintar de uma cor so) aparece por baixo
+    // e a maquete se desfaz em vez de terminar num corte seco. A saia da borda
+    // fica em transparencia total, e a placa de fundo de antes saiu.
+    const materialCidade = new THREE.MeshLambertMaterial({ map: textura, transparent: true });
+    materialCidade.onBeforeCompile = shader => {
+        shader.uniforms.uTamanho = { value: new THREE.Vector2(W, D) };
+        shader.uniforms.uMargem = { value: CIDADE3D_MARGEM_BORDA };
+        shader.vertexShader = shader.vertexShader
+            .replace('#include <common>', '#include <common>\nvarying vec2 vChao;')
+            .replace('#include <begin_vertex>', '#include <begin_vertex>\nvChao = position.xz;');
+        shader.fragmentShader = shader.fragmentShader
+            .replace('#include <common>', '#include <common>\nvarying vec2 vChao;\nuniform vec2 uTamanho;\nuniform float uMargem;')
+            .replace('#include <opaque_fragment>', `#include <opaque_fragment>
+            vec2 dentro = min(vChao, uTamanho - vChao);
+            float borda = smoothstep(0.0, uMargem, min(dentro.x, dentro.y));
+            gl_FragColor.a *= borda * borda;
+            // Quase invisivel nao grava profundidade: senao o terreno que ja
+            // sumiu tampava as nuvens atras dele (placas escuras na moldura).
+            if (gl_FragColor.a < 0.3) discard;`);
+    };
+    const cidade = new THREE.Mesh(geo, materialCidade);
     cena.add(cidade);
 
-    // Fundo da maquete: uma placa escura logo abaixo da saia.
-    const placa = new THREE.Mesh(new THREE.BoxGeometry(W + 24, 4, D + 24), new THREE.MeshLambertMaterial({ color: 0x0f1c2b }));
-    placa.position.set(W / 2, -2, D / 2);
-    cena.add(placa);
+    // Moldura de nuvens: tufos ao longo das quatro bordas, uns por dentro e
+    // outros por fora, cobrindo onde o terreno some.
+    const nuvemTextura = texturaNuvem(THREE);
+    const nuvens = new THREE.Group();
+    const alturaMedia = 70 - base;
+    const tufo = (x, z) => {
+        const material = new THREE.SpriteMaterial({ map: nuvemTextura, transparent: true, depthWrite: false, fog: false, opacity: 0.55 + Math.random() * 0.35 });
+        const nuvem = new THREE.Sprite(material);
+        const tamanho = (170 + Math.random() * 150) * escala;
+        nuvem.scale.set(tamanho, tamanho * 0.6, 1);
+        nuvem.position.set(x, alturaMedia + 15 + Math.random() * 45, z);
+        nuvem.renderOrder = 5;
+        nuvens.add(nuvem);
+    };
+    const passoNuvem = 85 * escala;
+    for (let i = 0; i <= W; i += passoNuvem) {
+        for (const z of [0, D]) {
+            const fora = z === 0 ? -1 : 1;
+            tufo(i + (Math.random() - 0.5) * 40, z + fora * (Math.random() * 60 - 25));
+        }
+    }
+    for (let i = 0; i <= D; i += passoNuvem) {
+        for (const x of [0, W]) {
+            const fora = x === 0 ? -1 : 1;
+            tufo(x + fora * (Math.random() * 60 - 25), i + (Math.random() - 0.5) * 40);
+        }
+    }
+    cena.add(nuvens);
 
     cena.add(new THREE.HemisphereLight(0xe8f4f8, 0x16283b, 1.6));
     const sol = new THREE.DirectionalLight(0xffffff, 1.4);
@@ -340,7 +439,7 @@ async function montarCidade3d(palco) {
 
     const camera = new THREE.PerspectiveCamera(42, 1, 1, 6000);
     const meio = new THREE.Vector3(W / 2, 70 - base, D / 2);
-    camera.position.set(W / 2 + 260, 620, D + 520);
+    camera.position.set(W / 2 + 260 * escala, 620 * escala, D + 520 * escala);
     const controles = new OrbitControls(camera, renderer.domElement);
     controles.target.copy(meio);
     controles.enableDamping = true;
@@ -348,8 +447,14 @@ async function montarCidade3d(palco) {
     controles.screenSpacePanning = false;
     controles.zoomToCursor = true;
     controles.minDistance = 25;
-    controles.maxDistance = 2200;
+    controles.maxDistance = 2200 * escala;
     controles.maxPolarAngle = 1.38;
+    // Gira sozinha ate a primeira mexida (arrastar, roda, clique num pino ou
+    // num item da lista); depois fica onde a pessoa deixou.
+    controles.autoRotate = true;
+    controles.autoRotateSpeed = CIDADE3D_GIRO;
+    const pararGiro = () => { controles.autoRotate = false; };
+    controles.addEventListener('start', pararGiro);
     controles.update();
 
     palco.innerHTML = '';
@@ -468,6 +573,7 @@ async function montarCidade3d(palco) {
     });
 
     function voarPara(alvo) {
+        pararGiro();
         const destino = new THREE.Vector3(alvo.x - mapa.x0 + 0.5, alturaMarca(alvo), alvo.z - mapa.z0 + 0.5);
         // Mesmo angulo de agora, mais perto.
         const direcao = camera.position.clone().sub(controles.target).normalize();
@@ -495,6 +601,8 @@ async function montarCidade3d(palco) {
         geo.dispose();
         textura.dispose();
         cidade.material.dispose();
+        nuvemTextura.dispose();
+        for (const nuvem of nuvens.children) nuvem.material.dispose();
         for (const ponto of cabecas) ponto.material.dispose();
         for (const textura of texturas.values()) textura.dispose();
         renderer.dispose();
