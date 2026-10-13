@@ -65,13 +65,16 @@ function metaBancoHTML(meta, { painel = false } = {}) {
             <li class="mb-degrau${alcancado ? ' mb-alcancado' : ''}${atual ? ' mb-atual' : ''}" style="--i: ${i}">
                 <span class="mb-degrau-taxa">${mbPct(d.taxa)}</span>
                 <span class="mb-degrau-req">${d.base ? 'Sempre' : `${mbCompacto(d.valor)} na semana`}</span>
+                ${d.extra ? `<span class="mb-degrau-extra">+ ${mbEsc(d.extra)}</span>` : ''}
                 ${atual ? '<span class="mb-degrau-selo">Agora</span>' : ''}
             </li>`;
     }).join('');
 
+    // `extra`: o evento que o degrau libera (Quiz do Clã, Copa de Duelos).
+    const ultimo = degraus[degraus.length - 1];
     const chamada = cheia
-        ? `<p class="mb-chamada mb-chamada-cheia"><i class="fa-solid fa-crown"></i> <span><strong>Meta cheia!</strong> Os pódios desta semana pagam <strong>${mbPct(degraus[degraus.length - 1].taxa)}</strong> de adicional.</span></p>`
-        : `<p class="mb-chamada"><i class="fa-solid fa-arrow-trend-up"></i> <span>Faltam <strong>${mbMoeda(proximo.valor - meta.liquido)}</strong> para o adicional subir para <strong>${mbPct(proximo.taxa)}</strong>.</span></p>`;
+        ? `<p class="mb-chamada mb-chamada-cheia"><i class="fa-solid fa-crown"></i> <span><strong>Meta cheia!</strong> Os pódios desta semana pagam <strong>${mbPct(ultimo.taxa)}</strong> de adicional${ultimo.extra ? ` e a <strong class="mb-chamada-extra">${mbEsc(ultimo.extra)}</strong> está liberada` : ''}.</span></p>`
+        : `<p class="mb-chamada"><i class="fa-solid fa-arrow-trend-up"></i> <span>Faltam <strong>${mbMoeda(proximo.valor - meta.liquido)}</strong> para o adicional subir para <strong>${mbPct(proximo.taxa)}</strong>${proximo.extra ? ` e liberar o <strong class="mb-chamada-extra">${mbEsc(proximo.extra)}</strong>` : ''}.</span></p>`;
 
     const apoiadores = meta.apoiadores.length
         ? `<ol class="mb-apoiadores">${meta.apoiadores.map((a, i) => `

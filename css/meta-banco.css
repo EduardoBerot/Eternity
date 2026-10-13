@@ -306,6 +306,23 @@
 .mb-degrau-taxa { font-family: Conthax; font-size: 1.35rem; color: var(--gelo); }
 .mb-degrau-req { font-size: 0.78rem; color: var(--nevoa); }
 
+/* Evento que o degrau libera (Quiz do Clã, Copa de Duelos) */
+.mb-degrau-extra {
+    align-self: flex-start;
+    margin-top: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--mb-ouro);
+    background: rgba(255, 210, 63, 0.12);
+    border: 1px solid rgba(255, 210, 63, 0.35);
+}
+
+.mb-chamada-extra { color: var(--mb-ouro); }
+
 .mb-degrau.mb-alcancado { opacity: 1; border-color: rgba(46, 230, 240, 0.25); }
 
 .mb-degrau.mb-atual {
