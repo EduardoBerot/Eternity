@@ -126,7 +126,6 @@ function metaBancoHTML(meta, { painel = false } = {}) {
             <footer class="mb-regras">
                 Conta o depósito <b>líquido</b> dos membros no banco do clã (<code>/clan banco depositar</code>), de segunda a domingo: sacar devolve a barra.
                 O adicional vale para os pódios dos torneios da semana e é pago na segunda, junto do resultado.
-                O extra nunca passa da metade do que entrou na semana, para o caixa do clã sempre crescer.
             </footer>
         </article>`;
 }
