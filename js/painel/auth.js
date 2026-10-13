@@ -35,7 +35,7 @@ async function authenticate() {
             // menu e conveniencia de interface -- quem autoriza de verdade e o
             // middleware do backend em cada requisicao.
             if (valid && lider) {
-                for (const id of ['recrutamento', 'analises']) {
+                for (const id of ['recrutamento', 'analises', 'banco']) {
                     const item = document.getElementById(id);
                     if (item) item.hidden = false;
                 }

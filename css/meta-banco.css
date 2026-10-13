@@ -1,0 +1,437 @@
+/* Meta semanal do banco (13/10/2026): o card da barra, na pagina inicial e na
+   aba Banco do painel. Usa os tokens do site.css. A barra vai do aqua do site
+   ao dourado da meta cheia; cada degrau e um marco na trilha e um cartao
+   embaixo, e o degrau em vigor e o unico que pulsa. */
+
+.mb-card {
+    --mb-ouro: #ffd23f;
+    --mb-azul: #4d9dff;
+    --mb-trilho: rgba(232, 244, 248, 0.07);
+    --mb-alto-trilha: 18px;
+    --mb-no: 26px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    margin-top: 30px;
+    padding: clamp(20px, 3.4vw, 36px);
+    border-radius: 18px;
+    background:
+        radial-gradient(120% 140% at 0% 0%, rgba(46, 230, 240, 0.1), transparent 55%),
+        radial-gradient(90% 120% at 100% 100%, rgba(255, 210, 63, 0.07), transparent 60%),
+        rgba(7, 13, 22, 0.72);
+    border: 1px solid rgba(46, 230, 240, 0.18);
+    box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(232, 244, 248, 0.05);
+    overflow: hidden;
+    font-family: var(--sans);
+    color: var(--gelo);
+}
+
+/* O site herda a Conthax em quase tudo; no card ela fica so nos numeros
+   grandes (regras com classe propria, mais abaixo, vencem esta). */
+.mb-card * { font-family: var(--sans); }
+
+/* Linha de luz no topo do card. */
+.mb-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(46, 230, 240, 0.7), rgba(255, 210, 63, 0.6), transparent);
+}
+
+.mb-previa {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(255, 210, 63, 0.08);
+    border: 1px dashed rgba(255, 210, 63, 0.4);
+    color: var(--mb-ouro);
+    font-size: 0.85rem;
+}
+
+.mb-rotulo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nevoa);
+}
+
+/* ---------- Topo: taxa atual e relogio ---------- */
+
+.mb-topo {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+.mb-taxa-bloco { display: flex; flex-direction: column; gap: 6px; }
+
+.mb-taxa {
+    font-family: Conthax;
+    font-size: clamp(2.6rem, 7vw, 4.2rem);
+    line-height: 1;
+    background: linear-gradient(120deg, var(--aqua), var(--gelo) 60%, var(--aqua));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 18px rgba(46, 230, 240, 0.35));
+}
+
+.mb-cheia .mb-taxa {
+    background-image: linear-gradient(120deg, var(--mb-ouro), #fff3c4 55%, var(--mb-ouro));
+    filter: drop-shadow(0 0 22px rgba(255, 210, 63, 0.45));
+}
+
+.mb-relogio {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: rgba(232, 244, 248, 0.03);
+    border: 1px solid var(--linha);
+
+    strong { font-family: Conthax; font-weight: normal; font-size: 1.15rem; color: var(--gelo); }
+    small { font-size: 0.75rem; color: var(--nevoa-escura); }
+}
+
+/* ---------- Numeros ---------- */
+
+.mb-numeros {
+    display: flex;
+    align-items: baseline;
+    gap: 10px 14px;
+    flex-wrap: wrap;
+}
+
+.mb-valor {
+    font-family: Conthax;
+    font-size: clamp(1.4rem, 3.6vw, 2rem);
+    color: var(--gelo);
+    font-variant-numeric: tabular-nums;
+}
+
+.mb-de { color: var(--nevoa); font-size: 0.95rem; }
+
+.mb-pct {
+    margin-left: auto;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--aqua-suave);
+    color: var(--aqua);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.mb-cheia .mb-pct { background: rgba(255, 210, 63, 0.14); color: var(--mb-ouro); }
+
+/* ---------- Trilha ---------- */
+
+/* Espaco em cima (taxa do marco) e embaixo (valor do marco) da barra; os
+   marcos sao posicionados sobre esta area, na fracao do valor dentro da meta. */
+.mb-trilha-area {
+    position: relative;
+    padding: 34px 0 30px;
+    margin: 0 10px;
+}
+
+.mb-trilha {
+    position: relative;
+    height: var(--mb-alto-trilha);
+    border-radius: 999px;
+    background:
+        repeating-linear-gradient(90deg, transparent 0 22px, rgba(232, 244, 248, 0.035) 22px 24px),
+        var(--mb-trilho);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
+}
+
+.mb-preenchido {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--aqua), var(--mb-azul) 55%, var(--mb-ouro));
+    background-size: calc(100% / max(var(--mb-alvo), 0.01)) 100%;
+    box-shadow: 0 0 22px rgba(46, 230, 240, 0.45);
+    transition: width 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow: hidden;
+}
+
+.mb-visivel .mb-preenchido { width: calc(var(--mb-alvo) * 100%); }
+
+/* Faixa de luz correndo dentro do preenchido. */
+.mb-brilho {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.45) 45%, transparent 70%);
+    transform: translateX(-100%);
+    animation: mb-correr 2.8s ease-in-out 1.6s infinite;
+}
+
+@keyframes mb-correr {
+    0% { transform: translateX(-100%); }
+    60%, 100% { transform: translateX(100%); }
+}
+
+.mb-cheia .mb-preenchido { animation: mb-pulso-ouro 2.4s ease-in-out infinite; }
+
+@keyframes mb-pulso-ouro {
+    0%, 100% { box-shadow: 0 0 18px rgba(255, 210, 63, 0.4); }
+    50% { box-shadow: 0 0 36px rgba(255, 210, 63, 0.75); }
+}
+
+/* Marco de largura zero na posicao do degrau; os tres filhos se centralizam
+   nele: a taxa acima da barra, o no sobre ela e o valor abaixo. */
+.mb-marco {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--pos);
+    width: 0;
+    pointer-events: none;
+
+    > * { position: absolute; left: 0; transform: translateX(-50%); white-space: nowrap; }
+}
+
+.mb-marco-taxa {
+    top: 4px;
+    font-family: Conthax;
+    font-size: 0.85rem;
+    color: var(--nevoa-escura);
+    transition: color 0.4s ease;
+}
+
+.mb-marco-valor { bottom: 2px; font-size: 0.75rem; color: var(--nevoa-escura); }
+
+/* O ultimo marco fica na ponta da barra: os textos encostam a direita para nao
+   vazarem do card. */
+.mb-marco:last-child {
+    .mb-marco-taxa, .mb-marco-valor { transform: translateX(-85%); }
+}
+
+.mb-no {
+    top: calc(34px + var(--mb-alto-trilha) / 2 - var(--mb-no) / 2);
+    display: grid;
+    place-items: center;
+    width: var(--mb-no);
+    height: var(--mb-no);
+    border-radius: 50%;
+    background: var(--noite);
+    border: 2px solid rgba(232, 244, 248, 0.2);
+    color: var(--noite);
+    font-size: 0.7rem;
+    transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.mb-marco.mb-alcancado {
+    .mb-marco-taxa { color: var(--gelo); }
+    .mb-marco-valor { color: var(--nevoa); }
+    .mb-no { background: var(--aqua); border-color: var(--aqua); box-shadow: 0 0 14px rgba(46, 230, 240, 0.7); }
+}
+
+.mb-marco.mb-atual .mb-no { animation: mb-pulso-no 1.8s ease-in-out infinite; }
+
+.mb-marco:last-child.mb-alcancado {
+    .mb-marco-taxa { color: var(--mb-ouro); }
+    .mb-no { background: var(--mb-ouro); border-color: var(--mb-ouro); box-shadow: 0 0 18px rgba(255, 210, 63, 0.8); }
+}
+
+@keyframes mb-pulso-no {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.18); }
+}
+
+/* ---------- Chamada ---------- */
+
+.mb-chamada {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, rgba(46, 230, 240, 0.1), transparent 80%);
+    border-left: 3px solid var(--aqua);
+    font-size: 0.98rem;
+    color: var(--nevoa);
+
+    i { color: var(--aqua); font-size: 1.1rem; }
+    strong { color: var(--gelo); }
+}
+
+.mb-chamada-cheia {
+    background: linear-gradient(90deg, rgba(255, 210, 63, 0.12), transparent 80%);
+    border-left-color: var(--mb-ouro);
+
+    i { color: var(--mb-ouro); }
+}
+
+/* ---------- Degraus ---------- */
+
+.mb-degraus {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mb-degrau {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 14px 12px;
+    border-radius: 12px;
+    background: rgba(232, 244, 248, 0.025);
+    border: 1px solid var(--linha);
+    opacity: 0.55;
+    transition: opacity 0.3s ease, transform 0.2s ease, border-color 0.3s ease;
+}
+
+.mb-degrau:hover { transform: translateY(-2px); }
+
+.mb-degrau-taxa { font-family: Conthax; font-size: 1.35rem; color: var(--gelo); }
+.mb-degrau-req { font-size: 0.78rem; color: var(--nevoa); }
+
+.mb-degrau.mb-alcancado { opacity: 1; border-color: rgba(46, 230, 240, 0.25); }
+
+.mb-degrau.mb-atual {
+    background: linear-gradient(160deg, rgba(46, 230, 240, 0.16), rgba(46, 230, 240, 0.03));
+    border-color: var(--aqua);
+    box-shadow: 0 0 0 1px rgba(46, 230, 240, 0.25), 0 10px 30px -14px rgba(46, 230, 240, 0.6);
+}
+
+.mb-cheia .mb-degrau.mb-atual {
+    background: linear-gradient(160deg, rgba(255, 210, 63, 0.18), rgba(255, 210, 63, 0.03));
+    border-color: var(--mb-ouro);
+    box-shadow: 0 0 0 1px rgba(255, 210, 63, 0.3), 0 10px 30px -14px rgba(255, 210, 63, 0.6);
+
+    .mb-degrau-taxa { color: var(--mb-ouro); }
+    .mb-degrau-selo { background: var(--mb-ouro); }
+}
+
+.mb-degrau-selo {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--aqua);
+    color: var(--noite);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+/* ---------- Apoiadores ---------- */
+
+.mb-bloco h3 {
+    margin: 0 0 12px;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nevoa);
+    font-family: var(--sans);
+    font-weight: 600;
+}
+
+.mb-apoiadores {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px 8px 8px;
+        border-radius: 10px;
+        background: rgba(232, 244, 248, 0.03);
+        border: 1px solid var(--linha);
+        opacity: 0;
+        transform: translateY(6px);
+        transition: opacity 0.4s ease calc(0.9s + var(--i) * 70ms), transform 0.4s ease calc(0.9s + var(--i) * 70ms), border-color 0.2s ease;
+    }
+    li:first-child { border-color: rgba(255, 210, 63, 0.35); }
+    li:hover { border-color: rgba(46, 230, 240, 0.4); }
+    img { width: 32px; height: 32px; border-radius: 6px; image-rendering: pixelated; }
+}
+
+.mb-visivel .mb-apoiadores li { opacity: 1; transform: none; }
+
+.mb-apoiador-nick { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.88rem; }
+.mb-apoiador-valor { font-family: Conthax; font-size: 0.85rem; color: var(--aqua); }
+.mb-apoiadores li:first-child .mb-apoiador-valor { color: var(--mb-ouro); }
+
+.mb-mais { margin: 8px 0 0; font-size: 0.8rem; color: var(--nevoa-escura); }
+
+.mb-vazio {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    color: var(--nevoa);
+    font-size: 0.9rem;
+
+    i { color: var(--mb-ouro); }
+}
+
+/* ---------- Regras ---------- */
+
+.mb-regras {
+    padding-top: 16px;
+    border-top: 1px solid var(--linha);
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--nevoa-escura);
+
+    b { color: var(--nevoa); }
+    code { padding: 1px 6px; border-radius: 4px; background: rgba(232, 244, 248, 0.06); color: var(--nevoa); font-size: 0.78rem; }
+}
+
+/* ---------- Aba Banco do painel ---------- */
+
+.mb-painel {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px var(--lado) 64px;
+
+    h2 { margin: 0 0 6px; font-size: clamp(1.4rem, 3vw, 2rem); }
+    .texto { margin: 0; }
+}
+
+/* ---------- Celular ---------- */
+
+@media (max-width: 640px) {
+    .mb-degraus { grid-template-columns: repeat(2, 1fr); }
+    .mb-degrau-selo { position: static; align-self: flex-start; order: -1; margin-bottom: 2px; }
+    .mb-relogio { align-items: flex-start; }
+    .mb-topo { align-items: flex-start; }
+    .mb-pct { margin-left: 0; }
+    .mb-marco-taxa { font-size: 0.72rem; }
+    .mb-marco-valor { font-size: 0.68rem; }
+    .mb-card { --mb-no: 22px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mb-preenchido { transition: none; }
+    .mb-brilho, .mb-cheia .mb-preenchido, .mb-marco.mb-atual .mb-no { animation: none; }
+    .mb-apoiadores li { transition: none; }
+}
