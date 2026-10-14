@@ -1,4 +1,4 @@
-// Meta semanal do banco do cla (13/10/2026), na pagina inicial e no painel.
+// Meta semanal do banco do cla (13/10/2026), na pagina inicial.
 //
 // O bot calcula a semana (bank-goal.js no harley) e publica o pacote pronto em
 // /api/banco/meta; aqui so se desenha. Enquanto o Fundador nao divulga a meta,
@@ -42,7 +42,7 @@ function mbFaltaTexto(fimIso) {
     return `${m} min`;
 }
 
-function metaBancoHTML(meta, { painel = false } = {}) {
+function metaBancoHTML(meta) {
     const degraus = meta.degraus;
     const nivel = degraus.filter(d => meta.liquido >= d.valor).length;
     const cheia = nivel === degraus.length;
@@ -88,7 +88,6 @@ function metaBancoHTML(meta, { painel = false } = {}) {
 
     return `
         <article class="mb-card${cheia ? ' mb-cheia' : ''}" style="--mb-alvo: ${progresso}">
-            ${painel && !meta.publico ? '<p class="mb-previa"><i class="fa-solid fa-eye-slash"></i> Prévia: a meta ainda não foi divulgada. Só líderes logados veem esta tela.</p>' : ''}
             <header class="mb-topo">
                 <div class="mb-taxa-bloco">
                     <span class="mb-rotulo">Adicional dos pódios agora</span>
@@ -170,28 +169,9 @@ function mbPararTimers() {
     mbRelogio = mbRecarga = null;
 }
 
-// Aba Banco do painel (so lideres). Com a meta ainda nao divulgada, e o unico
-// lugar onde ela aparece.
-function renderBancoPainel() {
-    APP.innerHTML = `
-        <div class="mb-painel">
-            <h2>Meta semanal do banco</h2>
-            <p class="texto">Depósitos líquidos dos membros na semana da Liga e o adicional que eles liberam nos pódios.</p>
-            <div id="mb-painel-meta"><p class="texto"><span class="loading-dot">Aguarde ...</span></p></div>
-        </div>`;
-    const alvo = document.getElementById('mb-painel-meta');
-    carregarMetaBanco(alvo, { headers: getAdminRequestHeaders(), painel: true })
-        .then(ok => {
-            if (!ok) alvo.innerHTML = '<p class="texto">O bot ainda não publicou a meta desta semana. Ela aparece aqui alguns minutos depois do próximo ciclo do site.</p>';
-        })
-        .catch(() => {
-            alvo.innerHTML = '<p class="texto">A meta não carregou. Tente de novo em instantes.</p>';
-        });
-}
-
 // Busca e desenha em `alvo`. Devolve false quando nao ha meta para mostrar
 // (404: sem meta, ou meta ainda nao divulgada para quem nao e lider).
-async function carregarMetaBanco(alvo, { headers = {}, painel = false } = {}) {
+async function carregarMetaBanco(alvo, { headers = {} } = {}) {
     if (!alvo) return false;
     mbPararTimers();
     const resposta = await fetch(URL_META_BANCO, { headers });
@@ -199,7 +179,7 @@ async function carregarMetaBanco(alvo, { headers = {}, painel = false } = {}) {
     if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
     const meta = await resposta.json();
     if (!meta?.degraus?.length) return false;
-    alvo.innerHTML = metaBancoHTML(meta, { painel });
+    alvo.innerHTML = metaBancoHTML(meta);
     mbAnimar(alvo.querySelector('.mb-card'));
     let atual = meta;
 
@@ -218,7 +198,7 @@ async function carregarMetaBanco(alvo, { headers = {}, painel = false } = {}) {
             const dados = await nova.json();
             if (!dados?.degraus?.length || dados.atualizadoEm === atual.atualizadoEm) return;
             atual = dados;
-            alvo.innerHTML = metaBancoHTML(dados, { painel });
+            alvo.innerHTML = metaBancoHTML(dados);
             alvo.querySelector('.mb-card')?.classList.add('mb-visivel');
         } catch (_) { /* tenta no proximo */ }
     }, MB_ATUALIZAR_MS);

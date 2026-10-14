@@ -8,7 +8,6 @@ const pages_content = {
     historico: renderHistorico,
     recrutamento: renderRecrutamento,
     analises: renderAnalises,
-    banco: renderBancoPainel,
     cidade: renderCidade,
 }
 

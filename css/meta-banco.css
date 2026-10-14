@@ -1,5 +1,5 @@
-/* Meta semanal do banco (13/10/2026): o card da barra, na pagina inicial e na
-   aba Banco do painel. Usa os tokens do site.css. A barra vai do aqua do site
+/* Meta semanal do banco (13/10/2026): o card da barra, na pagina inicial. Usa
+   os tokens do site.css. A barra vai do aqua do site
    ao dourado da meta cheia; cada degrau e um marco na trilha e um cartao
    embaixo, e o degrau em vigor e o unico que pulsa. */
 
@@ -38,19 +38,6 @@
     inset: 0 0 auto;
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(46, 230, 240, 0.7), rgba(255, 210, 63, 0.6), transparent);
-}
-
-.mb-previa {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
-    padding: 10px 14px;
-    border-radius: 10px;
-    background: rgba(255, 210, 63, 0.08);
-    border: 1px dashed rgba(255, 210, 63, 0.4);
-    color: var(--mb-ouro);
-    font-size: 0.85rem;
 }
 
 .mb-rotulo {
@@ -421,17 +408,6 @@
 
     b { color: var(--nevoa); }
     code { padding: 1px 6px; border-radius: 4px; background: rgba(232, 244, 248, 0.06); color: var(--nevoa); font-size: 0.78rem; }
-}
-
-/* ---------- Aba Banco do painel ---------- */
-
-.mb-painel {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 32px var(--lado) 64px;
-
-    h2 { margin: 0 0 6px; font-size: clamp(1.4rem, 3vw, 2rem); }
-    .texto { margin: 0; }
 }
 
 /* ---------- Celular ---------- */
