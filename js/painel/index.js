@@ -12,9 +12,10 @@ const pages_content = {
 }
 
 function render(event) {
-    // As abas Analises e Cidade travam a rolagem da pagina para caber na
+    // As abas Analises, Recrutamento e Cidade travam a rolagem da pagina para caber na
     // janela; qualquer outra aba devolve.
     anSairDaAba();
+    rcSairDaAba();
     cidadeSairDaAba();
     APP.innerHTML = '';
     const id = event.target.id;
