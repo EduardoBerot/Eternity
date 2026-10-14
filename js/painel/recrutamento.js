@@ -35,6 +35,7 @@ const ETAPAS_LABEL = {
     returning: 'Convite de volta enviado',
     complete: 'Entrou',
     expirado: 'Encerrado por inatividade',
+    sem_discord: 'Sem Discord (pausado)',
 };
 
 // O que falta para a pessoa andar, dito do jeito que um lider resolveria. No
@@ -64,6 +65,8 @@ const DESFECHOS = [
     { id: 'encerrado', nome: 'Encerrado sem interesse', cor: 'var(--viz-6)' },
     { id: 'recusou', nome: 'Pediu para parar', cor: 'var(--viz-7)' },
     { id: 'expirado', nome: 'Encerrado por 10 dias parado', cor: 'var(--viz-8)' },
+    // Neutro, e nao um nono slot: e pausa, nao desfecho de verdade (14/10/2026).
+    { id: 'sem_discord', nome: 'Sem Discord (pausado)', cor: 'var(--viz-ink-2)' },
 ];
 
 function rotuloEtapa(valor, retorno = false) {
@@ -76,7 +79,17 @@ function rotuloEtapa(valor, retorno = false) {
 function proximoPasso(item) {
     if (item.desfecho !== 'em_andamento' && item.desfecho !== 'aguardando') return '—';
     if (item.retorno && item.etapa === 'discord') return 'Vincular o Discord';
+    if (item.etapa === 'site') return passoNoGuia(item.guia);
     return PROXIMO_PASSO[item.etapa] || '—';
+}
+
+// Na etapa do site, o que o Guia viu de quem veio pelo link do bot: diz se a
+// pessoa nem abriu o link, parou no teste ou parou no Discord (14/10/2026).
+// Quem entrou na etapa antes disso aparece como "nao abriu" ate abrir de novo.
+function passoNoGuia(guia) {
+    if (!guia?.abertoEm) return 'Abrir o link do Guia (ainda não abriu)';
+    if (!guia.testeEm) return 'Passar no teste do Guia';
+    return 'Vincular o Discord (já passou no teste)';
 }
 
 function horasLegiveis(horas) {

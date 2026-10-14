@@ -29,6 +29,25 @@ function guiaSalvar() {
     try { sessionStorage.setItem(GUIA_STORAGE, JSON.stringify(guia)); } catch (_) { /* ignora */ }
 }
 
+// Onde a pessoa parou no Guia, so para quem veio pelo link do bot (14/10/2026):
+// a conta do cla le isso para saber se a pessoa parada abriu o link, passou no
+// teste ou parou no Discord. Quem abre o site sozinho continua anonimo, e o
+// teste aprovado e gravado pela propria correcao. Uma vez por etapa e por
+// pagina; falha nao atrapalha o Guia.
+const URL_GUIA_PROGRESSO = `${URL_BASE}/api/recrutamento/guia`;
+const guiaRegistrado = new Set();
+
+function guiaRegistrar(etapa) {
+    if (!guia.doJogo || !guia.nick || guiaRegistrado.has(etapa)) return;
+    guiaRegistrado.add(etapa);
+    fetch(URL_GUIA_PROGRESSO, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nick: guia.nick, etapa }),
+        keepalive: true,
+    }).catch(() => guiaRegistrado.delete(etapa));
+}
+
 function guiaIr(etapa) {
     guia.etapa = etapa;
     guiaSalvar();
@@ -219,6 +238,7 @@ async function enviarTeste(event) {
 
 function renderGuiaDiscord() {
     const nick = escapeGuia(guia.nick || 'SeuNick');
+    guiaRegistrar('discord');
     return `
         <div class="guia-cabeca">
             <h2>Discord</h2>
@@ -246,7 +266,33 @@ function renderGuiaDiscord() {
         <button class="button guia-principal" onclick="guiaIr(3)">Já vinculei</button>
         <!-- Quem ja tem o Discord vinculado ao nick nao refaz o vinculo: o bot
              confere no jogo e segue direto para a solicitacao e o convite. -->
-        <p class="guia-links"><a href="#" onclick="guiaIr(3); return false;">Já tenho o Discord vinculado ao meu nick</a></p>`;
+        <p class="guia-links"><a href="#" onclick="guiaIr(3); return false;">Já tenho o Discord vinculado ao meu nick</a><span>·</span><a href="#" onclick="guiaSemDiscord(event)">Não tenho Discord</a></p>`;
+}
+
+// O Discord continua obrigatorio (14/10/2026): o botao nao pula a etapa. Ele
+// avisa a conta do cla, que pausa o recrutamento e para de cobrar a pessoa ate
+// ela voltar com o "quero entrar". Fica fora da numeracao das etapas: e um
+// desvio da etapa do Discord, e o "Voltar" devolve para ela.
+function guiaSemDiscord(event) {
+    event?.preventDefault();
+    guiaRegistrar('sem_discord');
+    const comando = guia.doJogo
+        ? `<p>Seu teste fica salvo e a conta do clã para de te cobrar enquanto isso. Quando tiver o Discord, volte nesta página ou mande no jogo:</p>`
+        : `<p>Seu teste fica salvo nesta página. Quando tiver o Discord, volte aqui ou mande no jogo:</p>`;
+    document.getElementById('app').innerHTML = `
+        <h1>Recrutamento</h1>
+        ${guiaProgresso()}
+        <div class="guia-cartao guia-centro">
+            <div class="guia-selo aviso"><i class="fa-brands fa-discord"></i></div>
+            <h2>Sem problema</h2>
+            <p>O Discord é <b>obrigatório</b> para entrar na Eternity: é por ele que o clã aplica o seu cargo e fala com os membros.</p>
+            <p>A conta é <b>gratuita</b> e sai em dois minutos, até pelo celular.</p>
+            <a class="guia-discord" href="https://discord.com/register" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-discord"></i> Criar conta no Discord</a>
+            ${comando}
+            <div class="guia-cmds">${guiaComando('Apocalipse', '/m Eternity quero entrar')}${guiaComando('Gênesis', '/m Coagula1999 quero entrar')}</div>
+        </div>
+        <p class="guia-rodape"><a href="#" onclick="renderGuia(); return false;">Voltar para a etapa do Discord</a></p>`;
+    document.getElementById('app')?.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // No Apocalipse o convite NAO vem da Eternity nem da ETY: vem da ETZ, a porta de
@@ -308,12 +354,15 @@ function renderGuia() {
 function openGuia() {
     guiaCarregar();
     const nick = new URLSearchParams(location.search).get('nick');
-    if (nick && /^[A-Za-z0-9_]{3,16}$/.test(nick)) {
+    // O `*` e o prefixo dos nicks do Bedrock (*aislan8560): sem ele no padrao,
+    // o link do bot para essas pessoas abria o Guia como se nao fosse do jogo.
+    if (nick && /^\*?[A-Za-z0-9_]{3,16}$/.test(nick)) {
         guia.doJogo = true;
         if (!guia.nick) guia.nick = nick;
         guiaSalvar();
     }
     renderGuia();
+    guiaRegistrar('aberto');
 }
 
 // Atualizacao cadastral de quem ja e membro: so a explicacao do /aniversario.
