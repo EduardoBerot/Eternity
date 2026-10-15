@@ -82,7 +82,10 @@ const ROTAS = {
 };
 
 function route() {
-    const nome = location.hash.replace(/^#/, '').split(/[?&]/)[0] || 'inicio';
+    // O link assinado do jogo (?g=) e a volta do login do Discord (?vinculo=)
+    // abrem o Guia mesmo sem o #guia: no tell cada caractere conta.
+    const doGuia = /[?&](g|vinculo)=/.test(location.search) ? 'guia' : 'inicio';
+    const nome = location.hash.replace(/^#/, '').split(/[?&]/)[0] || doGuia;
     const rota = ROTAS[nome] || ROTAS.inicio;
     // A classe da pagina zera a do Guia (guia-modo-video) e deixa cada tela
     // ajustar o proprio painel.

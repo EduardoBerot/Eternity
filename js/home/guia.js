@@ -14,9 +14,11 @@ const GUIA_ETAPAS = ['Vídeo', 'Teste', 'Discord', 'Convite'];
 const GUIA_STORAGE = 'eternity-guia-v2';
 
 // `doJogo`: a pessoa chegou pelo link que a Eternity manda no jogo
-// (?nick=Fulano#guia). Ai a conta ja esta acompanhando o recrutamento e convida
-// sozinha no fim; sem o link, a pessoa precisa chamar a conta no jogo.
-let guia = { etapa: 0, aprovado: false, nick: '', doJogo: false };
+// (?nick=Fulano#guia, ou ?g=Fulano.assinatura desde 15/10/2026). Ai a conta ja
+// esta acompanhando o recrutamento e convida sozinha no fim; sem o link, a
+// pessoa precisa chamar a conta no jogo. `link`: o `g` assinado, que prova o
+// nick e libera o vinculo pelo login do Discord.
+let guia = { etapa: 0, aprovado: false, nick: '', doJogo: false, link: '' };
 
 function guiaCarregar() {
     try {
@@ -236,9 +238,156 @@ async function enviarTeste(event) {
     }
 }
 
+// Vinculo pelo login do Discord (15/10/2026). Com o link assinado do jogo, o
+// Guia ja sabe que a pessoa e dona do nick: o login diz quem ela e no Discord, e
+// o bot a coloca no servidor e grava o vinculo -- sem canal, sem codigo e sem
+// voltar ao jogo para digitar nada. A data de nascimento era pedida na janela do
+// botao do Discord; aqui ela vem antes do login.
+const URL_GUIA_DISCORD = `${URL_BASE}/api/guia/discord`;
+
+function renderGuiaDiscordLogin() {
+    const nick = escapeGuia(guia.nick);
+    return `
+        <div class="guia-cabeca">
+            <h2>Discord</h2>
+            <p>Teste aprovado! Todo membro fica no nosso Discord, com a conta vinculada ao nick.</p>
+        </div>
+        <form class="guia-cartao guia-centro guia-login" onsubmit="guiaEntrarDiscord(event)">
+            <div class="guia-selo discord"><i class="fa-brands fa-discord"></i></div>
+            <h2>Vincule com um clique</h2>
+            <p>Entre com a sua conta do Discord: você já cai no <b>nosso servidor</b> com a conta vinculada ao nick <b>${nick}</b>. Não precisa mandar código no jogo.</p>
+            <label class="guia-campo">
+                <span>Sua data de nascimento</span>
+                <input id="guia-nascimento" type="text" inputmode="numeric" autocomplete="bday" placeholder="dd/mm/aaaa" maxlength="10" required oninput="guiaMascaraData(this)">
+            </label>
+            <button class="guia-discord guia-discord--grande" id="guia-entrar-discord" type="submit"><i class="fa-brands fa-discord"></i> Entrar com Discord</button>
+            <small class="guia-sub">Não tem conta? Dá para criar na própria tela do Discord, de graça.</small>
+            <p id="guia-msg" class="guia-msg"></p>
+        </form>
+        <p class="guia-links"><a href="#" onclick="guiaVinculoPeloCanal(event)">Prefiro vincular pelo canal #saudações</a><span>·</span><a href="#" onclick="guiaSemDiscord(event)">Não tenho Discord</a></p>`;
+}
+
+// dd/mm/aaaa enquanto digita: no celular o teclado numerico nao tem a barra.
+function guiaMascaraData(campo) {
+    const digitos = campo.value.replace(/\D/g, '').slice(0, 8);
+    campo.value = [digitos.slice(0, 2), digitos.slice(2, 4), digitos.slice(4)].filter(Boolean).join('/');
+}
+
+async function guiaEntrarDiscord(event) {
+    event.preventDefault();
+    const msg = document.getElementById('guia-msg');
+    const botao = document.getElementById('guia-entrar-discord');
+    const nascimento = document.getElementById('guia-nascimento').value.trim();
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(nascimento)) {
+        msg.textContent = 'Escreva a data no formato dd/mm/aaaa.';
+        return;
+    }
+    msg.textContent = '';
+    botao.disabled = true;
+    botao.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Abrindo o Discord...';
+    try {
+        const resposta = await fetch(`${URL_GUIA_DISCORD}/iniciar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ g: guia.link, nascimento }),
+        });
+        const dados = await resposta.json().catch(() => ({}));
+        if (!resposta.ok || !dados.url) throw new Error(dados.message || 'Não consegui abrir o Discord. Tente de novo.');
+        location.href = dados.url;
+    } catch (error) {
+        botao.disabled = false;
+        botao.innerHTML = '<i class="fa-brands fa-discord"></i> Entrar com Discord';
+        msg.textContent = error.message && error.message !== 'Failed to fetch' ? error.message : 'Não consegui falar com o site. Tente de novo em alguns segundos.';
+    }
+}
+
+// O caminho antigo continua valendo: o botao "Vincular minha conta" no canal.
+function guiaVinculoPeloCanal(event) {
+    event?.preventDefault();
+    guia.peloCanal = true;
+    renderGuia();
+}
+
+// A volta do Discord: ?vinculo=<id> acompanha o bot do Discord aplicar o
+// vinculo (ele confere a cada minuto); ?vinculo=erro diz o que deu errado.
+const GUIA_ERROS_VINCULO = {
+    cancelado: 'Você cancelou o login no Discord.',
+    expirado: 'O login demorou demais ou já foi usado.',
+    discord: 'O Discord não respondeu agora.',
+};
+let guiaVinculoTimer = null;
+
+function renderGuiaVinculo(id, motivo) {
+    clearTimeout(guiaVinculoTimer);
+    // So chega aqui quem apertou o botao da etapa do Discord, ou seja, ja
+    // passou no teste. A volta pode abrir noutra aba (o app do Discord no
+    // celular), sem a sessao: sem isto, "Tentar de novo" mandaria refazer o teste.
+    guia.aprovado = true;
+    if (guia.etapa < 2) guia.etapa = 2;
+    guiaSalvar();
+    const app = document.getElementById('app');
+    app.classList.remove('guia-modo-video');
+    const tentarDeNovo = `<button class="button guia-principal" onclick="guiaVoltarAoDiscord()">Tentar de novo</button>`;
+    const cartao = (selo, icone, titulo, corpo) => {
+        app.innerHTML = `<h1>Recrutamento</h1>${guiaProgresso()}
+            <div class="guia-cartao guia-centro">
+                <div class="guia-selo ${selo}"><i class="${icone}"></i></div>
+                <h2>${titulo}</h2>${corpo}
+            </div>`;
+    };
+    if (id === 'erro') {
+        cartao('aviso', 'fa-brands fa-discord', 'O vínculo não saiu', `<p>${escapeGuia(GUIA_ERROS_VINCULO[motivo] || GUIA_ERROS_VINCULO.discord)}</p>${tentarDeNovo}`);
+        return;
+    }
+    let tentativas = 0;
+    const consultar = async () => {
+        tentativas += 1;
+        let dados = null;
+        try {
+            const resposta = await fetch(`${URL_GUIA_DISCORD}/status/${encodeURIComponent(id)}`);
+            dados = resposta.ok ? await resposta.json() : null;
+        } catch (_) { /* tenta de novo */ }
+        if (dados?.status === 'concluido') {
+            guia.etapa = 3;
+            guia.aprovado = true;
+            if (dados.nick && !guia.nick) guia.nick = dados.nick;
+            guia.doJogo = true;
+            guiaSalvar();
+            cartao('sucesso', 'fa-solid fa-check', 'Discord vinculado!', `
+                <p>A conta <b>${escapeGuia(dados.usuario || 'do Discord')}</b> está vinculada ao nick <b>${escapeGuia(dados.nick)}</b> e já está no nosso servidor.</p>
+                <p>Agora é só <b>ficar online no jogo</b>: a conta do clã manda o <b>convite</b> sozinha.</p>
+                ${GUIA_AVISO_CONVITE}
+                <h2 class="guia-bemvindo">Seja bem-vindo à Eternity!</h2>`);
+            return;
+        }
+        if (dados?.status === 'falhou') {
+            cartao('aviso', 'fa-brands fa-discord', 'O vínculo não saiu', `<p>${escapeGuia(dados.motivo || 'Algo deu errado.')}</p>${tentarDeNovo}`);
+            return;
+        }
+        // Autorizado: o bot do Discord pega em ate um minuto. Passados ~3 min, o
+        // mais provavel e o recrutamento ter vencido no jogo.
+        const demorando = tentativas > 36;
+        cartao('discord', 'fa-solid fa-spinner fa-spin', 'Vinculando sua conta...', demorando
+            ? '<p>Está demorando mais que o normal. Mande <b>quero entrar</b> para a conta do clã no jogo e use o link novo que ela mandar.</p>'
+            : `<p>Recebemos o login${dados?.usuario ? ` de <b>${escapeGuia(dados.usuario)}</b>` : ''}. A conta do clã está aplicando o vínculo — leva até um minuto.</p><p class="guia-sub">Pode deixar esta página aberta.</p>`);
+        guiaVinculoTimer = setTimeout(consultar, tentativas < 20 ? 3000 : 6000);
+    };
+    cartao('discord', 'fa-solid fa-spinner fa-spin', 'Vinculando sua conta...', '<p>Conferindo o login...</p>');
+    consultar();
+}
+
+function guiaVoltarAoDiscord() {
+    clearTimeout(guiaVinculoTimer);
+    history.replaceState(null, '', `${location.pathname}${guia.link ? `?g=${encodeURIComponent(guia.link)}` : ''}#guia`);
+    guia.etapa = 2;
+    guiaSalvar();
+    renderGuia();
+}
+
 function renderGuiaDiscord() {
     const nick = escapeGuia(guia.nick || 'SeuNick');
     guiaRegistrar('discord');
+    if (guia.link && !guia.peloCanal) return renderGuiaDiscordLogin();
     return `
         <div class="guia-cabeca">
             <h2>Discord</h2>
@@ -264,6 +413,7 @@ function renderGuiaDiscord() {
             </li>
         </ol>
         <button class="button guia-principal" onclick="guiaIr(3)">Já vinculei</button>
+        ${guia.link ? '<p class="guia-links"><a href="#" onclick="guia.peloCanal = false; renderGuia(); return false;">Voltar para o login com Discord</a></p>' : ''}
         <!-- Quem ja tem o Discord vinculado ao nick nao refaz o vinculo: o bot
              confere no jogo e segue direto para a solicitacao e o convite. -->
         <p class="guia-links"><a href="#" onclick="guiaIr(3); return false;">Já tenho o Discord vinculado ao meu nick</a><span>·</span><a href="#" onclick="guiaSemDiscord(event)">Não tenho Discord</a></p>`;
@@ -353,13 +503,23 @@ function renderGuia() {
 
 function openGuia() {
     guiaCarregar();
-    const nick = new URLSearchParams(location.search).get('nick');
+    const params = new URLSearchParams(location.search);
+    // ?g=Nick.assinatura (15/10/2026): o nick e a prova dele num parametro so.
+    const link = params.get('g') || '';
+    const doLink = link.includes('.') ? link.slice(0, link.lastIndexOf('.')) : '';
+    const nick = doLink || params.get('nick');
     // O `*` e o prefixo dos nicks do Bedrock (*aislan8560): sem ele no padrao,
     // o link do bot para essas pessoas abria o Guia como se nao fosse do jogo.
     if (nick && /^\*?[A-Za-z0-9_]{3,16}$/.test(nick)) {
         guia.doJogo = true;
-        if (!guia.nick) guia.nick = nick;
+        if (!guia.nick || doLink) guia.nick = nick;
+        if (doLink) guia.link = link;
         guiaSalvar();
+    }
+    const vinculo = params.get('vinculo');
+    if (vinculo) {
+        renderGuiaVinculo(vinculo, params.get('motivo'));
+        return;
     }
     renderGuia();
     guiaRegistrar('aberto');

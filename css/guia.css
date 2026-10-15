@@ -490,6 +490,48 @@
 
 .guia-discord:hover { background: #4752c4; transform: translateY(-1px); }
 
+/* Login com Discord (15/10/2026): o botao e a acao da etapa. */
+.guia-selo.discord { background: linear-gradient(135deg, #4752c4, #7983f5); color: #fff; box-shadow: 0 8px 24px rgba(88, 101, 242, 0.35); }
+
+.guia-discord--grande {
+    justify-content: center;
+    width: min(340px, 100%);
+    min-height: 3.1em;
+    border: 0;
+    font: inherit;
+    font-size: 1.05em;
+    cursor: pointer;
+}
+
+.guia-discord--grande:disabled { opacity: 0.7; cursor: progress; transform: none; }
+
+.guia-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: min(340px, 100%);
+    text-align: left;
+    font-family: var(--guia-sans);
+
+    span { color: var(--guia-texto); font-size: 0.9em; }
+
+    input {
+        width: 100%;
+        margin: 0;
+        padding: 12px 14px;
+        border: 1px solid var(--guia-borda);
+        border-radius: 0.6em 0.2em;
+        background: rgba(4, 12, 20, 0.6);
+        color: var(--guia-tinta);
+        font: inherit;
+        font-size: 1.05em;
+        letter-spacing: 1px;
+        box-shadow: none;
+    }
+
+    input:focus-visible { outline: 2px solid var(--guia-ciano); outline-offset: 1px; }
+}
+
 .guia-cmds {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
