@@ -98,7 +98,7 @@ const GUIA_REGRAS = `
         </section>
         <section class="guia-card">
             <h3><i class="fa-solid fa-clock"></i> Atividade</h3>
-            <p><b>10 dias offline resultam em kick.</b> O trust da casa é removido depois de um mês offline, salvo aviso.</p>
+            <p><b>10 dias offline resultam em kick.</b> Com <b>3 meses offline</b>, o trust da casa é retirado e os itens vão para o banco de itens do clã.</p>
             <p>O status de <b>confiável</b> depende da análise dos líderes e é exigido nas áreas coletivas.</p>
         </section>
         <section class="guia-card">
