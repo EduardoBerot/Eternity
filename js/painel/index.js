@@ -6,13 +6,12 @@ const pages_content = {
     adicionar: renderAdicionar,
     excluidos: renderExcluidos,
     historico: renderHistorico,
-    recrutamento: renderRecrutamento,
-    analises: renderAnalises,
+    indicadores: renderIndicadores,
     cidade: renderCidade,
 }
 
 function render(event) {
-    // As abas Analises, Recrutamento e Cidade travam a rolagem da pagina para caber na
+    // Os Indicadores (Recrutamento e Liga) e a Cidade travam a rolagem da pagina para caber na
     // janela; qualquer outra aba devolve.
     anSairDaAba();
     rcSairDaAba();

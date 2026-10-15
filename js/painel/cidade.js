@@ -58,32 +58,69 @@ async function cidadeApi(caminho, opcoes = {}) {
     return lerResposta(await fetch(`${URL_CIDADE}${caminho}`, { ...opcoes, headers: getAdminRequestHeaders() }));
 }
 
-// A aba cabe na janela, sem rolagem (como a Analises): o mapa ocupa o que
-// sobra abaixo do topo e sempre enquadra a cidade inteira, inclusive quando a
-// janela muda de tamanho. render() chama cidadeSairDaAba() ao trocar de aba.
+// A aba cabe na janela, sem rolagem (como os Indicadores): um dashboard com o
+// mapa a esquerda, do tamanho que cabe na altura, e os numeros da cidade a
+// direita (15/10/2026; antes era so o mapa). No celular, um cartao por vez.
+// render() chama cidadeSairDaAba() ao trocar de aba.
 function cidadeSairDaAba() {
     document.body.classList.remove('painel--cidade');
     if (cidade.observador) { cidade.observador.disconnect(); cidade.observador = null; }
     if (cidade.mapa) { cidade.mapa.remove(); cidade.mapa = null; }
 }
 
+const CIDADE_ABAS = [['mapa', 'Mapa'], ['resumo', 'Resumo'], ['fila', 'A fazer'], ['mov', 'Movimento']];
+const CIDADE_DIA = 24 * 60 * 60 * 1000;
+// Rotulos curtos para a lista da ocupacao (a legenda do mapa usa os longos).
+const CIDADE_ESTADO_CURTO = { livre: 'Vazia', aberta: 'Aberta', ocupada: 'Ocupada', inativa: 'Inativo', liberar: 'Retirar trust' };
+
 async function renderCidade() {
     cidadeSairDaAba();
     document.body.classList.add('painel--cidade');
+    cidade.filtro = { estado: null, tipo: null };
+    cidade.aba = 'mapa';
     APP.innerHTML = `
-        <section class="cidade">
-            <div class="cidade-moldura"><div id="cidade_mapa" class="cidade-mapa"></div></div>
-            <footer class="cidade-rodape">
-                <ul class="cidade-legenda">
-                    ${Object.values(CIDADE_ESTADOS).map(e => `<li><span style="--cor:${e.cor}"></span>${e.rotulo}</li>`).join('')}
-                    <li><span class="quadrado" style="--cor:${CIDADE_COR_TERRENO_LIVRE}"></span>Terreno</li>
-                    <li><span class="pendente"></span>Pedido pendente</li>
-                    <li><i class="fa-solid fa-signs-post" aria-hidden="true"></i>Local</li>
-                    <li><span class="pend" style="--cor:${PENDENCIA_STATUS.Aberta.cor}"></span>Pendência da cidade</li>
-                </ul>
-                <button type="button" id="cidade_status" class="cidade-status" onclick="abrirPendencias()" disabled>Carregando o mapa...</button>
-            </footer>
-        </section>
+        <div class="an-root cd-root">
+            <div class="an-topo">
+                <div class="an-titulo">
+                    <h1>Cidade</h1>
+                    <small id="cd_sub">Carregando o mapa...</small>
+                </div>
+                <div class="an-filtros">
+                    <div class="an-seg" id="cd_tipo" role="radiogroup" aria-label="Tipo"></div>
+                    <form class="cd-busca" onsubmit="event.preventDefault(); cidadeBuscar(this.busca.value)">
+                        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                        <input name="busca" id="cd_busca" list="cd_busca_lista" placeholder="Morador ou casa" autocomplete="off" aria-label="Buscar morador ou casa">
+                        <datalist id="cd_busca_lista"></datalist>
+                    </form>
+                </div>
+            </div>
+            <div class="an-abas" id="cd_abas" role="tablist"></div>
+            <div class="an-grade cd-grade" id="cd_grade" data-aba="mapa">
+                <section class="an-card cd-c-mapa" data-aba="mapa">
+                    <div class="cidade-moldura"><div id="cidade_mapa" class="cidade-mapa"></div></div>
+                    <ul class="cidade-legenda">
+                        ${Object.values(CIDADE_ESTADOS).map(e => `<li><span style="--cor:${e.cor}"></span>${e.rotulo}</li>`).join('')}
+                        <li><span class="quadrado" style="--cor:${CIDADE_COR_TERRENO_LIVRE}"></span>Terreno</li>
+                        <li><span class="pendente"></span>Pedido pendente</li>
+                        <li><i class="fa-solid fa-signs-post" aria-hidden="true"></i>Local</li>
+                        <li><span class="pend" style="--cor:${PENDENCIA_STATUS.Aberta.cor}"></span>Pendência</li>
+                    </ul>
+                </section>
+                <section class="an-card cd-c-hero" data-aba="resumo"><div class="an-hero" id="cd_hero"></div></section>
+                <section class="an-card cd-c-ocup" data-aba="resumo">
+                    <header><h2>Ocupação</h2><span>clique para destacar no mapa</span></header>
+                    <div class="cd-ocup" id="cd_ocup"></div>
+                </section>
+                <section class="an-card cd-c-mov" data-aba="mov">
+                    <header><h2>Últimos 30 dias</h2><span>trust e ronda</span></header>
+                    <div class="rc-guia cd-mov" id="cd_mov"></div>
+                </section>
+                <section class="an-card cd-c-fila" data-aba="fila">
+                    <header><h2 id="cd_t_fila">A fazer</h2><button type="button" class="cd-link" onclick="abrirPendencias()">ver histórico</button></header>
+                    <div class="rc-fila" id="cd_fila"></div>
+                </section>
+            </div>
+        </div>
         <div id="cidade_modal" class="cidade-modal" hidden>
             <div class="cidade-modal-caixa" role="dialog" aria-modal="true">
                 <button type="button" class="cidade-fechar" onclick="cidadeFechar()" aria-label="Fechar">&times;</button>
@@ -91,6 +128,9 @@ async function renderCidade() {
             </div>
         </div>`;
     document.getElementById('cidade_modal').addEventListener('click', e => { if (e.target.id === 'cidade_modal') cidadeFechar(); });
+    document.getElementById('cd_busca').addEventListener('change', e => cidadeBuscar(e.target.value));
+    cidadeDesenharAbas();
+    cidadeDesenharTipo();
 
     try {
         cidade.dados = await cidadeApi('');
@@ -98,8 +138,221 @@ async function renderCidade() {
         desenharCasas();
     } catch (error) {
         console.error('Falha ao carregar a cidade:', error);
-        document.getElementById('cidade_status').textContent = 'Não foi possível carregar o mapa da cidade.';
+        document.getElementById('cd_sub').textContent = 'Não foi possível carregar a cidade.';
     }
+}
+
+function cidadeDesenharAbas() {
+    document.getElementById('cd_abas').innerHTML = CIDADE_ABAS.map(([id, nome]) => `
+        <button type="button" role="tab" class="${cidade.aba === id ? 'is-on' : ''}" aria-selected="${cidade.aba === id}"
+            onclick="cidadeTrocarAba('${id}')">${nome}</button>`).join('');
+    const grade = document.getElementById('cd_grade');
+    grade.dataset.aba = cidade.aba;
+    for (const card of grade.querySelectorAll('.an-card')) card.classList.toggle('is-aba', card.dataset.aba === cidade.aba);
+}
+
+function cidadeTrocarAba(aba) {
+    cidade.aba = aba;
+    cidadeDesenharAbas();
+}
+
+function cidadeDesenharTipo() {
+    const opcoes = [[null, 'Tudo'], ['casa', 'Casas'], ['terreno', 'Terrenos']];
+    document.getElementById('cd_tipo').innerHTML = opcoes.map(([valor, rotulo]) => `
+        <button type="button" role="radio" aria-checked="${cidade.filtro.tipo === valor}" class="${cidade.filtro.tipo === valor ? 'is-on' : ''}"
+            onclick="cidadeFiltrar({ tipo: ${valor ? `'${valor}'` : 'null'} })">${rotulo}</button>`).join('');
+}
+
+// Destaca no mapa um estado (clique na ocupacao) e/ou um tipo (seletor do
+// topo); o resto fica esmaecido, nao some, para o mapa seguir legivel.
+function cidadeFiltrar(mudanca) {
+    if ('estado' in mudanca && mudanca.estado === cidade.filtro.estado) mudanca.estado = null;
+    Object.assign(cidade.filtro, mudanca);
+    cidadeDesenharTipo();
+    if (cidade.dados) desenharCasas();
+}
+
+function cidadeCasaNoFiltro(casa) {
+    const { estado, tipo } = cidade.filtro;
+    return (!estado || casa.estado === estado) && (!tipo || (casa.tipo || 'casa') === tipo);
+}
+
+// Busca pelo nick de um morador (ou de quem pediu) ou pelo nome da casa.
+function cidadeBuscar(texto) {
+    const campo = document.getElementById('cd_busca');
+    const alvo = String(texto || '').trim().toLowerCase();
+    if (!alvo || !cidade.dados) return;
+    const casas = cidade.dados.casas;
+    const nome = c => String(c.nome || '').toLowerCase();
+    const casa = casas.find(c => c.moradores.some(m => m.nick.toLowerCase() === alvo))
+        || casas.find(c => nome(c) === alvo)
+        || casas.find(c => c.pedidos.some(p => p.status === 'Pendente' && p.nick.toLowerCase() === alvo))
+        || casas.find(c => c.moradores.some(m => m.nick.toLowerCase().includes(alvo)) || nome(c).includes(alvo));
+    campo.setCustomValidity(casa ? '' : 'Nenhum morador ou casa com esse nome.');
+    if (!casa) { campo.reportValidity(); return; }
+    cidadeTrocarAba('mapa');
+    irParaCasa(casa.id);
+}
+
+// ---------- Numeros da cidade (tudo do mesmo GET do mapa) ----------
+
+function cidadeOcupada(casa) {
+    return casa.moradores.length > 0;
+}
+
+function cidadeDias(desde, ate = Date.now()) {
+    const t = new Date(desde).getTime();
+    return Number.isNaN(t) ? null : Math.max(0, Math.floor((ate - t) / CIDADE_DIA));
+}
+
+function cidadeMediana(valores) {
+    const v = valores.filter(n => Number.isFinite(n)).sort((a, b) => a - b);
+    if (!v.length) return null;
+    const meio = Math.floor(v.length / 2);
+    return v.length % 2 ? v[meio] : (v[meio - 1] + v[meio]) / 2;
+}
+
+function cidadeDuracao(ms) {
+    if (ms === null) return '—';
+    const horas = ms / 3600000;
+    if (horas < 1) return `${Math.max(1, Math.round(ms / 60000))} min`;
+    if (horas < 48) return `${Math.round(horas)} h`;
+    return `${Math.round(horas / 24)} dias`;
+}
+
+function cidadePlural(n, um, varios) {
+    return `${n} ${n === 1 ? um : varios}`;
+}
+
+function cidadeDesenharPainel() {
+    const { casas, locais = [] } = cidade.dados;
+    const lotes = casas.length;
+    const ocupadas = casas.filter(cidadeOcupada).length;
+    const moradores = new Set(casas.flatMap(c => c.moradores.map(m => m.nick.toLowerCase())));
+    const abertas = casas.filter(c => c.estado === 'aberta').length;
+    const pedidos = casas.reduce((soma, c) => soma + c.pedidos.filter(p => p.status === 'Pendente').length, 0);
+    const inativos = casas.flatMap(c => c.moradores).filter(m => m.status_membro === 'Inativo').length;
+    const retirar = casas.flatMap(c => c.moradores).filter(m => m.retirar).length;
+    const nCasas = casas.filter(c => (c.tipo || 'casa') === 'casa').length;
+
+    document.getElementById('cd_sub').textContent =
+        `${cidadePlural(nCasas, 'casa', 'casas')} · ${cidadePlural(lotes - nCasas, 'terreno', 'terrenos')} · ${cidadePlural(locais.length, 'local', 'locais')} marcados`;
+
+    const taxa = lotes ? Math.round((ocupadas / lotes) * 100) : 0;
+    const notas = [];
+    if (inativos) notas.push(cidadePlural(inativos, 'morador inativo', 'moradores inativos'));
+    if (retirar) notas.push(`${retirar} trust a retirar`);
+    document.getElementById('cd_hero').innerHTML = `
+        <div class="an-hero__rotulo">Ocupação da cidade</div>
+        <div class="an-hero__valor">${taxa}%</div>
+        <div class="an-hero__liga"><strong>${ocupadas}</strong> de ${cidadePlural(lotes, 'lote', 'lotes')} com morador</div>
+        <div class="an-hero__nota">${notas.join(' · ') || 'Nenhum morador inativo ou fora do clã'}</div>
+        <div class="an-mini">
+            <div><b>${moradores.size}</b><span>moradores</span></div>
+            <div><b>${abertas}</b><span>abertos p/ ocupar</span></div>
+            <div><b>${pedidos}</b><span>pedidos na fila</span></div>
+            <div><b>${locais.length}</b><span>locais</span></div>
+        </div>`;
+
+    cidadeDesenharOcupacao();
+    cidadeDesenharMovimento();
+    cidadeDesenharFila();
+
+    const nomes = new Set();
+    for (const c of casas) {
+        for (const m of c.moradores) nomes.add(m.nick);
+        if (c.nome) nomes.add(c.nome);
+    }
+    document.getElementById('cd_busca_lista').innerHTML = [...nomes].sort((a, b) => a.localeCompare(b))
+        .map(n => `<option value="${cEsc(n)}"></option>`).join('');
+}
+
+// Uma barra empilhada por tipo (casas e terrenos) e a lista dos estados, que
+// destaca o estado no mapa.
+function cidadeDesenharOcupacao() {
+    const { casas } = cidade.dados;
+    const linha = (rotulo, lista) => {
+        const total = lista.length;
+        const fatias = Object.entries(CIDADE_ESTADOS).map(([chave, e]) => {
+            const n = lista.filter(c => c.estado === chave).length;
+            return n ? `<i style="--cor:${e.cor}; flex:${n}" title="${e.rotulo}: ${n}"></i>` : '';
+        }).join('');
+        const ocupadas = lista.filter(cidadeOcupada).length;
+        return `
+            <div class="cd-barra">
+                <div class="cd-barra__rot"><span>${rotulo}</span><small>${ocupadas}/${total} ocupados</small></div>
+                <div class="cd-barra__trilho">${total ? fatias : ''}</div>
+            </div>`;
+    };
+    const itens = Object.entries(CIDADE_ESTADOS).map(([chave, e]) => {
+        const n = casas.filter(c => c.estado === chave).length;
+        const pct = casas.length ? Math.round((n / casas.length) * 100) : 0;
+        return `<li><button type="button" class="${cidade.filtro.estado === chave ? 'is-on' : ''}" onclick="cidadeFiltrar({ estado: '${chave}' })" ${n ? '' : 'disabled'}>
+            <i style="background:${e.cor}"></i><span>${CIDADE_ESTADO_CURTO[chave] || e.rotulo}</span><b>${n}<small>${pct}%</small></b></button></li>`;
+    }).join('');
+    document.getElementById('cd_ocup').innerHTML = `
+        ${linha('Casas', casas.filter(c => (c.tipo || 'casa') === 'casa'))}
+        ${linha('Terrenos', casas.filter(c => c.tipo === 'terreno'))}
+        <ul class="cd-estados ${cidade.filtro.estado ? 'tem-foco' : ''}">${itens}</ul>`;
+}
+
+// O que mudou nos ultimos 30 dias: decisoes de trust e a ronda da staff. As
+// pendencias resolvidas ficam 30 dias na lista do backend, o que basta aqui.
+function cidadeDesenharMovimento() {
+    const { casas, pendencias = [] } = cidade.dados;
+    const desde = Date.now() - 30 * CIDADE_DIA;
+    const dentro = data => data && new Date(data).getTime() >= desde;
+    const pedidos = casas.flatMap(c => c.pedidos);
+    const decididos = pedidos.filter(p => dentro(p.decidido_em));
+    const contar = status => decididos.filter(p => p.status === status).length;
+    const esperaPedido = cidadeMediana(decididos.filter(p => p.status === 'Concedido')
+        .map(p => new Date(p.decidido_em) - new Date(p.createdAt)));
+    const abertas = pendencias.filter(p => dentro(p.criado_em));
+    const resolvidas = pendencias.filter(p => p.status === 'Resolvida' && dentro(p.resolvido_em));
+    const esperaPend = cidadeMediana(resolvidas.map(p => new Date(p.resolvido_em) - new Date(p.criado_em)));
+    const autores = new Map();
+    for (const p of abertas) autores.set(p.criado_por, (autores.get(p.criado_por) || 0) + 1);
+    const top = [...autores.entries()].sort((a, b) => b[1] - a[1])[0];
+    const pedidosNovos = pedidos.filter(p => dentro(p.createdAt)).length;
+    document.getElementById('cd_mov').innerHTML = `
+        <div><b>${contar('Concedido')}</b><span>trusts dados</span><small>${cidadePlural(pedidosNovos, 'pedido novo', 'pedidos novos')}</small></div>
+        <div><b>${contar('Retirado')}</b><span>trusts retirados</span><small>${cidadePlural(contar('Recusado'), 'recusado', 'recusados')}</small></div>
+        <div><b>${cidadeDuracao(esperaPedido)}</b><span>espera do pedido</span><small>mediana até o trust</small></div>
+        <div><b>${abertas.length}</b><span>pendências criadas</span><small>${top ? `mais por ${cEsc(top[0])} (${top[1]})` : 'ninguém fez ronda'}</small></div>
+        <div><b>${resolvidas.length}</b><span>resolvidas</span><small>${cidadePlural(pendenciasAbertas().length, 'em aberto agora', 'em aberto agora')}</small></div>
+        <div><b>${cidadeDuracao(esperaPend)}</b><span>para resolver</span><small>mediana da pendência</small></div>`;
+}
+
+// A fila do que esta parado: trust a retirar (morador saiu do cla), pedidos e
+// pendencias da cidade. O clique leva ao ponto no mapa e abre o detalhe.
+function cidadeDesenharFila() {
+    const itens = [];
+    for (const casa of cidade.dados.casas) {
+        const onde = cEsc(casa.nome || `${cidadeRotuloTipo(casa.tipo)} X ${casa.x}, Z ${casa.z}`);
+        for (const m of casa.moradores.filter(m => m.retirar)) {
+            itens.push({ ordem: 0, dias: null, cor: CIDADE_ESTADOS.liberar.cor, acao: `irParaCasa(${casa.id})`,
+                titulo: `Retirar trust · ${cEsc(m.nick)}`, sub: `${onde} · ${cEsc(m.status_membro.toLowerCase())}` });
+        }
+        for (const p of casa.pedidos.filter(p => p.status === 'Pendente')) {
+            itens.push({ ordem: 1, dias: cidadeDias(p.createdAt), cor: '#ff9f1c', acao: `irParaCasa(${casa.id})`,
+                titulo: `${p.tipo === 'retirar' ? 'Retirar' : 'Conceder'} trust · ${cEsc(p.nick)}`, sub: `${onde} · pedido` });
+        }
+    }
+    for (const p of pendenciasAbertas()) {
+        const resumo = p.descricao.length > 60 ? `${p.descricao.slice(0, 60)}…` : p.descricao;
+        itens.push({ ordem: 2, dias: cidadeDias(p.criado_em), cor: (PENDENCIA_STATUS[p.status] || PENDENCIA_STATUS.Aberta).cor,
+            acao: `irParaPendencia(${p.id})`, icone: PENDENCIA_ICONE[p.tipo] || PENDENCIA_ICONE.outro,
+            titulo: `${cEsc(rotuloTipoPendencia(p.tipo))} · ${cEsc(p.status.toLowerCase())}`, sub: cEsc(resumo) });
+    }
+    itens.sort((a, b) => a.ordem - b.ordem || (b.dias ?? 0) - (a.dias ?? 0));
+    document.getElementById('cd_t_fila').textContent = itens.length ? `A fazer (${itens.length})` : 'A fazer';
+    document.getElementById('cd_fila').innerHTML = itens.length ? itens.map(item => `
+        <button type="button" class="rc-item cd-item" onclick="${item.acao}">
+            <i style="background:${item.cor}"></i>
+            <div class="rc-item__quem"><strong>${item.icone ? `<i class="fa-solid ${item.icone}" aria-hidden="true"></i> ` : ''}${item.titulo}</strong><span>${item.sub}</span></div>
+            <span class="rc-item__dias ${item.dias >= 3 ? 'is-quente' : ''}">${item.dias === null ? '' : `${item.dias}d`}</span>
+        </button>`).join('')
+        : '<div class="an-vazio"><span><i class="fa-solid fa-check" aria-hidden="true"></i> Nada parado na cidade.</span></div>';
 }
 
 function blocoParaLatLng(x, z) {
@@ -116,6 +369,8 @@ function montarMapaCidade() {
     const { largura, altura } = cidade.dados.mapa;
     const limites = [[-altura, 0], [0, largura]];
     cidadeProporcao(document.getElementById('cidade_mapa'), largura, altura);
+    // A coluna do mapa na grade do PC segue a mesma proporcao (cidade.css).
+    cidadeProporcao(document.getElementById('cd_grade'), largura, altura);
     const mapa = L.map('cidade_mapa', {
         crs: L.CRS.Simple, minZoom: -2, maxZoom: 3, zoomSnap: 0, zoomDelta: 0.5, wheelPxPerZoomLevel: 120, attributionControl: false,
         maxBounds: limites, maxBoundsViscosity: 1,
@@ -169,12 +424,14 @@ function desenharCasas() {
         const marca = cidadeMarcaCasa(blocoParaLatLng(casa.x, casa.z), {
             tipo: casa.tipo, cor, destaque: casa.estado === 'aberta', pendente: casa.pendentes > 0,
         });
+        if (!cidadeCasaNoFiltro(casa)) marca.setOpacity(0.18);
         marca.bindTooltip(rotuloDaCasa(casa), { direction: 'top', offset: [0, -10] });
         marca.on('click', () => abrirCasa(casa.id));
         marca.addTo(cidade.camada);
     }
     for (const local of cidade.dados.locais || []) {
         const marca = cidadeMarcaLocal(blocoParaLatLng(local.x, local.z), local.icone);
+        if (cidade.filtro.estado || cidade.filtro.tipo) marca.setOpacity(0.35);
         marca.bindTooltip(cEsc(local.nome), { direction: 'top', offset: [0, -14] });
         marca.on('click', () => abrirLocal(local.id));
         marca.addTo(cidade.camada);
@@ -186,19 +443,7 @@ function desenharCasas() {
         marca.on('click', () => abrirPendenciaCidade(p.id));
         marca.addTo(cidade.camada);
     }
-    // As pendencias viram um selo de status no rodape; o clique abre a lista.
-    const trust = pendenciasCidade().length;
-    const daCidade = pendenciasAbertas().length;
-    const total = trust + daCidade;
-    const status = document.getElementById('cidade_status');
-    status.disabled = !total && !(cidade.dados.pendencias || []).length;
-    status.classList.toggle('tem', total > 0);
-    const partes = [];
-    if (trust) partes.push(`${trust} de trust`);
-    if (daCidade) partes.push(`${daCidade} da cidade`);
-    status.innerHTML = total
-        ? `<i class="fa-solid fa-list-check" aria-hidden="true"></i> ${total === 1 ? 'Pendência' : 'Pendências'}: ${partes.join(' · ')}`
-        : '<i class="fa-solid fa-check" aria-hidden="true"></i> Nenhuma pendência';
+    cidadeDesenharPainel();
 }
 
 // O hover mostra quem mora la. Sem morador, quem esta pedindo; senao, o estado.
@@ -252,6 +497,7 @@ function abrirPendencias() {
 }
 
 function irParaPendencia(id) {
+    cidadeTrocarAba('mapa');
     const p = (cidade.dados.pendencias || []).find(item => item.id === id);
     if (!p) return;
     cidade.mapa.setView(blocoParaLatLng(p.x, p.z), 1);
@@ -259,6 +505,7 @@ function irParaPendencia(id) {
 }
 
 function irParaCasa(id) {
+    cidadeTrocarAba('mapa');
     const casa = cidade.dados.casas.find(c => c.id === id);
     if (!casa) return;
     cidade.mapa.setView(blocoParaLatLng(casa.x, casa.z), 1);

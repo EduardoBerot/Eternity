@@ -174,7 +174,7 @@ function renderAnalises() {
         <div class="an-root" id="an_root">
             <div class="an-topo">
                 <div class="an-titulo">
-                    <h1>Análises da Liga</h1>
+                    ${indicadoresCabecalho('liga')}
                     <small id="an_atualizado">Carregando...</small>
                 </div>
                 <div class="an-filtros" id="an_filtros"></div>

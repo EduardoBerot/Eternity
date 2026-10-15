@@ -280,7 +280,7 @@ function renderRecrutamento() {
         <div class="an-root rc-root" id="rc_root">
             <div class="an-topo">
                 <div class="an-titulo">
-                    <h1>Recrutamento</h1>
+                    ${indicadoresCabecalho('recrutamento')}
                     <small id="rc_aviso">Carregando...</small>
                 </div>
                 <div class="an-filtros" id="rc_filtros"></div>
@@ -850,7 +850,7 @@ async function abrirConversaDoLink() {
     try { sessionStorage.removeItem(LOG_PENDENTE); } catch (_) {}
     history.replaceState(null, '', location.pathname + location.search);
     rcSairDaAba();
-    const aba = document.getElementById('recrutamento');
+    const aba = document.getElementById('indicadores');
     if (aba) selectItem(aba);
     APP.innerHTML = '';
     renderLoading(APP);
@@ -870,7 +870,7 @@ async function abrirConversaDoLink() {
                     <span class="pending-page__eyebrow">Conversa</span>
                     <h1>${textoSeguro(pedido.nick)}</h1>
                     <p>A conversa ainda não chegou ao site: o bot sincroniza o funil a cada 30 minutos. Tente de novo daqui a pouco.</p>
-                    <button type="button" class="btn btn-danger" onclick="recrutamento.click()">Ir para o Recrutamento</button>
+                    <button type="button" class="btn btn-danger" onclick="renderIndicadores('recrutamento')">Ir para o Recrutamento</button>
                 </header>
             </div>`;
     } catch (erro) {
@@ -914,7 +914,7 @@ function abrirConversaRecruta(id) {
                         <p>${dados.servidor === 'genesis' ? 'Gênesis' : 'Apocalipse'} ·
                            ${dados.origem === 'prospeccao' ? 'Prospecção' : 'Orgânico'} ·
                            ${rotuloEtapa(dados.etapa)}</p>
-                        <button type="button" class="btn btn-danger" onclick="recrutamento.click()">Voltar</button>
+                        <button type="button" class="btn btn-danger" onclick="renderIndicadores('recrutamento')">Voltar</button>
                     </header>
                     <div class="pending-list">
                         <section class="pending-card">

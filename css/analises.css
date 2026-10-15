@@ -455,3 +455,14 @@ body.painel--analises main { margin: 0; }
     .an-mini { display: none; }
     .an-origem li button { padding: 0 6px; font-size: 0.66rem; }
 }
+
+/* ---------- Aba Indicadores (15/10/2026): titulo e a troca Recrutamento/Liga ---------- */
+
+.an-root .ind-cab {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.an-root .ind-troca button { padding: 4px 12px; font-size: 0.74rem; }
