@@ -247,11 +247,17 @@ const URL_GUIA_DISCORD = `${URL_BASE}/api/guia/discord`;
 
 function renderGuiaDiscordLogin() {
     const nick = escapeGuia(guia.nick);
-    return `
-        <div class="guia-cabeca">
+    const cabeca = guia.volta
+        ? `<div class="guia-cabeca">
+            <h2>Bem-vindo de volta, ${nick}!</h2>
+            <p>Você já foi da Eternity: não precisa refazer o vídeo nem o teste. Para voltar, só falta o Discord.</p>
+        </div>`
+        : `<div class="guia-cabeca">
             <h2>Discord</h2>
             <p>Teste aprovado! Todo membro fica no nosso Discord, com a conta vinculada ao nick.</p>
-        </div>
+        </div>`;
+    return `
+        ${cabeca}
         <form class="guia-cartao guia-centro guia-login" onsubmit="guiaEntrarDiscord(event)">
             <div class="guia-selo discord"><i class="fa-brands fa-discord"></i></div>
             <h2>Vincule com um clique</h2>
@@ -329,7 +335,7 @@ function renderGuiaVinculo(id, motivo) {
     app.classList.remove('guia-modo-video');
     const tentarDeNovo = `<button class="button guia-principal" onclick="guiaVoltarAoDiscord()">Tentar de novo</button>`;
     const cartao = (selo, icone, titulo, corpo) => {
-        app.innerHTML = `<h1>Recrutamento</h1>${guiaProgresso()}
+        app.innerHTML = `<h1>Recrutamento</h1>${guia.volta ? '' : guiaProgresso()}
             <div class="guia-cartao guia-centro">
                 <div class="guia-selo ${selo}"><i class="${icone}"></i></div>
                 <h2>${titulo}</h2>${corpo}
@@ -391,7 +397,7 @@ function renderGuiaDiscord() {
     return `
         <div class="guia-cabeca">
             <h2>Discord</h2>
-            <p>Teste aprovado! Todo membro fica no nosso Discord, com a conta vinculada ao nick.</p>
+            <p>${guia.volta ? 'Bem-vindo de volta!' : 'Teste aprovado!'} Todo membro fica no nosso Discord, com a conta vinculada ao nick.</p>
         </div>
         <ol class="guia-timeline">
             <li>
@@ -491,7 +497,22 @@ function guiaRecomecar(event) {
 
 const GUIA_RENDER = [renderGuiaVideo, renderGuiaTeste, renderGuiaDiscord, renderGuiaConvite];
 
+// Ex-membro (?g=...&v, 15/10/2026): a lista de inativos no bot ja decidiu que
+// ele volta sem recrutamento, entao o Guia e so o login do Discord. O link
+// "pelo canal" continua valendo, sem as etapas.
+function renderGuiaVolta() {
+    const app = document.getElementById('app');
+    app.classList.remove('guia-modo-video');
+    // "Já vinculei" (pelo canal) leva a etapa 3: o aviso do convite.
+    const corpo = guia.etapa >= 3 ? renderGuiaConvite() : guia.peloCanal ? renderGuiaDiscord() : renderGuiaDiscordLogin();
+    app.innerHTML = `<h1>Recrutamento</h1>${corpo}`;
+}
+
 function renderGuia() {
+    if (guia.volta && guia.link) {
+        renderGuiaVolta();
+        return;
+    }
     // O teste e a barreira: sem ele aprovado nesta sessao, volta para o teste.
     if (guia.etapa >= 2 && !guia.aprovado) guia.etapa = 1;
     if (!GUIA_RENDER[guia.etapa]) guia.etapa = 0;
@@ -514,6 +535,10 @@ function openGuia() {
         guia.doJogo = true;
         if (!guia.nick || doLink) guia.nick = nick;
         if (doLink) guia.link = link;
+        // `&v`: ex-membro voltando (o bot so manda este link para quem esta na
+        // lista de inativos). Um link sem a marca desfaz a de um anterior.
+        if (doLink) guia.volta = params.has('v');
+        if (guia.volta) { guia.etapa = 2; guia.peloCanal = false; }
         guiaSalvar();
     }
     const vinculo = params.get('vinculo');
