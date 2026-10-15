@@ -553,6 +553,7 @@ body.painel--cidade main { margin: 0; }
 
     i { color: #8c96ff; font-size: 1.4rem; margin-top: 2px; }
     p { margin: 0; font-size: 0.88rem; }
+    p.cidade-enviado-nota { margin-top: 6px; font-size: 0.78rem; opacity: 0.8; }
 }
 
 /* No celular o card vira uma faixa no pe do mapa. */

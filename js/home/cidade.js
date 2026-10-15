@@ -245,7 +245,8 @@ async function enviarSolicitacao(event, casaId) {
         abrirCard(cartaoCasa(casa, `
             <div class="cidade-enviado">
                 <i class="fa-brands fa-discord" aria-hidden="true"></i>
-                <p><b>Confira o seu Discord.</b> Em instantes o bot da Eternity manda uma DM para <b>${escHtml(nick)}</b>. Confirme por lá em até 30 minutos para o pedido chegar aos líderes.</p>
+                <div><p><b>Confira o seu Discord.</b> Em instantes o bot da Eternity manda uma DM para <b>${escHtml(nick)}</b>. Confirme por lá em até 30 minutos para o pedido chegar aos líderes.</p>
+                <p class="cidade-enviado-nota">DM fechada para o servidor? A confirmação chega num tópico só seu no canal <b>#comandos</b>.</p></div>
             </div>`));
     } catch (error) {
         erro.textContent = error?.doBackend ? error.message : 'Não foi possível enviar o pedido. Tente de novo.';
