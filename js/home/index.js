@@ -79,6 +79,8 @@ const ROTAS = {
         },
     },
     atualizar: { menu: null, render: () => openAtualizar() },
+    // Painel do membro, com login do Discord (meu-painel.js).
+    'meu-painel': { menu: 'meu-painel-link', render: () => renderMeuPainel() },
 };
 
 function route() {

@@ -1,0 +1,325 @@
+/* Painel do membro (16/10/2026, js/home/meu-painel.js). Mesma linguagem da
+   janela do membro: blocos .info-bloco, selos e chips de titulo do site. */
+
+/* Margem da pagina, como o Guia e o login (site.css). */
+.site .page-meu-painel {
+    padding: 24px var(--lado) 56px;
+
+    > h1 { width: min(1180px, 100%); margin: 12px auto 16px; font-size: clamp(1.6rem, 4vw, 2.4rem); }
+}
+
+.mp-topo h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); }
+.site .page-meu-painel > h1:has(+ .mp-cartao) { text-align: center; }
+
+.mp-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: min(1180px, 100%);
+    margin: 0 auto 16px;
+
+    h1 { margin: 0; }
+}
+
+.mp-sair {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.45em 0.9em;
+    border: 1px solid var(--linha);
+    border-radius: 999px;
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    color: var(--nevoa);
+    text-decoration: none;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.mp-sair:hover { color: var(--gelo); border-color: rgba(46, 230, 240, 0.35); }
+
+.mp {
+    display: grid;
+    grid-template-columns: 270px minmax(0, 1fr);
+    gap: 16px;
+    width: min(1180px, 100%);
+    margin: 0 auto;
+    align-items: start;
+}
+
+/* ---------- Coluna do perfil ---------- */
+
+.mp-perfil {
+    position: sticky;
+    top: calc(var(--nav) + 16px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 22px 16px;
+    border-radius: 16px;
+    border: 1px solid var(--linha);
+    background: linear-gradient(170deg, color-mix(in srgb, var(--cor, var(--c-membro)) 22%, transparent), rgba(232, 244, 248, 0.02) 70%);
+    text-align: center;
+
+    h2 { margin: 0; font-size: 1.5rem; word-break: break-all; }
+    .dialogo-selos { justify-content: center; }
+}
+
+.mp-skin { image-rendering: pixelated; filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.45)); }
+
+.mp-tempo {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    color: var(--nevoa);
+
+    i { color: var(--aqua); margin-right: 4px; }
+}
+
+.mp-titulos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+}
+
+.mp-titulos-esquerda { justify-content: flex-start; }
+
+/* Texto corrido em sans: a Conthrax do site fica nos titulos dos blocos. */
+.mp-agora li span, .mp-tabela td, .mp-progresso small, .mp-numero small, .mp .info-linha > span { font-family: var(--sans); }
+.mp a:not(.button):not(.mp-sair) { color: var(--aqua); }
+
+/* ---------- Coluna principal ---------- */
+
+.mp-principal { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+
+.mp-numeros {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.mp-numero {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--linha);
+    border-top: 2px solid var(--aqua);
+    background: rgba(232, 244, 248, 0.03);
+    min-width: 0;
+
+    span { font-family: var(--sans); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--nevoa-escura); }
+    strong { font-size: 1.6rem; line-height: 1.1; color: var(--gelo); overflow-wrap: anywhere; }
+    small { font-family: var(--sans); font-size: 0.8rem; color: var(--nevoa); }
+}
+
+.mp-numero.destaque strong { color: var(--aqua); }
+
+.mp-agora ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+.mp-agora li {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--nevoa);
+
+    > i { color: var(--aqua); width: 1.1em; text-align: center; flex-shrink: 0; }
+    b { color: var(--gelo); }
+    .titulo-nome { font-weight: 800; }
+}
+
+.mp-abas {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+}
+
+.mp-aba {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0.55em 1em;
+    border: 1px solid var(--linha);
+    border-radius: 999px;
+    background: rgba(232, 244, 248, 0.03);
+    color: var(--nevoa);
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.mp-aba:hover { color: var(--gelo); }
+.mp-aba.ativa { color: var(--noite); background: var(--aqua); border-color: var(--aqua); font-weight: 700; }
+.mp-aba:focus-visible, .mp-barra:focus-visible { outline: 2px solid var(--aqua); outline-offset: 2px; }
+
+.mp-grade {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.mp-nota, .mp-texto {
+    margin: 10px 0 0;
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    color: var(--nevoa-escura);
+
+    i { margin-right: 4px; }
+}
+
+.mp-texto { color: var(--nevoa); font-size: 0.86rem; margin: 0 0 6px; }
+.mp-grade > .mp-nota { grid-column: 1 / -1; margin: 0; }
+
+/* Grafico de pontos por mes: colunas clicaveis que trocam o mes do lado. */
+.mp-grafico {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+    height: 180px;
+    padding-top: 6px;
+}
+
+.mp-barra {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--nevoa);
+    font-family: var(--sans);
+    cursor: pointer;
+}
+
+.mp-barra-coluna {
+    width: 100%;
+    max-width: 38px;
+    border-radius: 6px 6px 2px 2px;
+    background: linear-gradient(180deg, rgba(46, 230, 240, 0.55), rgba(46, 230, 240, 0.12));
+    transition: background 0.2s ease;
+}
+
+.mp-barra-valor { font-size: 0.68rem; color: var(--nevoa-escura); }
+.mp-barra-mes { font-size: 0.72rem; text-transform: capitalize; }
+.mp-barra:hover .mp-barra-coluna { background: linear-gradient(180deg, rgba(46, 230, 240, 0.8), rgba(46, 230, 240, 0.2)); }
+.mp-barra.ativa .mp-barra-coluna { background: var(--aqua); }
+.mp-barra.ativa .mp-barra-valor, .mp-barra.ativa .mp-barra-mes { color: var(--gelo); font-weight: 700; }
+
+.mp-tabela-caixa { max-height: 320px; overflow-y: auto; margin-top: 8px; }
+
+.mp-tabela {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--sans);
+    font-size: 0.85rem;
+
+    th { position: sticky; top: 0; background: var(--aco); text-align: left; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--nevoa-escura); padding: 6px 4px; }
+    td { padding: 7px 4px; border-top: 1px dashed var(--linha); color: var(--gelo); }
+    td:last-child, th:last-child { text-align: right; }
+    small { color: var(--nevoa); }
+}
+
+/* Progresso dos titulos: uma barra por escada. */
+.mp-progresso { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; }
+
+.mp-progresso li { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+
+.mp-progresso-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    strong { font-family: var(--sans); font-size: 0.85rem; color: var(--gelo); white-space: nowrap; }
+}
+
+.mp-progresso-barra {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(232, 244, 248, 0.07);
+    overflow: hidden;
+
+    span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, rgba(46, 230, 240, 0.5), var(--aqua)); }
+}
+
+.mp-progresso small { font-family: var(--sans); font-size: 0.78rem; color: var(--nevoa); }
+
+/* ---------- Login e avisos ---------- */
+
+.mp-cartao {
+    width: min(560px, 100%);
+    margin: 10px auto 0;
+    padding: 30px 28px;
+    border-radius: 18px;
+    border: 1px solid rgba(46, 230, 240, 0.2);
+    background: rgba(15, 28, 43, 0.75);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+
+    h2 { margin: 0; }
+    p { margin: 0; font-family: var(--sans); color: var(--nevoa); line-height: 1.55; }
+    a:not(.button) { color: var(--aqua); }
+}
+
+.mp-cartao-selo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    font-size: 1.7rem;
+    color: var(--noite);
+    background: linear-gradient(135deg, var(--aqua), #9ff6fa);
+    box-shadow: 0 8px 24px rgba(46, 230, 240, 0.3);
+}
+
+.mp-cartao.aviso .mp-cartao-selo { background: linear-gradient(135deg, #b45309, #f59e0b); box-shadow: 0 8px 20px rgba(180, 83, 9, 0.3); }
+
+.button.mp-entrar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: min(320px, 100%);
+    height: auto;
+    min-height: 3em;
+    padding: 0.7em 1.4em;
+    text-decoration: none;
+}
+
+.mp-erro { color: #fca5a5 !important; }
+.mp-sub { font-size: 0.85rem; color: var(--nevoa-escura) !important; }
+
+/* ---------- Telas menores ---------- */
+
+@media (max-width: 960px) {
+    .mp { grid-template-columns: minmax(0, 1fr); }
+    .mp-perfil { position: static; }
+    .mp-numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 680px) {
+    .mp-grade, .mp-progresso { grid-template-columns: minmax(0, 1fr); }
+    .mp-numero strong { font-size: 1.35rem; }
+    .mp-grafico { height: 150px; gap: 3px; }
+    .mp-barra-valor { display: none; }
+}
