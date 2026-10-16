@@ -1,9 +1,16 @@
 const URL_VERIFY_LOGIN = `${URL_BASE}/api/verifyLogin`;
 let nick;
 
+// Sem acesso valido, volta ao painel do membro: o unico login e o do Discord
+// (16/10/2026), e o `admin=1` faz a aba Administracao renovar o acesso sozinha
+// enquanto a sessao do Discord valer.
+function voltarAoLogin() {
+    deleteCookie(ETY_ADM_LOGIN_COOKIE);
+    deleteCookie(ETY_ADM_PASS_COOKIE);
+    window.location.href = '/#meu-painel&admin=1';
+}
+
 async function authenticate() {
-    const MSG = 'Faça login na seção "Administração".';
-    
     try {
         const cookiesOk = checkCookie(ETY_ADM_LOGIN_COOKIE) && checkCookie(ETY_ADM_PASS_COOKIE);
         if (cookiesOk) {
@@ -44,21 +51,13 @@ async function authenticate() {
                 document.dispatchEvent(new Event('painel:lider'));
             }
 
-            if (!valid){
-                alert(MSG);
-                deleteCookie(ETY_ADM_LOGIN_COOKIE);
-                deleteCookie(ETY_ADM_PASS_COOKIE);
-                window.location.href = '/';
-            }
-
+            if (!valid) voltarAoLogin();
         } else {
-            alert(MSG);
-            window.location.href = '/';
+            voltarAoLogin();
         }
     } catch (error) {
         console.error('Erro ao verificar autenticação:', error);
-        alert(MSG);
-        window.location.href = '/';
+        voltarAoLogin();
     }
 }
 

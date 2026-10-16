@@ -215,10 +215,10 @@ body.site::before {
 }
 
 .nav-actions .social-link:hover { color: var(--gelo); background: var(--aqua-suave); transform: translateY(-2px); }
-.nav-actions .admin-link { margin-left: 4px; font-size: 1rem; }
-/* O admin e .itens (entra na rota), mas icone nao leva o sublinhado dos links. */
-.nav-links .nav-actions .admin-link::after { display: none; }
-.nav-actions .admin-link.select { color: var(--aqua); background: var(--aqua-suave); }
+.nav-actions .conta-link { margin-left: 4px; font-size: 1rem; }
+/* O icone do painel do membro e .itens (entra na rota), mas nao leva o sublinhado dos links. */
+.nav-links .nav-actions .conta-link::after { display: none; }
+.nav-actions .conta-link.select { color: var(--aqua); background: var(--aqua-suave); }
 
 .menu-toggle { display: none; }
 

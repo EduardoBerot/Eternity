@@ -58,8 +58,6 @@ const pages_content = {
     </br><p>A mudança vai para análise da staff. Ainda não vinculou o Discord? Use o botão <b>Vincular minha conta</b> no canal <b>#saudações</b>. Ainda não é membro? Faça o <a href="#guia" onclick="openGuia()">Recrutamento</a>.</p>`,
 
     // A Cidade (mapa, galeria e pedido de casa) fica em cidade.js.
-
-    administracao: `${loadingHTML}<form onsubmit="validationLogin(event)" style="display:none;"><h1>Login da staff</h1><input type="text" id="login" placeholder="login"><input type="password" id="senha" placeholder="Senha"><button class="button">OK</button></form>`,
 };
 
 // Rotas por hash (#inicio, #membros...): cada pagina tem endereco proprio. O
@@ -71,16 +69,12 @@ const ROTAS = {
     membros: { menu: 'hall', render: () => renderMembros() },
     wiki: { menu: 'wiki', render: () => renderWiki() },
     cidade: { menu: 'city', render: () => renderCidadePublica() },
-    admin: {
-        menu: 'administracao',
-        render: () => {
-            app.innerHTML = pages_content.administracao;
-            renderFormAdmin('administracao');
-        },
-    },
     atualizar: { menu: null, render: () => openAtualizar() },
-    // Painel do membro, com login do Discord (meu-painel.js).
+    // Painel do membro, com login do Discord (meu-painel.js). E o unico login do
+    // site: a administracao e uma aba dele para quem tem cargo (16/10/2026).
     'meu-painel': { menu: 'meu-painel-link', render: () => renderMeuPainel() },
+    // Endereco antigo do login da staff: leva a administracao pelo painel.
+    admin: { menu: 'meu-painel-link', render: () => { history.replaceState(null, '', '#meu-painel&admin=1'); renderMeuPainel(); } },
 };
 
 function route() {
@@ -112,57 +106,6 @@ window.addEventListener('hashchange', route);
 window.addEventListener('scroll', () => {
     document.querySelector('.topbar')?.classList.toggle('rolou', window.scrollY > 8);
 }, { passive: true });
-
-function renderFormAdmin(id) {
-    if (id == 'administracao') {
-        fetch(URL_BASE)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                document.getElementById('loading').style.display = 'none';
-                document.querySelector('form').style.display = 'flex';
-            })
-            .catch(error => {
-                console.error('There has been a problem with your fetch operation:', error);
-            });
-    }
-}
-
-
-async function validationLogin(event) {
-    event.preventDefault();
-
-    const URL_LOGIN = `${URL_BASE}/api/login`
-    const login = document.querySelector('#login').value;
-    const senha = document.querySelector('#senha').value;
-    const dados = {login, senha}
-
-    try {
-        const response = await fetch(URL_LOGIN, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(dados)
-        });
-
-        if (!response.ok) {
-            throw new Error('Erro na requisição');
-        }
-
-        const {token, login} = await response.json();
-        const DOIS_DIAS_EM_MINUTOS = 60*24*2;
-
-        setCookie(ETY_ADM_LOGIN_COOKIE, DOIS_DIAS_EM_MINUTOS, login);
-        setCookie(ETY_ADM_PASS_COOKIE, DOIS_DIAS_EM_MINUTOS, token);
-
-        window.location.href = '/painel.html';
-
-    } catch (error) {
-        alert('Login ou senha não conferem.')
-        console.error('Erro ao enviar os dados:', error);
-    }
-
-}
 
 // Espera o DOMContentLoaded porque inicio.js, membros.js, wiki.js e guia.js
 // carregam depois deste arquivo.

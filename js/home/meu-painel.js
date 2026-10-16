@@ -32,13 +32,29 @@ function mpGuardarSessao(token) {
 }
 
 // A volta do login traz a sessao ou o erro no hash; os dois saem da barra na hora.
+// `admin=1` (vindo do painel da staff com o acesso vencido) pede para abrir a
+// administracao assim que o painel carregar; o pedido sobrevive a ida ao
+// Discord guardado na aba do navegador.
+const MP_CHAVE_ADMIN = 'ety-painel-abrir-admin';
+
 function mpLerRetorno() {
     const params = new URLSearchParams(location.hash.replace(/^#meu-painel&?/, ''));
     const sessao = params.get('sessao');
     const erro = params.get('erro');
-    if (sessao || erro) history.replaceState(null, '', `${location.pathname}${location.search}#meu-painel`);
+    if (params.get('admin') === '1') {
+        try { sessionStorage.setItem(MP_CHAVE_ADMIN, '1'); } catch { /* sem a aba guardada, so nao abre sozinho */ }
+    }
+    if (sessao || erro || params.has('admin')) history.replaceState(null, '', `${location.pathname}${location.search}#meu-painel`);
     if (sessao) mpGuardarSessao(sessao);
     return { erro };
+}
+
+function mpPedidoAdmin() {
+    try {
+        const pedido = sessionStorage.getItem(MP_CHAVE_ADMIN) === '1';
+        sessionStorage.removeItem(MP_CHAVE_ADMIN);
+        return pedido;
+    } catch { return false; }
 }
 
 function mpDinheiro(valor) {
@@ -86,6 +102,9 @@ function mpTelaSemVinculo() {
 function mpSair(event) {
     event?.preventDefault();
     mpGuardarSessao(null);
+    // Sai da staff junto: o acesso da administracao nao fica aberto neste navegador.
+    deleteCookie(ETY_ADM_LOGIN_COOKIE);
+    deleteCookie(ETY_ADM_PASS_COOKIE);
     mpEstado.dados = null;
     mpTelaLogin(null);
 }
@@ -121,6 +140,7 @@ async function renderMeuPainel() {
     mpEstado.meta = meta?.publico ? meta : null;
     mpEstado.copa = copa && copa.status ? copa : null;
     mpEstado.mes = 0;
+    if (mpPedidoAdmin() && corpo.staff) return mpAbrirAdmin();
     mpDesenhar();
 }
 
@@ -156,7 +176,7 @@ function mpDesenhar() {
                 ${mpNumeros(perfil)}
                 ${mpAgora(perfil)}
                 <div class="mp-abas" role="tablist" aria-label="Seções do painel">
-                    ${[['liga', 'fa-trophy', 'Liga'], ['banco', 'fa-building-columns', 'Banco e prêmios'], ['titulos', 'fa-award', 'Títulos'], ['conta', 'fa-id-card', 'Conta']]
+                    ${[['liga', 'fa-trophy', 'Liga'], ['banco', 'fa-building-columns', 'Banco e prêmios'], ['titulos', 'fa-award', 'Títulos'], ['conta', 'fa-id-card', 'Conta'], ...(mpEstado.dados.staff ? [['admin', 'fa-user-shield', 'Administração']] : [])]
                         .map(([id, icone, rotulo]) => `<button type="button" role="tab" class="mp-aba ${mpEstado.aba === id ? 'ativa' : ''}" aria-selected="${mpEstado.aba === id}" onclick="mpTrocarAba('${id}')"><i class="fa-solid ${icone}" aria-hidden="true"></i> ${rotulo}</button>`).join('')}
                 </div>
                 <div id="mp-aba" role="tabpanel">${mpConteudoAba()}</div>
@@ -177,6 +197,7 @@ function mpTrocarAba(aba) {
 
 function mpConteudoAba() {
     const { perfil, membro } = mpEstado.dados;
+    if (mpEstado.aba === 'admin' && mpEstado.dados.staff) return mpAbaAdmin(membro);
     if (mpEstado.aba === 'banco') return mpAbaBanco(perfil);
     if (mpEstado.aba === 'titulos') return mpAbaTitulos(perfil);
     if (mpEstado.aba === 'conta') return mpAbaConta(perfil, membro);
@@ -401,4 +422,42 @@ function mpAbaConta(perfil, membro) {
             <p class="mp-nota">Os dados do painel são atualizados pelo bot a cada 30 minutos.</p>
         </section>
     </div>`;
+}
+
+// ---------- Administracao (so quem tem cargo) ----------
+
+// O unico login do painel da staff (16/10/2026): a API confere o cargo agora e
+// devolve o token no formato de sempre, que vai nos cookies que o painel le.
+function mpAbaAdmin(membro) {
+    return `<div class="mp-grade">
+        <section class="info-bloco info-bloco-largo mp-admin">
+            <h3><i class="fa-solid fa-user-shield"></i> Painel da staff</h3>
+            <p class="mp-texto">Como ${escHtml(membro?.cargo || 'staff')}, você tem acesso ao painel da staff: membros, solicitações, recrutamento e o que mais o seu cargo permite.</p>
+            <button type="button" class="button mp-entrar" onclick="mpAbrirAdmin()"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> Abrir a administração</button>
+            <p class="mp-nota" id="mp-admin-erro" hidden></p>
+            <p class="mp-nota">O acesso confere o seu cargo a cada ação e vale por 2 dias; depois o site renova sozinho pelo seu Discord.</p>
+        </section>
+    </div>`;
+}
+
+async function mpAbrirAdmin() {
+    const token = mpLerSessao();
+    const erro = mensagem => {
+        const alvo = document.getElementById('mp-admin-erro');
+        if (alvo) { alvo.textContent = mensagem; alvo.hidden = false; }
+        else app.innerHTML = mpCartao('fa-solid fa-user-shield', 'Administração', `<p>${escHtml(mensagem)}</p>`, { tipo: 'aviso' });
+    };
+    if (!token) return mpTelaLogin(null);
+    try {
+        const resposta = await fetch(`${URL_PAINEL_MEMBRO}/staff`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+        const corpo = await resposta.json().catch(() => ({}));
+        if (resposta.status === 401) { mpGuardarSessao(null); return mpTelaLogin(null); }
+        if (!resposta.ok || !corpo.token) return erro(corpo.message || 'Não foi possível abrir a administração agora.');
+        const DOIS_DIAS_EM_MINUTOS = 60 * 24 * 2;
+        setCookie(ETY_ADM_LOGIN_COOKIE, DOIS_DIAS_EM_MINUTOS, corpo.login);
+        setCookie(ETY_ADM_PASS_COOKIE, DOIS_DIAS_EM_MINUTOS, corpo.token);
+        window.location.href = '/painel.html';
+    } catch {
+        erro('O site não respondeu. Tente de novo em instantes.');
+    }
 }
