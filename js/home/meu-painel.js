@@ -178,7 +178,60 @@ async function renderMeuPainel() {
     mpDesenhar();
 }
 
-// ---------- Painel ----------
+// ---------- Ficha de personagem (16/10/2026) ----------
+// Redesenho pedido pelo Fundador: o painel generico (coluna lateral, quatro
+// numeros, lista e abas competindo) virou uma ficha de RPG. Topo com a skin 3D,
+// o nivel pelo tempo de cla e os numeros; atributos como barras de XP ate o
+// proximo titulo de cada escada; missoes do dia; a grade com TODAS as
+// conquistas (titulos) do cla, acesas ou bloqueadas. Liga, tesouro e conta
+// ficam nas abas de baixo.
+
+// Escada de tempo de cla, na ordem de TITULOS_TEMPO (titulos.js).
+const MP_NIVEIS_DIAS = [120, 180, 365, 730, 1095, 1825];
+
+// Titulo que cobre outros fora das escadas (titles.js do bot: SUPERA).
+const MP_SUPERA = { Onipotente: ['Vanguarda', 'Atirador', 'Farmer', 'Mercenário', 'Pacifista'], Mercenário: ['Vanguarda', 'Atirador'], Pacifista: ['Farmer'] };
+
+const MP_ATRIBUTOS = [
+    ['podios', 'Pódios', 'fa-medal'],
+    ['desafios', 'Desafios', 'fa-bolt'],
+    ['ofensiva', 'Ofensiva', 'fa-fire'],
+    ['banco', 'Apoio ao banco', 'fa-coins'],
+    ['poder', 'Poder mcMMO', 'fa-hand-fist'],
+];
+
+let mpViewer = null;
+
+function mpDiasDeCla(membro) {
+    const inicio = new Date(membro?.data_entrada);
+    return Number.isNaN(inicio.getTime()) ? null : Math.max(0, Math.floor((Date.now() - inicio) / 86_400_000));
+}
+
+function mpNivel(dias) {
+    if (dias === null) return null;
+    const alcancados = MP_NIVEIS_DIAS.filter(limite => dias >= limite).length;
+    const anterior = alcancados ? MP_NIVEIS_DIAS[alcancados - 1] : 0;
+    const proximo = MP_NIVEIS_DIAS[alcancados] ?? null;
+    return {
+        nivel: alcancados,
+        titulo: alcancados ? TITULOS_TEMPO[alcancados - 1][0] : null,
+        proximoTitulo: proximo ? TITULOS_TEMPO[alcancados][0] : null,
+        faltam: proximo ? proximo - dias : 0,
+        pct: proximo ? Math.round((dias - anterior) / (proximo - anterior) * 100) : 100,
+    };
+}
+
+// Nomes conquistados (masculino e feminino contam igual), com o que cada um supera.
+function mpConquistados(perfil) {
+    const nomes = new Set();
+    for (const titulo of perfil.titulos || []) {
+        const info = TITULOS_POR_NOME.get(titulo.nome);
+        const base = info?.familia?.titulos?.find(t => t.nome === titulo.nome || t.fem === titulo.nome)?.nome || titulo.nome;
+        nomes.add(base);
+        for (const coberto of MP_SUPERA[base] || []) nomes.add(coberto);
+    }
+    return nomes;
+}
 
 function mpDesenhar() {
     const { perfil, membro } = mpEstado.dados;
@@ -186,36 +239,62 @@ function mpDesenhar() {
     const cargo = membro?.cargo || 'Membro';
     const jogo = perfil.jogo || {};
     const online = jogo.visto === 'Online';
-    const tempo = tempoNoCla(membro?.data_entrada);
     const inativo = membro?.status && membro.status !== 'Ativo';
+    const dias = mpDiasDeCla(membro);
+    const nivel = mpNivel(dias);
+    const mes = perfil.ligaMeses?.[0] || perfil.liga;
+    const premios = (perfil.privado?.premios || []).reduce((soma, item) => soma + (Number(item.valor) || 0), 0);
+    const nickSkin = String(nick).replace(/^\*+/, '');
 
     app.innerHTML = `
         <div class="mp-topo">
             <h1>Meu painel</h1>
             <a href="#meu-painel" class="mp-sair" onclick="mpSair(event)"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Sair</a>
         </div>
-        <div class="mp">
-            <aside class="mp-perfil ${escHtml(classeCargo(cargo))}">
-                <img class="mp-skin" src="https://mc-heads.net/body/${encodeURIComponent(String(nick).replace(/^\*+/, ''))}/110" alt="Skin de ${escHtml(nick)}" width="66" height="132">
-                <h2>${escHtml(nick)}</h2>
-                <div class="dialogo-selos">
-                    <span class="selo cargo-${escHtml(classeCargo(cargo))}">${escHtml(cargo)}</span>
-                    ${inativo ? '<span class="selo selo-inativo">Inativo</span>' : ''}
-                    ${jogo.visto ? `<span class="selo ${online ? 'selo-online' : ''}"><span class="ponto"></span> ${online ? 'Online' : `Visto: ${escHtml(jogo.visto)}`}</span>` : ''}
+        <div class="ficha">
+            <section class="ficha-painel ficha-heroi ${escHtml(classeCargo(cargo))}">
+                <div class="ficha-skin" title="Arraste para girar">
+                    <img src="https://mc-heads.net/body/${encodeURIComponent(nickSkin)}/150" alt="Skin de ${escHtml(nick)}" width="75" height="150">
                 </div>
-                ${tempo ? `<p class="mp-tempo"><i class="fa-regular fa-clock" aria-hidden="true"></i> No clã ${escHtml(tempo)}</p>` : ''}
-                ${mpTitulosConquistados(perfil.titulos)}
-            </aside>
-            <div class="mp-principal">
-                ${mpNumeros(perfil)}
-                ${mpAgora(perfil)}
-                <div class="mp-abas" role="tablist" aria-label="Seções do painel">
-                    ${[['liga', 'fa-trophy', 'Liga'], ['banco', 'fa-building-columns', 'Banco e prêmios'], ['titulos', 'fa-award', 'Títulos'], ['conta', 'fa-id-card', 'Conta'], ...(mpEstado.dados.staff ? [['admin', 'fa-user-shield', 'Administração']] : [])]
-                        .map(([id, icone, rotulo]) => `<button type="button" role="tab" class="mp-aba ${mpEstado.aba === id ? 'ativa' : ''}" aria-selected="${mpEstado.aba === id}" onclick="mpTrocarAba('${id}')"><i class="fa-solid ${icone}" aria-hidden="true"></i> ${rotulo}</button>`).join('')}
+                <div class="ficha-id">
+                    <div class="ficha-nome">
+                        <h2>${escHtml(nick)}</h2>
+                        <div class="dialogo-selos">
+                            <span class="selo cargo-${escHtml(classeCargo(cargo))}">${escHtml(cargo)}</span>
+                            ${jogo.cla ? `<span class="selo selo-tag">${escHtml(jogo.cla)}</span>` : ''}
+                            ${inativo ? '<span class="selo selo-inativo">Inativo</span>' : ''}
+                            ${jogo.visto ? `<span class="selo ${online ? 'selo-online' : ''}"><span class="ponto"></span> ${online ? 'Online' : `Visto: ${escHtml(jogo.visto)}`}</span>` : ''}
+                        </div>
+                    </div>
+                    ${nivel ? `<div class="ficha-nivel">
+                        <div class="ficha-nivel-topo">
+                            <span class="ficha-nivel-num">NV ${escHtml(nivel.nivel)}</span>
+                            <span>${nivel.titulo ? mpNomeTitulo(nivel.titulo) : '<b>Recruta</b>'} · ${escHtml(tempoNoCla(membro.data_entrada) || '')} de clã</span>
+                        </div>
+                        <div class="ficha-barra ficha-barra-ouro" role="progressbar" aria-valuenow="${nivel.pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Nível de clã"><span style="width:${nivel.pct}%"></span></div>
+                        <small>${nivel.proximoTitulo ? `Faltam ${escHtml(nivel.faltam.toLocaleString('pt-BR'))} dias para ${escHtml(nivel.proximoTitulo)}` : 'Nível máximo de tempo de clã'}</small>
+                    </div>` : ''}
+                    ${mpTitulosEmUso(perfil.titulos)}
                 </div>
-                <div id="mp-aba" role="tabpanel">${mpConteudoAba()}</div>
+                <div class="ficha-stats">
+                    ${mpStat('fa-trophy', 'Liga', escHtml(mes?.pontos ?? 0), mes?.posicao ? `${escHtml(mes.posicao)}º de ${escHtml(mes.participantes)}` : 'sem pontos no mês')}
+                    ${mpStat('fa-coins', 'Banco', escHtml(mpDinheiro(perfil.banco?.total)), perfil.banco?.posicao ? `${escHtml(perfil.banco.posicao)}º apoiador` : 'sem depósitos')}
+                    ${mpStat('fa-flag-checkered', 'Eventos', escHtml(perfil.eventos?.total ?? 0), 'vencidos')}
+                    ${mpStat('fa-sack-dollar', 'Prêmios', escHtml(mpDinheiro(premios)), 'recebidos')}
+                </div>
+            </section>
+            <div class="ficha-meio">
+                ${mpAtributos(perfil)}
+                ${mpMissoes(perfil)}
             </div>
+            ${mpConquistasGrade(perfil, dias)}
+            <div class="mp-abas" role="tablist" aria-label="Seções do painel">
+                ${[['liga', 'fa-chart-column', 'Liga'], ['banco', 'fa-gem', 'Tesouro'], ['conta', 'fa-id-card', 'Conta'], ...(mpEstado.dados.staff ? [['admin', 'fa-user-shield', 'Administração']] : [])]
+                    .map(([id, icone, rotulo]) => `<button type="button" role="tab" class="mp-aba ${mpEstado.aba === id ? 'ativa' : ''}" aria-selected="${mpEstado.aba === id}" onclick="mpTrocarAba('${id}')"><i class="fa-solid ${icone}" aria-hidden="true"></i> ${rotulo}</button>`).join('')}
+            </div>
+            <div id="mp-aba" role="tabpanel">${mpConteudoAba()}</div>
         </div>`;
+    mpSkin3d(app.querySelector('.ficha-skin'), nickSkin);
 }
 
 function mpTrocarAba(aba) {
@@ -233,76 +312,170 @@ function mpConteudoAba() {
     const { perfil, membro } = mpEstado.dados;
     if (mpEstado.aba === 'admin' && mpEstado.dados.staff) return mpAbaAdmin(membro);
     if (mpEstado.aba === 'banco') return mpAbaBanco(perfil);
-    if (mpEstado.aba === 'titulos') return mpAbaTitulos(perfil);
     if (mpEstado.aba === 'conta') return mpAbaConta(perfil, membro);
     return mpAbaLiga(perfil);
 }
 
-function mpTitulosConquistados(titulos) {
+// Skin 3D grande no topo da ficha (skinview3d, o mesmo da janela de Membros).
+// Sem WebGL ou sem a biblioteca, fica a imagem 2D.
+async function mpSkin3d(caixa, nick) {
+    mpViewer?.dispose();
+    mpViewer = null;
+    if (!caixa || typeof webglDisponivel !== 'function' || !webglDisponivel()) return;
+    let lib;
+    try { lib = await carregarSkinview3d(); } catch { return; }
+    if (!caixa.isConnected) return;
+    const canvas = document.createElement('canvas');
+    const viewer = new lib.SkinViewer({ canvas, width: 180, height: 250 });
+    try { await viewer.loadSkin(`https://mc-heads.net/skin/${encodeURIComponent(nick)}`); } catch { viewer.dispose(); return; }
+    if (!caixa.isConnected) { viewer.dispose(); return; }
+    viewer.fov = 40;
+    viewer.zoom = 0.82;
+    viewer.controls.enableZoom = false;
+    viewer.controls.enablePan = false;
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        viewer.animation = new lib.IdleAnimation();
+        viewer.autoRotate = true;
+        viewer.autoRotateSpeed = 0.5;
+    }
+    mpViewer = viewer;
+    caixa.replaceChildren(canvas);
+    caixa.classList.add('em-3d');
+}
+
+function mpStat(icone, rotulo, valor, apoio) {
+    return `<div class="ficha-stat">
+        <i class="fa-solid ${icone}" aria-hidden="true"></i>
+        <span>${rotulo}</span>
+        <strong>${valor}</strong>
+        <small>${apoio}</small>
+    </div>`;
+}
+
+// Titulos conquistados no topo, o que esta em uso primeiro.
+function mpTitulosEmUso(titulos) {
     const lista = (Array.isArray(titulos) ? titulos : [])
         .map(titulo => ({ ...titulo, info: TITULOS_POR_NOME.get(titulo.nome) }))
         .filter(titulo => titulo.info)
         .sort((a, b) => Number(Boolean(b.atual)) - Number(Boolean(a.atual)) || b.info.nivel - a.info.nivel);
     if (!lista.length) return '';
-    return `<div class="mp-titulos">
+    return `<div class="mp-titulos mp-titulos-esquerda">
         ${lista.map(titulo => `<span class="titulo-chip holo" style="--de:${titulo.info.familia.de};--ate:${titulo.info.familia.ate}" title="${titulo.atual ? 'Usando agora' : 'Conquistado'}">${tituloHtml(titulo.nome, titulo.info, { atual: titulo.atual })}</span>`).join('')}
     </div>`;
 }
 
-function mpNumero(rotulo, valor, apoio, { destaque = false } = {}) {
-    return `<div class="mp-numero ${destaque ? 'destaque' : ''}">
-        <span>${rotulo}</span>
-        <strong>${valor}</strong>
-        <small>${apoio || '&nbsp;'}</small>
-    </div>`;
+function mpPainel(icone, titulo, corpo, { classe = '', extra = '' } = {}) {
+    return `<section class="ficha-painel ${classe}">
+        <h3 class="ficha-titulo"><i class="fa-solid ${icone}" aria-hidden="true"></i> ${titulo}${extra ? `<small>${extra}</small>` : ''}</h3>
+        ${corpo}
+    </section>`;
 }
 
-function mpNumeros(perfil) {
-    const mes = perfil.ligaMeses?.[0] || perfil.liga;
-    const banco = perfil.banco;
-    const dominio = Number(perfil.liga?.dominio) || 0;
-    return `<div class="mp-numeros">
-        ${mpNumero('Pontos na Liga', escHtml(mes?.pontos ?? 0), mes?.posicao ? `${escHtml(mes.posicao)}º de ${escHtml(mes.participantes)}` : 'Sem pontos no mês', { destaque: true })}
-        ${mpNumero('Banco do clã', escHtml(mpDinheiro(banco?.total)), banco?.posicao ? `${escHtml(banco.posicao)}º de ${escHtml(banco.apoiadores)} apoiadores` : 'Sem depósitos')}
-        ${mpNumero('Eventos vencidos', escHtml(perfil.eventos?.total ?? 0), 'desde ago/2026')}
-        ${mpNumero('Ofensiva', dominio ? `🔥 ${escHtml(dominio)}` : '0', dominio ? 'dias seguidos' : 'Dias de Domínio')}
-    </div>`;
+// Atributos: uma barra por escada, ate o proximo titulo; escada completa = MAX.
+function mpAtributos(perfil) {
+    const proximos = new Map((perfil.privado?.proximosTitulos || []).map(item => [item.grupo, item]));
+    const conquistados = mpConquistados(perfil);
+    const linhas = MP_ATRIBUTOS.map(([grupo, rotulo, icone]) => {
+        const item = proximos.get(grupo);
+        const familia = TITULOS_CATEGORIAS.flatMap(c => c.familias).find(f => f.grupo === grupo);
+        const topo = familia?.titulos.at(-1)?.nome;
+        if (!item && !(topo && conquistados.has(topo))) return '';
+        const pct = item ? Math.min(100, Math.round(item.atual / item.meta * 100)) : 100;
+        return `<li class="ficha-atributo">
+            <div class="ficha-atributo-topo">
+                <span><i class="fa-solid ${icone}" aria-hidden="true"></i> ${rotulo}</span>
+                <span>${item ? `${escHtml(mpValorEscada(grupo, item.atual))} / ${escHtml(mpValorEscada(grupo, item.meta))}` : '<b class="ficha-max">MÁX</b>'}</span>
+            </div>
+            <div class="ficha-barra" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="${escHtml(rotulo)}"><span style="width:${pct}%"></span></div>
+            <small>${item ? `Próximo: ${mpNomeTitulo(item.nome)} · faltam ${escHtml(mpFalta(item))}` : `Escada completa: ${mpNomeTitulo(topo)}`}</small>
+        </li>`;
+    }).join('');
+    return mpPainel('fa-chart-simple', 'Atributos', linhas
+        ? `<ul class="ficha-atributos">${linhas}</ul>`
+        : '<p class="info-vazio">Os atributos aparecem na próxima atualização do site, em até 1 hora.</p>', { classe: 'ficha-atributos-painel' });
 }
 
-// O que da para fazer agora: so o que a pessoa consegue mudar hoje.
-function mpAgora(perfil) {
-    const itens = [];
+// Missoes do dia: o que a pessoa consegue fazer agora, com o estado quando se sabe.
+function mpMissoes(perfil) {
+    const missoes = [];
     const dominio = Number(perfil.liga?.dominio) || 0;
-    itens.push(dominio
-        ? ['fa-fire', `Ofensiva de <b>${escHtml(dominio)} dias</b> nos Dias de Domínio. Complete os desafios de hoje para não perder a sequência.`]
-        : ['fa-fire', 'Complete todos os desafios de hoje para começar uma ofensiva nos <b>Dias de Domínio</b>.']);
-
+    missoes.push({
+        estado: 'pendente', icone: 'fa-fire',
+        texto: dominio ? `Mantenha a ofensiva de <b>${escHtml(dominio)} dias</b>: complete os desafios de hoje.` : 'Complete <b>todos os desafios</b> de hoje e comece uma ofensiva.',
+    });
     const meta = mpEstado.meta;
     if (meta && Number(meta.meta) > 0) {
         const pct = Math.min(100, Math.round((Number(meta.liquido) || 0) / Number(meta.meta) * 100));
-        const chaves = new Set([perfil.nick, ...(perfil.alts || [])].map(nick => String(nick).toLowerCase()));
+        const chaves = new Set([perfil.nick, ...(perfil.alts || [])].map(n => String(n).toLowerCase()));
         const minha = (meta.apoiadores || []).filter(item => chaves.has(String(item.nick).toLowerCase())).reduce((soma, item) => soma + (Number(item.valor) || 0), 0);
-        itens.push(['fa-building-columns', `Meta do banco da semana em <b>${pct}%</b> (${escHtml(mpDinheiro(meta.liquido))} de ${escHtml(mpDinheiro(meta.meta))}). ${minha ? `Sua parte: <b>${escHtml(mpDinheiro(minha))}</b>.` : 'Você ainda não depositou nesta semana.'}`]);
+        missoes.push(minha
+            ? { estado: 'feito', icone: 'fa-coins', texto: `Você já apoiou a meta da semana: <b>${escHtml(mpDinheiro(minha))}</b> (meta em ${pct}%).` }
+            : { estado: 'pendente', icone: 'fa-coins', texto: `Apoie a <b>meta do banco</b> da semana (em ${pct}%).` });
     }
-
     const copa = mpEstado.copa;
     if (copa?.status === 'inscricoes') {
-        const inscrito = (copa.inscritos || []).some(nick => String(nick).toLowerCase() === String(perfil.nick).toLowerCase());
-        itens.push(['fa-hand-fist', inscrito
-            ? 'Você está inscrito na <b>Copa de Duelos</b>. Fique de olho no Discord para a sua chamada.'
-            : `Inscrições da <b>Copa de Duelos</b> abertas${copa.inscricoesAte ? ` até ${escHtml(mpData(copa.inscricoesAte))}` : ''}. Use <code>/copa</code> no Discord.`]);
+        const inscrito = (copa.inscritos || []).some(n => String(n).toLowerCase() === String(perfil.nick).toLowerCase());
+        missoes.push(inscrito
+            ? { estado: 'feito', icone: 'fa-hand-fist', texto: 'Inscrito na <b>Copa de Duelos</b>.' }
+            : { estado: 'pendente', icone: 'fa-hand-fist', texto: `Inscreva-se na <b>Copa de Duelos</b> com <code>/copa</code>${copa.inscricoesAte ? ` até ${escHtml(mpData(copa.inscricoesAte))}` : ''}.` });
     }
-
     const perto = (perfil.privado?.proximosTitulos || [])
         .map(item => ({ ...item, razao: item.atual / item.meta }))
         .filter(item => item.razao < 1)
         .sort((a, b) => b.razao - a.razao)[0];
-    if (perto) itens.push(['fa-award', `Você está a <b>${escHtml(mpFalta(perto))}</b> do título ${mpNomeTitulo(perto.nome)}.`]);
+    if (perto) missoes.push({ estado: 'pendente', icone: 'fa-award', texto: `Faltam <b>${escHtml(mpFalta(perto))}</b> para ${mpNomeTitulo(perto.nome)}.` });
+    const feitas = missoes.filter(m => m.estado === 'feito').length;
+    return mpPainel('fa-scroll', 'Missões de hoje', `<ul class="ficha-missoes">
+        ${missoes.map(m => `<li class="ficha-missao ${m.estado}">
+            <span class="ficha-missao-marca" aria-label="${m.estado === 'feito' ? 'Feita' : 'Pendente'}"><i class="fa-solid ${m.estado === 'feito' ? 'fa-check' : m.icone}" aria-hidden="true"></i></span>
+            <span>${m.texto}</span>
+        </li>`).join('')}
+    </ul>`, { classe: 'ficha-missoes-painel', extra: `${feitas} de ${missoes.length}` });
+}
 
-    return `<section class="info-bloco mp-agora">
-        <h3><i class="fa-solid fa-bolt"></i> O que fazer agora</h3>
-        <ul>${itens.map(([icone, texto]) => `<li><i class="fa-solid ${icone}" aria-hidden="true"></i><span>${texto}</span></li>`).join('')}</ul>
-    </section>`;
+// Conquistas: todos os titulos do cla, por categoria. Escada acende ate o nivel
+// alcancado; nas outras familias cada titulo e independente.
+function mpConquistasGrade(perfil, dias) {
+    const conquistados = mpConquistados(perfil);
+    let total = 0;
+    let acesas = 0;
+    const tile = (nome, icone, requisito, aceso, familia, nivelTitulo) => {
+        total += 1;
+        if (aceso) acesas += 1;
+        const cor = familia ? `--de:${familia.de};--ate:${familia.ate}` : '';
+        return `<div class="ficha-conquista ${aceso ? 'acesa' : 'bloqueada'}" style="${cor}" title="${escHtml(requisito)}">
+            <span class="ficha-conquista-icone" aria-hidden="true">${aceso ? escHtml(icone || '✦') : '<i class="fa-solid fa-lock"></i>'}</span>
+            <span class="ficha-conquista-nome">${aceso ? tituloHtml(nome, { familia, nivel: nivelTitulo }) : escHtml(nome)}</span>
+            <small>${escHtml(requisito)}</small>
+        </div>`;
+    };
+    const blocos = TITULOS_CATEGORIAS.map(categoria => `
+        <div class="ficha-conquistas-cat">
+            <h4><i class="fa-solid ${categoria.icone}" aria-hidden="true"></i> ${escHtml(categoria.nome)}</h4>
+            <div class="ficha-conquistas-grade">
+                ${categoria.familias.map(familia => {
+                    const indices = familia.titulos.map((t, i) => (conquistados.has(t.nome) ? i : -1)).filter(i => i >= 0);
+                    const topo = indices.length ? Math.max(...indices) : -1;
+                    return familia.titulos.map((titulo, i) => tile(
+                        titulo.nome, titulo.icone || familia.icone, titulo.requisito,
+                        familia.escada ? i <= topo : conquistados.has(titulo.nome),
+                        familia, familia.escada ? i + 1 : (titulo.nivel || 1),
+                    )).join('');
+                }).join('')}
+            </div>
+        </div>`).join('');
+    const tempo = { de: '#e8f4f8', ate: '#2ee6f0' };
+    const blocoTempo = `
+        <div class="ficha-conquistas-cat">
+            <h4><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i> Tempo de clã</h4>
+            <div class="ficha-conquistas-grade">
+                ${TITULOS_TEMPO.map(([nome, rotulo], i) => tile(nome, '✧', `${rotulo} de clã`, dias !== null && dias >= MP_NIVEIS_DIAS[i], tempo, 1)).join('')}
+            </div>
+        </div>`;
+    // No celular so as acesas aparecem; o botao abre as bloqueadas (a grade inteira tem 36).
+    const corpo = `<div class="ficha-conquistas">${blocos}${blocoTempo}</div>
+        <button type="button" class="ficha-ver-todas" onclick="this.previousElementSibling.classList.toggle('todas'); this.textContent = this.previousElementSibling.classList.contains('todas') ? 'Mostrar só as conquistadas' : 'Ver todas as conquistas'">Ver todas as conquistas</button>`;
+    return mpPainel('fa-award', 'Conquistas', corpo, { classe: 'ficha-conquistas-painel', extra: `${acesas} de ${total}` });
 }
 
 // ---------- Abas ----------
@@ -406,32 +579,6 @@ function mpNomeTitulo(nome) {
     return info ? tituloHtml(nome, info) : `<b>${escHtml(nome)}</b>`;
 }
 
-function mpAbaTitulos(perfil) {
-    const proximos = perfil.privado?.proximosTitulos || [];
-    const conquistados = mpTitulosConquistados(perfil.titulos);
-    return `<div class="mp-grade">
-        <section class="info-bloco info-bloco-largo">
-            <h3><i class="fa-solid fa-stairs"></i> Próximo degrau de cada escada</h3>
-            ${proximos.length ? `<ul class="mp-progresso">${proximos.map(item => {
-                const pct = Math.min(100, Math.round(item.atual / item.meta * 100));
-                return `<li>
-                    <div class="mp-progresso-topo">
-                        <span class="titulo-chip">${mpNomeTitulo(item.nome)}</span>
-                        <strong>${escHtml(mpValorEscada(item.grupo, item.atual))} / ${escHtml(mpValorEscada(item.grupo, item.meta))}</strong>
-                    </div>
-                    <div class="mp-progresso-barra" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="${escHtml(item.nome)}"><span style="width:${pct}%"></span></div>
-                    <small>Faltam ${escHtml(mpFalta(item))}</small>
-                </li>`;
-            }).join('')}</ul>` : '<p class="info-vazio">Você já está no topo das escadas que dá para medir.</p>'}
-        </section>
-        <section class="info-bloco info-bloco-largo">
-            <h3><i class="fa-solid fa-award"></i> Conquistados</h3>
-            ${conquistados ? conquistados.replace('class="mp-titulos"', 'class="mp-titulos mp-titulos-esquerda"') : '<p class="info-vazio">Nenhum título ainda.</p>'}
-            <p class="mp-nota">Para usar um título no jogo, mande para a Eternity: <code>/m Eternity quero a tag Nome</code>. A lista completa está na <a href="#wiki">Wiki</a>.</p>
-        </section>
-    </div>`;
-}
-
 function mpAbaConta(perfil, membro) {
     const discord = perfil.discord;
     const alts = Array.isArray(perfil.alts) ? perfil.alts : [];
@@ -440,7 +587,7 @@ function mpAbaConta(perfil, membro) {
         <section class="info-bloco">
             <h3><i class="fa-solid fa-id-card"></i> Sua conta</h3>
             ${linhaInfo('Nick', escHtml(perfil.nick))}
-            ${linhaInfo('Discord', discord ? `<span class="discord-chip">${discord.avatar ? `<img src="${escHtml(discord.avatar)}" alt="" width="20" height="20">` : ''}${escHtml(discord.nome || perfil.nick)}</span>` : '')}
+            ${linhaInfo('Discord', discord ? `<span class="discord-chip">${discord.avatar ? `<img src="${escHtml(discord.avatar)}" alt="" width="20" height="20">` : ''}${escHtml(String(discord.nome || '').replace(/⌜[^⌟]*⌟\s*/g, '').trim() || perfil.nick)}</span>` : '')}
             ${linhaInfo('Alts', alts.length ? `<span class="alts-lista">${alts.map(alt => `<span class="alt-chip">${escHtml(alt)}</span>`).join('')}</span>` : '<small>Nenhuma</small>')}
             ${linhaInfo('Clã', escHtml(perfil.jogo?.cla || membro?.clan_origem || ''))}
             ${linhaInfo('Servidor', escHtml(servidores))}

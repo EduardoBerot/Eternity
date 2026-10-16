@@ -1,14 +1,15 @@
-/* Painel do membro (16/10/2026, js/home/meu-painel.js). Mesma linguagem da
-   janela do membro: blocos .info-bloco, selos e chips de titulo do site. */
+/* Painel do membro (js/home/meu-painel.js). Desde 16/10/2026 e uma ficha de
+   personagem: paineis com canto chanfrado, barras de XP segmentadas, conquistas
+   acesas ou bloqueadas e o nivel (tempo de cla) em dourado. As abas de baixo
+   (Liga, Tesouro, Conta, Administracao) reaproveitam .info-bloco com a mesma
+   moldura. */
 
-/* Margem da pagina, como o Guia e o login (site.css). */
 .site .page-meu-painel {
     padding: 24px var(--lado) 56px;
 
     > h1 { width: min(1180px, 100%); margin: 12px auto 16px; font-size: clamp(1.6rem, 4vw, 2.4rem); }
 }
 
-.mp-topo h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); }
 .site .page-meu-painel > h1:has(+ .mp-cartao) { text-align: center; }
 
 .mp-topo {
@@ -19,7 +20,7 @@
     width: min(1180px, 100%);
     margin: 0 auto 16px;
 
-    h1 { margin: 0; }
+    h1 { margin: 0; font-size: clamp(1.6rem, 4vw, 2.4rem); }
 }
 
 .mp-sair {
@@ -38,101 +39,333 @@
 
 .mp-sair:hover { color: var(--gelo); border-color: rgba(46, 230, 240, 0.35); }
 
-.mp {
-    display: grid;
-    grid-template-columns: 270px minmax(0, 1fr);
-    gap: 16px;
+/* ---------- Ficha ---------- */
+
+.ficha {
+    --ficha-ouro: #f5c542;
+    --ficha-xp: #5cf08a;
+    --chanfro: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
     width: min(1180px, 100%);
     margin: 0 auto;
-    align-items: start;
+
+    a:not(.button):not(.mp-sair) { color: var(--aqua); }
 }
 
-/* ---------- Coluna do perfil ---------- */
+/* Moldura comum: canto superior esquerdo e inferior direito chanfrados, como
+   uma carta/ficha; borda feita com o fundo de fora para o chanfro aparecer. */
+.ficha-painel,
+.ficha .info-bloco {
+    position: relative;
+    padding: 18px 20px;
+    border: 1px solid rgba(46, 230, 240, 0.16);
+    border-radius: 0;
+    background:
+        linear-gradient(180deg, rgba(46, 230, 240, 0.05), transparent 120px),
+        rgba(10, 20, 33, 0.82);
+    clip-path: polygon(var(--chanfro) 0, 100% 0, 100% calc(100% - var(--chanfro)), calc(100% - var(--chanfro)) 100%, 0 100%, 0 var(--chanfro));
+    box-shadow: inset 0 1px 0 rgba(232, 244, 248, 0.05);
+}
 
-.mp-perfil {
-    position: sticky;
-    top: calc(var(--nav) + 16px);
+.ficha .info-bloco:hover { border-color: rgba(46, 230, 240, 0.28); }
+
+.ficha-titulo,
+.ficha .info-bloco h3 {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding: 22px 16px;
-    border-radius: 16px;
-    border: 1px solid var(--linha);
-    background: linear-gradient(170deg, color-mix(in srgb, var(--cor, var(--c-membro)) 22%, transparent), rgba(232, 244, 248, 0.02) 70%);
-    text-align: center;
+    gap: 9px;
+    margin: 0 0 14px;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gelo);
 
-    h2 { margin: 0; font-size: 1.5rem; word-break: break-all; }
-    .dialogo-selos { justify-content: center; }
+    > i { color: var(--aqua); }
+    small { margin-left: auto; font-family: var(--sans); font-size: 0.75rem; letter-spacing: 0; text-transform: none; color: var(--nevoa-escura); }
 }
 
-.mp-skin { image-rendering: pixelated; filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.45)); }
+/* Texto corrido em sans: a Conthrax do site fica nos titulos. */
+.ficha .info-linha > span,
+.ficha-missao > span:last-child,
+.ficha-atributo small,
+.ficha-nivel small,
+.ficha-stat small,
+.ficha-conquista small,
+.mp-tabela td,
+.ficha .info-linha small { font-family: var(--sans); }
 
-.mp-tempo {
-    margin: 0;
-    font-family: var(--sans);
-    font-size: 0.85rem;
-    color: var(--nevoa);
+/* ---------- Topo: o heroi ---------- */
 
-    i { color: var(--aqua); margin-right: 4px; }
-}
-
-.mp-titulos {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 6px;
-}
-
-.mp-titulos-esquerda { justify-content: flex-start; }
-
-/* Texto corrido em sans: a Conthrax do site fica nos titulos dos blocos. */
-.mp-agora li span, .mp-tabela td, .mp-progresso small, .mp-numero small, .mp .info-linha > span { font-family: var(--sans); }
-.mp a:not(.button):not(.mp-sair) { color: var(--aqua); }
-
-/* ---------- Coluna principal ---------- */
-
-.mp-principal { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-
-.mp-numeros {
+.ficha-heroi {
+    --cor: var(--c-membro);
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
+    grid-template-columns: 190px minmax(0, 1fr) minmax(0, 390px);
+    gap: 22px;
+    align-items: center;
+    padding: 22px 26px;
+    background:
+        radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--cor) 22%, transparent), transparent 55%),
+        linear-gradient(180deg, rgba(46, 230, 240, 0.06), transparent 160px),
+        rgba(10, 20, 33, 0.9);
+    border-color: color-mix(in srgb, var(--cor) 40%, rgba(46, 230, 240, 0.16));
 }
 
-.mp-numero {
+.ficha-skin {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    min-height: 250px;
+    background: radial-gradient(60% 18% at 50% 92%, rgba(0, 0, 0, 0.45), transparent 70%);
+    cursor: grab;
+
+    img { width: 100px; height: auto; image-rendering: pixelated; filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.5)); }
+    canvas { max-width: 100%; height: auto; }
+}
+
+.ficha-id { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+
+.ficha-nome {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 14px 16px;
-    border-radius: 12px;
-    border: 1px solid var(--linha);
-    border-top: 2px solid var(--aqua);
-    background: rgba(232, 244, 248, 0.03);
-    min-width: 0;
+    gap: 8px;
 
-    span { font-family: var(--sans); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--nevoa-escura); }
-    strong { font-size: 1.6rem; line-height: 1.1; color: var(--gelo); overflow-wrap: anywhere; }
-    small { font-family: var(--sans); font-size: 0.8rem; color: var(--nevoa); }
+    h2 { margin: 0; font-size: clamp(1.7rem, 3.4vw, 2.4rem); line-height: 1; word-break: break-all; }
 }
 
-.mp-numero.destaque strong { color: var(--aqua); }
-
-.mp-agora ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
-
-.mp-agora li {
+.ficha-nivel {
     display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 520px;
+
+    small { font-size: 0.78rem; color: var(--nevoa); }
+}
+
+.ficha-nivel-topo {
+    display: flex;
+    align-items: center;
     gap: 10px;
-    align-items: baseline;
     font-family: var(--sans);
-    font-size: 0.9rem;
-    line-height: 1.45;
+    font-size: 0.88rem;
     color: var(--nevoa);
 
-    > i { color: var(--aqua); width: 1.1em; text-align: center; flex-shrink: 0; }
     b { color: var(--gelo); }
     .titulo-nome { font-weight: 800; }
 }
+
+.ficha-nivel-num {
+    padding: 3px 9px;
+    font-family: "Conthrax", var(--sans);
+    font-size: 0.78rem;
+    color: #1a1204;
+    background: linear-gradient(135deg, var(--ficha-ouro), #ffe9a6);
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+
+.ficha-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ficha-stat {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto auto;
+    column-gap: 9px;
+    padding: 10px 12px;
+    background: rgba(4, 8, 15, 0.45);
+    border: 1px solid var(--linha);
+    min-width: 0;
+
+    > i { grid-row: 1 / span 3; align-self: start; margin-top: 2px; color: var(--aqua); font-size: 0.95rem; }
+    span { font-family: var(--sans); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--nevoa-escura); }
+    strong { font-size: 0.98rem; line-height: 1.25; color: var(--gelo); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    small { font-size: 0.74rem; color: var(--nevoa); }
+}
+
+.mp-titulos { display: flex; flex-wrap: wrap; gap: 6px; }
+.mp-titulos-esquerda { justify-content: flex-start; }
+
+/* ---------- Barras de XP ---------- */
+
+.ficha-barra {
+    position: relative;
+    height: 12px;
+    background: rgba(4, 8, 15, 0.7);
+    border: 1px solid rgba(232, 244, 248, 0.1);
+    overflow: hidden;
+
+    > span {
+        display: block;
+        height: 100%;
+        background: linear-gradient(90deg, var(--aqua), var(--ficha-xp));
+        box-shadow: 0 0 12px rgba(92, 240, 138, 0.35);
+        transition: width 0.6s ease;
+    }
+
+    /* Os segmentos da barra, como a de experiencia do jogo. */
+    &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 2px), rgba(4, 8, 15, 0.85) calc(10% - 2px) 10%);
+        pointer-events: none;
+    }
+}
+
+.ficha-barra-ouro > span { background: linear-gradient(90deg, #c89212, var(--ficha-ouro)); box-shadow: 0 0 12px rgba(245, 197, 66, 0.35); }
+
+/* ---------- Atributos e missoes ---------- */
+
+.ficha-meio {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 14px;
+    align-items: stretch;
+}
+
+.ficha-atributos { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 14px; }
+
+.ficha-atributo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    small { font-size: 0.78rem; color: var(--nevoa); }
+    .titulo-nome { font-weight: 800; }
+}
+
+.ficha-atributo-topo {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-family: var(--sans);
+    font-size: 0.86rem;
+    color: var(--gelo);
+
+    i { width: 1.2em; color: var(--aqua); }
+    > span:last-child { color: var(--nevoa); white-space: nowrap; }
+}
+
+.ficha-max { color: var(--ficha-ouro); letter-spacing: 0.08em; }
+
+.ficha-missoes { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+.ficha-missao {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 12px;
+    background: rgba(4, 8, 15, 0.4);
+    border: 1px solid var(--linha);
+    font-size: 0.88rem;
+    line-height: 1.45;
+    color: var(--nevoa);
+
+    b { color: var(--gelo); }
+    .titulo-nome { font-weight: 800; }
+}
+
+.ficha-missao-marca {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    color: var(--aqua);
+    border: 1px solid rgba(46, 230, 240, 0.35);
+    transform: rotate(45deg);
+
+    i { transform: rotate(-45deg); font-size: 0.8rem; }
+}
+
+.ficha-missao.feito {
+    border-color: rgba(92, 240, 138, 0.3);
+    background: rgba(92, 240, 138, 0.06);
+
+    .ficha-missao-marca { color: #062311; background: var(--ficha-xp); border-color: var(--ficha-xp); }
+}
+
+/* ---------- Conquistas ---------- */
+
+.ficha-conquistas { display: flex; flex-direction: column; gap: 16px; }
+
+.ficha-conquistas-cat h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--nevoa-escura);
+
+    i { color: var(--nevoa); }
+}
+
+.ficha-conquistas-grade {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 8px;
+}
+
+.ficha-conquista {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    column-gap: 10px;
+    align-items: center;
+    padding: 9px 10px;
+    border: 1px solid var(--linha);
+    background: rgba(4, 8, 15, 0.45);
+    min-width: 0;
+
+    small { grid-column: 2; font-size: 0.7rem; line-height: 1.3; color: var(--nevoa-escura); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+}
+
+.ficha-conquista-icone {
+    grid-row: 1 / span 2;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    font-size: 1.05rem;
+    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+}
+
+.ficha-conquista-nome { font-size: 0.85rem; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* O degrade do titulo fica, mas em sans: a Conthrax cortava o nome na carta. */
+.ficha-conquista-nome .titulo-nome, .ficha-conquista-nome .titulo-grad { font-family: var(--sans); font-weight: 800; letter-spacing: 0; }
+
+.ficha-conquista.acesa {
+    border-color: color-mix(in srgb, var(--ate) 45%, transparent);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--de) 12%, transparent), rgba(4, 8, 15, 0.5));
+
+    .ficha-conquista-icone { color: #04080f; background: linear-gradient(135deg, var(--de), var(--ate)); }
+}
+
+.ficha-conquista.bloqueada {
+    .ficha-conquista-icone { color: var(--nevoa-escura); background: rgba(232, 244, 248, 0.06); font-size: 0.8rem; }
+    .ficha-conquista-nome { color: var(--nevoa-escura); font-family: var(--sans); font-weight: 600; }
+}
+
+.ficha-ver-todas {
+    display: none;
+    width: 100%;
+    margin-top: 12px;
+    padding: 0.6em;
+    border: 1px dashed rgba(46, 230, 240, 0.3);
+    background: transparent;
+    color: var(--aqua);
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+/* ---------- Abas e conteudo das abas ---------- */
 
 .mp-abas {
     display: flex;
@@ -146,16 +379,16 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    padding: 0.55em 1em;
+    padding: 0.6em 1.1em;
     border: 1px solid var(--linha);
-    border-radius: 999px;
-    background: rgba(232, 244, 248, 0.03);
+    background: rgba(10, 20, 33, 0.7);
     color: var(--nevoa);
     font-family: var(--sans);
     font-size: 0.88rem;
     white-space: nowrap;
     cursor: pointer;
-    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+    transition: color 0.2s ease, background 0.2s ease;
 }
 
 .mp-aba:hover { color: var(--gelo); }
@@ -208,7 +441,6 @@
 .mp-barra-coluna {
     width: 100%;
     max-width: 38px;
-    border-radius: 6px 6px 2px 2px;
     background: linear-gradient(180deg, rgba(46, 230, 240, 0.55), rgba(46, 230, 240, 0.12));
     transition: background 0.2s ease;
 }
@@ -216,7 +448,7 @@
 .mp-barra-valor { font-size: 0.68rem; color: var(--nevoa-escura); }
 .mp-barra-mes { font-size: 0.72rem; text-transform: capitalize; }
 .mp-barra:hover .mp-barra-coluna { background: linear-gradient(180deg, rgba(46, 230, 240, 0.8), rgba(46, 230, 240, 0.2)); }
-.mp-barra.ativa .mp-barra-coluna { background: var(--aqua); }
+.mp-barra.ativa .mp-barra-coluna { background: linear-gradient(180deg, var(--ficha-xp), var(--aqua)); }
 .mp-barra.ativa .mp-barra-valor, .mp-barra.ativa .mp-barra-mes { color: var(--gelo); font-weight: 700; }
 
 .mp-tabela-caixa { max-height: 320px; overflow-y: auto; margin-top: 8px; }
@@ -227,36 +459,11 @@
     font-family: var(--sans);
     font-size: 0.85rem;
 
-    th { position: sticky; top: 0; background: var(--aco); text-align: left; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--nevoa-escura); padding: 6px 4px; }
+    th { position: sticky; top: 0; background: #0b1726; text-align: left; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--nevoa-escura); padding: 6px 4px; }
     td { padding: 7px 4px; border-top: 1px dashed var(--linha); color: var(--gelo); }
     td:last-child, th:last-child { text-align: right; }
     small { color: var(--nevoa); }
 }
-
-/* Progresso dos titulos: uma barra por escada. */
-.mp-progresso { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; }
-
-.mp-progresso li { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-
-.mp-progresso-topo {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-
-    strong { font-family: var(--sans); font-size: 0.85rem; color: var(--gelo); white-space: nowrap; }
-}
-
-.mp-progresso-barra {
-    height: 8px;
-    border-radius: 999px;
-    background: rgba(232, 244, 248, 0.07);
-    overflow: hidden;
-
-    span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, rgba(46, 230, 240, 0.5), var(--aqua)); }
-}
-
-.mp-progresso small { font-family: var(--sans); font-size: 0.78rem; color: var(--nevoa); }
 
 /* ---------- Login e avisos ---------- */
 
@@ -306,23 +513,38 @@
     text-decoration: none;
 }
 
+/* Clique no "Entrar com Discord": o retorno aparece na hora. */
+.button.mp-entrar.carregando { opacity: 0.85; cursor: progress; }
+
 .mp-erro { color: #fca5a5 !important; }
 .mp-sub { font-size: 0.85rem; color: var(--nevoa-escura) !important; }
 
 /* ---------- Telas menores ---------- */
 
-@media (max-width: 960px) {
-    .mp { grid-template-columns: minmax(0, 1fr); }
-    .mp-perfil { position: static; }
-    .mp-numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 1080px) {
+    .ficha-heroi { grid-template-columns: 170px minmax(0, 1fr); }
+    .ficha-stats { grid-column: 1 / -1; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 860px) {
+    .ficha-meio { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 680px) {
-    .mp-grade, .mp-progresso { grid-template-columns: minmax(0, 1fr); }
-    .mp-numero strong { font-size: 1.35rem; }
+    .ficha { --chanfro: 10px; }
+    .ficha-heroi { grid-template-columns: minmax(0, 1fr); padding: 18px 16px; text-align: center; }
+    .ficha-skin { min-height: 200px; }
+    .ficha-nome .dialogo-selos, .ficha-heroi .mp-titulos { justify-content: center; }
+    .ficha-nivel { margin: 0 auto; width: 100%; }
+    .ficha-nivel-topo { justify-content: center; flex-wrap: wrap; }
+    .ficha-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); text-align: left; }
+    .ficha-painel, .ficha .info-bloco { padding: 16px 14px; }
+    .ficha-conquistas-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ficha-conquistas:not(.todas) .ficha-conquista.bloqueada { display: none; }
+    .ficha-conquistas:not(.todas) .ficha-conquistas-cat:not(:has(.acesa)) { display: none; }
+    .ficha-ver-todas { display: block; }
+    .ficha-stat strong { font-size: 0.95rem; }
+    .mp-grade { grid-template-columns: minmax(0, 1fr); }
     .mp-grafico { height: 150px; gap: 3px; }
     .mp-barra-valor { display: none; }
 }
-
-/* Clique no "Entrar com Discord": o retorno aparece na hora (16/10/2026). */
-.button.mp-entrar.carregando { opacity: 0.85; cursor: progress; }
