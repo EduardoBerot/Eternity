@@ -80,8 +80,33 @@ function mpCartao(icone, titulo, corpo, { tipo = '' } = {}) {
         </div>`;
 }
 
+// O botao nasce apontando para a reserva da API (que redireciona) e, assim que
+// o link do Discord chega, aponta direto para ele (16/10/2026): o clique deixa
+// de esperar a API, e um Render acordando acorda enquanto a pessoa le a tela.
+// O link vence em 10 min (o state assinado); passados 9, volta a reserva.
+const MP_LINK_VALIDO_MS = 9 * 60 * 1000;
+let mpLinkDiscord = null;
+
 function mpBotaoEntrar(texto = 'Entrar com Discord') {
-    return `<a class="button mp-entrar" href="${URL_PAINEL_MEMBRO}/entrar"><i class="fa-brands fa-discord" aria-hidden="true"></i> ${texto}</a>`;
+    return `<a class="button mp-entrar" id="mp-entrar" href="${URL_PAINEL_MEMBRO}/entrar" onclick="mpClicouEntrar(this)"><i class="fa-brands fa-discord" aria-hidden="true"></i> <span>${texto}</span></a>`;
+}
+
+async function mpPrepararLink() {
+    try {
+        const resposta = await fetch(`${URL_PAINEL_MEMBRO}/link`);
+        const corpo = resposta.ok ? await resposta.json() : null;
+        if (!corpo?.url) return;
+        mpLinkDiscord = { url: corpo.url, em: Date.now() };
+        const botao = document.getElementById('mp-entrar');
+        if (botao) botao.href = corpo.url;
+    } catch { /* fica a reserva da API */ }
+}
+
+// Retorno imediato no clique: no celular o Discord (ou o app dele) demora a abrir.
+function mpClicouEntrar(botao) {
+    if (!mpLinkDiscord || Date.now() - mpLinkDiscord.em > MP_LINK_VALIDO_MS) botao.href = `${URL_PAINEL_MEMBRO}/entrar`;
+    botao.classList.add('carregando');
+    botao.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> <span>Abrindo o Discord...</span>';
 }
 
 function mpTelaLogin(erro) {
@@ -90,7 +115,16 @@ function mpTelaLogin(erro) {
         <p>Entre com a conta do Discord vinculada ao seu nick para ver a sua Liga, os seus depósitos no banco, os prêmios que recebeu e quanto falta para cada título.</p>
         ${mpBotaoEntrar()}
         <p class="mp-sub">Só pedimos o seu nome no Discord. Nada é publicado em seu nome.</p>`);
+    mpPrepararLink();
 }
+
+// Quem volta do Discord pelo botao Voltar do celular encontra o botao ainda
+// em "Abrindo o Discord...": a pagina restaurada do cache volta ao normal.
+window.addEventListener('pageshow', event => {
+    if (!event.persisted) return;
+    const botao = document.getElementById('mp-entrar');
+    if (botao?.classList.contains('carregando')) mpTelaLogin(null);
+});
 
 function mpTelaSemVinculo() {
     app.innerHTML = mpCartao('fa-brands fa-discord', 'Discord sem nick vinculado', `

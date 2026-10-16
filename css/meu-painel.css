@@ -323,3 +323,6 @@
     .mp-grafico { height: 150px; gap: 3px; }
     .mp-barra-valor { display: none; }
 }
+
+/* Clique no "Entrar com Discord": o retorno aparece na hora (16/10/2026). */
+.button.mp-entrar.carregando { opacity: 0.85; cursor: progress; }
