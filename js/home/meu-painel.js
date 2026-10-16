@@ -584,6 +584,7 @@ function mpAbaLiga(perfil) {
             <h3><i class="fa-solid fa-trophy"></i> ${escHtml(meses[mpEstado.mes]?.rotulo || 'Mês')}</h3>
             <div id="mp-liga-mes">${conteudoLigaMes(perfil, mpEstado.mes)}</div>
         </section>
+        ${mpAreasLiga(meses[mpEstado.mes])}
         <section class="info-bloco info-bloco-largo">
             <h3><i class="fa-solid fa-medal"></i> Eventos vencidos <small>desde agosto de 2026</small></h3>
             ${eventos.length
@@ -594,6 +595,42 @@ function mpAbaLiga(perfil) {
                 : '<p class="info-vazio">Nenhum evento vencido ainda.</p>'}
         </section>
     </div>`;
+}
+
+// Pontos do mes escolhido por area da Liga (16/10/2026): de onde veio cada
+// ponto. "Outros" so aparece quando tem ponto (o que nao e torneio, desafio
+// nem evento).
+const MP_AREAS_LIGA = [
+    ['torneios', 'Torneios', 'fa-trophy'],
+    ['desafios', 'Desafios', 'fa-bolt'],
+    ['eventos', 'Eventos', 'fa-flag-checkered'],
+    ['outros', 'Outros', 'fa-ellipsis'],
+];
+
+function mpAreasLiga(mes) {
+    const areas = mes?.areas;
+    if (!areas) {
+        return `<section class="info-bloco info-bloco-largo"><h3><i class="fa-solid fa-layer-group"></i> Pontos por área</h3>
+            <p class="info-vazio">Aparece na próxima atualização do site, em até 1 hora.</p></section>`;
+    }
+    const total = MP_AREAS_LIGA.reduce((soma, [chave]) => soma + (Number(areas[chave]) || 0), 0);
+    const linhas = MP_AREAS_LIGA
+        .filter(([chave]) => chave !== 'outros' || Number(areas.outros) > 0)
+        .map(([chave, rotulo, icone]) => {
+            const pontos = Number(areas[chave]) || 0;
+            const pct = total ? Math.round(pontos / total * 100) : 0;
+            return `<li class="mp-area">
+                <div class="mp-area-topo">
+                    <span><i class="fa-solid ${icone}" aria-hidden="true"></i> ${rotulo}</span>
+                    <span><b>${escHtml(pontos.toLocaleString('pt-BR'))}</b> pts · ${pct}%</span>
+                </div>
+                <div class="ficha-barra" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="${rotulo}"><span style="width:${pct}%"></span></div>
+            </li>`;
+        }).join('');
+    return `<section class="info-bloco info-bloco-largo">
+        <h3><i class="fa-solid fa-layer-group"></i> Pontos por área <small>${escHtml(mes.rotulo || '')} · ${escHtml(total.toLocaleString('pt-BR'))} pts</small></h3>
+        ${total ? `<ul class="mp-areas">${linhas}</ul>` : '<p class="info-vazio">Sem pontos neste mês.</p>'}
+    </section>`;
 }
 
 function mpTrocarMes(indice) {

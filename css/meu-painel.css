@@ -572,3 +572,26 @@
     .ficha-xp ul { grid-template-columns: minmax(0, 1fr); }
     .ficha-xp summary { margin: 0 auto; }
 }
+
+/* Pontos por area da Liga (16/10/2026), na aba Liga: uma barra por area. */
+.mp-areas { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 24px; }
+
+.mp-area { display: flex; flex-direction: column; gap: 6px; }
+
+.mp-area-topo {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-family: var(--sans);
+    font-size: 0.86rem;
+    color: var(--nevoa);
+
+    span { font-family: var(--sans); }
+    > span:first-child { color: var(--gelo); }
+    i { width: 1.2em; color: var(--aqua); }
+    b { color: var(--gelo); }
+}
+
+@media (max-width: 680px) {
+    .mp-areas { grid-template-columns: minmax(0, 1fr); }
+}
