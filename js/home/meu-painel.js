@@ -210,7 +210,8 @@ function mpDiasDeCla(membro) {
 // Nivel da conta (16/10/2026, Fundador: "faz um que some tudo"). O primeiro
 // nivel olhava so o tempo de cla; agora soma o XP de tudo o que a pessoa fez,
 // com os dados que o painel ja recebe. A tabela fica a mostra na ficha ("De onde
-// vem seu XP"): mudar um peso aqui muda o nivel de todo mundo.
+// vem seu XP"). Os pesos valem tambem no bot (minecraft/member-level.js no harley),
+// que publica o nivel oficial: mudou aqui, mude la.
 const MP_XP = {
     dia: 0.5,            // por dia de cla
     pontosLiga: 0.1,     // por ponto da Liga (1 a cada 10), todos os meses guardados
@@ -262,6 +263,28 @@ function mpXp(perfil, dias) {
     return { total: fontes.reduce((total, fonte) => total + fonte.xp, 0), fontes };
 }
 
+// O nivel que o bot publica no perfil (member-level.js), o mesmo do card do
+// /perfil. O calculo daqui (mpXp) so vale enquanto o perfil nao trouxer o nivel.
+const MP_FONTES_XP = {
+    tempo: ['fa-hourglass-half', 'Tempo de clã'],
+    conquistas: ['fa-award', 'Conquistas'],
+    liga: ['fa-trophy', 'Pontos na Liga'],
+    podios: ['fa-medal', 'Pódios'],
+    desafios: ['fa-bolt', 'Desafios completos'],
+    eventos: ['fa-flag-checkered', 'Eventos vencidos'],
+    banco: ['fa-coins', 'Banco do clã'],
+    ofensiva: ['fa-fire', 'Ofensiva ativa'],
+};
+
+function mpXpPublicado(perfil) {
+    const nivel = perfil.nivel;
+    if (!nivel || !Number.isFinite(Number(nivel.xp))) return null;
+    const fontes = (nivel.fontes || []).filter(fonte => MP_FONTES_XP[fonte.chave]).map(fonte => ({
+        icone: MP_FONTES_XP[fonte.chave][0], rotulo: MP_FONTES_XP[fonte.chave][1], detalhe: fonte.detalhe || '', xp: Number(fonte.xp) || 0,
+    }));
+    return { total: Number(nivel.xp), fontes };
+}
+
 function mpNivelXp(total) {
     const nivel = Math.floor(Math.sqrt(total / MP_XP_BASE));
     const base = MP_XP_BASE * nivel * nivel;
@@ -289,7 +312,7 @@ function mpDesenhar() {
     const online = jogo.visto === 'Online';
     const inativo = membro?.status && membro.status !== 'Ativo';
     const dias = mpDiasDeCla(membro);
-    const xp = mpXp(perfil, dias);
+    const xp = mpXpPublicado(perfil) || mpXp(perfil, dias);
     const nivel = mpNivelXp(xp.total);
     const tempo = tempoNoCla(membro?.data_entrada);
     const mes = perfil.ligaMeses?.[0] || perfil.liga;
