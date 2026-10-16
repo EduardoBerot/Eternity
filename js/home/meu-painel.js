@@ -207,18 +207,66 @@ function mpDiasDeCla(membro) {
     return Number.isNaN(inicio.getTime()) ? null : Math.max(0, Math.floor((Date.now() - inicio) / 86_400_000));
 }
 
-function mpNivel(dias) {
-    if (dias === null) return null;
-    const alcancados = MP_NIVEIS_DIAS.filter(limite => dias >= limite).length;
-    const anterior = alcancados ? MP_NIVEIS_DIAS[alcancados - 1] : 0;
-    const proximo = MP_NIVEIS_DIAS[alcancados] ?? null;
-    return {
-        nivel: alcancados,
-        titulo: alcancados ? TITULOS_TEMPO[alcancados - 1][0] : null,
-        proximoTitulo: proximo ? TITULOS_TEMPO[alcancados][0] : null,
-        faltam: proximo ? proximo - dias : 0,
-        pct: proximo ? Math.round((dias - anterior) / (proximo - anterior) * 100) : 100,
-    };
+// Nivel da conta (16/10/2026, Fundador: "faz um que some tudo"). O primeiro
+// nivel olhava so o tempo de cla; agora soma o XP de tudo o que a pessoa fez,
+// com os dados que o painel ja recebe. A tabela fica a mostra na ficha ("De onde
+// vem seu XP"): mudar um peso aqui muda o nivel de todo mundo.
+const MP_XP = {
+    dia: 0.5,            // por dia de cla
+    pontosLiga: 0.1,     // por ponto da Liga (1 a cada 10), todos os meses guardados
+    podio: { ouro: 30, prata: 20, bronze: 10 },
+    desafios: 15,        // por dia com todos os desafios completos
+    evento: 50,          // por evento vencido
+    banco: 10 / 100_000, // 10 a cada 100k depositados
+    conquista: 100,      // por titulo desbloqueado
+    ofensiva: 5,         // por dia da ofensiva ativa
+};
+// O nivel N pede 50 x N^2 de XP no total, sem teto.
+const MP_XP_BASE = 50;
+
+function mpContarConquistas(perfil, dias) {
+    const conquistados = mpConquistados(perfil);
+    let acesas = 0;
+    for (const familia of TITULOS_CATEGORIAS.flatMap(categoria => categoria.familias)) {
+        const indices = familia.titulos.map((t, i) => (conquistados.has(t.nome) ? i : -1)).filter(i => i >= 0);
+        acesas += familia.escada ? (indices.length ? Math.max(...indices) + 1 : 0) : indices.length;
+    }
+    if (dias !== null) acesas += MP_NIVEIS_DIAS.filter(limite => dias >= limite).length;
+    return acesas;
+}
+
+function mpXp(perfil, dias) {
+    const meses = Array.isArray(perfil.ligaMeses) && perfil.ligaMeses.length ? perfil.ligaMeses : (perfil.liga ? [perfil.liga] : []);
+    const soma = campo => meses.reduce((total, mes) => total + (Number(mes?.[campo]) || 0), 0);
+    const podios = meses.reduce((total, mes) => ({
+        ouro: total.ouro + (Number(mes?.podios?.ouro) || 0),
+        prata: total.prata + (Number(mes?.podios?.prata) || 0),
+        bronze: total.bronze + (Number(mes?.podios?.bronze) || 0),
+    }), { ouro: 0, prata: 0, bronze: 0 });
+    const conquistas = mpContarConquistas(perfil, dias);
+    const eventos = Number(perfil.eventos?.total) || 0;
+    const banco = Number(perfil.banco?.total) || 0;
+    const ofensiva = Number(perfil.liga?.dominio) || 0;
+    const pontos = soma('pontos');
+    const desafios = soma('desafios');
+    const fontes = [
+        { icone: 'fa-hourglass-half', rotulo: 'Tempo de clã', detalhe: `${(dias || 0).toLocaleString('pt-BR')} dias`, xp: (dias || 0) * MP_XP.dia },
+        { icone: 'fa-award', rotulo: 'Conquistas', detalhe: `${conquistas} títulos`, xp: conquistas * MP_XP.conquista },
+        { icone: 'fa-trophy', rotulo: 'Pontos na Liga', detalhe: `${pontos.toLocaleString('pt-BR')} pontos`, xp: pontos * MP_XP.pontosLiga },
+        { icone: 'fa-medal', rotulo: 'Pódios', detalhe: `${podios.ouro}·${podios.prata}·${podios.bronze}`, xp: podios.ouro * MP_XP.podio.ouro + podios.prata * MP_XP.podio.prata + podios.bronze * MP_XP.podio.bronze },
+        { icone: 'fa-bolt', rotulo: 'Desafios completos', detalhe: `${desafios} dias`, xp: desafios * MP_XP.desafios },
+        { icone: 'fa-flag-checkered', rotulo: 'Eventos vencidos', detalhe: `${eventos}`, xp: eventos * MP_XP.evento },
+        { icone: 'fa-coins', rotulo: 'Banco do clã', detalhe: mpDinheiro(banco), xp: banco * MP_XP.banco },
+        { icone: 'fa-fire', rotulo: 'Ofensiva ativa', detalhe: `${ofensiva} dias`, xp: ofensiva * MP_XP.ofensiva },
+    ].map(fonte => ({ ...fonte, xp: Math.round(fonte.xp) }));
+    return { total: fontes.reduce((total, fonte) => total + fonte.xp, 0), fontes };
+}
+
+function mpNivelXp(total) {
+    const nivel = Math.floor(Math.sqrt(total / MP_XP_BASE));
+    const base = MP_XP_BASE * nivel * nivel;
+    const proximo = MP_XP_BASE * (nivel + 1) * (nivel + 1);
+    return { nivel, faltam: proximo - total, pct: Math.round((total - base) / (proximo - base) * 100) };
 }
 
 // Nomes conquistados (masculino e feminino contam igual), com o que cada um supera.
@@ -241,7 +289,9 @@ function mpDesenhar() {
     const online = jogo.visto === 'Online';
     const inativo = membro?.status && membro.status !== 'Ativo';
     const dias = mpDiasDeCla(membro);
-    const nivel = mpNivel(dias);
+    const xp = mpXp(perfil, dias);
+    const nivel = mpNivelXp(xp.total);
+    const tempo = tempoNoCla(membro?.data_entrada);
     const mes = perfil.ligaMeses?.[0] || perfil.liga;
     const premios = (perfil.privado?.premios || []).reduce((soma, item) => soma + (Number(item.valor) || 0), 0);
     const nickSkin = String(nick).replace(/^\*+/, '');
@@ -264,16 +314,22 @@ function mpDesenhar() {
                             ${jogo.cla ? `<span class="selo selo-tag">${escHtml(jogo.cla)}</span>` : ''}
                             ${inativo ? '<span class="selo selo-inativo">Inativo</span>' : ''}
                             ${jogo.visto ? `<span class="selo ${online ? 'selo-online' : ''}"><span class="ponto"></span> ${online ? 'Online' : `Visto: ${escHtml(jogo.visto)}`}</span>` : ''}
+                            ${tempo ? `<span class="selo"><i class="fa-regular fa-clock" aria-hidden="true"></i> ${escHtml(tempo)} de clã</span>` : ''}
                         </div>
                     </div>
-                    ${nivel ? `<div class="ficha-nivel">
+                    <div class="ficha-nivel">
                         <div class="ficha-nivel-topo">
                             <span class="ficha-nivel-num">NV ${escHtml(nivel.nivel)}</span>
-                            <span>${nivel.titulo ? mpNomeTitulo(nivel.titulo) : '<b>Recruta</b>'} · ${escHtml(tempoNoCla(membro.data_entrada) || '')} de clã</span>
+                            <span><b>${escHtml(xp.total.toLocaleString('pt-BR'))} XP</b></span>
                         </div>
-                        <div class="ficha-barra ficha-barra-ouro" role="progressbar" aria-valuenow="${nivel.pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Nível de clã"><span style="width:${nivel.pct}%"></span></div>
-                        <small>${nivel.proximoTitulo ? `Faltam ${escHtml(nivel.faltam.toLocaleString('pt-BR'))} dias para ${escHtml(nivel.proximoTitulo)}` : 'Nível máximo de tempo de clã'}</small>
-                    </div>` : ''}
+                        <div class="ficha-barra ficha-barra-ouro" role="progressbar" aria-valuenow="${nivel.pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Nível da conta"><span style="width:${nivel.pct}%"></span></div>
+                        <small>Faltam ${escHtml(nivel.faltam.toLocaleString('pt-BR'))} XP para o NV ${escHtml(nivel.nivel + 1)}</small>
+                        <details class="ficha-xp">
+                            <summary>De onde vem seu XP</summary>
+                            <ul>${xp.fontes.map(fonte => `<li><i class="fa-solid ${fonte.icone}" aria-hidden="true"></i><span>${fonte.rotulo} <small>${escHtml(fonte.detalhe)}</small></span><b>${escHtml(fonte.xp.toLocaleString('pt-BR'))}</b></li>`).join('')}</ul>
+                            <p>Dia de clã 0,5 · 10 pontos da Liga 1 · pódio 30/20/10 · dia de desafios 15 · evento 50 · ¢100k no banco 10 · título 100 · dia de ofensiva 5. O NV N pede 50 × N² de XP.</p>
+                        </details>
+                    </div>
                     ${mpTitulosEmUso(perfil.titulos)}
                 </div>
                 <div class="ficha-stats">

@@ -548,3 +548,27 @@
     .mp-grafico { height: 150px; gap: 3px; }
     .mp-barra-valor { display: none; }
 }
+
+/* Nivel da conta por XP (16/10/2026): o detalhe de cada fonte abre embaixo da barra. */
+.ficha-xp {
+    margin-top: 4px;
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    color: var(--nevoa);
+
+    summary { cursor: pointer; color: var(--aqua); width: fit-content; }
+    summary, li span, li small, p { font-family: var(--sans); }
+    ul { margin: 8px 0 6px; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 18px; }
+    li { display: flex; align-items: center; gap: 8px; padding: 3px 0; border-bottom: 1px dashed var(--linha); }
+    li i { width: 1.1em; color: var(--aqua); }
+    li span { flex: 1; min-width: 0; }
+    li small { color: var(--nevoa-escura); }
+    li b { color: var(--ficha-ouro); }
+    p { margin: 4px 0 0; font-size: 0.72rem; color: var(--nevoa-escura); line-height: 1.5; }
+}
+
+@media (max-width: 680px) {
+    .ficha-xp { text-align: left; }
+    .ficha-xp ul { grid-template-columns: minmax(0, 1fr); }
+    .ficha-xp summary { margin: 0 auto; }
+}
