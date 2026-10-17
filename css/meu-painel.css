@@ -595,3 +595,6 @@
 @media (max-width: 680px) {
     .mp-areas { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Contador da aba Conquistas (10/36). */
+.mp-aba-conta { font-size: 0.75em; opacity: 0.8; }

@@ -366,9 +366,8 @@ function mpDesenhar() {
                 ${mpAtributos(perfil)}
                 ${mpMissoes(perfil)}
             </div>
-            ${mpConquistasGrade(perfil, dias)}
             <div class="mp-abas" role="tablist" aria-label="Seções do painel">
-                ${[['liga', 'fa-chart-column', 'Liga'], ['banco', 'fa-gem', 'Tesouro'], ['conta', 'fa-id-card', 'Conta'], ...(mpEstado.dados.staff ? [['admin', 'fa-user-shield', 'Administração']] : [])]
+                ${[['liga', 'fa-chart-column', 'Liga'], ['banco', 'fa-gem', 'Tesouro'], ['conquistas', 'fa-award', `Conquistas <small class="mp-aba-conta">${mpContarConquistas(perfil, dias)}/${MP_TOTAL_CONQUISTAS}</small>`], ['conta', 'fa-id-card', 'Conta'], ...(mpEstado.dados.staff ? [['admin', 'fa-user-shield', 'Administração']] : [])]
                     .map(([id, icone, rotulo]) => `<button type="button" role="tab" class="mp-aba ${mpEstado.aba === id ? 'ativa' : ''}" aria-selected="${mpEstado.aba === id}" onclick="mpTrocarAba('${id}')"><i class="fa-solid ${icone}" aria-hidden="true"></i> ${rotulo}</button>`).join('')}
             </div>
             <div id="mp-aba" role="tabpanel">${mpConteudoAba()}</div>
@@ -392,8 +391,14 @@ function mpConteudoAba() {
     if (mpEstado.aba === 'admin' && mpEstado.dados.staff) return mpAbaAdmin(membro);
     if (mpEstado.aba === 'banco') return mpAbaBanco(perfil);
     if (mpEstado.aba === 'conta') return mpAbaConta(perfil, membro);
+    // A grade de conquistas e grande: fica numa aba (16/10/2026), para nao
+    // empurrar a Liga e o Tesouro para o fim da pagina.
+    if (mpEstado.aba === 'conquistas') return mpConquistasGrade(perfil, mpDiasDeCla(membro));
     return mpAbaLiga(perfil);
 }
+
+// Todas as cartas da grade: os titulos do catalogo mais a escada de tempo.
+const MP_TOTAL_CONQUISTAS = TITULOS_CATEGORIAS.reduce((soma, categoria) => soma + categoria.familias.reduce((s, familia) => s + familia.titulos.length, 0), 0) + TITULOS_TEMPO.length;
 
 // Skin 3D grande no topo da ficha (skinview3d, o mesmo da janela de Membros).
 // Sem WebGL ou sem a biblioteca, fica a imagem 2D.
