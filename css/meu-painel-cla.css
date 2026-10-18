@@ -1,0 +1,290 @@
+/* Gamificacao do painel do membro (18/10/2026, js/home/meu-painel-cla.js):
+   posicao no topo da ficha, abas Top niveis e Minha Liga. Mesma moldura
+   chanfrada da ficha (meu-painel.css). */
+
+/* ---------- Topo da ficha ---------- */
+
+.ficha-heroi-cla { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ficha-heroi-cla:empty { display: none; }
+
+.ficha-rank {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0.35em 0.9em;
+    border: 1px solid rgba(245, 197, 66, 0.45);
+    background: rgba(245, 197, 66, 0.1);
+    color: var(--ficha-ouro);
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+
+.ficha-rank:hover { background: rgba(245, 197, 66, 0.2); }
+
+.ficha-semana { font-family: var(--sans); font-size: 0.8rem; font-weight: 600; color: var(--ficha-xp); }
+
+/* ---------- Controles comuns ---------- */
+
+.mp-chip {
+    padding: 0.4em 0.95em;
+    border: 1px solid var(--linha);
+    border-radius: 999px;
+    background: rgba(232, 244, 248, 0.04);
+    color: var(--nevoa);
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.mp-chip:hover { color: var(--gelo); border-color: rgba(46, 230, 240, 0.35); }
+.mp-chip.ativo { color: var(--noite); background: var(--aqua); border-color: var(--aqua); font-weight: 700; }
+
+.mp-link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--aqua);
+    font: inherit;
+    font-family: var(--sans);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.niv-grupo { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ---------- Top niveis ---------- */
+
+.niv { display: flex; flex-direction: column; gap: 14px; }
+
+.niv-eu {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 18px;
+    padding: 16px 20px;
+    border: 1px solid rgba(245, 197, 66, 0.35);
+    background:
+        linear-gradient(100deg, rgba(245, 197, 66, 0.12), transparent 60%),
+        rgba(10, 20, 33, 0.82);
+    clip-path: polygon(var(--chanfro) 0, 100% 0, 100% calc(100% - var(--chanfro)), calc(100% - var(--chanfro)) 100%, 0 100%, 0 var(--chanfro));
+}
+
+.niv-eu-pos {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-right: 18px;
+    border-right: 1px solid var(--linha);
+
+    span, small { font-family: var(--sans); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--nevoa-escura); }
+    strong { font-size: 2rem; line-height: 1.1; color: var(--ficha-ouro); }
+}
+
+.niv-eu-dados {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+
+    b { font-size: 1.15rem; color: var(--gelo); }
+    small { font-family: var(--sans); font-size: 0.82rem; color: var(--nevoa); }
+    .niv-nv { align-self: flex-start; }
+}
+
+.niv-eu-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 260px;
+    padding: 10px 14px;
+    background: rgba(4, 8, 15, 0.45);
+    border: 1px solid var(--linha);
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    color: var(--nevoa);
+
+    i { color: var(--ficha-xp); }
+    b { color: var(--gelo); }
+}
+
+.niv-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 18px;
+
+    .niv-ir { margin-left: auto; }
+}
+
+.niv-nv {
+    display: inline-block;
+    padding: 0.15em 0.6em;
+    font-family: "Conthrax", var(--sans);
+    font-size: 0.72rem;
+    color: #1a1204;
+    background: linear-gradient(135deg, var(--ficha-ouro), #ffe9a6);
+    clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+    white-space: nowrap;
+}
+
+.niv-cabeca { image-rendering: pixelated; flex: none; }
+
+/* Podio: 2o, 1o, 3o lado a lado, o 1o mais alto. */
+.niv-podio {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: end;
+    gap: 12px;
+}
+
+.niv-podio-carta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 16px 10px 14px;
+    text-decoration: none;
+    border: 1px solid var(--linha);
+    background: rgba(10, 20, 33, 0.82);
+    clip-path: polygon(var(--chanfro) 0, 100% 0, 100% calc(100% - var(--chanfro)), calc(100% - var(--chanfro)) 100%, 0 100%, 0 var(--chanfro));
+    transition: transform 0.15s ease, border-color 0.15s ease;
+
+    b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--gelo); font-size: 0.95rem; }
+    small { font-family: var(--sans); color: var(--nevoa); font-size: 0.8rem; }
+}
+
+.niv-podio-carta:hover { transform: translateY(-3px); border-color: rgba(46, 230, 240, 0.35); }
+.niv-podio-lugar { font-size: 1.1rem; font-weight: 700; }
+.niv-podio-carta.lugar-1 { padding-top: 28px; border-color: rgba(245, 197, 66, 0.55); background: linear-gradient(180deg, rgba(245, 197, 66, 0.16), rgba(10, 20, 33, 0.82) 70%); }
+.niv-podio-carta.lugar-1 .niv-podio-lugar { color: var(--ficha-ouro); }
+.niv-podio-carta.lugar-2 { border-color: rgba(200, 214, 229, 0.45); background: linear-gradient(180deg, rgba(200, 214, 229, 0.12), rgba(10, 20, 33, 0.82) 70%); }
+.niv-podio-carta.lugar-2 .niv-podio-lugar { color: #c8d6e5; }
+.niv-podio-carta.lugar-3 { border-color: rgba(205, 127, 50, 0.5); background: linear-gradient(180deg, rgba(205, 127, 50, 0.14), rgba(10, 20, 33, 0.82) 70%); }
+.niv-podio-carta.lugar-3 .niv-podio-lugar { color: #e09a5a; }
+.niv-podio-carta.eu { box-shadow: inset 0 0 0 2px var(--ficha-xp); }
+
+.niv-lista { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
+
+.niv-linha a {
+    display: grid;
+    grid-template-columns: 3.2em 32px minmax(0, 1fr) auto auto 7.5em;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px;
+    text-decoration: none;
+    background: rgba(10, 20, 33, 0.7);
+    border: 1px solid transparent;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.niv-linha a:hover { border-color: rgba(46, 230, 240, 0.3); background: rgba(14, 28, 44, 0.85); }
+.niv-linha.eu a { border-color: rgba(92, 240, 138, 0.5); background: linear-gradient(90deg, rgba(92, 240, 138, 0.12), rgba(10, 20, 33, 0.7) 50%); }
+.niv-linha.piscar a, .niv-podio-carta.piscar { animation: niv-piscar 0.8s ease 2; }
+
+@keyframes niv-piscar { 50% { background: rgba(92, 240, 138, 0.28); } }
+
+.niv-pos { font-weight: 700; color: var(--nevoa); text-align: right; }
+
+.niv-nome {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+
+    b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--gelo); font-size: 0.92rem; }
+    small { font-family: var(--sans); font-size: 0.74rem; color: var(--nevoa-escura); }
+}
+
+.niv-semana { font-family: var(--sans); font-size: 0.8rem; color: var(--ficha-xp); opacity: 0.75; }
+.niv-semana.destaque { opacity: 1; font-weight: 700; }
+.niv-xp { font-family: var(--sans); font-weight: 700; color: var(--gelo); text-align: right; white-space: nowrap; }
+.niv-xp small { font-weight: 400; color: var(--nevoa-escura); }
+
+/* ---------- Minha Liga ---------- */
+
+.lg { display: flex; flex-direction: column; gap: 14px; }
+
+.lg-cabeca {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    h3 { display: flex; align-items: center; gap: 9px; margin: 0; font-size: 0.95rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gelo); }
+    h3 i { color: var(--aqua); }
+    h3 small { font-family: var(--sans); font-size: 0.75rem; letter-spacing: 0; text-transform: none; color: var(--ficha-xp); }
+}
+
+.lg-numeros { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+
+.lg-semanas {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    height: 190px;
+}
+
+.lg-semana {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+}
+
+.lg-semana-valor { font-family: var(--sans); font-size: 0.74rem; color: var(--nevoa); min-height: 1em; }
+
+.lg-semana-pilha {
+    flex: 1;
+    width: min(54px, 100%);
+    display: flex;
+    flex-direction: column-reverse;
+    background: rgba(4, 8, 15, 0.45);
+
+    span { display: block; width: 100%; transition: height 0.25s ease; }
+}
+
+.lg-semana-rotulo { font-family: var(--sans); font-size: 0.74rem; color: var(--nevoa-escura); white-space: nowrap; }
+
+.lg-origens { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+
+.lg-origem {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    background: none;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+
+    .mp-area-topo span { font-family: var(--sans); }
+}
+
+.lg-origem:hover { border-color: rgba(46, 230, 240, 0.25); }
+.lg-origem.ativa { border-color: rgba(46, 230, 240, 0.5); background: rgba(46, 230, 240, 0.06); }
+.lg-origem.apagada { opacity: 0.45; }
+
+/* ---------- Celular ---------- */
+
+@media (max-width: 760px) {
+    .niv-eu { grid-template-columns: auto minmax(0, 1fr); }
+    .niv-eu-meta { grid-column: 1 / -1; max-width: none; }
+    .niv-linha a { grid-template-columns: 2.4em 28px minmax(0, 1fr) auto; gap: 8px; padding: 8px 10px; }
+    .niv-linha .niv-semana, .niv-linha .niv-nv { display: none; }
+    .niv-linha .niv-cabeca { width: 28px; height: 28px; }
+    .niv-podio { gap: 6px; }
+    .niv-podio-carta { padding: 12px 4px 10px; }
+    .niv-podio-carta b { font-size: 0.8rem; }
+    .niv-filtros .niv-ir { margin-left: 0; }
+    .lg-numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .lg-semanas { height: 160px; gap: 6px; }
+}

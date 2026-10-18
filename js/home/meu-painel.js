@@ -18,7 +18,8 @@ const MP_ERROS = {
     desligado: 'O login com Discord ainda não está ligado.',
 };
 
-const mpEstado = { dados: null, meta: null, copa: null, aba: 'liga', mes: 0 };
+// cla: ranking de nivel e Liga pessoal (meu-painel-cla.js), pedido depois da ficha.
+const mpEstado = { dados: null, meta: null, copa: null, cla: null, aba: 'liga', mes: 0 };
 
 function mpLerSessao() {
     try { return localStorage.getItem(MP_CHAVE_SESSAO); } catch { return null; }
@@ -174,8 +175,10 @@ async function renderMeuPainel() {
     mpEstado.meta = meta?.publico ? meta : null;
     mpEstado.copa = copa && copa.status ? copa : null;
     mpEstado.mes = 0;
+    mpEstado.cla = null;
     if (mpPedidoAdmin() && corpo.staff) return mpAbrirAdmin();
     mpDesenhar();
+    mpCarregarCla();
 }
 
 // ---------- Ficha de personagem (16/10/2026) ----------
@@ -353,6 +356,7 @@ function mpDesenhar() {
                             <p>Dia de clã 0,5 · 10 pontos da Liga 1 · pódio 30/20/10 · dia de desafios 15 · evento 50 · ¢100k no banco 10 · título 100 · dia de ofensiva 5. O NV N pede 50 × N² de XP.</p>
                         </details>
                     </div>
+                    <div class="ficha-heroi-cla" id="mp-heroi-cla"></div>
                     ${mpTitulosEmUso(perfil.titulos)}
                 </div>
                 <div class="ficha-stats">
@@ -367,12 +371,13 @@ function mpDesenhar() {
                 ${mpMissoes(perfil)}
             </div>
             <div class="mp-abas" role="tablist" aria-label="Seções do painel">
-                ${[['liga', 'fa-chart-column', 'Liga'], ['banco', 'fa-gem', 'Tesouro'], ['conquistas', 'fa-award', `Conquistas <small class="mp-aba-conta">${mpContarConquistas(perfil, dias)}/${MP_TOTAL_CONQUISTAS}</small>`], ['conta', 'fa-id-card', 'Conta'], ...(mpEstado.dados.staff ? [['admin', 'fa-user-shield', 'Administração']] : [])]
+                ${[['liga', 'fa-chart-column', 'Minha Liga'], ['niveis', 'fa-ranking-star', 'Top níveis'], ['banco', 'fa-gem', 'Tesouro'], ['conquistas', 'fa-award', `Conquistas <small class="mp-aba-conta">${mpContarConquistas(perfil, dias)}/${MP_TOTAL_CONQUISTAS}</small>`], ['conta', 'fa-id-card', 'Conta'], ...(mpEstado.dados.staff ? [['admin', 'fa-user-shield', 'Administração']] : [])]
                     .map(([id, icone, rotulo]) => `<button type="button" role="tab" class="mp-aba ${mpEstado.aba === id ? 'ativa' : ''}" aria-selected="${mpEstado.aba === id}" onclick="mpTrocarAba('${id}')"><i class="fa-solid ${icone}" aria-hidden="true"></i> ${rotulo}</button>`).join('')}
             </div>
             <div id="mp-aba" role="tabpanel">${mpConteudoAba()}</div>
         </div>`;
     mpSkin3d(app.querySelector('.ficha-skin'), nickSkin);
+    mpAtualizarHeroiCla();
 }
 
 function mpTrocarAba(aba) {
@@ -394,7 +399,8 @@ function mpConteudoAba() {
     // A grade de conquistas e grande: fica numa aba (16/10/2026), para nao
     // empurrar a Liga e o Tesouro para o fim da pagina.
     if (mpEstado.aba === 'conquistas') return mpConquistasGrade(perfil, mpDiasDeCla(membro));
-    return mpAbaLiga(perfil);
+    if (mpEstado.aba === 'niveis') return mpAbaNiveis();
+    return mpAbaMinhaLiga(perfil);
 }
 
 // Todas as cartas da grade: os titulos do catalogo mais a escada de tempo.
