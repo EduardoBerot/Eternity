@@ -456,7 +456,8 @@ body.modo-jogo .page-meu-painel { padding: 0; }
     gap: 14px 30px;
 
     small { font-family: var(--sans); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ficha-ouro); }
-    h1 { margin: 4px 0 0; font-size: clamp(1.4rem, 3.6vw, 2.2rem); }
+    /* A folga de cima ficou no lugar do rotulo da temporada (tirado em 18/10/2026). */
+    h1 { margin: 22px 0 0; font-size: clamp(1.4rem, 3.6vw, 2.2rem); }
     h1 span { color: var(--aqua); }
 }
 

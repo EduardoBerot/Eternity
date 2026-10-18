@@ -304,7 +304,6 @@ function mpTelaInicio() {
     const temporada = mpDiasParaFimDoMes();
     return `<section class="inicio-boas">
             <div>
-                <small>Temporada de ${MP_MESES_LONGOS[Number(temporada.mes.slice(5)) - 1]}</small>
                 <h1>Bem-vindo de volta, <span>${escHtml(perfil.nick)}</span></h1>
             </div>
             <div class="inicio-temporada" title="A Liga fecha no último dia do mês">
