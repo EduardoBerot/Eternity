@@ -44,6 +44,8 @@ async function mpCarregarAcoes() {
             const status = antes.get(acao.id);
             if (status && ['pendente', 'executando'].includes(status) && !['pendente', 'executando'].includes(acao.status)) {
                 if (acao.tipo === 'titulo' && acao.status === 'feito') mpEstado.tituloAplicado = acao.dados?.titulo || null;
+                // Conferir da jornada: a etapa pode ter sido cumprida agora.
+                if (acao.tipo === 'conferir') mpCarregarJornada();
                 mpAvisoAcao(acao);
             }
         }
@@ -68,9 +70,11 @@ async function mpPedirAcao(tipo, dados, botao) {
             mpAviso(corpo.message || 'Não foi possível enviar agora.', 'erro');
         } else {
             mpEstado.acoes = [corpo, ...(mpEstado.acoes || [])];
-            mpAviso(tipo === 'titulo'
-                ? `Pedido enviado: a Eternity vai conferir e aplicar <b>${escHtml(dados.titulo)}</b> em instantes.`
-                : 'Pedido enviado: a Eternity vai até a farm liberar seu trust. Leva um ou dois minutos.', 'ok');
+            mpAviso({
+                titulo: `Pedido enviado: a Eternity vai conferir e aplicar <b>${escHtml(dados.titulo)}</b> em instantes.`,
+                trust: 'Pedido enviado: a Eternity vai até a farm liberar seu trust. Leva um ou dois minutos.',
+                conferir: 'Pedido enviado: a Eternity vai conferir o seu perfil em instantes. Fique online no servidor.',
+            }[tipo], 'ok');
             clearTimeout(mpAcoesTimer);
             mpAcoesTimer = setTimeout(mpCarregarAcoes, 5000);
         }
@@ -86,6 +90,12 @@ function mpPedirTitulo(titulo, botao) {
 
 function mpPedirTrust(farm, botao) {
     return mpPedirAcao('trust', { farm }, botao);
+}
+
+function mpNomeAcao(acao) {
+    if (acao.tipo === 'titulo') return `Título ${acao.dados?.titulo || ''}`;
+    if (acao.tipo === 'conferir') return 'Jornada: conferir Herbalismo';
+    return `Trust na ${MP_FARMS.find(f => f.farm === acao.dados?.farm)?.nome || acao.dados?.farm || 'farm'}`;
 }
 
 // ---------- Avisos ----------
@@ -111,7 +121,7 @@ function mpAvisoAcao(acao) {
     const linhas = String(acao.resposta || '').split('\n').filter(Boolean);
     const final = linhas.at(-1) || MP_STATUS_ACAO[acao.status]?.[1] || '';
     const tipo = acao.status === 'feito' ? 'ok' : acao.status === 'negado' ? 'aviso' : 'erro';
-    const titulo = acao.tipo === 'titulo' ? `Título ${escHtml(acao.dados?.titulo || '')}` : `Trust na ${escHtml(MP_FARMS.find(f => f.farm === acao.dados?.farm)?.nome || acao.dados?.farm || 'farm')}`;
+    const titulo = escHtml(mpNomeAcao(acao));
     mpAviso(`<b>${titulo}:</b> ${escHtml(final)}`, tipo, 12000);
 }
 
@@ -123,6 +133,7 @@ function mpAtualizarAcoesNaTela() {
     if (lista) lista.outerHTML = mpCartaoPedidos();
     const farms = document.getElementById('mp-farms');
     if (farms) farms.outerHTML = mpCartaoFarms();
+    if (mpEstado.tela === 'jornada') mpRedesenharTela();
     if (mpEstado.tela === 'perfil' && mpEstado.aba === 'titulos') {
         const alvo = document.getElementById('mp-aba');
         if (alvo) alvo.innerHTML = mpConteudoAba();
@@ -156,7 +167,7 @@ function mpCartaoPedidos() {
         <ul class="pedidos-lista">
             ${acoes.map(acao => {
                 const [icone, rotulo] = MP_STATUS_ACAO[acao.status] || MP_STATUS_ACAO.erro;
-                const nome = acao.tipo === 'titulo' ? `Título ${acao.dados?.titulo || ''}` : `Trust: ${MP_FARMS.find(f => f.farm === acao.dados?.farm)?.nome || acao.dados?.farm || ''}`;
+                const nome = mpNomeAcao(acao);
                 const final = String(acao.resposta || '').split('\n').filter(Boolean).at(-1);
                 return `<li class="pedido-${acao.status}">
                     <i class="fa-solid ${icone}" aria-hidden="true"></i>

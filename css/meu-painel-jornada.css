@@ -1,0 +1,315 @@
+/* Jornada dos 7 Dias (18/10/2026, js/home/meu-painel-jornada.js): cartao de
+   chamada no Inicio e a tela com as sete missoes. Mesma moldura chanfrada da
+   ficha (meu-painel.css); feita em verde XP, liberada em aqua, trancada apagada. */
+
+/* ---------- Chamada no Inicio ---------- */
+
+.jornada-chamada {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    border-color: rgba(245, 197, 66, 0.35);
+    background:
+        linear-gradient(100deg, rgba(245, 197, 66, 0.12), transparent 60%),
+        rgba(10, 20, 33, 0.85);
+    cursor: pointer;
+}
+
+.jornada-chamada:hover { border-color: rgba(245, 197, 66, 0.6); }
+
+.jornada-chamada-selo {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    background: rgba(245, 197, 66, 0.14);
+    color: var(--ficha-ouro);
+    font-size: 1.4rem;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+
+.jornada-chamada-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+
+    h3 { display: flex; align-items: baseline; gap: 10px; margin: 0; font-size: 1rem; color: var(--gelo); }
+    h3 small { font-family: var(--sans); font-size: 0.8rem; color: var(--ficha-ouro); }
+    p { margin: 0; font-family: var(--sans); font-size: 0.88rem; color: var(--nevoa); }
+    p b { color: var(--gelo); }
+}
+
+.jornada-trilha {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    max-width: 320px;
+
+    span { height: 6px; background: rgba(232, 244, 248, 0.1); }
+    span.aberta { background: var(--aqua); }
+    span.feita { background: var(--ficha-xp); box-shadow: 0 0 8px rgba(92, 240, 138, 0.4); }
+}
+
+/* ---------- Tela ---------- */
+
+.jornada-cabeca {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.jornada-progresso {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 520px;
+
+    .ficha-barra { flex: 1; }
+    b { font-family: var(--sans); color: var(--ficha-ouro); }
+}
+
+.jornada-premio {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 760px;
+    padding: 10px 14px;
+    border: 1px solid rgba(245, 197, 66, 0.3);
+    background: rgba(245, 197, 66, 0.07);
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    color: var(--nevoa);
+
+    > i { margin-top: 2px; color: var(--ficha-ouro); }
+    b { color: var(--gelo); }
+}
+
+.jornada-premio.feito { border-color: rgba(92, 240, 138, 0.4); background: rgba(92, 240, 138, 0.08); }
+.jornada-premio.feito > i { color: var(--ficha-xp); }
+
+.jornada-missoes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+    gap: 16px;
+    align-items: start;
+}
+
+.jornada-missao { display: flex; flex-direction: column; gap: 12px; }
+.jornada-missao.feita { border-color: rgba(92, 240, 138, 0.35); }
+.jornada-missao.aberta { border-color: rgba(46, 230, 240, 0.45); box-shadow: 0 0 0 1px rgba(46, 230, 240, 0.15), inset 0 1px 0 rgba(232, 244, 248, 0.05); }
+.jornada-missao.trancada { opacity: 0.55; }
+
+.jornada-missao-topo {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+
+    h3 { margin: 0; font-size: 0.98rem; color: var(--gelo); }
+}
+
+.jornada-dia {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    width: 46px;
+    padding: 6px 0;
+    background: rgba(46, 230, 240, 0.08);
+    color: var(--aqua);
+
+    small { font-family: var(--sans); font-size: 0.68rem; color: var(--nevoa); }
+}
+
+.feita .jornada-dia { background: rgba(92, 240, 138, 0.1); color: var(--ficha-xp); }
+
+.jornada-selo {
+    padding: 0.25em 0.7em;
+    border: 1px solid var(--linha);
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    color: var(--nevoa);
+    white-space: nowrap;
+}
+
+.jornada-selo.aberta { border-color: var(--aqua); color: var(--aqua); }
+.jornada-selo.feita { border-color: rgba(92, 240, 138, 0.5); color: var(--ficha-xp); }
+
+.jornada-etapas {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+        display: grid;
+        grid-template-columns: 20px minmax(0, 1fr);
+        gap: 10px;
+        font-family: var(--sans);
+        font-size: 0.88rem;
+        color: var(--gelo);
+    }
+
+    li > i { margin-top: 2px; color: var(--nevoa); text-align: center; }
+    li.feita { color: var(--nevoa); }
+    li.feita > i { color: var(--ficha-xp); }
+    small { display: block; margin-top: 2px; font-size: 0.76rem; color: var(--nevoa-escura); }
+}
+
+.jornada-barra {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    small { font-family: var(--sans); font-size: 0.76rem; color: var(--nevoa); }
+}
+
+.jornada-botoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.jornada-escolha { margin: 0; }
+.jornada-escolha > i { color: var(--ficha-xp); }
+
+.jornada-conferir {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+
+    .mp-nota { margin: 0; }
+    .mp-nota > i { color: var(--ficha-ouro); }
+}
+
+.jornada-gancho {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(232, 244, 248, 0.12);
+
+    h4 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gelo); }
+    h4 > i { color: var(--ficha-ouro); }
+    p { margin: 0; font-family: var(--sans); font-size: 0.85rem; color: var(--nevoa); }
+    p b { color: var(--gelo); }
+    .mp-link { align-self: flex-start; font-size: 0.82rem; }
+}
+
+.jornada-titulos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; background: rgba(4, 8, 15, 0.35); }
+    small { font-family: var(--sans); font-size: 0.72rem; color: var(--nevoa); }
+    .ficha-barra { height: 6px; }
+}
+
+.jornada-degraus {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    color: var(--nevoa);
+
+    i { color: var(--nevoa-escura); }
+    .feito { color: var(--gelo); }
+    .feito i { color: var(--ficha-xp); }
+}
+
+.jornada-jeitos {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li { display: grid; grid-template-columns: 22px minmax(0, 1fr); align-items: center; gap: 10px; padding: 8px 10px; background: rgba(4, 8, 15, 0.35); }
+    li > i { color: var(--ficha-ouro); text-align: center; }
+    span { display: flex; flex-direction: column; gap: 2px; }
+    small { font-family: var(--sans); font-size: 0.76rem; color: var(--nevoa); }
+}
+
+.jornada-recompensas {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--sans);
+    font-size: 0.86rem;
+    color: var(--gelo);
+
+    i { width: 20px; color: var(--ficha-ouro); text-align: center; }
+}
+
+.jornada-farms li { grid-template-columns: 22px minmax(0, 1fr); }
+
+.jornada-linha {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 4px 0 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 6px 0 6px 20px;
+        font-family: var(--sans);
+        font-size: 0.82rem;
+        color: var(--nevoa);
+    }
+
+    li::before {
+        content: "";
+        position: absolute;
+        left: 3px;
+        top: 11px;
+        width: 9px;
+        height: 9px;
+        border: 2px solid var(--nevoa-escura);
+        border-radius: 50%;
+    }
+
+    li:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        left: 8px;
+        top: 22px;
+        bottom: -6px;
+        width: 1px;
+        background: rgba(232, 244, 248, 0.15);
+    }
+
+    li.feita::before { border-color: var(--ficha-xp); background: var(--ficha-xp); }
+    b { color: var(--gelo); text-align: right; }
+}
+
+@media (max-width: 560px) {
+    .jornada-chamada { grid-template-columns: auto minmax(0, 1fr); }
+    .jornada-chamada > .mp-acao { grid-column: 1 / -1; justify-self: start; }
+    .jornada-titulos { grid-template-columns: minmax(0, 1fr); }
+    .jornada-linha li { flex-direction: column; gap: 2px; }
+    .jornada-linha b { text-align: left; }
+}
+
+/* Texto corrido em sans: a Conthrax fica nos titulos (e nos nomes de titulo). */
+.jornada-missao :is(p, li, span, b, small, code, a, button):not(.tit-nome):not(.tit-nome *):not(.jornada-dia),
+.jornada-premio, .jornada-premio b,
+.jornada-chamada-texto p, .jornada-chamada-texto p b { font-family: var(--sans); }
+
+/* O dia 7 fecha a jornada: ocupa a linha toda. */
+.jornada-missao#jornada-dia-7 { grid-column: 1 / -1; }
+.jornada-farms { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); }

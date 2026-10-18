@@ -20,7 +20,8 @@ const MP_ERROS = {
 };
 
 // cla: ranking de nivel e Liga pessoal (meu-painel-cla.js), pedido depois da ficha.
-const mpEstado = { dados: null, meta: null, copa: null, cla: null, tela: 'inicio', aba: 'geral', mes: 0 };
+// jornada: Jornada dos 7 Dias (meu-painel-jornada.js), so de quem faz.
+const mpEstado = { dados: null, meta: null, copa: null, cla: null, jornada: null, tela: 'inicio', aba: 'geral', mes: 0 };
 
 function mpLerSessao() {
     try { return localStorage.getItem(MP_CHAVE_SESSAO); } catch { return null; }
@@ -54,7 +55,7 @@ function mpLerRetorno() {
             if (destino?.tela) ({ tela, nick } = destino);
         } catch { /* sem destino guardado */ }
     }
-    if (MP_TELAS.some(([id]) => id === tela)) mpEstado.tela = tela;
+    if (MP_TELAS.some(([id]) => id === tela) || tela === 'jornada') mpEstado.tela = tela;
     // Perfil de outro membro aberto no painel: volta a ele ao recarregar.
     if (tela === 'jogador' && nick) { mpEstado.tela = 'jogador'; mpEstado.jogadorNick = nick; }
     const sessao = params.get('sessao');
@@ -229,10 +230,12 @@ async function renderMeuPainel() {
     mpEstado.copa = copa && copa.status ? copa : null;
     mpEstado.mes = 0;
     mpEstado.cla = null;
+    mpEstado.jornada = null;
     if (mpPedidoAdmin() && corpo.staff) return mpAbrirAdmin();
     mpDesenhar();
     mpCarregarCla();
     mpCarregarAcoes();
+    mpCarregarJornada();
     if (mpEstado.tela === 'jogador') mpAbrirJogador(mpEstado.jogadorNick);
 }
 
@@ -405,7 +408,12 @@ function mpResumo(alvo = mpAlvo()) {
 function mpDesenhar() {
     document.body.classList.add('modo-jogo');
     const { perfil, nivel, nickSkin } = mpResumo(mpEu());
-    const telas = [...MP_TELAS, ...(mpEstado.dados.staff ? [['staff', 'fa-user-shield', 'Staff']] : [])];
+    const telas = [
+        MP_TELAS[0],
+        ...(mpEstado.jornada ? [['jornada', 'fa-route', 'Jornada']] : []),
+        ...MP_TELAS.slice(1),
+        ...(mpEstado.dados.staff ? [['staff', 'fa-user-shield', 'Staff']] : []),
+    ];
     const botao = ([id, icone, rotulo], classe) => `<button type="button" class="${classe} ${mpEstado.tela === id ? 'ativa' : ''}" ${mpEstado.tela === id ? 'aria-current="page"' : ''} onclick="mpIr('${id}')"><i class="fa-solid ${icone}" aria-hidden="true"></i><span>${rotulo}</span></button>`;
     app.innerHTML = `<div class="jogo">
         <header class="hud">
@@ -431,6 +439,7 @@ function mpConteudoTela() {
     if (mpEstado.tela === 'ranking') return `<div class="jogo-cabeca"><h1>Ranking de níveis</h1><p>O nível da conta soma tudo o que você faz no clã.</p></div><div id="mp-ranking">${mpAbaNiveis()}</div>`;
     if (mpEstado.tela === 'perfil') return mpTelaPerfil();
     if (mpEstado.tela === 'jogador') return mpTelaJogador();
+    if (mpEstado.tela === 'jornada') return mpTelaJornada();
     return mpTelaInicio();
 }
 

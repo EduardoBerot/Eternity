@@ -311,6 +311,7 @@ function mpTelaInicio() {
                 <div class="ficha-barra"><span style="width:${temporada.pct}%"></span></div>
             </div>
         </section>
+        ${mpCartaoJornadaInicio()}
         <div class="inicio-grade">
             <div class="inicio-col">
                 ${mpCartaoClaNaLiga()}
