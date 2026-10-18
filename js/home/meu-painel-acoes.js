@@ -42,7 +42,10 @@ async function mpCarregarAcoes() {
         // Pedido que terminou desde a ultima olhada: aviso com a resposta.
         for (const acao of mpEstado.acoes) {
             const status = antes.get(acao.id);
-            if (status && ['pendente', 'executando'].includes(status) && !['pendente', 'executando'].includes(acao.status)) mpAvisoAcao(acao);
+            if (status && ['pendente', 'executando'].includes(status) && !['pendente', 'executando'].includes(acao.status)) {
+                if (acao.tipo === 'titulo' && acao.status === 'feito') mpEstado.tituloAplicado = acao.dados?.titulo || null;
+                mpAvisoAcao(acao);
+            }
         }
         mpAtualizarAcoesNaTela();
     } catch { /* tenta na proxima */ }
@@ -120,7 +123,7 @@ function mpAtualizarAcoesNaTela() {
     if (lista) lista.outerHTML = mpCartaoPedidos();
     const farms = document.getElementById('mp-farms');
     if (farms) farms.outerHTML = mpCartaoFarms();
-    if (mpEstado.tela === 'perfil' && mpEstado.aba === 'conquistas') {
+    if (mpEstado.tela === 'perfil' && mpEstado.aba === 'titulos') {
         const alvo = document.getElementById('mp-aba');
         if (alvo) alvo.innerHTML = mpConteudoAba();
     }
@@ -165,27 +168,74 @@ function mpCartaoPedidos() {
     </section>`;
 }
 
-// Titulo que da para pedir: o topo de cada escada e os de fora das escadas que
-// a pessoa ja tem. Quem usa uma versao feminina pede a feminina.
-function mpTitulosPedidos(perfil) {
-    const emUso = (perfil.titulos || []).find(titulo => titulo.atual)?.nome || null;
+// ---------- Aba Titulos (18/10/2026) ----------
+// Pedido do Fundador: em vez de um botao em cada carta das conquistas, uma
+// vitrine com todos os titulos que a pessoa pode usar; o que esta em uso fica
+// selecionado e tocar em outro seleciona e manda a Eternity trocar no jogo.
+
+// Os titulos que da para pedir: o topo de cada escada (pedir um nivel abaixo
+// volta "superado"), os de fora das escadas que a pessoa tem de fato (nao os
+// cobertos por outro) e o tempo de cla mais alto. Quem usa uma versao feminina
+// pede a feminina.
+function mpTitulosDisponiveis(perfil, dias) {
+    const conquistados = mpConquistados(perfil);
     const feminino = (perfil.titulos || []).some(titulo => TITULOS_POR_NOME.get(titulo.nome)?.familia?.titulos?.some(t => t.fem === titulo.nome));
-    return { emUso, feminino };
+    const tem = new Set((perfil.titulos || []).flatMap(titulo => {
+        const base = TITULOS_POR_NOME.get(titulo.nome)?.familia?.titulos?.find(t => t.nome === titulo.nome || t.fem === titulo.nome);
+        return [titulo.nome, base?.nome].filter(Boolean);
+    }));
+    const lista = [];
+    for (const categoria of TITULOS_CATEGORIAS) {
+        for (const familia of categoria.familias) {
+            const indices = familia.titulos.map((t, i) => (conquistados.has(t.nome) ? i : -1)).filter(i => i >= 0);
+            const escolhidos = familia.escada
+                ? (indices.length ? [familia.titulos[Math.max(...indices)]] : [])
+                : familia.titulos.filter(t => tem.has(t.nome));
+            for (const titulo of escolhidos) {
+                const nome = feminino && titulo.fem ? titulo.fem : titulo.nome;
+                lista.push({ nome, base: titulo.nome, fem: titulo.fem || null, requisito: titulo.requisito, icone: titulo.icone || familia.icone, categoria: categoria.nome, info: TITULOS_POR_NOME.get(titulo.nome) });
+            }
+        }
+    }
+    const tempo = TITULOS_TEMPO.map(([nome, rotulo], i) => ({ nome, rotulo, i })).filter(t => dias !== null && dias >= MP_NIVEIS_DIAS[t.i]).at(-1);
+    if (tempo) lista.push({ nome: tempo.nome, base: tempo.nome, fem: null, requisito: `${tempo.rotulo} de clã`, icone: '✧', categoria: 'Tempo de clã', info: TITULOS_POR_NOME.get(tempo.nome) || null });
+    return lista;
 }
 
-function mpBotaoUsar(titulo) {
-    if (!mpPodeTrocarTitulo()) return '';
-    const { emUso, feminino } = mpTitulosPedidos(mpEstado.dados.perfil);
-    const nome = feminino && titulo.fem ? titulo.fem : titulo.nome;
-    if (emUso && (emUso === titulo.nome || emUso === titulo.fem)) return '<span class="ficha-usando"><i class="fa-solid fa-check" aria-hidden="true"></i> Em uso</span>';
+function mpTituloEmUso(perfil) {
+    // Troca que acabou de dar certo vale antes da proxima atualizacao do perfil.
+    if (mpEstado.tituloAplicado) return mpEstado.tituloAplicado;
+    return (perfil.titulos || []).find(titulo => titulo.atual)?.nome || 'Membro';
+}
+
+function mpAbaTitulos(perfil, dias) {
+    if (!mpPodeAgir()) {
+        return mpPainel('fa-crown', 'Seus títulos', '<p class="info-vazio">Os títulos são exclusivos da ETY. Quando você subir para a ETY, eles aparecem aqui para escolher.</p>');
+    }
+    const staff = !mpPodeTrocarTitulo();
+    const emUso = mpTituloEmUso(perfil);
     const aberta = mpAcaoAberta();
-    const esta = aberta?.tipo === 'titulo' && aberta.dados?.titulo === nome;
-    return `<button type="button" class="mp-acao ficha-usar" ${aberta ? 'disabled' : ''} data-titulo="${escHtml(nome)}" onclick="mpPedirTitulo(this.dataset.titulo, this)">${esta ? '<i class="fa-solid fa-gear fa-spin" aria-hidden="true"></i> Aplicando' : 'Usar'}</button>`;
-}
-
-function mpBotaoVoltarMembro() {
-    if (!mpPodeTrocarTitulo()) return '';
-    const { emUso } = mpTitulosPedidos(mpEstado.dados.perfil);
-    if (!emUso) return '';
-    return `<button type="button" class="mp-acao mp-acao-fraca" ${mpAcaoAberta() ? 'disabled' : ''} onclick="mpPedirTitulo('Membro', this)">Voltar a Membro</button>`;
+    const pedindo = aberta?.tipo === 'titulo' ? aberta.dados?.titulo : null;
+    const lista = mpTitulosDisponiveis(perfil, dias);
+    const cartao = item => {
+        const selecionado = emUso === item.nome || emUso === item.fem || (item.nome === 'Membro' && emUso === 'Membro');
+        const carregando = pedindo === item.nome;
+        const cor = item.info?.familia ? `--de:${item.info.familia.de};--ate:${item.info.familia.ate}` : '';
+        const nome = item.info ? tituloHtml(item.nome, item.info) : `<b>${escHtml(item.nome)}</b>`;
+        const bloqueado = staff || Boolean(aberta) || selecionado;
+        return `<button type="button" class="tit-carta ${selecionado ? 'selecionada' : ''} ${carregando ? 'carregando' : ''}" style="${cor}"
+                ${bloqueado ? 'disabled' : ''} aria-pressed="${selecionado}" data-titulo="${escHtml(item.nome)}" onclick="mpPedirTitulo(this.dataset.titulo, this)">
+            <span class="tit-icone" aria-hidden="true">${escHtml(item.icone || '✦')}</span>
+            <span class="tit-nome">${nome}</span>
+            <small>${escHtml(item.requisito || '')}</small>
+            <span class="tit-estado">${selecionado ? '<i class="fa-solid fa-check" aria-hidden="true"></i> Em uso' : carregando ? '<i class="fa-solid fa-gear fa-spin" aria-hidden="true"></i> Aplicando' : staff ? '' : 'Usar'}</span>
+        </button>`;
+    };
+    const membro = { nome: 'Membro', base: 'Membro', fem: null, requisito: 'Sem título, só o cargo de membro', icone: '○', info: null };
+    const intro = staff
+        ? `Seu cargo (${escHtml(mpEstado.dados.membro?.cargo || 'staff')}) é de staff: os títulos não substituem o cargo no jogo. Aqui ficam os que você já conquistou.`
+        : 'Escolha o título que aparece no seu nick. A Eternity confere e troca no jogo em instantes.';
+    const corpo = `<p class="tit-intro">${intro}</p>
+        ${lista.length ? `<div class="tit-grade">${lista.map(cartao).join('')}${staff ? '' : cartao(membro)}</div>` : '<p class="info-vazio">Você ainda não conquistou nenhum título. Veja na aba Conquistas o que falta para cada um.</p>'}`;
+    return mpPainel('fa-crown', 'Seus títulos', corpo, { classe: 'tit-painel', extra: `${lista.length} disponíveis` });
 }

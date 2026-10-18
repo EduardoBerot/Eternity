@@ -330,6 +330,7 @@ const MP_ABAS_PERFIL = [
     ['geral', 'fa-chart-simple', 'Visão geral'],
     ['liga', 'fa-trophy', 'Liga'],
     ['banco', 'fa-gem', 'Tesouro'],
+    ['titulos', 'fa-crown', 'Títulos'],
     ['conquistas', 'fa-award', 'Conquistas'],
     ['conta', 'fa-id-card', 'Conta'],
 ];
@@ -468,6 +469,7 @@ function mpConteudoAba() {
     const { perfil, membro, proprio } = mpAlvo();
     if (proprio && mpEstado.aba === 'banco') return mpAbaBanco(perfil);
     if (proprio && mpEstado.aba === 'conta') return mpAbaConta(perfil, membro);
+    if (proprio && mpEstado.aba === 'titulos') return mpAbaTitulos(perfil, mpDiasDeCla(membro));
     // A grade de conquistas e grande: fica numa aba (16/10/2026).
     if (mpEstado.aba === 'conquistas') return mpConquistasGrade(perfil, mpDiasDeCla(membro));
     if (mpEstado.aba === 'liga') return proprio ? mpAbaMinhaLiga(perfil) : mpAbaLiga(perfil);
@@ -652,16 +654,9 @@ function mpMissoes(perfil) {
 // alcancado; nas outras familias cada titulo e independente.
 function mpConquistasGrade(perfil, dias) {
     const conquistados = mpConquistados(perfil);
-    // Botao "Usar" (meu-painel-acoes.js) so no proprio perfil: o topo de cada
-    // escada e os de fora das escadas que a pessoa tem de fato (nao os cobertos).
-    const proprio = mpAlvo().proprio;
-    const tem = new Set((perfil.titulos || []).flatMap(titulo => {
-        const base = TITULOS_POR_NOME.get(titulo.nome)?.familia?.titulos?.find(t => t.nome === titulo.nome || t.fem === titulo.nome);
-        return [titulo.nome, base?.nome].filter(Boolean);
-    }));
     let total = 0;
     let acesas = 0;
-    const tile = (nome, icone, requisito, aceso, familia, nivelTitulo, pedir = null) => {
+    const tile = (nome, icone, requisito, aceso, familia, nivelTitulo) => {
         total += 1;
         if (aceso) acesas += 1;
         const cor = familia ? `--de:${familia.de};--ate:${familia.ate}` : '';
@@ -669,7 +664,6 @@ function mpConquistasGrade(perfil, dias) {
             <span class="ficha-conquista-icone" aria-hidden="true">${aceso ? escHtml(icone || '✦') : '<i class="fa-solid fa-lock"></i>'}</span>
             <span class="ficha-conquista-nome">${aceso ? tituloHtml(nome, { familia, nivel: nivelTitulo }) : escHtml(nome)}</span>
             <small>${escHtml(requisito)}</small>
-            ${proprio && aceso && pedir ? mpBotaoUsar(pedir) : ''}
         </div>`;
     };
     const blocos = TITULOS_CATEGORIAS.map(categoria => `
@@ -683,7 +677,6 @@ function mpConquistasGrade(perfil, dias) {
                         titulo.nome, titulo.icone || familia.icone, titulo.requisito,
                         familia.escada ? i <= topo : conquistados.has(titulo.nome),
                         familia, familia.escada ? i + 1 : (titulo.nivel || 1),
-                        (familia.escada ? i === topo : tem.has(titulo.nome)) ? titulo : null,
                     )).join('');
                 }).join('')}
             </div>
@@ -693,15 +686,11 @@ function mpConquistasGrade(perfil, dias) {
         <div class="ficha-conquistas-cat">
             <h4><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i> Tempo de clã</h4>
             <div class="ficha-conquistas-grade">
-                ${TITULOS_TEMPO.map(([nome, rotulo], i) => tile(nome, '✧', `${rotulo} de clã`, dias !== null && dias >= MP_NIVEIS_DIAS[i], tempo, 1,
-                    dias !== null && dias >= MP_NIVEIS_DIAS[i] && !(dias >= MP_NIVEIS_DIAS[i + 1]) ? { nome } : null)).join('')}
+                ${TITULOS_TEMPO.map(([nome, rotulo], i) => tile(nome, '✧', `${rotulo} de clã`, dias !== null && dias >= MP_NIVEIS_DIAS[i], tempo, 1)).join('')}
             </div>
         </div>`;
     // No celular so as acesas aparecem; o botao abre as bloqueadas (a grade inteira tem 36).
-    let topoAcoes = '';
-    if (proprio && mpPodeTrocarTitulo()) topoAcoes = `<div class="ficha-conquistas-acoes"><span>Toque em <b>Usar</b> para a Eternity trocar seu título no jogo.</span>${mpBotaoVoltarMembro()}</div>`;
-    else if (proprio && mpPodeAgir()) topoAcoes = `<div class="ficha-conquistas-acoes"><span>Seu cargo (${escHtml(mpEstado.dados.membro?.cargo || 'staff')}) é de staff: os títulos não substituem o cargo no jogo.</span></div>`;
-    const corpo = `${topoAcoes}<div class="ficha-conquistas">${blocos}${blocoTempo}</div>
+    const corpo = `<div class="ficha-conquistas">${blocos}${blocoTempo}</div>
         <button type="button" class="ficha-ver-todas" onclick="this.previousElementSibling.classList.toggle('todas'); this.textContent = this.previousElementSibling.classList.contains('todas') ? 'Mostrar só as conquistadas' : 'Ver todas as conquistas'">Ver todas as conquistas</button>`;
     return mpPainel('fa-award', 'Conquistas', corpo, { classe: 'ficha-conquistas-painel', extra: `${acesas} de ${total}` });
 }
