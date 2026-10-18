@@ -12,7 +12,7 @@ const MP_JORNADA_ETAPAS = {
     chegada: { icone: 'fa-location-dot', texto: 'Use <code>/go ETY</code> e mande um oi no chat local', ajuda: 'A Eternity fica na cidade e ouve o chat local de quem chega.' },
     painel: { icone: 'fa-display', texto: 'Abra o seu painel', ajuda: 'Pronto: você já está nele.' },
     cidade: { icone: 'fa-house-chimney', texto: 'Decida se vai morar na cidade', ajuda: 'Casa ou terreno: escolha e veja os lugares livres no mapa da cidade.' },
-    cla: { icone: 'fa-comments', texto: 'Mande uma mensagem no chat do clã com <code>/c</code>' },
+    cla: { icone: 'fa-comments', texto: 'Mande uma mensagem no chat da aliança com <code>/a</code>', ajuda: 'É o chat que a ETZ e a ETY dividem com os clãs aliados.' },
     discord: { icone: 'fa-brands fa-discord', texto: 'Mande uma mensagem no Discord da Eternity' },
     call: { icone: 'fa-headset', texto: 'Fique 5 minutos em uma call do Discord', ajuda: 'Pode ser sozinho: entre em qualquer canal de voz.' },
     eternity: { icone: 'fa-robot', texto: 'Mande uma pergunta para a Eternity no privado', ajuda: 'No jogo: <code>/m Eternity</code> e a sua pergunta. Ela responde sobre o clã, a Liga, o banco e o servidor.' },
