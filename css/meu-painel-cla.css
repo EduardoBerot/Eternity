@@ -295,7 +295,8 @@
 .jogo .inicio-origens li,
 .jogo .inicio-em-alta,
 .jogo .perfil-xp li > span,
-.jogo .perfil-xp-regras summary { font-family: var(--sans); }
+.jogo .perfil-xp-regras summary,
+.jogo .ficha-conquistas-acoes span { font-family: var(--sans); }
 
 /* ================= Modo jogo (18/10/2026) =================
    Logado no painel, a navbar do site some e entra o HUD do jogo. No celular as
@@ -479,12 +480,11 @@ body.modo-jogo .page-meu-painel { padding: 0; }
     gap: 16px;
     align-items: start;
 
-    .inicio-cla { grid-column: 1; grid-row: 1 / span 2; }
-    .ficha-missoes-painel { grid-column: 2; grid-row: 1; }
-    .inicio-topo { grid-column: 2; grid-row: 2; }
-    .inicio-meta { grid-column: 1 / -1; grid-row: 3; padding: 0; background: none; border: 0; clip-path: none; box-shadow: none; }
-    .inicio-meta[hidden] { display: none; }
 }
+
+.inicio-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.inicio-meta { padding: 0; background: none; border: 0; clip-path: none; box-shadow: none; }
+.inicio-meta[hidden] { display: none; }
 
 .inicio-servidores { margin-left: auto; }
 .inicio-servidores .mp-chip { padding: 0.25em 0.8em; font-size: 0.72rem; letter-spacing: 0; text-transform: none; }
@@ -810,7 +810,6 @@ body.modo-jogo .page-meu-painel { padding: 0; }
     .jogo-aba.ativa i { color: var(--aqua); text-shadow: 0 0 10px var(--aqua); }
 
     .inicio-grade { grid-template-columns: minmax(0, 1fr); }
-    .inicio-grade > * { grid-column: 1 !important; grid-row: auto !important; }
     .inicio-cla-topo { grid-template-columns: minmax(0, 1fr); justify-items: center; }
     .inicio-cla-numeros { width: 100%; }
     .inicio-cla-baixo { grid-template-columns: minmax(0, 1fr); }
@@ -855,4 +854,105 @@ body.modo-jogo .page-meu-painel { padding: 0; }
     > b { font-size: 0.92rem; color: var(--nevoa); }
     > b:last-child { text-align: right; }
     > b.ganha { color: var(--ficha-xp); text-shadow: 0 0 10px rgba(92, 240, 138, 0.35); }
+}
+
+/* ---------- Acoes (18/10/2026, meu-painel-acoes.js) ---------- */
+
+.mp-acao {
+    flex: none;
+    padding: 0.45em 1em;
+    border: 1px solid rgba(46, 230, 240, 0.5);
+    background: rgba(46, 230, 240, 0.1);
+    color: var(--gelo);
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+
+.mp-acao:hover:not(:disabled) { background: var(--aqua); color: var(--noite); }
+.mp-acao:disabled { opacity: 0.5; cursor: not-allowed; }
+.mp-acao-fraca { border-color: var(--linha); background: none; font-weight: 400; color: var(--nevoa); }
+
+.farms-lista, .pedidos-lista { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+
+.farms-lista li, .pedidos-lista li {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: rgba(4, 8, 15, 0.35);
+
+    > i { color: var(--ficha-xp); text-align: center; }
+    > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    b { font-size: 0.9rem; color: var(--gelo); }
+    small { font-family: var(--sans); font-size: 0.76rem; color: var(--nevoa); }
+    time { font-family: var(--sans); font-size: 0.74rem; color: var(--nevoa-escura); }
+}
+
+.pedidos-lista li > i { color: var(--aqua); }
+.pedidos-lista .pedido-feito > i { color: var(--ficha-xp); }
+.pedidos-lista .pedido-negado > i { color: var(--ficha-ouro); }
+.pedidos-lista .pedido-erro > i, .pedidos-lista .pedido-expirado > i { color: #fca5a5; }
+
+.inicio-farms .mp-nota { margin: 12px 0 0; }
+
+.ficha-conquistas-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+    font-family: var(--sans);
+    font-size: 0.84rem;
+    color: var(--nevoa);
+}
+
+.ficha-conquista .ficha-usar, .ficha-conquista .ficha-usando { grid-column: 2; justify-self: start; }
+.ficha-conquista .ficha-usar { margin-top: 8px; }
+.ficha-usando { margin-top: 8px; font-family: var(--sans); font-size: 0.76rem; font-weight: 700; color: var(--ficha-xp); }
+
+/* Avisos no canto (acima da barra de abas no celular). */
+.mp-avisos {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 80;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: min(380px, calc(100vw - 36px));
+}
+
+.mp-aviso {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid rgba(46, 230, 240, 0.4);
+    border-left-width: 4px;
+    background: rgba(8, 16, 27, 0.97);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    font-family: var(--sans);
+    font-size: 0.86rem;
+    color: var(--gelo);
+    animation: mp-aviso-entra 0.25s ease;
+
+    > span { flex: 1; }
+    b { color: var(--gelo); }
+    button { border: 0; background: none; color: var(--nevoa); cursor: pointer; }
+}
+
+.mp-aviso.ok { border-color: rgba(92, 240, 138, 0.6); }
+.mp-aviso.aviso { border-color: rgba(245, 197, 66, 0.6); }
+.mp-aviso.erro { border-color: rgba(248, 113, 113, 0.6); }
+
+@keyframes mp-aviso-entra { from { opacity: 0; transform: translateY(10px); } }
+
+@media (max-width: 860px) {
+    .mp-avisos { right: 12px; left: 12px; width: auto; bottom: calc(76px + env(safe-area-inset-bottom)); }
 }

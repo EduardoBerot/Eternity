@@ -313,11 +313,17 @@ function mpTelaInicio() {
             </div>
         </section>
         <div class="inicio-grade">
-            ${mpCartaoClaNaLiga()}
-            ${mpMissoes(perfil)}
-            <section class="ficha-painel inicio-meta" id="inicio-meta" hidden></section>
-            ${mpCartaoTopo()}
-        </div>`;
+            <div class="inicio-col">
+                ${mpCartaoClaNaLiga()}
+                ${mpCartaoFarms()}
+            </div>
+            <div class="inicio-col">
+                ${mpMissoes(perfil)}
+                ${mpCartaoTopo()}
+                ${mpCartaoPedidos()}
+            </div>
+        </div>
+        <section class="ficha-painel inicio-meta" id="inicio-meta" hidden></section>`;
 }
 
 function mpCartaoClaNaLiga() {
