@@ -16,6 +16,7 @@ const MP_ERROS = {
     expirado: 'O login demorou demais. Tente de novo.',
     discord: 'O Discord não respondeu agora. Tente de novo em instantes.',
     desligado: 'O login com Discord ainda não está ligado.',
+    entrada: 'Esse link de entrada venceu ou já foi usado. Peça outro com /painel no Discord, ou mande "painel" para a Eternity no jogo.',
 };
 
 // cla: ranking de nivel e Liga pessoal (meu-painel-cla.js), pedido depois da ficha.
@@ -37,20 +38,60 @@ function mpGuardarSessao(token) {
 // administracao assim que o painel carregar; o pedido sobrevive a ida ao
 // Discord guardado na aba do navegador.
 const MP_CHAVE_ADMIN = 'ety-painel-abrir-admin';
+// Para onde a pessoa ia antes do login do Discord (ex.: o "Ver no painel" do
+// /perfil abre #meu-painel&tela=jogador&nick=...): a ida ao Discord perde o
+// hash, entao o destino espera na aba do navegador (18/10/2026).
+const MP_CHAVE_DESTINO = 'ety-painel-destino';
 
 function mpLerRetorno() {
     const params = new URLSearchParams(location.hash.replace(/^#meu-painel&?/, ''));
-    if (MP_TELAS.some(([id]) => id === params.get('tela'))) mpEstado.tela = params.get('tela');
+    let tela = params.get('tela');
+    let nick = params.get('nick');
+    if (!tela) {
+        try {
+            const destino = JSON.parse(sessionStorage.getItem(MP_CHAVE_DESTINO) || 'null');
+            sessionStorage.removeItem(MP_CHAVE_DESTINO);
+            if (destino?.tela) ({ tela, nick } = destino);
+        } catch { /* sem destino guardado */ }
+    }
+    if (MP_TELAS.some(([id]) => id === tela)) mpEstado.tela = tela;
     // Perfil de outro membro aberto no painel: volta a ele ao recarregar.
-    if (params.get('tela') === 'jogador' && params.get('nick')) { mpEstado.tela = 'jogador'; mpEstado.jogadorNick = params.get('nick'); }
+    if (tela === 'jogador' && nick) { mpEstado.tela = 'jogador'; mpEstado.jogadorNick = nick; }
     const sessao = params.get('sessao');
     const erro = params.get('erro');
+    // Link de entrada do bot (/painel no Discord, "painel" para a Eternity).
+    const entrada = params.get('entrada');
     if (params.get('admin') === '1') {
         try { sessionStorage.setItem(MP_CHAVE_ADMIN, '1'); } catch { /* sem a aba guardada, so nao abre sozinho */ }
     }
-    if (sessao || erro || params.has('admin')) history.replaceState(null, '', `${location.pathname}${location.search}#meu-painel`);
+    if (sessao || erro || entrada || params.has('admin')) {
+        const fica = mpEstado.tela === 'jogador' ? `&tela=jogador&nick=${encodeURIComponent(mpEstado.jogadorNick)}` : mpEstado.tela !== 'inicio' ? `&tela=${mpEstado.tela}` : '';
+        history.replaceState(null, '', `${location.pathname}${location.search}#meu-painel${fica}`);
+    }
     if (sessao) mpGuardarSessao(sessao);
-    return { erro };
+    return { erro, entrada };
+}
+
+// Antes de mandar para o login, guarda a tela pedida para voltar a ela.
+function mpGuardarDestino() {
+    if (mpEstado.tela === 'inicio') return;
+    try { sessionStorage.setItem(MP_CHAVE_DESTINO, JSON.stringify({ tela: mpEstado.tela, nick: mpEstado.jogadorNick || null })); } catch { /* sem aba */ }
+}
+
+async function mpTrocarEntrada(token) {
+    try {
+        const resposta = await fetch(`${URL_PAINEL_MEMBRO}/entrada`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token }),
+        });
+        const corpo = await resposta.json().catch(() => ({}));
+        if (resposta.ok && corpo.sessao) {
+            mpGuardarSessao(corpo.sessao);
+            return true;
+        }
+    } catch { /* cai no login normal */ }
+    return false;
 }
 
 function mpPedidoAdmin() {
@@ -118,7 +159,8 @@ function mpTelaLogin(erro) {
         ${erro ? `<p class="mp-erro">${escHtml(MP_ERROS[erro] || MP_ERROS.discord)}</p>` : ''}
         <p>Entre com a conta do Discord vinculada ao seu nick para ver a sua Liga, os seus depósitos no banco, os prêmios que recebeu e quanto falta para cada título.</p>
         ${mpBotaoEntrar()}
-        <p class="mp-sub">Só pedimos o seu nome no Discord. Nada é publicado em seu nome.</p>`);
+        <p class="mp-sub">Só pedimos o seu nome no Discord. Nada é publicado em seu nome.</p>
+        <p class="mp-sub"><i class="fa-solid fa-bolt" aria-hidden="true"></i> Atalho: use <code>/painel</code> no Discord, ou mande <b>painel</b> para a Eternity no privado do jogo, e entre já logado.</p>`);
     mpPrepararLink();
 }
 
@@ -149,11 +191,18 @@ function mpSair(event) {
 }
 
 async function renderMeuPainel() {
-    const { erro } = mpLerRetorno();
+    const { erro, entrada } = mpLerRetorno();
+    if (entrada) {
+        app.innerHTML = mpCartao('fa-solid fa-spinner fa-spin', 'Entrando...', '<p class="mp-sub">Conferindo o seu link de entrada.</p>');
+        if (!(await mpTrocarEntrada(entrada))) return mpTelaLogin('entrada');
+    }
     const token = mpLerSessao();
-    if (!token) return mpTelaLogin(erro);
+    if (!token) {
+        mpGuardarDestino();
+        return mpTelaLogin(erro);
+    }
 
-    app.innerHTML = mpCartao('fa-solid fa-spinner fa-spin', 'Abrindo seu painel...', '<p class="mp-sub">Se o site estava dormindo, pode levar até um minuto.</p>');
+    app.innerHTML = mpCartao('fa-solid fa-spinner fa-spin', 'Abrindo seu painel...', '');
     const extra = url => fetch(url).then(resposta => (resposta.ok ? resposta.json() : null)).catch(() => null);
     const [resposta, meta, copa] = await Promise.all([
         fetch(URL_PAINEL_MEMBRO, { headers: { Authorization: `Bearer ${token}` } }).catch(() => null),
