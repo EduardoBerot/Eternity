@@ -585,8 +585,9 @@ body.modo-jogo .page-meu-painel { padding: 0; }
     padding: 0;
     list-style: none;
 
-    li { display: grid; grid-template-columns: 2.4em 24px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 6px 8px; background: rgba(4, 8, 15, 0.35); }
-    li.eu { background: linear-gradient(90deg, rgba(92, 240, 138, 0.14), rgba(4, 8, 15, 0.35)); box-shadow: inset 2px 0 0 var(--ficha-xp); }
+    li > a { display: grid; grid-template-columns: 2.4em 24px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 6px 8px; background: rgba(4, 8, 15, 0.35); text-decoration: none; border: 1px solid transparent; }
+    li > a:hover { border-color: rgba(46, 230, 240, 0.3); }
+    li.eu > a { background: linear-gradient(90deg, rgba(92, 240, 138, 0.14), rgba(4, 8, 15, 0.35)); box-shadow: inset 2px 0 0 var(--ficha-xp); }
     li:nth-child(1) .niv-pos { color: var(--ficha-ouro); }
     li:nth-child(2) .niv-pos { color: #c8d6e5; }
     li:nth-child(3) .niv-pos { color: #e09a5a; }
@@ -605,8 +606,41 @@ body.modo-jogo .page-meu-painel { padding: 0; }
     color: var(--nevoa);
 
     > span:first-child { width: 100%; color: #ff9b52; }
+    a { color: var(--nevoa); text-decoration: none; }
+    a:hover { color: var(--gelo); }
     b { color: var(--ficha-xp); }
 }
+
+/* ---------- Perfil de outro membro ---------- */
+
+.jogo-voltar-barra {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--nevoa-escura);
+}
+
+.jogo-voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.45em 1em;
+    border: 1px solid var(--linha);
+    background: rgba(232, 244, 248, 0.04);
+    color: var(--gelo);
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    letter-spacing: 0;
+    text-transform: none;
+    cursor: pointer;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+
+.jogo-voltar:hover { border-color: rgba(46, 230, 240, 0.4); }
 
 /* ---------- Meu perfil ---------- */
 
@@ -790,4 +824,35 @@ body.modo-jogo .page-meu-painel { padding: 0; }
     .hud-jogador-texto { display: none; }
     .inicio-cla-numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .inicio-cla-numeros > div:last-child { grid-column: 1 / -1; }
+}
+
+/* Voce x outro membro (perfil de membro). */
+.cmp { display: flex; flex-direction: column; gap: 6px; }
+
+.cmp-cabeca, .cmp-linha {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+}
+
+.cmp-cabeca {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nevoa-escura);
+
+    span:last-child { text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
+.cmp-linha {
+    padding: 8px 10px;
+    background: rgba(4, 8, 15, 0.35);
+
+    > span { font-family: var(--sans); font-size: 0.8rem; color: var(--nevoa); text-align: center; white-space: nowrap; }
+    > span i { color: var(--aqua); margin-right: 4px; }
+    > b { font-size: 0.92rem; color: var(--nevoa); }
+    > b:last-child { text-align: right; }
+    > b.ganha { color: var(--ficha-xp); text-shadow: 0 0 10px rgba(92, 240, 138, 0.35); }
 }

@@ -51,9 +51,13 @@ function mpMinhaLinha() {
 // Posicao no ranking e XP da semana no topo da ficha, quando o ranking chega.
 function mpAtualizarHeroiCla() {
     const alvo = document.getElementById('mp-heroi-cla');
-    const eu = mpMinhaLinha();
-    if (!alvo || !eu) return;
-    const total = mpCla().ranking.length;
+    const cla = mpCla();
+    if (!alvo || !cla) return;
+    // No perfil de outro membro, a posicao dele.
+    const nick = mpAlvo().perfil.nick;
+    const eu = cla.ranking.find(linha => linha.nick === nick);
+    if (!eu) return;
+    const total = cla.ranking.length;
     alvo.innerHTML = `<button type="button" class="ficha-rank" onclick="mpIr('ranking')" title="Ver o ranking">
             <i class="fa-solid fa-ranking-star" aria-hidden="true"></i> ${eu.posicao}º de ${total} no clã
         </button>${eu.semana ? `<span class="ficha-semana"><i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i> +${eu.semana.toLocaleString('pt-BR')} XP na semana</span>` : ''}`;
@@ -115,12 +119,14 @@ function mpCabeca(nick, tamanho) {
     return `<img class="niv-cabeca" src="https://mc-heads.net/avatar/${encodeURIComponent(String(nick).replace(/^\*+/, ''))}/${tamanho}" alt="" width="${tamanho}" height="${tamanho}" loading="lazy">`;
 }
 
+// Clicar em alguem abre o perfil dele dentro do painel (18/10/2026), nao o
+// perfil publico. O href fica para abrir em outra aba.
 function mpLinkMembro(nick) {
-    return `#membros?membro=${encodeURIComponent(nick)}`;
+    return `href="#meu-painel&tela=jogador&nick=${encodeURIComponent(nick)}" data-nick="${escHtml(nick)}" onclick="return mpAbrirJogador(this.dataset.nick)"`;
 }
 
 function mpCartaoPodio(linha, lugar, eu) {
-    return `<a class="niv-podio-carta lugar-${lugar} ${linha.nick === eu ? 'eu' : ''}" href="${mpLinkMembro(linha.nick)}" title="Ver o perfil de ${escHtml(linha.nick)}">
+    return `<a class="niv-podio-carta lugar-${lugar} ${linha.nick === eu ? 'eu' : ''}" ${mpLinkMembro(linha.nick)} title="Ver o perfil de ${escHtml(linha.nick)}">
         <span class="niv-podio-lugar">${lugar}º</span>
         ${mpCabeca(linha.nick, 56)}
         <b>${escHtml(linha.nick)}</b>
@@ -131,7 +137,7 @@ function mpCartaoPodio(linha, lugar, eu) {
 
 function mpLinhaNivel(linha, eu, ordem) {
     return `<li class="niv-linha ${linha.nick === eu ? 'eu' : ''}" ${linha.nick === eu ? 'id="niv-eu"' : ''}>
-        <a href="${mpLinkMembro(linha.nick)}" title="Ver o perfil de ${escHtml(linha.nick)}">
+        <a ${mpLinkMembro(linha.nick)} title="Ver o perfil de ${escHtml(linha.nick)}">
             <span class="niv-pos">${linha.posicao}º</span>
             ${mpCabeca(linha.nick, 32)}
             <span class="niv-nome"><b>${escHtml(linha.nick)}</b><small><span class="cargo-${escHtml(classeCargo(linha.cargo))}">${escHtml(linha.cargo)}</span>${linha.cla ? ` · ${escHtml(linha.cla)}` : ''}</small></span>
@@ -375,16 +381,16 @@ function mpCartaoTopo() {
     const emAlta = cla.ranking.filter(linha => linha.semana > 0).sort((a, b) => b.semana - a.semana).slice(0, 3);
     const itens = linhas.map(linha => (linha === null
         ? '<li class="inicio-ranking-pula" aria-hidden="true">⋯</li>'
-        : `<li class="${linha.nick === cla.eu ? 'eu' : ''}">
+        : `<li class="${linha.nick === cla.eu ? 'eu' : ''}"><a ${mpLinkMembro(linha.nick)} title="Ver o perfil de ${escHtml(linha.nick)}">
             <span class="niv-pos">${linha.posicao}º</span>
             ${mpCabeca(linha.nick, 24)}
             <span class="inicio-ranking-nick">${escHtml(linha.nick)}</span>
             <span class="niv-nv">NV ${linha.nivel}</span>
-        </li>`)).join('');
+        </a></li>`)).join('');
     return `<section class="ficha-painel inicio-topo">
         <h3 class="ficha-titulo"><i class="fa-solid fa-ranking-star" aria-hidden="true"></i> Top níveis</h3>
         <ol class="inicio-ranking">${itens}</ol>
-        ${emAlta.length ? `<div class="inicio-em-alta"><span><i class="fa-solid fa-fire" aria-hidden="true"></i> Em alta na semana</span>${emAlta.map(linha => `<span class="inicio-em-alta-item">${escHtml(linha.nick)} <b>+${linha.semana.toLocaleString('pt-BR')}</b></span>`).join('')}</div>` : ''}
+        ${emAlta.length ? `<div class="inicio-em-alta"><span><i class="fa-solid fa-fire" aria-hidden="true"></i> Em alta na semana</span>${emAlta.map(linha => `<a class="inicio-em-alta-item" ${mpLinkMembro(linha.nick)}>${escHtml(linha.nick)} <b>+${linha.semana.toLocaleString('pt-BR')}</b></a>`).join('')}</div>` : ''}
         <button type="button" class="mp-link inicio-mais" onclick="mpIr('ranking')">Ver o ranking completo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
     </section>`;
 }
@@ -398,4 +404,66 @@ function mpMetaInicio() {
     alvo.innerHTML = metaBancoHTML(meta);
     alvo.hidden = false;
     alvo.querySelector('.mb-card')?.classList.add('mb-visivel');
+}
+
+// ---------- Perfil de outro membro (18/10/2026) ----------
+// Dados publicos (os mesmos da pagina Membros): /api/perfis e /api/membros,
+// pedidos uma vez por visita ao painel.
+
+async function mpCarregarPublicos() {
+    if (mpEstado.publicos) return mpEstado.publicos;
+    const [perfis, membros] = await Promise.all([
+        fetch(`${URL_BASE}/api/perfis`).then(r => (r.ok ? r.json() : [])),
+        fetch(`${URL_BASE}/api/membros`).then(r => (r.ok ? r.json() : [])),
+    ]);
+    const porNick = new Map();
+    // O mesmo nick pode ter um cadastro antigo e um ativo: o ativo ganha.
+    for (const membro of Array.isArray(membros) ? membros : []) {
+        const chave = String(membro.nick || '').toLowerCase();
+        if (!porNick.has(chave) || membro.status === 'Ativo') porNick.set(chave, membro);
+    }
+    mpEstado.publicos = {
+        perfis: new Map((Array.isArray(perfis) ? perfis : []).map(p => [String(p.nick).toLowerCase(), p])),
+        membros: porNick,
+    };
+    return mpEstado.publicos;
+}
+
+function mpAbrirJogador(nick) {
+    if (!nick) return false;
+    if (String(nick).toLowerCase() === String(mpEstado.dados.perfil.nick).toLowerCase()) {
+        mpIr('perfil');
+        return false;
+    }
+    if (mpEstado.tela !== 'jogador') mpEstado.voltar = mpEstado.tela;
+    mpEstado.tela = 'jogador';
+    mpEstado.jogadorNick = nick;
+    mpEstado.jogador = null;
+    mpEstado.aba = 'geral';
+    mpEstado.mes = 0;
+    history.replaceState(null, '', `${location.pathname}${location.search}#meu-painel&tela=jogador&nick=${encodeURIComponent(nick)}`);
+    mpDesenhar();
+    window.scrollTo({ top: 0 });
+    mpCarregarPublicos().then(({ perfis, membros }) => {
+        const chave = String(nick).toLowerCase();
+        mpEstado.jogador = perfis.has(chave) ? { perfil: perfis.get(chave), membro: membros.get(chave) || null } : { erro: true };
+    }).catch(() => {
+        mpEstado.publicos = null;
+        mpEstado.jogador = { erro: true };
+    }).finally(() => {
+        if (mpEstado.tela === 'jogador' && mpEstado.jogadorNick === nick) mpRedesenharTela();
+    });
+    return false;
+}
+
+function mpTelaJogador() {
+    const voltar = mpEstado.voltar && mpEstado.voltar !== 'jogador' ? mpEstado.voltar : 'ranking';
+    const rotulo = { inicio: 'Início', ranking: 'Ranking', perfil: 'Meu perfil' }[voltar] || 'Ranking';
+    const barra = `<div class="jogo-voltar-barra">
+        <button type="button" class="jogo-voltar" onclick="mpIr('${voltar}')"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> ${rotulo}</button>
+        <span>Perfil de membro</span>
+    </div>`;
+    if (!mpEstado.jogador) return `${barra}<section class="ficha-painel"><p class="info-vazio"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Abrindo o perfil de ${escHtml(mpEstado.jogadorNick)}...</p></section>`;
+    if (mpEstado.jogador.erro) return `${barra}<section class="ficha-painel"><p class="info-vazio">Não encontrei o perfil de ${escHtml(mpEstado.jogadorNick)}. O perfil aparece depois da próxima atualização do site.</p></section>`;
+    return barra + mpTelaPerfil();
 }

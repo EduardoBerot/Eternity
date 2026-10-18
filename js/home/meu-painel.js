@@ -41,6 +41,8 @@ const MP_CHAVE_ADMIN = 'ety-painel-abrir-admin';
 function mpLerRetorno() {
     const params = new URLSearchParams(location.hash.replace(/^#meu-painel&?/, ''));
     if (MP_TELAS.some(([id]) => id === params.get('tela'))) mpEstado.tela = params.get('tela');
+    // Perfil de outro membro aberto no painel: volta a ele ao recarregar.
+    if (params.get('tela') === 'jogador' && params.get('nick')) { mpEstado.tela = 'jogador'; mpEstado.jogadorNick = params.get('nick'); }
     const sessao = params.get('sessao');
     const erro = params.get('erro');
     if (params.get('admin') === '1') {
@@ -181,6 +183,7 @@ async function renderMeuPainel() {
     if (mpPedidoAdmin() && corpo.staff) return mpAbrirAdmin();
     mpDesenhar();
     mpCarregarCla();
+    if (mpEstado.tela === 'jogador') mpAbrirJogador(mpEstado.jogadorNick);
 }
 
 // ---------- Ficha de personagem (16/10/2026) ----------
@@ -330,16 +333,27 @@ const MP_ABAS_PERFIL = [
     ['conta', 'fa-id-card', 'Conta'],
 ];
 
-function mpResumo() {
-    const { perfil, membro } = mpEstado.dados;
+// Quem as telas de perfil mostram: a propria pessoa, ou outro membro na tela
+// 'jogador' (clique no ranking, 18/10/2026), so com o que ja e publico.
+function mpAlvo() {
+    if (mpEstado.tela === 'jogador' && mpEstado.jogador?.perfil) return { ...mpEstado.jogador, proprio: false };
+    return mpEu();
+}
+
+function mpEu() {
+    return { perfil: mpEstado.dados.perfil, membro: mpEstado.dados.membro, proprio: true };
+}
+
+function mpResumo(alvo = mpAlvo()) {
+    const { perfil, membro } = alvo;
     const dias = mpDiasDeCla(membro);
     const xp = mpXpPublicado(perfil) || mpXp(perfil, dias);
-    return { perfil, membro, dias, xp, nivel: mpNivelXp(xp.total), nickSkin: String(perfil.nick).replace(/^\*+/, '') };
+    return { perfil, membro, dias, xp, nivel: mpNivelXp(xp.total), nickSkin: String(perfil.nick).replace(/^\*+/, ''), proprio: alvo.proprio !== false };
 }
 
 function mpDesenhar() {
     document.body.classList.add('modo-jogo');
-    const { perfil, nivel, nickSkin } = mpResumo();
+    const { perfil, nivel, nickSkin } = mpResumo(mpEu());
     const telas = [...MP_TELAS, ...(mpEstado.dados.staff ? [['staff', 'fa-user-shield', 'Staff']] : [])];
     const botao = ([id, icone, rotulo], classe) => `<button type="button" class="${classe} ${mpEstado.tela === id ? 'ativa' : ''}" ${mpEstado.tela === id ? 'aria-current="page"' : ''} onclick="mpIr('${id}')"><i class="fa-solid ${icone}" aria-hidden="true"></i><span>${rotulo}</span></button>`;
     app.innerHTML = `<div class="jogo">
@@ -365,11 +379,12 @@ function mpDesenhar() {
 function mpConteudoTela() {
     if (mpEstado.tela === 'ranking') return `<div class="jogo-cabeca"><h1>Ranking de níveis</h1><p>O nível da conta soma tudo o que você faz no clã.</p></div><div id="mp-ranking">${mpAbaNiveis()}</div>`;
     if (mpEstado.tela === 'perfil') return mpTelaPerfil();
+    if (mpEstado.tela === 'jogador') return mpTelaJogador();
     return mpTelaInicio();
 }
 
 function mpDepoisDaTela() {
-    if (mpEstado.tela === 'perfil') mpSkin3d(app.querySelector('.ficha-skin'), mpResumo().nickSkin);
+    if (mpEstado.tela === 'perfil' || (mpEstado.tela === 'jogador' && mpEstado.jogador?.perfil)) mpSkin3d(app.querySelector('.ficha-skin'), mpResumo().nickSkin);
     else { mpViewer?.dispose(); mpViewer = null; }
     if (mpEstado.tela === 'inicio') mpMetaInicio();
     mpAtualizarHeroiCla();
@@ -393,14 +408,19 @@ function mpIr(tela) {
 
 // ---------- Meu perfil ----------
 
+// No perfil de outro membro so as abas com dado publico (Tesouro e Conta sao
+// privados; a Liga e a por mes do perfil publico, sem semanas nem origens).
+const MP_ABAS_JOGADOR = ['geral', 'liga', 'conquistas'];
+
 function mpTelaPerfil() {
-    const { perfil, membro, nivel, xp, nickSkin } = mpResumo();
+    const { perfil, membro, nivel, xp, nickSkin, proprio } = mpResumo();
     const cargo = membro?.cargo || 'Membro';
     const jogo = perfil.jogo || {};
     const online = jogo.visto === 'Online';
     const inativo = membro?.status && membro.status !== 'Ativo';
     const tempo = tempoNoCla(membro?.data_entrada);
-    const aba = MP_ABAS_PERFIL.some(([id]) => id === mpEstado.aba) ? mpEstado.aba : 'geral';
+    const abas = proprio ? MP_ABAS_PERFIL : MP_ABAS_PERFIL.filter(([id]) => MP_ABAS_JOGADOR.includes(id));
+    const aba = abas.some(([id]) => id === mpEstado.aba) ? mpEstado.aba : 'geral';
     mpEstado.aba = aba;
     return `<section class="perfil-heroi ${escHtml(classeCargo(cargo))}">
             <div class="ficha-skin" title="Arraste para girar">
@@ -427,7 +447,7 @@ function mpTelaPerfil() {
             </div>
         </section>
         <div class="perfil-abas" role="tablist" aria-label="Seções do perfil">
-            ${MP_ABAS_PERFIL.map(([id, icone, rotulo]) => `<button type="button" role="tab" class="perfil-aba ${aba === id ? 'ativa' : ''}" aria-selected="${aba === id}" onclick="mpTrocarAba('${id}')"><i class="fa-solid ${icone}" aria-hidden="true"></i> ${rotulo}${id === 'conquistas' ? ` <small>${mpContarConquistas(perfil, mpDiasDeCla(membro))}/${MP_TOTAL_CONQUISTAS}</small>` : ''}</button>`).join('')}
+            ${abas.map(([id, icone, rotulo]) => `<button type="button" role="tab" class="perfil-aba ${aba === id ? 'ativa' : ''}" aria-selected="${aba === id}" onclick="mpTrocarAba('${id}')"><i class="fa-solid ${icone}" aria-hidden="true"></i> ${rotulo}${id === 'conquistas' ? ` <small>${mpContarConquistas(perfil, mpDiasDeCla(membro))}/${MP_TOTAL_CONQUISTAS}</small>` : ''}</button>`).join('')}
         </div>
         <div id="mp-aba" role="tabpanel">${mpConteudoAba()}</div>`;
 }
@@ -444,18 +464,45 @@ function mpTrocarAba(aba) {
 }
 
 function mpConteudoAba() {
-    const { perfil, membro } = mpEstado.dados;
-    if (mpEstado.aba === 'banco') return mpAbaBanco(perfil);
-    if (mpEstado.aba === 'conta') return mpAbaConta(perfil, membro);
+    const { perfil, membro, proprio } = mpAlvo();
+    if (proprio && mpEstado.aba === 'banco') return mpAbaBanco(perfil);
+    if (proprio && mpEstado.aba === 'conta') return mpAbaConta(perfil, membro);
     // A grade de conquistas e grande: fica numa aba (16/10/2026).
     if (mpEstado.aba === 'conquistas') return mpConquistasGrade(perfil, mpDiasDeCla(membro));
-    if (mpEstado.aba === 'liga') return mpAbaMinhaLiga(perfil);
+    if (mpEstado.aba === 'liga') return proprio ? mpAbaMinhaLiga(perfil) : mpAbaLiga(perfil);
     return mpAbaGeral();
+}
+
+// No perfil de outro membro: voce x ele, numero a numero (so dado publico).
+function mpComparacao() {
+    const outro = mpResumo();
+    const eu = mpResumo(mpEu());
+    const pontos = r => Number((r.perfil.ligaMeses?.[0] || r.perfil.liga)?.pontos) || 0;
+    const linhas = [
+        ['fa-star', 'Nível', r => r.nivel.nivel, v => `NV ${v}`],
+        ['fa-bolt', 'XP total', r => r.xp.total, v => v.toLocaleString('pt-BR')],
+        ['fa-trophy', 'Liga do mês', pontos, v => `${v.toLocaleString('pt-BR')} pts`],
+        ['fa-award', 'Conquistas', r => mpContarConquistas(r.perfil, r.dias), v => String(v)],
+        ['fa-flag-checkered', 'Eventos vencidos', r => Number(r.perfil.eventos?.total) || 0, v => String(v)],
+        ['fa-hourglass-half', 'Dias de clã', r => r.dias || 0, v => v.toLocaleString('pt-BR')],
+    ];
+    const corpo = `<div class="cmp">
+        <div class="cmp-cabeca"><span>Você</span><span></span><span>${escHtml(outro.perfil.nick)}</span></div>
+        ${linhas.map(([icone, rotulo, valor, texto]) => {
+            const a = valor(eu); const b = valor(outro);
+            return `<div class="cmp-linha">
+                <b class="${a > b ? 'ganha' : ''}">${escHtml(texto(a))}</b>
+                <span><i class="fa-solid ${icone}" aria-hidden="true"></i> ${rotulo}</span>
+                <b class="${b > a ? 'ganha' : ''}">${escHtml(texto(b))}</b>
+            </div>`;
+        }).join('')}
+    </div>`;
+    return mpPainel('fa-scale-balanced', 'Você × ' + escHtml(outro.perfil.nick), corpo, { classe: 'cmp-painel' });
 }
 
 // Visao geral: os numeros, os atributos (escadas dos titulos) e de onde vem o XP.
 function mpAbaGeral() {
-    const { perfil, xp } = mpResumo();
+    const { perfil, xp, dias, proprio } = mpResumo();
     const mes = perfil.ligaMeses?.[0] || perfil.liga;
     const premios = (perfil.privado?.premios || []).reduce((soma, item) => soma + (Number(item.valor) || 0), 0);
     return `<div class="perfil-geral">
@@ -463,11 +510,13 @@ function mpAbaGeral() {
             ${mpStat('fa-trophy', 'Liga do mês', escHtml((mes?.pontos ?? 0).toLocaleString('pt-BR')), 'pontos')}
             ${mpStat('fa-coins', 'Banco', escHtml(mpDinheiro(perfil.banco?.total)), perfil.banco?.posicao ? `${escHtml(perfil.banco.posicao)}º apoiador` : 'sem depósitos')}
             ${mpStat('fa-flag-checkered', 'Eventos', escHtml(perfil.eventos?.total ?? 0), 'vencidos')}
-            ${mpStat('fa-sack-dollar', 'Prêmios', escHtml(mpDinheiro(premios)), 'recebidos')}
+            ${proprio
+                ? mpStat('fa-sack-dollar', 'Prêmios', escHtml(mpDinheiro(premios)), 'recebidos')
+                : mpStat('fa-award', 'Conquistas', escHtml(mpContarConquistas(perfil, dias)), `de ${MP_TOTAL_CONQUISTAS}`)}
         </div>
         <div class="perfil-geral-grade">
-            ${mpAtributos(perfil)}
-            ${mpPainel('fa-star', 'De onde vem seu XP', `<ul class="perfil-xp">${xp.fontes.filter(fonte => fonte.xp > 0).sort((a, b) => b.xp - a.xp).map(fonte => `<li>
+            ${proprio ? mpAtributos(perfil) : mpComparacao()}
+            ${mpPainel('fa-star', proprio ? 'De onde vem seu XP' : 'De onde vem o XP', `<ul class="perfil-xp">${xp.fontes.filter(fonte => fonte.xp > 0).sort((a, b) => b.xp - a.xp).map(fonte => `<li>
                     <i class="fa-solid ${fonte.icone}" aria-hidden="true"></i>
                     <span>${fonte.rotulo} <small>${escHtml(fonte.detalhe)}</small></span>
                     <b>${escHtml(fonte.xp.toLocaleString('pt-BR'))}</b>
@@ -722,7 +771,7 @@ function mpAreasLiga(mes) {
 function mpTrocarMes(indice) {
     mpEstado.mes = Number(indice) || 0;
     const alvo = document.getElementById('mp-aba');
-    if (alvo) alvo.innerHTML = mpAbaLiga(mpEstado.dados.perfil);
+    if (alvo) alvo.innerHTML = mpAbaLiga(mpAlvo().perfil);
 }
 
 function mpTabela(colunas, linhas, vazio) {
