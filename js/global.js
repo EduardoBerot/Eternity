@@ -1,4 +1,5 @@
-const URL_BASE = "https://eternity-crud.onrender.com"
+// API no Pi (18/10/2026), pelo tunel do Cloudflare; antes eternity-crud.onrender.com.
+const URL_BASE = "https://api.eduardoberot.dev.br"
 // const URL_BASE = "http://localhost:5000"
 
 const URL_MEMBERS = `${URL_BASE}/api/membro`;
