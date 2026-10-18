@@ -373,7 +373,7 @@ function mpCartaoClaNaLiga() {
             </div>
             <ul class="inicio-origens">${origensHtml}</ul>
         </div>
-        <button type="button" class="mp-link inicio-mais" onclick="mpEstado.aba = 'liga'; mpIr('perfil')">Ver a minha Liga <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+        <button type="button" class="mp-link inicio-mais" onclick="mpEstado.aba = 'liga'; mpIr('perfil')">Ver meus pontos na Liga <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
     </section>`;
 }
 
