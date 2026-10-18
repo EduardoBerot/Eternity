@@ -69,8 +69,6 @@ const ROTAS = {
     membros: { menu: 'hall', render: () => renderMembros() },
     wiki: { menu: 'wiki', render: () => renderWiki() },
     cidade: { menu: 'city', render: () => renderCidadePublica() },
-    // Paineis do cla (paineis.js): os mesmos do Discord, para qualquer um.
-    paineis: { menu: 'paineis-link', render: () => renderPaineis() },
     atualizar: { menu: null, render: () => openAtualizar() },
     // Painel do membro, com login do Discord (meu-painel.js). E o unico login do
     // site: a administracao e uma aba dele para quem tem cargo (16/10/2026).
