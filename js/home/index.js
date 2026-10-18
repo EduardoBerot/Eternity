@@ -86,6 +86,8 @@ function route() {
     // A classe da pagina zera a do Guia (guia-modo-video) e deixa cada tela
     // ajustar o proprio painel.
     app.className = `content page-${ROTAS[nome] ? nome : 'inicio'}`;
+    // O modo jogo (HUD do painel do membro) so vale no #meu-painel logado.
+    document.body.classList.remove('modo-jogo');
     setMenuOpen(false);
     selectItem(rota.menu ? document.getElementById(rota.menu) : null);
     rota.render();

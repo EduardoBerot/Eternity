@@ -19,7 +19,7 @@ const MP_ERROS = {
 };
 
 // cla: ranking de nivel e Liga pessoal (meu-painel-cla.js), pedido depois da ficha.
-const mpEstado = { dados: null, meta: null, copa: null, cla: null, aba: 'liga', mes: 0 };
+const mpEstado = { dados: null, meta: null, copa: null, cla: null, tela: 'inicio', aba: 'geral', mes: 0 };
 
 function mpLerSessao() {
     try { return localStorage.getItem(MP_CHAVE_SESSAO); } catch { return null; }
@@ -40,6 +40,7 @@ const MP_CHAVE_ADMIN = 'ety-painel-abrir-admin';
 
 function mpLerRetorno() {
     const params = new URLSearchParams(location.hash.replace(/^#meu-painel&?/, ''));
+    if (MP_TELAS.some(([id]) => id === params.get('tela'))) mpEstado.tela = params.get('tela');
     const sessao = params.get('sessao');
     const erro = params.get('erro');
     if (params.get('admin') === '1') {
@@ -137,6 +138,7 @@ function mpTelaSemVinculo() {
 function mpSair(event) {
     event?.preventDefault();
     mpGuardarSessao(null);
+    document.body.classList.remove('modo-jogo');
     // Sai da staff junto: o acesso da administracao nao fica aberto neste navegador.
     deleteCookie(ETY_ADM_LOGIN_COOKIE);
     deleteCookie(ETY_ADM_PASS_COOKIE);
@@ -307,82 +309,132 @@ function mpConquistados(perfil) {
     return nomes;
 }
 
-function mpDesenhar() {
+// ---------- Modo jogo (18/10/2026) ----------
+// Pedido do Fundador: a ficha numa pagina so parecia poluida, e o painel devia
+// ser "literalmente um jogo web". Logado, a navbar do site sai (body.modo-jogo)
+// e entra o HUD: Inicio (o cla: Liga do cla, missoes, meta, top niveis),
+// Ranking e Meu perfil (a ficha, com as abas). No celular as telas vao para uma
+// barra de abas embaixo. A tela fica no hash (#meu-painel&tela=perfil) para
+// sobreviver ao recarregar; trocar de tela nao recarrega os dados.
+
+const MP_TELAS = [
+    ['inicio', 'fa-house', 'Início'],
+    ['ranking', 'fa-ranking-star', 'Ranking'],
+    ['perfil', 'fa-user', 'Meu perfil'],
+];
+const MP_ABAS_PERFIL = [
+    ['geral', 'fa-chart-simple', 'Visão geral'],
+    ['liga', 'fa-trophy', 'Liga'],
+    ['banco', 'fa-gem', 'Tesouro'],
+    ['conquistas', 'fa-award', 'Conquistas'],
+    ['conta', 'fa-id-card', 'Conta'],
+];
+
+function mpResumo() {
     const { perfil, membro } = mpEstado.dados;
-    const nick = perfil.nick;
+    const dias = mpDiasDeCla(membro);
+    const xp = mpXpPublicado(perfil) || mpXp(perfil, dias);
+    return { perfil, membro, dias, xp, nivel: mpNivelXp(xp.total), nickSkin: String(perfil.nick).replace(/^\*+/, '') };
+}
+
+function mpDesenhar() {
+    document.body.classList.add('modo-jogo');
+    const { perfil, nivel, nickSkin } = mpResumo();
+    const telas = [...MP_TELAS, ...(mpEstado.dados.staff ? [['staff', 'fa-user-shield', 'Staff']] : [])];
+    const botao = ([id, icone, rotulo], classe) => `<button type="button" class="${classe} ${mpEstado.tela === id ? 'ativa' : ''}" ${mpEstado.tela === id ? 'aria-current="page"' : ''} onclick="mpIr('${id}')"><i class="fa-solid ${icone}" aria-hidden="true"></i><span>${rotulo}</span></button>`;
+    app.innerHTML = `<div class="jogo">
+        <header class="hud">
+            <a class="hud-marca" href="#inicio" title="Voltar ao site">Eternity</a>
+            <nav class="hud-nav" aria-label="Painel">${telas.map(tela => botao(tela, 'hud-item')).join('')}</nav>
+            <button type="button" class="hud-jogador" onclick="mpIr('perfil')" title="Meu perfil">
+                <img src="https://mc-heads.net/avatar/${encodeURIComponent(nickSkin)}/40" alt="" width="34" height="34">
+                <span class="hud-jogador-texto">
+                    <b>${escHtml(perfil.nick)}</b>
+                    <span class="hud-xp" role="progressbar" aria-valuenow="${nivel.pct}" aria-valuemin="0" aria-valuemax="100" aria-label="XP até o próximo nível"><span style="width:${nivel.pct}%"></span></span>
+                </span>
+                <span class="niv-nv">NV ${nivel.nivel}</span>
+            </button>
+            <button type="button" class="hud-sair" onclick="mpSair(event)" aria-label="Sair" title="Sair"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i></button>
+        </header>
+        <main class="jogo-tela" id="jogo-tela">${mpConteudoTela()}</main>
+        <nav class="jogo-abas-baixo" aria-label="Painel">${telas.map(tela => botao(tela, 'jogo-aba')).join('')}</nav>
+    </div>`;
+    mpDepoisDaTela();
+}
+
+function mpConteudoTela() {
+    if (mpEstado.tela === 'ranking') return `<div class="jogo-cabeca"><h1>Ranking de níveis</h1><p>O nível da conta soma tudo o que você faz no clã.</p></div><div id="mp-ranking">${mpAbaNiveis()}</div>`;
+    if (mpEstado.tela === 'perfil') return mpTelaPerfil();
+    return mpTelaInicio();
+}
+
+function mpDepoisDaTela() {
+    if (mpEstado.tela === 'perfil') mpSkin3d(app.querySelector('.ficha-skin'), mpResumo().nickSkin);
+    else { mpViewer?.dispose(); mpViewer = null; }
+    if (mpEstado.tela === 'inicio') mpMetaInicio();
+    mpAtualizarHeroiCla();
+}
+
+// Redesenha so a tela (o HUD fica), por exemplo quando o ranking chega.
+function mpRedesenharTela() {
+    const alvo = document.getElementById('jogo-tela');
+    if (!alvo) return;
+    alvo.innerHTML = mpConteudoTela();
+    mpDepoisDaTela();
+}
+
+function mpIr(tela) {
+    if (tela === 'staff') return mpAbrirAdmin();
+    mpEstado.tela = tela;
+    history.replaceState(null, '', `${location.pathname}${location.search}#meu-painel${tela === 'inicio' ? '' : `&tela=${tela}`}`);
+    mpDesenhar();
+    window.scrollTo({ top: 0 });
+}
+
+// ---------- Meu perfil ----------
+
+function mpTelaPerfil() {
+    const { perfil, membro, nivel, xp, nickSkin } = mpResumo();
     const cargo = membro?.cargo || 'Membro';
     const jogo = perfil.jogo || {};
     const online = jogo.visto === 'Online';
     const inativo = membro?.status && membro.status !== 'Ativo';
-    const dias = mpDiasDeCla(membro);
-    const xp = mpXpPublicado(perfil) || mpXp(perfil, dias);
-    const nivel = mpNivelXp(xp.total);
     const tempo = tempoNoCla(membro?.data_entrada);
-    const mes = perfil.ligaMeses?.[0] || perfil.liga;
-    const premios = (perfil.privado?.premios || []).reduce((soma, item) => soma + (Number(item.valor) || 0), 0);
-    const nickSkin = String(nick).replace(/^\*+/, '');
-
-    app.innerHTML = `
-        <div class="mp-topo">
-            <h1>Meu painel</h1>
-            <a href="#meu-painel" class="mp-sair" onclick="mpSair(event)"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Sair</a>
-        </div>
-        <div class="ficha">
-            <section class="ficha-painel ficha-heroi ${escHtml(classeCargo(cargo))}">
-                <div class="ficha-skin" title="Arraste para girar">
-                    <img src="https://mc-heads.net/body/${encodeURIComponent(nickSkin)}/150" alt="Skin de ${escHtml(nick)}" width="75" height="150">
+    const aba = MP_ABAS_PERFIL.some(([id]) => id === mpEstado.aba) ? mpEstado.aba : 'geral';
+    mpEstado.aba = aba;
+    return `<section class="perfil-heroi ${escHtml(classeCargo(cargo))}">
+            <div class="ficha-skin" title="Arraste para girar">
+                <img src="https://mc-heads.net/body/${encodeURIComponent(nickSkin)}/150" alt="Skin de ${escHtml(perfil.nick)}" width="75" height="150">
+            </div>
+            <div class="perfil-id">
+                <h1>${escHtml(perfil.nick)}</h1>
+                <div class="dialogo-selos">
+                    <span class="selo cargo-${escHtml(classeCargo(cargo))}">${escHtml(cargo)}</span>
+                    ${jogo.cla ? `<span class="selo selo-tag">${escHtml(jogo.cla)}</span>` : ''}
+                    ${inativo ? '<span class="selo selo-inativo">Inativo</span>' : ''}
+                    ${jogo.visto ? `<span class="selo ${online ? 'selo-online' : ''}"><span class="ponto"></span> ${online ? 'Online' : `Visto: ${escHtml(jogo.visto)}`}</span>` : ''}
+                    ${tempo ? `<span class="selo"><i class="fa-regular fa-clock" aria-hidden="true"></i> ${escHtml(tempo)} de clã</span>` : ''}
                 </div>
-                <div class="ficha-id">
-                    <div class="ficha-nome">
-                        <h2>${escHtml(nick)}</h2>
-                        <div class="dialogo-selos">
-                            <span class="selo cargo-${escHtml(classeCargo(cargo))}">${escHtml(cargo)}</span>
-                            ${jogo.cla ? `<span class="selo selo-tag">${escHtml(jogo.cla)}</span>` : ''}
-                            ${inativo ? '<span class="selo selo-inativo">Inativo</span>' : ''}
-                            ${jogo.visto ? `<span class="selo ${online ? 'selo-online' : ''}"><span class="ponto"></span> ${online ? 'Online' : `Visto: ${escHtml(jogo.visto)}`}</span>` : ''}
-                            ${tempo ? `<span class="selo"><i class="fa-regular fa-clock" aria-hidden="true"></i> ${escHtml(tempo)} de clã</span>` : ''}
-                        </div>
-                    </div>
-                    <div class="ficha-nivel">
-                        <div class="ficha-nivel-topo">
-                            <span class="ficha-nivel-num">NV ${escHtml(nivel.nivel)}</span>
-                            <span><b>${escHtml(xp.total.toLocaleString('pt-BR'))} XP</b></span>
-                        </div>
+                <div class="perfil-nivel">
+                    <div class="perfil-nv" aria-label="Nível ${nivel.nivel}"><small>NV</small><b>${nivel.nivel}</b></div>
+                    <div class="perfil-nv-barra">
+                        <div class="perfil-nv-topo"><b>${xp.total.toLocaleString('pt-BR')} XP</b><small>faltam ${nivel.faltam.toLocaleString('pt-BR')} para o NV ${nivel.nivel + 1}</small></div>
                         <div class="ficha-barra ficha-barra-ouro" role="progressbar" aria-valuenow="${nivel.pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Nível da conta"><span style="width:${nivel.pct}%"></span></div>
-                        <small>Faltam ${escHtml(nivel.faltam.toLocaleString('pt-BR'))} XP para o NV ${escHtml(nivel.nivel + 1)}</small>
-                        <details class="ficha-xp">
-                            <summary>De onde vem seu XP</summary>
-                            <ul>${xp.fontes.map(fonte => `<li><i class="fa-solid ${fonte.icone}" aria-hidden="true"></i><span>${fonte.rotulo} <small>${escHtml(fonte.detalhe)}</small></span><b>${escHtml(fonte.xp.toLocaleString('pt-BR'))}</b></li>`).join('')}</ul>
-                            <p>Dia de clã 0,5 · 10 pontos da Liga 1 · pódio 30/20/10 · dia de desafios 15 · evento 50 · ¢100k no banco 10 · título 100 · dia de ofensiva 5. O NV N pede 50 × N² de XP.</p>
-                        </details>
                     </div>
-                    <div class="ficha-heroi-cla" id="mp-heroi-cla"></div>
-                    ${mpTitulosEmUso(perfil.titulos)}
                 </div>
-                <div class="ficha-stats">
-                    ${mpStat('fa-trophy', 'Liga', escHtml(mes?.pontos ?? 0), mes?.posicao ? `${escHtml(mes.posicao)}º de ${escHtml(mes.participantes)}` : 'sem pontos no mês')}
-                    ${mpStat('fa-coins', 'Banco', escHtml(mpDinheiro(perfil.banco?.total)), perfil.banco?.posicao ? `${escHtml(perfil.banco.posicao)}º apoiador` : 'sem depósitos')}
-                    ${mpStat('fa-flag-checkered', 'Eventos', escHtml(perfil.eventos?.total ?? 0), 'vencidos')}
-                    ${mpStat('fa-sack-dollar', 'Prêmios', escHtml(mpDinheiro(premios)), 'recebidos')}
-                </div>
-            </section>
-            <div class="ficha-meio">
-                ${mpAtributos(perfil)}
-                ${mpMissoes(perfil)}
+                <div class="ficha-heroi-cla" id="mp-heroi-cla"></div>
+                ${mpTitulosEmUso(perfil.titulos)}
             </div>
-            <div class="mp-abas" role="tablist" aria-label="Seções do painel">
-                ${[['liga', 'fa-chart-column', 'Minha Liga'], ['niveis', 'fa-ranking-star', 'Top níveis'], ['banco', 'fa-gem', 'Tesouro'], ['conquistas', 'fa-award', `Conquistas <small class="mp-aba-conta">${mpContarConquistas(perfil, dias)}/${MP_TOTAL_CONQUISTAS}</small>`], ['conta', 'fa-id-card', 'Conta'], ...(mpEstado.dados.staff ? [['admin', 'fa-user-shield', 'Administração']] : [])]
-                    .map(([id, icone, rotulo]) => `<button type="button" role="tab" class="mp-aba ${mpEstado.aba === id ? 'ativa' : ''}" aria-selected="${mpEstado.aba === id}" onclick="mpTrocarAba('${id}')"><i class="fa-solid ${icone}" aria-hidden="true"></i> ${rotulo}</button>`).join('')}
-            </div>
-            <div id="mp-aba" role="tabpanel">${mpConteudoAba()}</div>
-        </div>`;
-    mpSkin3d(app.querySelector('.ficha-skin'), nickSkin);
-    mpAtualizarHeroiCla();
+        </section>
+        <div class="perfil-abas" role="tablist" aria-label="Seções do perfil">
+            ${MP_ABAS_PERFIL.map(([id, icone, rotulo]) => `<button type="button" role="tab" class="perfil-aba ${aba === id ? 'ativa' : ''}" aria-selected="${aba === id}" onclick="mpTrocarAba('${id}')"><i class="fa-solid ${icone}" aria-hidden="true"></i> ${rotulo}${id === 'conquistas' ? ` <small>${mpContarConquistas(perfil, mpDiasDeCla(membro))}/${MP_TOTAL_CONQUISTAS}</small>` : ''}</button>`).join('')}
+        </div>
+        <div id="mp-aba" role="tabpanel">${mpConteudoAba()}</div>`;
 }
 
 function mpTrocarAba(aba) {
     mpEstado.aba = aba;
-    for (const botao of document.querySelectorAll('.mp-aba')) {
+    for (const botao of document.querySelectorAll('.perfil-aba')) {
         const ativa = botao.getAttribute('onclick').includes(`'${aba}'`);
         botao.classList.toggle('ativa', ativa);
         botao.setAttribute('aria-selected', String(ativa));
@@ -393,14 +445,37 @@ function mpTrocarAba(aba) {
 
 function mpConteudoAba() {
     const { perfil, membro } = mpEstado.dados;
-    if (mpEstado.aba === 'admin' && mpEstado.dados.staff) return mpAbaAdmin(membro);
     if (mpEstado.aba === 'banco') return mpAbaBanco(perfil);
     if (mpEstado.aba === 'conta') return mpAbaConta(perfil, membro);
-    // A grade de conquistas e grande: fica numa aba (16/10/2026), para nao
-    // empurrar a Liga e o Tesouro para o fim da pagina.
+    // A grade de conquistas e grande: fica numa aba (16/10/2026).
     if (mpEstado.aba === 'conquistas') return mpConquistasGrade(perfil, mpDiasDeCla(membro));
-    if (mpEstado.aba === 'niveis') return mpAbaNiveis();
-    return mpAbaMinhaLiga(perfil);
+    if (mpEstado.aba === 'liga') return mpAbaMinhaLiga(perfil);
+    return mpAbaGeral();
+}
+
+// Visao geral: os numeros, os atributos (escadas dos titulos) e de onde vem o XP.
+function mpAbaGeral() {
+    const { perfil, xp } = mpResumo();
+    const mes = perfil.ligaMeses?.[0] || perfil.liga;
+    const premios = (perfil.privado?.premios || []).reduce((soma, item) => soma + (Number(item.valor) || 0), 0);
+    return `<div class="perfil-geral">
+        <div class="lg-numeros">
+            ${mpStat('fa-trophy', 'Liga do mês', escHtml((mes?.pontos ?? 0).toLocaleString('pt-BR')), 'pontos')}
+            ${mpStat('fa-coins', 'Banco', escHtml(mpDinheiro(perfil.banco?.total)), perfil.banco?.posicao ? `${escHtml(perfil.banco.posicao)}º apoiador` : 'sem depósitos')}
+            ${mpStat('fa-flag-checkered', 'Eventos', escHtml(perfil.eventos?.total ?? 0), 'vencidos')}
+            ${mpStat('fa-sack-dollar', 'Prêmios', escHtml(mpDinheiro(premios)), 'recebidos')}
+        </div>
+        <div class="perfil-geral-grade">
+            ${mpAtributos(perfil)}
+            ${mpPainel('fa-star', 'De onde vem seu XP', `<ul class="perfil-xp">${xp.fontes.filter(fonte => fonte.xp > 0).sort((a, b) => b.xp - a.xp).map(fonte => `<li>
+                    <i class="fa-solid ${fonte.icone}" aria-hidden="true"></i>
+                    <span>${fonte.rotulo} <small>${escHtml(fonte.detalhe)}</small></span>
+                    <b>${escHtml(fonte.xp.toLocaleString('pt-BR'))}</b>
+                    <span class="perfil-xp-barra"><span style="width:${Math.round(fonte.xp / Math.max(1, xp.total) * 100)}%"></span></span>
+                </li>`).join('')}</ul>
+                <details class="perfil-xp-regras"><summary>Como o XP é calculado</summary><p>Dia de clã 0,5 · 10 pontos da Liga 1 · pódio 30/20/10 · dia de desafios 15 · evento 50 · ¢100k no banco 10 · título 100 · dia de ofensiva 5. O NV N pede 50 × N² de XP.</p></details>`, { classe: 'perfil-xp-painel', extra: `${xp.total.toLocaleString('pt-BR')} XP` })}
+        </div>
+    </div>`;
 }
 
 // Todas as cartas da grade: os titulos do catalogo mais a escada de tempo.
@@ -736,18 +811,6 @@ function mpAbaConta(perfil, membro) {
 
 // O unico login do painel da staff (16/10/2026): a API confere o cargo agora e
 // devolve o token no formato de sempre, que vai nos cookies que o painel le.
-function mpAbaAdmin(membro) {
-    return `<div class="mp-grade">
-        <section class="info-bloco info-bloco-largo mp-admin">
-            <h3><i class="fa-solid fa-user-shield"></i> Painel da staff</h3>
-            <p class="mp-texto">Como ${escHtml(membro?.cargo || 'staff')}, você tem acesso ao painel da staff: membros, solicitações, recrutamento e o que mais o seu cargo permite.</p>
-            <button type="button" class="button mp-entrar" onclick="mpAbrirAdmin()"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> Abrir a administração</button>
-            <p class="mp-nota" id="mp-admin-erro" hidden></p>
-            <p class="mp-nota">O acesso confere o seu cargo a cada ação e vale por 2 dias; depois o site renova sozinho pelo seu Discord.</p>
-        </section>
-    </div>`;
-}
-
 async function mpAbrirAdmin() {
     const token = mpLerSessao();
     const erro = mensagem => {

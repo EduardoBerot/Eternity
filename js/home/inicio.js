@@ -71,14 +71,6 @@ function renderInicio() {
             </div>
         </section>
 
-        <section class="faixa faixa-escura" id="inicio-meta-banco" hidden>
-            <div class="miolo">
-                <h2>Meta do banco</h2>
-                <p class="texto">Cada depósito no banco do clã durante a semana aumenta o adicional que a Eternity paga nos pódios dos torneios.</p>
-                <div id="inicio-meta-banco-card"></div>
-            </div>
-        </section>
-
         <section class="chamada">
             <div class="miolo">
                 <div>
@@ -92,7 +84,6 @@ function renderInicio() {
         ${rodapeSite()}`;
     carregarMembrosInicio();
     carregarHall();
-    carregarMetaBancoInicio();
     carregarStatusServidor();
     marcaNoLogo = false;
     atualizarMarca(true);
@@ -259,16 +250,6 @@ async function carregarHall() {
     } catch (_) {
         hall.innerHTML = '<p class="texto">O Hall não carregou. Tente de novo em instantes.</p>';
     }
-}
-
-// Meta do banco (meta-banco.js): a secao nasce escondida e so aparece quando a
-// API entrega a meta -- enquanto o Fundador nao a divulga, a resposta publica e
-// 404 e a pagina segue como antes.
-async function carregarMetaBancoInicio() {
-    const secao = document.getElementById('inicio-meta-banco');
-    try {
-        if (await carregarMetaBanco(document.getElementById('inicio-meta-banco-card'))) secao.hidden = false;
-    } catch (_) { /* sem meta, sem secao */ }
 }
 
 async function carregarStatusServidor() {

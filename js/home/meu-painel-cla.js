@@ -32,16 +32,13 @@ async function mpCarregarCla() {
         mpEstado.cla = 'erro';
     }
     if (!location.hash.startsWith('#meu-painel') || !mpEstado.dados) return;
-    mpAtualizarHeroiCla();
-    if (['liga', 'niveis'].includes(mpEstado.aba)) {
-        const alvo = document.getElementById('mp-aba');
-        if (alvo) alvo.innerHTML = mpConteudoAba();
-    }
+    if (mpEstado.tela !== 'perfil' || mpEstado.aba === 'liga') mpRedesenharTela();
+    else mpAtualizarHeroiCla();
 }
 
 function mpEsperandoCla(titulo) {
     if (mpEstado.cla === 'erro') {
-        return `<section class="info-bloco"><p class="info-vazio">Não consegui carregar ${titulo} agora. <button type="button" class="mp-link" onclick="mpEstado.cla = null; mpTrocarAba(mpEstado.aba); mpCarregarCla()">Tentar de novo</button></p></section>`;
+        return `<section class="info-bloco"><p class="info-vazio">Não consegui carregar ${titulo} agora. <button type="button" class="mp-link" onclick="mpEstado.cla = null; mpRedesenharTela(); mpCarregarCla()">Tentar de novo</button></p></section>`;
     }
     return `<section class="info-bloco"><p class="info-vazio"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Carregando ${titulo}...</p></section>`;
 }
@@ -57,7 +54,7 @@ function mpAtualizarHeroiCla() {
     const eu = mpMinhaLinha();
     if (!alvo || !eu) return;
     const total = mpCla().ranking.length;
-    alvo.innerHTML = `<button type="button" class="ficha-rank" onclick="mpTrocarAba('niveis')" title="Ver o Top níveis">
+    alvo.innerHTML = `<button type="button" class="ficha-rank" onclick="mpIr('ranking')" title="Ver o ranking">
             <i class="fa-solid fa-ranking-star" aria-hidden="true"></i> ${eu.posicao}º de ${total} no clã
         </button>${eu.semana ? `<span class="ficha-semana"><i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i> +${eu.semana.toLocaleString('pt-BR')} XP na semana</span>` : ''}`;
 }
@@ -148,7 +145,7 @@ function mpLinhaNivel(linha, eu, ordem) {
 function mpNiveis(grupo, valor) {
     if (grupo === 'filtro') mpEstado.nivFiltro = valor;
     if (grupo === 'ordem') mpEstado.nivOrdem = valor;
-    const alvo = document.getElementById('mp-aba');
+    const alvo = document.getElementById('mp-ranking');
     if (alvo) alvo.innerHTML = mpAbaNiveis();
 }
 
@@ -283,4 +280,122 @@ function mpLiga(campo, valor) {
     if (campo === 'origem') mpEstado.ligaOrigem = mpEstado.ligaOrigem === valor ? null : valor;
     const alvo = document.getElementById('mp-aba');
     if (alvo) alvo.innerHTML = mpAbaMinhaLiga(mpEstado.dados.perfil);
+}
+
+// ---------- Inicio do jogo (18/10/2026) ----------
+// A tela principal e o cla: a temporada (o mes da Liga) com contagem, o cla na
+// Liga em totais, as missoes do dia, a meta do banco e o topo do ranking. O que
+// e so da pessoa fica em Meu perfil.
+
+function mpDiasParaFimDoMes(now = new Date()) {
+    const [ano, mes, dia] = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(now).split('-').map(Number);
+    const total = new Date(Date.UTC(ano, mes, 0)).getUTCDate();
+    return { restam: total - dia, pct: Math.round(dia / total * 100), mes: `${ano}-${String(mes).padStart(2, '0')}` };
+}
+
+function mpTelaInicio() {
+    const { perfil } = mpResumo();
+    const temporada = mpDiasParaFimDoMes();
+    return `<section class="inicio-boas">
+            <div>
+                <small>Temporada de ${MP_MESES_LONGOS[Number(temporada.mes.slice(5)) - 1]}</small>
+                <h1>Bem-vindo de volta, <span>${escHtml(perfil.nick)}</span></h1>
+            </div>
+            <div class="inicio-temporada" title="A Liga fecha no último dia do mês">
+                <span><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i> ${temporada.restam ? `A Liga fecha em <b>${temporada.restam} ${temporada.restam === 1 ? 'dia' : 'dias'}</b>` : '<b>Último dia</b> da Liga'}</span>
+                <div class="ficha-barra"><span style="width:${temporada.pct}%"></span></div>
+            </div>
+        </section>
+        <div class="inicio-grade">
+            ${mpCartaoClaNaLiga()}
+            ${mpMissoes(perfil)}
+            <section class="ficha-painel inicio-meta" id="inicio-meta" hidden></section>
+            ${mpCartaoTopo()}
+        </div>`;
+}
+
+function mpCartaoClaNaLiga() {
+    const cla = mpCla();
+    if (!cla) {
+        const texto = mpEstado.cla === 'erro'
+            ? 'Não consegui carregar o clã agora. <button type="button" class="mp-link" onclick="mpEstado.cla = null; mpRedesenharTela(); mpCarregarCla()">Tentar de novo</button>'
+            : '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Carregando o clã...';
+        return `<section class="ficha-painel inicio-cla"><p class="info-vazio">${texto}</p></section>`;
+    }
+    const resumo = cla.cla;
+    if (!resumo?.servidores?.length) return '';
+    const servidores = resumo.servidores;
+    const sIndice = Math.min(mpEstado.inicioServidor || 0, servidores.length - 1);
+    const s = servidores[sIndice];
+    const origens = resumo.origens;
+    const ganhos = s.porOrigem.reduce((soma, v) => soma + Math.max(0, v), 0);
+    const participacao = s.membrosAtuais ? Math.min(100, Math.round(s.pontuaram / s.membrosAtuais * 100)) : null;
+    const maiorSemana = Math.max(1, ...s.semanas.map(semana => semana.pontos));
+    const meus = cla.liga?.servidores.find(item => item.servidor === s.servidor)?.meses?.[s.mes];
+    const anterior = s.historico.filter(item => item.mes < s.mes).at(-1);
+    const chips = servidores.length > 1
+        ? `<span class="niv-grupo inicio-servidores">${servidores.map((item, i) => `<button type="button" class="mp-chip ${i === sIndice ? 'ativo' : ''}" aria-pressed="${i === sIndice}" onclick="mpEstado.inicioServidor = ${i}; mpRedesenharTela()">${escHtml(SERVIDORES[item.servidor] || item.servidor)}</button>`).join('')}</span>`
+        : '';
+    const origensHtml = origens.map((origem, o) => ({ origem, valor: s.porOrigem[o] }))
+        .filter(item => item.valor > 0).sort((a, b) => b.valor - a.valor).slice(0, 4)
+        .map(item => `<li><i style="background:${MP_ORIGENS[item.origem]?.cor || '#6b8193'}"></i>${MP_ORIGENS[item.origem]?.nome || escHtml(item.origem)} <b>${ganhos ? Math.round(item.valor / ganhos * 100) : 0}%</b></li>`).join('');
+    return `<section class="ficha-painel inicio-cla">
+        <h3 class="ficha-titulo"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> ${escHtml(s.cla || 'Clã')} na Liga ${chips}</h3>
+        <div class="inicio-cla-topo">
+            <div class="inicio-cla-pos ${s.liga?.posicao && s.liga.posicao <= 3 ? `podio-${s.liga.posicao}` : ''}">
+                <strong>${s.liga?.posicao ? `${s.liga.posicao}º` : '—'}</strong>
+                <small>${s.liga?.final ? 'resultado final' : 'posição agora'}</small>
+            </div>
+            <div class="inicio-cla-numeros">
+                <div><span>Pontos do clã</span><b>${(s.liga?.pontos ?? ganhos).toLocaleString('pt-BR')}</b>${anterior?.posicao ? `<small>mês passado: ${anterior.posicao}º</small>` : ''}</div>
+                <div><span>Pontuaram</span><b>${s.pontuaram}${s.membrosAtuais ? ` <small>de ${s.membrosAtuais}</small>` : ''}</b>${participacao !== null ? `<div class="ficha-barra"><span style="width:${participacao}%"></span></div>` : ''}</div>
+                <div><span>Você</span><b>${meus ? `${meus.pontos.toLocaleString('pt-BR')} <small>pts</small>` : '<small>sem pontos</small>'}</b>${meus?.posicao ? `<small>${meus.posicao}º do clã</small>` : '<small>pontue para aparecer</small>'}</div>
+            </div>
+        </div>
+        <div class="inicio-cla-baixo">
+            <div class="inicio-semanas" aria-label="Pontos do clã por semana">
+                ${s.semanas.map(semana => `<div class="inicio-semana" title="${escHtml(semana.rotulo)}: ${semana.pontos.toLocaleString('pt-BR')} pontos">
+                    <span class="inicio-semana-valor">${semana.pontos.toLocaleString('pt-BR')}</span>
+                    <span class="inicio-semana-barra"><span style="height:${Math.max(4, Math.round(Math.max(0, semana.pontos) / maiorSemana * 100))}%"></span></span>
+                    <small>${semana.numero ? `${semana.numero}ª sem` : ''}</small>
+                </div>`).join('')}
+            </div>
+            <ul class="inicio-origens">${origensHtml}</ul>
+        </div>
+        <button type="button" class="mp-link inicio-mais" onclick="mpEstado.aba = 'liga'; mpIr('perfil')">Ver a minha Liga <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+    </section>`;
+}
+
+function mpCartaoTopo() {
+    const cla = mpCla();
+    if (!cla) return '';
+    const eu = mpMinhaLinha();
+    const topo = cla.ranking.slice(0, 5);
+    const linhas = [...topo, ...(eu && eu.posicao > 5 ? [null, eu] : [])];
+    const emAlta = cla.ranking.filter(linha => linha.semana > 0).sort((a, b) => b.semana - a.semana).slice(0, 3);
+    const itens = linhas.map(linha => (linha === null
+        ? '<li class="inicio-ranking-pula" aria-hidden="true">⋯</li>'
+        : `<li class="${linha.nick === cla.eu ? 'eu' : ''}">
+            <span class="niv-pos">${linha.posicao}º</span>
+            ${mpCabeca(linha.nick, 24)}
+            <span class="inicio-ranking-nick">${escHtml(linha.nick)}</span>
+            <span class="niv-nv">NV ${linha.nivel}</span>
+        </li>`)).join('');
+    return `<section class="ficha-painel inicio-topo">
+        <h3 class="ficha-titulo"><i class="fa-solid fa-ranking-star" aria-hidden="true"></i> Top níveis</h3>
+        <ol class="inicio-ranking">${itens}</ol>
+        ${emAlta.length ? `<div class="inicio-em-alta"><span><i class="fa-solid fa-fire" aria-hidden="true"></i> Em alta na semana</span>${emAlta.map(linha => `<span class="inicio-em-alta-item">${escHtml(linha.nick)} <b>+${linha.semana.toLocaleString('pt-BR')}</b></span>`).join('')}</div>` : ''}
+        <button type="button" class="mp-link inicio-mais" onclick="mpIr('ranking')">Ver o ranking completo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+    </section>`;
+}
+
+// A meta da semana com o desenho de meta-banco.js (o mesmo que saiu da pagina
+// publica em 18/10/2026): so aparece quando a API entrega a meta.
+function mpMetaInicio() {
+    const alvo = document.getElementById('inicio-meta');
+    const meta = mpEstado.meta;
+    if (!alvo || !meta?.degraus?.length || typeof metaBancoHTML !== 'function') return;
+    alvo.innerHTML = metaBancoHTML(meta);
+    alvo.hidden = false;
+    alvo.querySelector('.mb-card')?.classList.add('mb-visivel');
 }
