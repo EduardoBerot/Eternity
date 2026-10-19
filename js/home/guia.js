@@ -99,7 +99,7 @@ const GUIA_REGRAS = `
         <section class="guia-card">
             <h3><i class="fa-solid fa-clock"></i> Atividade</h3>
             <p><b>10 dias offline resultam em kick.</b> Com <b>3 meses offline</b>, o trust da casa é retirado e os itens vão para o banco de itens do clã.</p>
-            <p>O status de <b>confiável</b> depende da análise dos líderes e é exigido nas áreas coletivas.</p>
+            <p>O <b>confiável</b> é automático: a Eternity o dá a quem completa <b>20 dias de clã</b>, e ele é exigido nas farms coletivas.</p>
         </section>
         <section class="guia-card">
             <h3><i class="fa-solid fa-khanda"></i> PvP</h3>
@@ -114,7 +114,7 @@ const GUIA_REGRAS = `
         </section>
         <section class="guia-card">
             <h3><i class="fa-solid fa-crown"></i> Cargos e títulos</h3>
-            <p>A cor define a hierarquia e o cargo define a função. Dono tem autonomia total; Coordenador organiza projetos; Supervisor cuida da cidade e da atividade; Auxiliar recruta e apoia novatos.</p>
+            <p>A cor define a hierarquia e o cargo define a função. Dono conduz os ciclos e as promoções da staff; Coordenador acompanha a gestão; Supervisor zela pela cidade e pelas farms; Auxiliar é mentor dos novatos.</p>
             <p>Títulos vêm do mcMMO, dos desafios, dos torneios e da Liga, do banco do clã e do tempo de clã (Tyrael aos 120 dias até Raziel aos 5 anos). A lista completa está na Wiki; peça a sua tag à Eternity no jogo.</p>
         </section>
     </div>`;
