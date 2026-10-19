@@ -315,15 +315,16 @@ function mpTelaInicio() {
         <div class="inicio-grade">
             <div class="inicio-col">
                 ${mpCartaoClaNaLiga()}
+                ${mpCartaoTorneios()}
                 ${mpCartaoFarms()}
             </div>
             <div class="inicio-col">
                 ${mpMissoes(perfil)}
+                ${mpCartaoMeta()}
                 ${mpCartaoTopo()}
                 ${mpCartaoPedidos()}
             </div>
-        </div>
-        <section class="ficha-painel inicio-meta" id="inicio-meta" hidden></section>`;
+        </div>`;
 }
 
 function mpCartaoClaNaLiga() {
@@ -399,17 +400,6 @@ function mpCartaoTopo() {
         ${emAlta.length ? `<div class="inicio-em-alta"><span><i class="fa-solid fa-fire" aria-hidden="true"></i> Em alta na semana</span>${emAlta.map(linha => `<a class="inicio-em-alta-item" ${mpLinkMembro(linha.nick)}>${escHtml(linha.nick)} <b>+${linha.semana.toLocaleString('pt-BR')}</b></a>`).join('')}</div>` : ''}
         <button type="button" class="mp-link inicio-mais" onclick="mpIr('ranking')">Ver o ranking completo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
     </section>`;
-}
-
-// A meta da semana com o desenho de meta-banco.js (o mesmo que saiu da pagina
-// publica em 18/10/2026): so aparece quando a API entrega a meta.
-function mpMetaInicio() {
-    const alvo = document.getElementById('inicio-meta');
-    const meta = mpEstado.meta;
-    if (!alvo || !meta?.degraus?.length || typeof metaBancoHTML !== 'function') return;
-    alvo.innerHTML = metaBancoHTML(meta);
-    alvo.hidden = false;
-    alvo.querySelector('.mb-card')?.classList.add('mb-visivel');
 }
 
 // ---------- Perfil de outro membro (18/10/2026) ----------

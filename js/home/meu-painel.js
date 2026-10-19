@@ -21,7 +21,7 @@ const MP_ERROS = {
 
 // cla: ranking de nivel e Liga pessoal (meu-painel-cla.js), pedido depois da ficha.
 // jornada: Jornada dos 7 Dias (meu-painel-jornada.js), so de quem faz.
-const mpEstado = { dados: null, meta: null, copa: null, cla: null, jornada: null, tela: 'inicio', aba: 'geral', mes: 0 };
+const mpEstado = { dados: null, meta: null, copa: null, cla: null, jornada: null, torneios: null, tela: 'inicio', aba: 'geral', mes: 0 };
 
 function mpLerSessao() {
     try { return localStorage.getItem(MP_CHAVE_SESSAO); } catch { return null; }
@@ -236,6 +236,7 @@ async function renderMeuPainel() {
     mpCarregarCla();
     mpCarregarAcoes();
     mpCarregarJornada();
+    mpCarregarTorneios();
     if (mpEstado.tela === 'jogador') mpAbrirJogador(mpEstado.jogadorNick);
 }
 
@@ -517,7 +518,6 @@ function mpConteudoTela() {
 function mpDepoisDaTela() {
     if (mpEstado.tela === 'perfil' || (mpEstado.tela === 'jogador' && mpEstado.jogador?.perfil)) mpSkin3d(app.querySelector('.ficha-skin'), mpResumo().nickSkin);
     else { mpViewer?.dispose(); mpViewer = null; }
-    if (mpEstado.tela === 'inicio') mpMetaInicio();
     if (mpEstado.tela === 'cidade') cidadeMontarMapa(mpEu().perfil.nick);
     else cidadeLimpar();
     mpAtualizarHeroiCla();

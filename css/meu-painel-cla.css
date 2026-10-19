@@ -484,8 +484,6 @@ body.modo-jogo .page-meu-painel { padding: 0; }
 }
 
 .inicio-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-.inicio-meta { padding: 0; background: none; border: 0; clip-path: none; box-shadow: none; }
-.inicio-meta[hidden] { display: none; }
 
 .inicio-servidores { margin-left: auto; }
 .inicio-servidores .mp-chip { padding: 0.25em 0.8em; font-size: 0.72rem; letter-spacing: 0; text-transform: none; }
@@ -1298,3 +1296,232 @@ body.modo-jogo .page-meu-painel { padding: 0; }
 }
 
 .lateral-recolhida .lateral-recolher i { transform: rotate(180deg); }
+
+/* ================= A semana no Inicio (18/10/2026) =================
+   Meta do banco e torneios da semana (js/home/meu-painel-semana.js), no mesmo
+   molde dos outros cards: ficha-painel, titulo em caixa alta, numeros em
+   Conthrax e texto corrido em sans. */
+
+.semana-meta, .semana-torneios { display: flex; flex-direction: column; gap: 14px; }
+.semana-meta .ficha-titulo, .semana-torneios .ficha-titulo { margin-bottom: 0; }
+.semana-meta .ficha-titulo small, .semana-torneios .ficha-titulo small { display: inline-flex; align-items: center; gap: 5px; }
+
+.semana-meta-numeros {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+
+    b { font-size: 1.5rem; color: var(--gelo); }
+    span { font-family: var(--sans); font-size: 0.85rem; color: var(--nevoa); }
+    strong { margin-left: auto; font-size: 1rem; color: var(--ficha-ouro); }
+}
+
+.semana-meta.cheia { border-color: rgba(245, 197, 66, 0.45); }
+
+.semana-trilha { position: relative; }
+
+.semana-marca {
+    position: absolute;
+    top: -3px;
+    bottom: -3px;
+    width: 2px;
+    transform: translateX(-1px);
+    background: rgba(232, 244, 248, 0.35);
+}
+
+.semana-marca.feita { background: #fff6d6; box-shadow: 0 0 6px rgba(245, 197, 66, 0.8); }
+
+.semana-degraus {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 8px 6px;
+        border: 1px solid rgba(232, 244, 248, 0.08);
+        background: rgba(4, 8, 15, 0.35);
+        text-align: center;
+        transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    b { font-size: 0.95rem; color: var(--nevoa-escura); }
+    small, em { font-family: var(--sans); font-size: 0.7rem; font-style: normal; color: var(--nevoa-escura); }
+    em { color: var(--nevoa); }
+    li.feito b { color: var(--gelo); }
+    li.feito small { color: var(--nevoa); }
+    li.agora { border-color: rgba(245, 197, 66, 0.55); background: rgba(245, 197, 66, 0.08); }
+    li.agora b { color: var(--ficha-ouro); }
+    li:hover { border-color: rgba(232, 244, 248, 0.2); }
+}
+
+.semana-chamada,
+.semana-premio {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 0.84rem;
+    color: var(--nevoa);
+
+    > i { margin-top: 3px; color: var(--ficha-ouro); }
+    b { color: var(--gelo); }
+}
+
+.semana-meta-pe {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(232, 244, 248, 0.12);
+}
+
+.semana-voce {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    color: var(--nevoa);
+
+    i { color: var(--ficha-xp); }
+    .fa-coins { color: var(--ficha-ouro); }
+    b { color: var(--gelo); }
+}
+
+.semana-apoiadores {
+    display: flex;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li { display: flex; align-items: center; gap: 6px; padding: 3px 8px 3px 3px; background: rgba(4, 8, 15, 0.35); }
+    span { display: none; }
+    b { font-family: var(--sans); font-size: 0.74rem; color: var(--ficha-ouro); }
+}
+
+.semana-torneios-meio {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px;
+
+    h4 { margin: 0 0 8px; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--nevoa-escura); }
+}
+
+.semana-corrida,
+.semana-meus,
+.semana-todos ul {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.semana-corrida li {
+    display: grid;
+    grid-template-columns: 2.2em minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border: 1px solid transparent;
+    background: rgba(4, 8, 15, 0.35);
+    transition: border-color 0.15s ease;
+
+    b { font-size: 0.85rem; color: var(--gelo); }
+}
+
+.semana-corrida li:hover { border-color: rgba(232, 244, 248, 0.14); }
+.semana-corrida li.eu { border-color: rgba(46, 230, 240, 0.4); background: rgba(46, 230, 240, 0.08); }
+.semana-corrida li.eu .semana-tag { color: var(--aqua); }
+.semana-tag { font-size: 0.85rem; color: var(--gelo); }
+.semana-corrida-podios { font-family: var(--sans); font-size: 0.72rem; color: var(--nevoa-escura); }
+
+.semana-lugar { font-weight: 700; color: var(--nevoa); }
+.semana-lugar.lugar-1 { color: var(--ficha-ouro); }
+.semana-lugar.lugar-2 { color: #c8d6e5; }
+.semana-lugar.lugar-3 { color: #e09a5a; }
+
+.semana-meus li {
+    display: grid;
+    grid-template-columns: 2.2em minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border: 1px solid rgba(245, 197, 66, 0.25);
+    background: rgba(245, 197, 66, 0.06);
+
+    span:not(.semana-lugar) { overflow: hidden; font-size: 0.8rem; color: var(--gelo); text-overflow: ellipsis; white-space: nowrap; }
+    b { font-family: var(--sans); font-size: 0.76rem; color: var(--ficha-xp); }
+}
+
+.semana-vazio { margin: 0; font-family: var(--sans); font-size: 0.82rem; color: var(--nevoa); }
+
+.semana-todos {
+    padding-top: 12px;
+    border-top: 1px dashed rgba(232, 244, 248, 0.12);
+
+    summary {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        list-style: none;
+        font-family: var(--sans);
+        font-size: 0.85rem;
+        color: var(--aqua);
+        cursor: pointer;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+    summary:hover { text-decoration: underline; }
+    summary i { font-size: 0.7rem; transition: transform 0.2s ease; }
+    &[open] summary i { transform: rotate(180deg); }
+
+    ul {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
+        gap: 6px;
+        margin-top: 10px;
+    }
+
+    li {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 8px 10px;
+        border: 1px solid transparent;
+        background: rgba(4, 8, 15, 0.35);
+    }
+
+    li.com-cla { border-color: rgba(46, 230, 240, 0.25); }
+    li > b { font-size: 0.72rem; letter-spacing: 0.05em; color: var(--gelo); }
+    li > span { display: flex; flex-direction: column; gap: 2px; font-family: var(--sans); font-size: 0.78rem; color: var(--nevoa); }
+    li > span .cla { color: var(--aqua); }
+    small { font-size: 0.68rem; color: var(--nevoa-escura); }
+}
+
+.jogo :is(.semana-meta, .semana-torneios) :is(p, li, span, small, em, summary, code):not(.semana-lugar):not(.semana-tag) { font-family: var(--sans); }
+.jogo :is(.semana-meta, .semana-torneios) .inicio-cla-numeros span { font-family: var(--sans); }
+
+@media (max-width: 860px) {
+    .semana-torneios-meio { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 480px) {
+    .semana-degraus { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.semana-torneios-meio h4 small { margin-left: 8px; font-family: var(--sans); font-size: 0.72rem; letter-spacing: 0; text-transform: none; color: var(--ficha-xp); }
+.semana-mais { margin: 6px 0 0; font-family: var(--sans); font-size: 0.76rem; color: var(--nevoa-escura); }
+.semana-mais b { font-weight: 400; color: var(--nevoa); }
+.semana-todos li > span .eu { color: var(--ficha-ouro); }
