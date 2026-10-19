@@ -114,6 +114,16 @@ function mpCartaoTorneios() {
         ? `<ul class="semana-meus">${meus.slice(0, MOSTRAR).map(item => `<li>${mpLugar(item.posicao)}<span>${escHtml(item.nome)}</span>${premio(item.posicao) ? `<b>+${mbCompacto(premio(item.posicao))}</b>` : ''}</li>`).join('')}</ul>${meus.length > MOSTRAR ? `<p class="semana-mais">e mais ${meus.length - MOSTRAR} ${meus.length - MOSTRAR === 1 ? 'pódio' : 'pódios'} na lista de todos os torneios</p>` : ''}`
         : '<p class="semana-vazio">Você ainda não está em nenhum pódio. Abra <code>/torneio</code> no jogo e escolha um para disputar.</p>';
 
+    // Os 5 do clã que mais somam pontos de Liga com os pódios da semana.
+    const destaques = (t.topPontuadores || []).map((item, i) => `<li class="${chaves.has(mpNickChave(item.nick)) ? 'eu' : ''}">
+            <a ${mpLinkMembro(item.nick)} title="Ver o perfil de ${escHtml(item.nick)}">
+                <span class="semana-lugar lugar-${i + 1}">${i + 1}º</span>
+                ${mpCabeca(item.nick, 24)}
+                <span class="semana-destaque-nick">${escHtml(item.nick)}<small>${item.podios} ${item.podios === 1 ? 'pódio' : 'pódios'}</small></span>
+                <b>${item.pontos.toLocaleString('pt-BR')}<small>pts</small></b>
+            </a>
+        </li>`).join('');
+
     const todos = t.torneios.map(torneio => `<li class="${torneio.top.some(item => item.cla) ? 'com-cla' : ''}">
             <b>${escHtml(torneio.nome)}</b>
             <span>${torneio.top.map(item => `<span class="${item.cla ? 'cla' : ''} ${chaves.has(mpNickChave(item.nick)) ? 'eu' : ''}">${mpLugar(item.posicao)} ${escHtml(item.nick)}${!item.cla && item.tag ? ` <small>${escHtml(item.tag)}</small>` : ''}</span>`).join('') || '<small>sem pódio</small>'}</span>
@@ -136,6 +146,10 @@ function mpCartaoTorneios() {
                 ${seus}
             </div>
         </div>
+        ${destaques ? `<div class="semana-destaques">
+            <h4>Top pontuadores da semana</h4>
+            <ol>${destaques}</ol>
+        </div>` : ''}
         ${taxa && premio(1) ? `<p class="semana-premio"><i class="fa-solid fa-coins" aria-hidden="true"></i> <span>O clã paga <b>${mbPct(taxa)}</b> de adicional por pódio: <b>${mbCompacto(premio(1))}</b> no 1º, <b>${mbCompacto(premio(2))}</b> no 2º e <b>${mbCompacto(premio(3))}</b> no 3º, na segunda-feira.</span></p>` : ''}
         <details class="semana-todos">
             <summary>Ver o pódio de todos os torneios <i class="fa-solid fa-chevron-down" aria-hidden="true"></i></summary>

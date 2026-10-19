@@ -1528,3 +1528,58 @@ body.modo-jogo .page-meu-painel { padding: 0; }
 
 /* "Você": o cartao do jogador abre o grupo e a Jornada vem logo abaixo. */
 .lateral-voce .lateral-jogador { margin-bottom: 4px; }
+
+/* Top pontuadores da semana no card dos torneios: 5 colunas no computador. */
+.semana-destaques {
+    h4 { margin: 0 0 8px; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--nevoa-escura); }
+
+    ol {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 6px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        height: 100%;
+        padding: 10px 6px;
+        box-sizing: border-box;
+        border: 1px solid transparent;
+        background: rgba(4, 8, 15, 0.35);
+        text-align: center;
+        text-decoration: none;
+        transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    a:hover { border-color: rgba(46, 230, 240, 0.3); background: rgba(46, 230, 240, 0.06); }
+    li.eu a { border-color: rgba(245, 197, 66, 0.45); background: rgba(245, 197, 66, 0.06); }
+    .niv-cabeca { image-rendering: pixelated; }
+    b { font-size: 0.9rem; color: var(--gelo); }
+    b small { margin-left: 3px; font-family: var(--sans); font-size: 0.68rem; font-weight: 400; color: var(--nevoa-escura); }
+}
+
+.semana-destaque-nick {
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    overflow: hidden;
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    color: var(--gelo);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    small { font-size: 0.68rem; color: var(--nevoa-escura); }
+}
+
+@media (max-width: 860px) {
+    .semana-destaques ol { grid-template-columns: minmax(0, 1fr); }
+    .semana-destaques a { flex-direction: row; justify-content: flex-start; gap: 10px; padding: 6px 8px; text-align: left; }
+    .semana-destaques .semana-destaque-nick { flex: 1; }
+}
