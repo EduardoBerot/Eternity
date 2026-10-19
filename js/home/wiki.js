@@ -99,7 +99,8 @@ const WIKI_WARPS = [
     ['/go ETYDubai', 'O bairro dos sheiks'],
 ];
 
-function renderWiki() {
+// `secaoFixa`: rota que ja nasce numa secao (#historia).
+function renderWiki(secaoFixa) {
     app.innerHTML = `
         <header class="cabeca-pagina">
             <div class="miolo">
@@ -182,7 +183,7 @@ function renderWiki() {
     // #wiki?secao=titulos. O route() rola para o topo logo depois do render,
     // entao a ida a secao espera o proximo quadro; e repete quando as cabecas
     // da torre chegam, porque elas podem mudar a altura dos andares.
-    const secao = new URLSearchParams(location.hash.split('?')[1] || '').get('secao');
+    const secao = secaoFixa || new URLSearchParams(location.hash.split('?')[1] || '').get('secao');
     const irParaPedida = () => {
         if (secao) document.getElementById(`wiki-${secao}`)?.scrollIntoView({ block: 'start' });
     };

@@ -68,6 +68,8 @@ const ROTAS = {
     guia: { menu: 'join', render: () => openGuia() },
     membros: { menu: 'hall', render: () => renderMembros() },
     wiki: { menu: 'wiki', render: () => renderWiki() },
+    // Link direto da Historia (19/10/2026): a Wiki aberta na secao.
+    historia: { menu: 'wiki', render: () => renderWiki('historia') },
     cidade: { menu: 'city', render: () => renderCidadePublica() },
     atualizar: { menu: null, render: () => openAtualizar() },
     // Painel do membro, com login do Discord (meu-painel.js). E o unico login do
