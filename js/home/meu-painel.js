@@ -408,6 +408,69 @@ function mpResumo(alvo = mpAlvo()) {
     return { perfil, membro, dias, xp, nivel: mpNivelXp(xp.total), nickSkin: String(perfil.nick).replace(/^\*+/, ''), proprio: alvo.proprio !== false };
 }
 
+// Menu lateral (18/10/2026): no computador as telas ficam numa coluna a
+// esquerda, agrupadas, com o jogador no topo; recolhida, sobra so a coluna de
+// icones. A escolha fica no navegador. No celular continua a barra de baixo.
+const MP_LATERAL_CHAVE = 'eternity-painel-lateral';
+const MP_LATERAL_GRUPOS = [
+    ['Clã', ['inicio', 'ranking', 'cidade']],
+    ['Você', ['jornada', 'perfil']],
+    ['Staff', ['staff']],
+];
+
+function mpLateralRecolhida() {
+    try { return localStorage.getItem(MP_LATERAL_CHAVE) === 'recolhida'; } catch { return false; }
+}
+
+function mpAlternarLateral() {
+    const jogo = app.querySelector('.jogo');
+    if (!jogo) return;
+    const recolhida = jogo.classList.toggle('lateral-recolhida');
+    try { localStorage.setItem(MP_LATERAL_CHAVE, recolhida ? 'recolhida' : 'aberta'); } catch { /* sem storage */ }
+    const botao = jogo.querySelector('.lateral-recolher');
+    botao?.setAttribute('aria-expanded', String(!recolhida));
+    botao?.setAttribute('title', recolhida ? 'Abrir o menu' : 'Recolher o menu');
+    // O mapa da cidade e a skin 3D acompanham a largura nova.
+    window.dispatchEvent(new Event('resize'));
+    setTimeout(() => window.dispatchEvent(new Event('resize')), 250);
+}
+
+function mpLateral(telas, { perfil, nivel, nickSkin }) {
+    const porId = new Map(telas.map(tela => [tela[0], tela]));
+    const jornada = mpEstado.jornada;
+    const selo = id => id === 'jornada' && jornada && !jornada.completa
+        ? `<small class="lateral-selo">${jornada.missoes.filter(missao => missao.feita).length}/7</small>`
+        : '';
+    const item = ([id, icone, rotulo]) => `<button type="button" class="lateral-item ${mpEstado.tela === id ? 'ativa' : ''}" ${mpEstado.tela === id ? 'aria-current="page"' : ''} onclick="mpIr('${id}')" title="${rotulo}">
+            <i class="fa-solid ${icone}" aria-hidden="true"></i><span>${rotulo}</span>${selo(id)}
+        </button>`;
+    const grupos = MP_LATERAL_GRUPOS
+        .map(([nome, ids]) => [nome, ids.map(id => porId.get(id)).filter(Boolean)])
+        .filter(([, itens]) => itens.length)
+        .map(([nome, itens]) => `<div class="lateral-grupo"><small class="lateral-grupo-nome">${nome}</small>${itens.map(item).join('')}</div>`)
+        .join('');
+    const recolhida = mpLateralRecolhida();
+    return `<aside class="lateral" aria-label="Menu do painel">
+        <div class="lateral-topo">
+            <a class="lateral-marca" href="#inicio" title="Voltar ao site"><span class="lateral-marca-cheia">Eternity</span><span class="lateral-marca-curta" aria-hidden="true">E</span></a>
+            <button type="button" class="lateral-recolher" onclick="mpAlternarLateral()" aria-expanded="${!recolhida}" title="${recolhida ? 'Abrir o menu' : 'Recolher o menu'}"><i class="fa-solid fa-angles-left" aria-hidden="true"></i></button>
+        </div>
+        <button type="button" class="lateral-jogador" onclick="mpIr('perfil')" title="${escHtml(perfil.nick)} · NV ${nivel.nivel}">
+            <img src="https://mc-heads.net/avatar/${encodeURIComponent(nickSkin)}/40" alt="" width="36" height="36">
+            <span class="lateral-jogador-texto">
+                <b>${escHtml(perfil.nick)}</b>
+                <span class="hud-xp" role="progressbar" aria-valuenow="${nivel.pct}" aria-valuemin="0" aria-valuemax="100" aria-label="XP até o próximo nível"><span style="width:${nivel.pct}%"></span></span>
+            </span>
+            <span class="niv-nv">NV ${nivel.nivel}</span>
+        </button>
+        <nav class="lateral-nav" aria-label="Painel">${grupos}</nav>
+        <div class="lateral-pe">
+            <a class="lateral-item" href="#inicio" title="Voltar ao site"><i class="fa-solid fa-globe" aria-hidden="true"></i><span>Voltar ao site</span></a>
+            <button type="button" class="lateral-item lateral-sair" onclick="mpSair(event)" title="Sair"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Sair</span></button>
+        </div>
+    </aside>`;
+}
+
 function mpDesenhar() {
     document.body.classList.add('modo-jogo');
     const { perfil, nivel, nickSkin } = mpResumo(mpEu());
@@ -418,7 +481,9 @@ function mpDesenhar() {
         ...(mpEstado.dados.staff ? [['staff', 'fa-user-shield', 'Staff']] : []),
     ];
     const botao = ([id, icone, rotulo], classe) => `<button type="button" class="${classe} ${mpEstado.tela === id ? 'ativa' : ''}" ${mpEstado.tela === id ? 'aria-current="page"' : ''} onclick="mpIr('${id}')"><i class="fa-solid ${icone}" aria-hidden="true"></i><span>${rotulo}</span></button>`;
-    app.innerHTML = `<div class="jogo">
+    app.innerHTML = `<div class="jogo ${mpLateralRecolhida() ? 'lateral-recolhida' : ''}">
+        ${mpLateral(telas, { perfil, nivel, nickSkin })}
+        <div class="jogo-corpo">
         <header class="hud">
             <a class="hud-marca" href="#inicio" title="Voltar ao site">Eternity</a>
             <nav class="hud-nav" aria-label="Painel">${telas.map(tela => botao(tela, 'hud-item')).join('')}</nav>
@@ -434,6 +499,7 @@ function mpDesenhar() {
         </header>
         <main class="jogo-tela" id="jogo-tela">${mpConteudoTela()}</main>
         <nav class="jogo-abas-baixo" aria-label="Painel">${telas.map(tela => botao(tela, 'jogo-aba')).join('')}</nav>
+        </div>
     </div>`;
     mpDepoisDaTela();
 }
