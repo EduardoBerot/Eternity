@@ -104,7 +104,7 @@ function renderWiki() {
         <header class="cabeca-pagina">
             <div class="miolo">
                 <h1>Wiki</h1>
-                <p class="texto">Como a Eternity se organiza: os cargos, os títulos que dá para conquistar, os lugares do clã e as regras.</p>
+                <p class="texto">Como a Eternity se organiza: os cargos, os títulos que dá para conquistar, os lugares do clã, as regras e a nossa história.</p>
             </div>
         </header>
         <div class="wiki-corpo miolo">
@@ -169,12 +169,15 @@ function renderWiki() {
                 ${GUIA_REGRAS}
             </div>
         </section>
+
+        ${historiaWikiHtml()}
         </div>
         </div>
 
         ${rodapeSite()}`;
     inclinarTorre();
     acompanharSecaoWiki();
+    acenderMarcosHistoria();
     // Link direto para uma secao (anuncio dos titulos, 10/10/2026):
     // #wiki?secao=titulos. O route() rola para o topo logo depois do render,
     // entao a ida a secao espera o proximo quadro; e repete quando as cabecas
@@ -193,6 +196,7 @@ const WIKI_SECOES = [
     ['wiki-titulos', 'Títulos', 'fa-crown'],
     ['wiki-warps', 'Warps', 'fa-location-dot'],
     ['wiki-regras', 'Regras', 'fa-scroll'],
+    ['wiki-historia', 'História', 'fa-book-open'],
 ];
 
 // Marca na navegacao a secao que esta na faixa de leitura (logo abaixo do
@@ -245,6 +249,7 @@ async function preencherOcupantes() {
     }
     if (!Array.isArray(membros)) return;
     membros = semContasDoCla(membros);
+    preencherRostosHistoria(membros);
     for (const sala of document.querySelectorAll('#wiki-torre .sala')) {
         const cargo = sala.dataset.cargo;
         const ocupantes = membros.filter(m => m.cargo === cargo);

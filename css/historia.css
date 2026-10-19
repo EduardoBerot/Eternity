@@ -1,0 +1,208 @@
+/* Historia na Wiki (19/10/2026, js/home/historia.js): os tres volumes e a
+   linha do tempo. A capa de cada volume e a mesma dos PDFs dos livros, em CSS:
+   fundo escuro, selo ETY e titulo em Cinzel. */
+
+/* Texto corrido na fonte de leitura; os titulos (h3, h4) seguem a do site. */
+.hist-volume-texto p, .hist-volume-num, .hist-volume-lema, .hist-botao, .hist-em-breve,
+.hist-legenda, .hist-legenda span, .hist-era-cabeca div span, .hist-cartao p, .hist-data, .hist-rosto, .hist-livro {
+    font-family: var(--sans);
+}
+
+.hist-volumes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+    margin: 28px 0 40px;
+}
+
+.hist-volume {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid var(--linha);
+    border-radius: 14px;
+    background: linear-gradient(160deg, var(--aco) 0%, var(--noite) 100%);
+    transition: border-color 0.25s ease, transform 0.25s ease;
+}
+.hist-volume:hover { border-color: rgba(46, 230, 240, 0.35); transform: translateY(-2px); }
+
+.hist-capa {
+    flex: none;
+    width: 96px;
+    aspect-ratio: 148 / 210;
+    border-radius: 4px 8px 8px 4px;
+    background: radial-gradient(circle at 50% 38%, #10333a 0%, #071417 72%);
+    box-shadow: inset 4px 0 0 rgba(0, 0, 0, 0.45), 0 10px 24px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(46, 230, 240, 0.18);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-family: 'Cinzel', serif;
+    color: #e9fbfc;
+    text-align: center;
+}
+.hist-capa-selo {
+    width: 30px; height: 30px;
+    border: 1px solid var(--aqua);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 0.55rem; color: var(--aqua); letter-spacing: 0.04em;
+    margin-bottom: 4px;
+}
+.hist-capa-titulo { font-weight: 700; font-size: 0.62rem; letter-spacing: 0.14em; }
+.hist-capa-era { font-size: 0.42rem; letter-spacing: 0.22em; color: var(--aqua); text-transform: uppercase; }
+.hist-capa-linha { width: 32px; height: 1px; background: var(--aqua); opacity: 0.55; margin: 3px 0; }
+.hist-capa-periodo { font-size: 0.42rem; letter-spacing: 0.08em; color: #8fc7cc; }
+.hist-capa-terceira { background: radial-gradient(circle at 50% 38%, #15303f 0%, #070d16 72%); opacity: 0.85; }
+
+.hist-volume-texto { display: flex; flex-direction: column; min-width: 0; }
+.hist-volume-num { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--nevoa-escura); }
+.hist-volume h3 { margin: 4px 0 2px; font-size: 1.15rem; }
+.hist-volume-lema { margin: 0 0 8px; color: var(--aqua); font-size: 0.82rem; }
+.hist-volume-texto > p:not(.hist-volume-lema) { margin: 0; color: var(--nevoa); font-size: 0.86rem; line-height: 1.5; }
+
+.hist-acoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 12px; }
+.hist-botao {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(46, 230, 240, 0.35);
+    color: var(--gelo);
+    font-size: 0.8rem;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+.hist-botao:hover { background: var(--aqua-suave); border-color: var(--aqua); }
+.hist-botao-cheio { background: var(--aqua); border-color: var(--aqua); color: var(--noite-funda); font-weight: 600; }
+.hist-botao-cheio:hover { background: #6ff0f6; }
+.hist-em-breve { display: inline-flex; align-items: center; gap: 7px; font-size: 0.8rem; color: var(--nevoa-escura); }
+
+.hist-legenda {
+    display: flex; flex-wrap: wrap; gap: 8px 16px;
+    margin-bottom: 28px;
+    font-size: 0.78rem; color: var(--nevoa);
+}
+.hist-legenda span { display: inline-flex; align-items: center; gap: 6px; }
+.hist-legenda i { color: var(--aqua); width: 14px; text-align: center; }
+
+/* ---------- Linha do tempo ---------- */
+
+.hist-era { position: relative; padding-bottom: 12px; }
+.hist-era + .hist-era { margin-top: 18px; }
+
+/* O nome da Era fica preso no alto enquanto se rola dentro dela. */
+.hist-era-cabeca {
+    position: sticky;
+    top: calc(var(--nav) + 12px);
+    z-index: 2;
+    display: flex; align-items: center; gap: 12px;
+    width: max-content; max-width: 100%;
+    margin: 0 0 18px;
+    padding: 8px 16px 8px 8px;
+    border: 1px solid rgba(46, 230, 240, 0.25);
+    border-radius: 999px;
+    background: rgba(7, 13, 22, 0.88);
+    backdrop-filter: blur(8px);
+}
+.hist-era-cabeca strong { display: block; font-size: 0.95rem; }
+.hist-era-cabeca div span { font-size: 0.75rem; color: var(--nevoa); }
+.hist-era-num {
+    width: 34px; height: 34px; flex: none;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: 'Cinzel', serif; font-weight: 700; font-size: 0.85rem;
+    color: var(--noite-funda); background: var(--aqua);
+}
+.hist-era-segunda .hist-era-num { background: #7fe9ef; }
+.hist-era-terceira .hist-era-num { background: var(--gelo); }
+
+.hist-linha {
+    --x: 18px;
+    position: relative;
+    list-style: none;
+    margin: 0; padding: 0;
+}
+/* A linha: um fio aqua que desce, mais forte no meio da Era. */
+.hist-linha::before {
+    content: '';
+    position: absolute;
+    left: var(--x); top: 0; bottom: 0;
+    width: 2px;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, transparent, rgba(46, 230, 240, 0.55) 6%, rgba(46, 230, 240, 0.55) 94%, transparent);
+}
+
+.hist-marco {
+    position: relative;
+    padding: 0 0 18px calc(var(--x) + 28px);
+}
+
+.hist-ponto {
+    position: absolute;
+    left: var(--x); top: 6px;
+    width: 34px; height: 34px;
+    transform: translateX(-50%) scale(0.7);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--aco);
+    border: 1px solid rgba(46, 230, 240, 0.35);
+    color: var(--nevoa-escura);
+    font-size: 0.8rem;
+    transition: transform 0.45s ease, color 0.45s ease, box-shadow 0.45s ease, border-color 0.45s ease;
+}
+.hist-marco.aceso .hist-ponto {
+    transform: translateX(-50%) scale(1);
+    color: var(--aqua);
+    border-color: var(--aqua);
+    box-shadow: 0 0 0 4px rgba(46, 230, 240, 0.08), 0 0 18px rgba(46, 230, 240, 0.35);
+}
+
+.hist-cartao {
+    padding: 14px 16px;
+    border: 1px solid var(--linha);
+    border-radius: 12px;
+    background: rgba(15, 28, 43, 0.72);
+    opacity: 0.35;
+    transform: translateY(8px);
+    transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.25s ease;
+}
+.hist-marco.aceso .hist-cartao { opacity: 1; transform: none; }
+.hist-cartao:hover { border-color: rgba(46, 230, 240, 0.3); }
+
+.hist-data { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--aqua); }
+.hist-cartao h4 { margin: 4px 0 6px; font-size: 1.02rem; color: var(--gelo); }
+.hist-cartao p { margin: 0; color: var(--nevoa); font-size: 0.88rem; line-height: 1.55; }
+
+.hist-rodape { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+.hist-rostos { display: flex; flex-wrap: wrap; gap: 6px; }
+.hist-rosto {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 2px 8px 2px 2px;
+    border-radius: 999px;
+    background: rgba(232, 244, 248, 0.05);
+    font-size: 0.72rem; color: var(--nevoa);
+    text-decoration: none;
+}
+.hist-rosto img { width: 20px; height: 20px; border-radius: 4px; image-rendering: pixelated; }
+.hist-rosto.ativo { color: var(--gelo); box-shadow: inset 0 0 0 1px rgba(46, 230, 240, 0.35); }
+.hist-rosto.ativo:hover { background: var(--aqua-suave); }
+.hist-livro { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--nevoa); text-decoration: none; }
+.hist-livro:hover { color: var(--aqua); }
+
+/* Computador: a linha vai para o centro e os marcos alternam de lado. */
+@media (min-width: 900px) {
+    .hist-linha { --x: 50%; }
+    .hist-marco { width: 50%; padding: 0 34px 22px 0; }
+    .hist-marco:nth-child(even) { margin-left: 50%; padding: 0 0 22px 34px; }
+    .hist-marco .hist-ponto { left: 100%; }
+    .hist-marco:nth-child(even) .hist-ponto { left: 0; }
+    .hist-marco:nth-child(odd) .hist-cartao { text-align: right; }
+    .hist-marco:nth-child(odd) .hist-rodape { flex-direction: row-reverse; }
+    .hist-marco:nth-child(odd) .hist-rostos { justify-content: flex-end; }
+    .hist-era-cabeca { margin-left: auto; margin-right: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hist-ponto, .hist-cartao, .hist-volume { transition: none; }
+}
