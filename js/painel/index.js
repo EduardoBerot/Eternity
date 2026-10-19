@@ -395,8 +395,12 @@ async function checkOutSolicitation(event){
     
         fetch(`${URL_PATH_ATIVAR_MEMBRO}/${id}`, opcoes)
             .then(lerResposta)
-            .then(_ => {
-                alert(`O membro foi definido como Ativo!`);
+            .then(resposta => {
+                // Desbanir nao devolve ao cla (19/10/2026): o cadastro sai da
+                // lista negra e a pessoa so volta por um convite novo.
+                alert(resposta?.desbanido
+                    ? 'Banimento retirado. A pessoa saiu da lista negra e pode ser convidada de novo; ela não volta ao clã sozinha.'
+                    : `O membro foi definido como Ativo!`);
                 getRedirectElement()?.click()
             })
             .catch(error => avisarFalha(error, 'Não foi possível ativar o membro.'));
