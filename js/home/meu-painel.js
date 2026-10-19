@@ -414,7 +414,8 @@ function mpResumo(alvo = mpAlvo()) {
 const MP_LATERAL_CHAVE = 'eternity-painel-lateral';
 const MP_LATERAL_GRUPOS = [
     ['Clã', ['inicio', 'ranking', 'cidade']],
-    ['Você', ['jornada', 'perfil']],
+    // Meu perfil abre pelo cartao do jogador, no topo do menu.
+    ['Você', ['jornada']],
     ['Staff', ['staff']],
 ];
 
@@ -455,7 +456,7 @@ function mpLateral(telas, { perfil, nivel, nickSkin }) {
             <a class="lateral-marca" href="#inicio" title="Voltar ao site"><span class="lateral-marca-cheia">Eternity</span><span class="lateral-marca-curta" aria-hidden="true">E</span></a>
             <button type="button" class="lateral-recolher" onclick="mpAlternarLateral()" aria-expanded="${!recolhida}" title="${recolhida ? 'Abrir o menu' : 'Recolher o menu'}"><i class="fa-solid fa-angles-left" aria-hidden="true"></i></button>
         </div>
-        <button type="button" class="lateral-jogador" onclick="mpIr('perfil')" title="${escHtml(perfil.nick)} · NV ${nivel.nivel}">
+        <button type="button" class="lateral-jogador ${mpEstado.tela === 'perfil' ? 'ativa' : ''}" onclick="mpIr('perfil')" title="${escHtml(perfil.nick)} · NV ${nivel.nivel}">
             <img src="https://mc-heads.net/avatar/${encodeURIComponent(nickSkin)}/40" alt="" width="36" height="36">
             <span class="lateral-jogador-texto">
                 <b>${escHtml(perfil.nick)}</b>

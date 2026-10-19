@@ -1029,9 +1029,10 @@ body.modo-jogo .page-meu-painel { padding: 0; }
 
 /* ================= Menu lateral (18/10/2026) =================
    No computador o HUD de cima da lugar a uma coluna a esquerda (mpLateral em
-   meu-painel.js): marca, jogador, telas por grupo, voltar ao site e sair.
-   Recolhida (.lateral-recolhida, guardado no navegador) fica so a coluna de
-   icones. No celular nada muda: HUD enxuto em cima e abas embaixo. */
+   meu-painel.js): marca, jogador (abre o Meu perfil), telas por grupo, voltar
+   ao site e sair. Recolhida (.lateral-recolhida, guardado no navegador) fica so
+   a coluna de icones, que se abre por cima do conteudo ao passar o mouse. No
+   celular nada muda: HUD enxuto em cima e abas embaixo. */
 
 .lateral { display: none; }
 
@@ -1045,22 +1046,32 @@ body.modo-jogo .page-meu-painel { padding: 0; }
     .jogo.lateral-recolhida { --lateral-largura: 76px; }
     .jogo-corpo { min-width: 0; }
     .jogo .hud { display: none; }
+    /* Sem o HUD de cima as telas precisam do proprio respiro no topo. */
+    .jogo .jogo-tela { padding-top: 40px; }
 
     .lateral {
         position: sticky;
         top: 0;
-        z-index: 50;
+        z-index: 60;
         display: flex;
         flex-direction: column;
         gap: 16px;
+        width: var(--lateral-largura, 244px);
         height: 100dvh;
         padding: 16px 12px;
         box-sizing: border-box;
         overflow: hidden auto;
-        background: rgba(4, 8, 15, 0.92);
+        background: rgba(4, 8, 15, 0.94);
         backdrop-filter: blur(10px);
         border-right: 1px solid rgba(46, 230, 240, 0.14);
         box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
+        transition: width 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    /* Recolhida, o mouse (ou o teclado) abre o menu por cima do conteudo. */
+    .lateral-recolhida .lateral:is(:hover, :has(:focus-visible)) {
+        width: 244px;
+        box-shadow: 18px 0 40px rgba(0, 0, 0, 0.55);
     }
 }
 
@@ -1069,19 +1080,24 @@ body.modo-jogo .page-meu-painel { padding: 0; }
     align-items: center;
     justify-content: space-between;
     gap: 8px;
+    min-height: 34px;
     padding: 0 4px;
 }
 
-.jogo .lateral-marca {
+.jogo a.lateral-marca,
+.lateral-marca span {
     font-family: Vermin;
     font-size: 1.8rem;
     line-height: 1;
     color: var(--gelo);
     text-decoration: none;
     white-space: nowrap;
+    transition: color 0.2s ease, text-shadow 0.2s ease;
 }
 
-.jogo .lateral-marca:hover { text-shadow: 0 0 16px rgba(46, 230, 240, 0.6); }
+.jogo a.lateral-marca:hover,
+.lateral-marca:hover span { color: var(--aqua); text-shadow: 0 0 18px rgba(46, 230, 240, 0.6); }
+
 .lateral-marca-curta { display: none; }
 
 .lateral-recolher {
@@ -1094,11 +1110,16 @@ body.modo-jogo .page-meu-painel { padding: 0; }
     background: none;
     color: var(--nevoa);
     cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 
     i { transition: transform 0.2s ease; }
 }
 
-.lateral-recolher:hover { color: var(--aqua); border-color: rgba(46, 230, 240, 0.35); }
+.lateral-recolher:hover {
+    border-color: rgba(46, 230, 240, 0.45);
+    background: rgba(46, 230, 240, 0.08);
+    color: var(--aqua);
+}
 
 .lateral-jogador {
     display: grid;
@@ -1111,12 +1132,15 @@ body.modo-jogo .page-meu-painel { padding: 0; }
     color: var(--gelo);
     cursor: pointer;
     clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    transition: background 0.15s ease, border-color 0.15s ease;
 
-    img { image-rendering: pixelated; }
+    img { image-rendering: pixelated; transition: transform 0.15s ease; }
     .hud-xp { width: 100%; }
 }
 
-.lateral-jogador:hover { background: rgba(245, 197, 66, 0.14); }
+.lateral-jogador:hover,
+.lateral-jogador.ativa { border-color: rgba(245, 197, 66, 0.65); background: rgba(245, 197, 66, 0.15); }
+.lateral-jogador:hover img { transform: scale(1.08); }
 
 .lateral-jogador-texto {
     display: flex;
@@ -1170,12 +1194,18 @@ body.modo-jogo .page-meu-painel { padding: 0; }
     text-transform: uppercase;
     white-space: nowrap;
     cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
 
-    i { font-size: 1rem; text-align: center; }
+    i { font-size: 1rem; text-align: center; transition: color 0.15s ease, transform 0.15s ease, text-shadow 0.15s ease; }
     span { overflow: hidden; text-overflow: ellipsis; }
 }
 
-.jogo .lateral-item:hover { background: rgba(46, 230, 240, 0.06); color: var(--gelo); }
+.jogo .lateral-item:hover {
+    background: rgba(46, 230, 240, 0.08);
+    color: var(--gelo);
+
+    i { color: var(--aqua); transform: scale(1.12); }
+}
 
 .jogo .lateral-item.ativa {
     background: linear-gradient(90deg, rgba(46, 230, 240, 0.16), transparent);
@@ -1212,14 +1242,16 @@ body.modo-jogo .page-meu-painel { padding: 0; }
     border-top: 1px solid var(--linha);
 }
 
-.jogo .lateral-sair:hover { color: #fca5a5; background: rgba(248, 113, 113, 0.08); }
+.jogo a.lateral-item { color: var(--nevoa); }
+.jogo a.lateral-item:hover { color: var(--gelo); }
+.jogo .lateral-sair:hover { background: rgba(248, 113, 113, 0.1); color: #fca5a5; }
+.jogo .lateral-sair:hover i { color: #fca5a5; }
 
-/* Recolhida: so os icones, centralizados; o nome aparece no title. */
-.lateral-recolhida {
+/* Recolhida e sem o mouse em cima: so os icones, centralizados. */
+.lateral-recolhida .lateral:not(:hover):not(:has(:focus-visible)) {
     .lateral-topo { flex-direction: column; padding: 0; }
     .lateral-marca-cheia { display: none; }
     .lateral-marca-curta { display: inline; }
-    .lateral-recolher i { transform: rotate(180deg); }
 
     .lateral-jogador {
         grid-template-columns: 1fr;
@@ -1242,23 +1274,27 @@ body.modo-jogo .page-meu-painel { padding: 0; }
         color: transparent;
     }
 
-    .jogo .lateral-item,
     .lateral-item {
         grid-template-columns: 1fr;
         justify-items: center;
         padding: 0;
     }
 
+    /* O n/7 vira um ponto dourado no canto do icone. */
     .lateral-selo {
         position: absolute;
-        top: 4px;
-        right: 4px;
-        padding: 0 4px;
-        font-size: 0.56rem;
+        top: 9px;
+        right: 12px;
+        width: 8px;
+        height: 8px;
+        padding: 0;
+        overflow: hidden;
+        border: 0;
+        border-radius: 50%;
+        background: var(--ficha-ouro);
+        box-shadow: 0 0 8px rgba(245, 197, 66, 0.7);
+        color: transparent;
     }
 }
 
-/* Os links do menu nao herdam o aqua dos links do painel. */
-.jogo a.lateral-marca { color: var(--gelo); }
-.jogo a.lateral-item { color: var(--nevoa); }
-.jogo a.lateral-item:hover { color: var(--gelo); }
+.lateral-recolhida .lateral-recolher i { transform: rotate(180deg); }
