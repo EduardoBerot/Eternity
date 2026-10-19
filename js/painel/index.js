@@ -3,7 +3,6 @@ const APP = document.getElementById("app");
 const pages_content = {
     solicitacoes: renderSolicitacoes,
     membros: renderMembros,
-    adicionar: renderAdicionar,
     excluidos: renderExcluidos,
     historico: renderHistorico,
     indicadores: renderIndicadores,
@@ -282,41 +281,6 @@ async function checkOutProfileUpdate(event) {
     }
 }
 
-async function renderAdicionar() {
-    APP.innerHTML = `
-    <h1 class="tittle">Adicionar Membro</h1>
-    <form id="form_adicionar" onsubmit="submitAdicionar(event)">
-        <div class="form-label">
-            <label for="nick">Nick</label>
-            <input type="text" id="nick" placeholder="Nick" required>
-        </div>
-        <div class="form-label">
-            <label for="data_nascimento">Data de Nascimento</label>
-            <input type="date" value="2002-06-30" id="data_nascimento" ${birthDateRangeAttrs()} required>
-        </div>
-        <div class="form-label">
-            <label for="cargo">Cargo</label>        
-            <select name="cargo" id="cargo" required></select>
-        </div>
-        <input type="text" id="status" placeholder="Status" value="Ativo" style="display:none"required>
-        <div class="form-label">
-            <label for="data_entrada">Data de Cadastro</label>
-            <input type="date" id="data_entrada" value="${getDate()}" required>
-        </div>
-        <div class="form-label">
-            <label for="recrutador">Recrutador</label>
-            <select name="recrutador" id="recrutador" required></select>
-        </div>
-        <button>Adicionar</button>
-    </form>
-    `;
-    
-    const nick = getCookie(ETY_ADM_LOGIN_COOKIE);
-    const staffs = await getStaffsNames();
-    createOptions('recrutador', staffs, nick);
-    createOptions('cargo', CARGOS, 'Membro');
-}
-
 function renderMembros(view = 'ativos') {
     const table_id = 'tb_membros';
     const showingInactive = view === 'inativos';
@@ -477,34 +441,6 @@ function getRedirectElement() {
         return elements[0]
     }
     return null
-}
-
-async function submitAdicionar(event) {
-    event.preventDefault();
-    console.log('Submetendo formulário de adição.');
-
-    const data = getFormData();
-
-    try {
-        await lerResposta(await fetch(URL_MEMBERS,
-            {
-                method: "POST",
-                // Sem o login da staff o backend recusa: o recruta entra pelo
-                // vinculo do Discord, nao por aqui.
-                headers: getAdminRequestHeaders(),
-                body: JSON.stringify(data),
-            }
-        ));
-        alert("Cadastro realizado com sucesso!");
-        cleanForm();
-    } catch (error) {
-        avisarFalha(error, 'Não foi possível realizar o cadastro.');
-    }
-
-    function cleanForm() {
-        document.getElementById('nick').value = '';
-        document.getElementById('data_nascimento').value = '2002-06-30';
-    }
 }
 
 function fetchDataAndRenderTable(url, tableId, properties, extraField='', callback=null, fetchOptions={}, uiOptions={}) {

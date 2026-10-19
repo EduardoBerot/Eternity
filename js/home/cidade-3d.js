@@ -278,7 +278,9 @@ function carregarTextura(THREE, url) {
 
 const CIDADE3D_COR_LOCAL = '#ffd23f';
 
-async function montarCidade3d(palco) {
+// Vitrine (18/10/2026): a pagina publica mostra so a maquete girando, sem as
+// marcas das casas; o mapa com os pedidos de trust fica no painel do membro.
+async function montarCidade3d(palco, { vitrine = false } = {}) {
     const [THREE, { OrbitControls }] = await Promise.all([import(CIDADE3D_THREE), import(CIDADE3D_CONTROLES)]);
     const { mapa, casas, locais = [] } = cidadePub.dados;
     const W = mapa.largura, D = mapa.altura;
@@ -433,13 +435,13 @@ async function montarCidade3d(palco) {
         marcas.add(ponto);
         cabecas.push(ponto);
     }
-    for (const casa of casas) {
+    for (const casa of vitrine ? [] : casas) {
         const estado = CASA_ESTADOS[casa.estado] || CASA_ESTADOS.fechada;
         const cor = casa.tipo === 'terreno' && casa.estado === 'aberta' ? CIDADE_COR_TERRENO_LIVRE : estado.cor;
         const dica = casa.moradores.length ? casa.moradores.join(', ') : `${cidadeRotuloTipo(casa.tipo)} · ${estado.rotulo.toLowerCase()}`;
         marca({ ...casa, tipoAlvo: 'casa' }, casa.tipo === 'terreno' ? 'terreno' : 'casa', cor, dica, casa.estado === 'aberta');
     }
-    for (const local of locais) marca({ ...local, tipoAlvo: 'local' }, 'local', CIDADE3D_COR_LOCAL, local.nome);
+    for (const local of vitrine ? [] : locais) marca({ ...local, tipoAlvo: 'local' }, 'local', CIDADE3D_COR_LOCAL, local.nome);
     cena.add(marcas);
 
     const camera = new THREE.PerspectiveCamera(42, 1, 1, 6000);
@@ -460,6 +462,15 @@ async function montarCidade3d(palco) {
     controles.autoRotateSpeed = CIDADE3D_GIRO;
     const pararGiro = () => { controles.autoRotate = false; };
     controles.addEventListener('start', pararGiro);
+    // Na vitrine o giro volta sozinho alguns segundos depois de soltar.
+    let voltaGiro = null;
+    if (vitrine) {
+        controles.addEventListener('start', () => clearTimeout(voltaGiro));
+        controles.addEventListener('end', () => {
+            clearTimeout(voltaGiro);
+            voltaGiro = setTimeout(() => { controles.autoRotate = true; pedirQuadro(); }, 4000);
+        });
+    }
     controles.update();
 
     palco.innerHTML = '';
@@ -605,6 +616,7 @@ async function montarCidade3d(palco) {
     }
 
     function descartar() {
+        clearTimeout(voltaGiro);
         observador.disconnect();
         controles.dispose();
         geo.dispose();

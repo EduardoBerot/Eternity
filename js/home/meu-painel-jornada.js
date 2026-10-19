@@ -192,10 +192,15 @@ function mpCorpoMissao(jornada, missao) {
 function mpEscolhaCidade(jornada) {
     if (jornada.cidade) {
         const escolha = MP_CIDADE_ESCOLHAS.find(([id]) => id === jornada.cidade);
-        const mapa = jornada.cidade === 'agora_nao' ? '' : ' <a href="#cidade">Ver os lugares livres no mapa da cidade</a>';
+        const mapa = jornada.cidade === 'agora_nao' ? '' : ` ${mpLinkCidade('Ver os lugares livres no mapa da cidade')}`;
         return `<p class="mp-nota jornada-escolha"><i class="fa-solid ${escolha?.[1] || 'fa-check'}" aria-hidden="true"></i> Sua escolha: <b>${escolha?.[2] || ''}</b>.${mapa} <button type="button" class="mp-link" onclick="mpEstado.jornada.cidade = null; mpRedesenharTela()">Mudar</button></p>`;
     }
     return `<div class="jornada-botoes">${MP_CIDADE_ESCOLHAS.map(([id, icone, rotulo]) => `<button type="button" class="mp-acao ${id === 'agora_nao' ? 'mp-acao-fraca' : ''}" onclick="mpEscolherCidade('${id}', this)"><i class="fa-solid ${icone}" aria-hidden="true"></i> ${rotulo}</button>`).join('')}</div>`;
+}
+
+// O mapa da cidade e uma tela do painel (18/10/2026).
+function mpLinkCidade(texto) {
+    return `<a href="#meu-painel&tela=cidade" onclick="event.preventDefault(); mpIr('cidade')">${texto}</a>`;
 }
 
 async function mpEscolherCidade(escolha, botao) {
@@ -210,7 +215,7 @@ async function mpEscolherCidade(escolha, botao) {
         if (resposta.status === 401) { mpGuardarSessao(null); return mpTelaLogin(null); }
         if (!resposta.ok) return mpAviso(corpo.message || 'Não foi possível salvar agora.', 'erro');
         mpEstado.jornada = corpo.jornada;
-        mpAviso(escolha === 'agora_nao' ? 'Anotado! Quando quiser morar na cidade, o mapa está em <a href="#cidade">Cidade</a>.' : 'Boa escolha! Veja os lugares livres no <a href="#cidade">mapa da cidade</a>.', 'ok');
+        mpAviso(escolha === 'agora_nao' ? `Anotado! Quando quiser morar na cidade, o mapa está na tela ${mpLinkCidade('Cidade')}.` : `Boa escolha! Veja os lugares livres no ${mpLinkCidade('mapa da cidade')}.`, 'ok');
     } catch {
         mpAviso('O site não respondeu. Tente de novo em instantes.', 'erro');
     }

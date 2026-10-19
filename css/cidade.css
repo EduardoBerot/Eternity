@@ -887,3 +887,51 @@ body.painel--cidade main { margin: 0; }
     .cd-estados button { padding: 1px 6px; font-size: 0.68rem; }
     .cd-ocup { gap: 5px; margin-top: 5px; }
 }
+
+/* ---------- Vitrine publica (18/10/2026) ----------
+   No site publico a cidade e so a maquete 3D girando (js/home/cidade-3d.js,
+   modo vitrine) e a galeria; o mapa com os pedidos fica no painel do membro. */
+
+.cidade-vitrine {
+    display: grid;
+    gap: 14px;
+    margin-top: 32px;
+}
+
+.cidade-vitrine-palco {
+    position: relative;
+    z-index: 0;
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border: 1px solid rgba(46, 230, 240, 0.18);
+    border-radius: 14px;
+    background: radial-gradient(ellipse at 50% 35%, #12233a 0%, #070d16 70%);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+
+    canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+}
+
+.cidade-vitrine-img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+
+.cidade-vitrine-pe {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    .cidade-rota { margin: 0; font-family: var(--sans); color: var(--nevoa); }
+}
+
+@media (max-width: 640px) {
+    .cidade-vitrine { margin-top: 20px; }
+    .cidade-vitrine-palco { aspect-ratio: 4 / 3; }
+    .cidade-vitrine-pe .botao { width: 100%; justify-content: center; }
+}
+
+/* No painel do membro o nick vem do login e nao se edita. */
+.cidade-form input[readonly] { opacity: 0.7; cursor: default; }

@@ -1,11 +1,12 @@
-// Cidade no site publico (06/10/2026): o mapa com as casas, os terrenos e os
-// locais importantes, aberto a qualquer um, e o pedido de trust. Clicar numa
-// marca da zoom nela e abre um card ao lado; numa casa ou terreno aberto para
-// ocupacao, "Solicitar trust" pede o nick. Marcadores em js/cidade-marcas.js. O nick tem de
-// ser de um membro ativo com Discord vinculado: o bot manda DM para esse
-// Discord, e so a confirmacao la faz o pedido chegar aos lideres. Assim
-// ninguem pede casa no nome de outro. Um lider da o /trust no jogo e aprova no
-// painel.
+// Cidade (06/10/2026; dividida em 18/10/2026). O site publico mostra so a
+// maquete 3D girando e a galeria de fotos. O mapa com as casas, os terrenos e os
+// locais importantes, e o pedido de trust, ficam na tela Cidade do painel do
+// membro (meu-painel.js chama cidadeMiolo/cidadeMontarMapa). Clicar numa marca
+// da zoom nela e abre um card ao lado; numa casa ou terreno aberto para
+// ocupacao, "Solicitar trust" pede a confirmacao (o nick ja vem do login).
+// Marcadores em js/cidade-marcas.js. O bot ainda manda DM para o Discord
+// vinculado ao nick, e so a confirmacao la faz o pedido chegar aos lideres. Um
+// lider da o /trust no jogo e aprova no painel.
 //
 // Leaflet com CRS.Simple, como no painel (js/painel/cidade.js): lat = -linha,
 // lng = coluna, e o bloco do mundo e (x0 + coluna, z0 + linha).
@@ -20,7 +21,8 @@ const CASA_ESTADOS = {
 
 const ZOOM_NA_CASA = 1.5;
 
-const cidadePub = { mapa: null, dados: null, alvo: null };
+// nick: o do membro logado, para o pedido de trust do painel.
+const cidadePub = { mapa: null, dados: null, alvo: null, nick: null };
 
 // Distancia do card ate a marca, em pixels.
 const FOLGA_CARD = 40;
@@ -31,16 +33,73 @@ function oTipo(casa) {
         : { nome: 'casa', este: 'esta casa', aberto: 'aberta' };
 }
 
-function renderCidadePublica() {
+// Desmonta o mapa (Leaflet e 3D) ao trocar de pagina ou de tela.
+function cidadeLimpar() {
     if (cidadePub.mapa) { cidadePub.mapa.remove(); cidadePub.mapa = null; }
+    cidadePub.observador?.disconnect();
+    cidadePub.observador = null;
     cidade3dDescartar();
     cidadePub.alvo = null;
+}
+
+// ---------- Site publico: vitrine 3D + galeria ----------
+
+function renderCidadePublica() {
+    cidadeLimpar();
     app.innerHTML = `
         <header class="cabeca-pagina"><div class="miolo">
             <h1>Cidade</h1>
             <p class="texto">A cidade da Eternity fica no servidor <b>Apocalipse</b>: casas e terrenos gratuitos, farms coletivas e um lugar para cada membro.</p>
         </div></header>
         <div class="miolo">
+            <section class="cidade-vitrine">
+                <div id="cidade_vitrine" class="cidade-vitrine-palco"><p class="cidade-carregando">Montando a cidade...</p></div>
+                <div class="cidade-vitrine-pe">
+                    <p class="cidade-rota">Para visitar: <code>/apocalipse</code><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><code>/go ETY</code></p>
+                    <a class="botao botao-principal" href="#meu-painel&tela=cidade"><i class="fa-solid fa-house-chimney" aria-hidden="true"></i> É membro? Peça a sua casa no painel</a>
+                </div>
+            </section>
+            <section class="cidade-galeria">
+                <div class="cidade-galeria-cabeca">
+                    <h2>Galeria</h2>
+                    <p>Clique numa foto para ampliar.</p>
+                </div>
+                <div id="gallery">${[0, 1, 2, 3, 4, 5].map(i => `<a href="/imgs/City0${i}.jpg"><img class="cityimgs" src="/imgs/City0${i}.jpg" alt="Cidade da Eternity, vista ${i + 1}" loading="lazy"><i class="fa-solid fa-expand" aria-hidden="true"></i></a>`).join('')}</div>
+            </section>
+        </div>
+        ${rodapeSite()}`;
+    lightGallery(document.getElementById('gallery'), { download: false });
+    carregarVitrine();
+}
+
+// Sem WebGL 2 (ou com o relevo desatualizado) a vitrine vira a imagem do mapa.
+async function carregarVitrine() {
+    const palco = document.getElementById('cidade_vitrine');
+    const imagem = () => {
+        const versao = encodeURIComponent(cidadePub.dados?.mapa?.versao || '');
+        if (palco?.isConnected) palco.innerHTML = `<img class="cidade-vitrine-img" src="${URL_CIDADE_PUBLICA}/mapa?v=${versao}" alt="Mapa da cidade da Eternity">`;
+    };
+    try {
+        cidadePub.dados = await fetch(`${URL_CIDADE_PUBLICA}/publico`).then(lerResposta);
+    } catch (error) {
+        console.error('Falha ao carregar a cidade:', error);
+        if (palco?.isConnected) palco.innerHTML = '<p class="cidade-carregando">Não foi possível carregar a cidade.</p>';
+        return;
+    }
+    if (!palco?.isConnected) return;
+    if (!cidade3dPossivel()) return imagem();
+    try {
+        cidade3d = await montarCidade3d(palco, { vitrine: true });
+    } catch (error) {
+        console.error('Cidade 3D:', error);
+        imagem();
+    }
+}
+
+// ---------- Painel do membro: mapa e pedido de trust ----------
+
+function cidadeMiolo() {
+    return `
             <section class="cidade-publica">
                 <div class="cidade-mapa cidade-mapa--publica">
                     <div id="cidade_mapa" class="cidade-mapa-leaflet"><p class="cidade-carregando">Carregando o mapa...</p></div>
@@ -56,8 +115,8 @@ function renderCidadePublica() {
                         <h2>Como pedir o seu</h2>
                         <ol class="cidade-passos">
                             <li><span>Clique numa casa ou num terreno <b>livre</b> no mapa.</span></li>
-                            <li><span>Em <b>Solicitar trust</b>, digite o seu nick.</span></li>
-                            <li><span>Confirme pela DM do bot no Discord vinculado ao nick.</span></li>
+                            <li><span>Toque em <b>Solicitar trust</b> e envie o pedido.</span></li>
+                            <li><span>Confirme pela DM do bot no seu Discord.</span></li>
                             <li><span>Um líder dá o trust no jogo.</span></li>
                         </ol>
                     </div>
@@ -73,23 +132,20 @@ function renderCidadePublica() {
                         <li><i class="fa-solid fa-signs-post" aria-hidden="true"></i>Local importante</li>
                     </ul>
                 </aside>
-            </section>
-            <section class="cidade-galeria">
-                <div class="cidade-galeria-cabeca">
-                    <h2>Galeria</h2>
-                    <p>Clique numa foto para ampliar.</p>
-                </div>
-                <div id="gallery">${[0, 1, 2, 3, 4, 5].map(i => `<a href="/imgs/City0${i}.jpg"><img class="cityimgs" src="/imgs/City0${i}.jpg" alt="Cidade da Eternity, vista ${i + 1}" loading="lazy"><i class="fa-solid fa-expand" aria-hidden="true"></i></a>`).join('')}</div>
-            </section>
-        </div>
-        ${rodapeSite()}`;
-    lightGallery(document.getElementById('gallery'), { download: false });
+            </section>`;
+}
+
+// Chamado depois que o cidadeMiolo() entra na pagina.
+function cidadeMontarMapa(nick) {
+    cidadeLimpar();
+    cidadePub.nick = nick || null;
     carregarCidadePublica();
 }
 
 async function carregarCidadePublica() {
     try {
         cidadePub.dados = await fetch(`${URL_CIDADE_PUBLICA}/publico`).then(lerResposta);
+        if (!document.getElementById('cidade_mapa')) return;
         contarCidade();
         montarMapaPublico();
         cidade3dPreparar();
@@ -218,13 +274,13 @@ function abrirSolicitacao(id) {
     if (!casa) return;
     abrirCard(cartaoCasa(casa, `
         <form class="cidade-form" onsubmit="enviarSolicitacao(event, ${casa.id})">
-            <label><span>Seu nick no Minecraft</span><input name="nick" required maxlength="17" autocomplete="off" spellcheck="false" placeholder="Ex.: Ducred22"></label>
+            <label><span>Seu nick no Minecraft</span><input name="nick" required maxlength="17" autocomplete="off" spellcheck="false" placeholder="Ex.: Ducred22"${cidadePub.nick ? ` value="${escHtml(cidadePub.nick)}" readonly` : ''}></label>
             <label><span>Observação <small>(opcional)</small></span><textarea name="observacao" maxlength="500" rows="2" placeholder="Ex.: vou morar com o meu duo"></textarea></label>
             <p class="cidade-aviso">Você vai receber uma DM do bot da Eternity no Discord vinculado ao nick para confirmar o pedido.</p>
             <p class="cidade-erro" hidden></p>
             <button class="botao botao-principal" type="submit">Enviar pedido</button>
         </form>`));
-    document.querySelector('#cidade_card input[name=nick]')?.focus();
+    document.querySelector(cidadePub.nick ? '#cidade_card textarea' : '#cidade_card input[name=nick]')?.focus();
 }
 
 async function enviarSolicitacao(event, casaId) {

@@ -376,6 +376,9 @@ function mpConquistados(perfil) {
 const MP_TELAS = [
     ['inicio', 'fa-house', 'Início'],
     ['ranking', 'fa-ranking-star', 'Ranking'],
+    // O mapa da cidade e o pedido de trust (18/10/2026; o site publico ficou so
+    // com a vitrine 3D e a galeria). Montado por js/home/cidade.js.
+    ['cidade', 'fa-city', 'Cidade'],
     ['perfil', 'fa-user', 'Meu perfil'],
 ];
 const MP_ABAS_PERFIL = [
@@ -440,6 +443,7 @@ function mpConteudoTela() {
     if (mpEstado.tela === 'perfil') return mpTelaPerfil();
     if (mpEstado.tela === 'jogador') return mpTelaJogador();
     if (mpEstado.tela === 'jornada') return mpTelaJornada();
+    if (mpEstado.tela === 'cidade') return `<div class="jogo-cabeca"><h1>Cidade</h1><p>Casas e terrenos gratuitos para os membros no Apocalipse. Escolha um lugar livre no mapa e peça o seu.</p></div>${cidadeMiolo()}`;
     return mpTelaInicio();
 }
 
@@ -447,6 +451,8 @@ function mpDepoisDaTela() {
     if (mpEstado.tela === 'perfil' || (mpEstado.tela === 'jogador' && mpEstado.jogador?.perfil)) mpSkin3d(app.querySelector('.ficha-skin'), mpResumo().nickSkin);
     else { mpViewer?.dispose(); mpViewer = null; }
     if (mpEstado.tela === 'inicio') mpMetaInicio();
+    if (mpEstado.tela === 'cidade') cidadeMontarMapa(mpEu().perfil.nick);
+    else cidadeLimpar();
     mpAtualizarHeroiCla();
 }
 
