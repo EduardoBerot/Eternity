@@ -78,6 +78,11 @@ const ROTAS = {
 };
 
 function route() {
+    // Link curto do painel no jogo (18/10/2026): /e/<codigo>, que o vercel.json
+    // redireciona para ?e=<codigo>, vira a entrada do painel (o site troca o
+    // codigo pela sessao em mpTrocarEntrada).
+    const curto = new URLSearchParams(location.search).get('e');
+    if (/^[a-z2-9]{8}$/.test(curto || '')) history.replaceState(null, '', `${location.pathname}#meu-painel&entrada=${curto}`);
     // O link assinado do jogo (?g=) e a volta do login do Discord (?vinculo=)
     // abrem o Guia mesmo sem o #guia: no tell cada caractere conta.
     const doGuia = /[?&](g|vinculo)=/.test(location.search) ? 'guia' : 'inicio';

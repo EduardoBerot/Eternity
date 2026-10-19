@@ -89,6 +89,11 @@ async function mpTrocarEntrada(token) {
         const corpo = await resposta.json().catch(() => ({}));
         if (resposta.ok && corpo.sessao) {
             mpGuardarSessao(corpo.sessao);
+            // O link curto do jogo guarda a tela na API (ex.: a Jornada no aceite).
+            if (corpo.tela && (MP_TELAS.some(([id]) => id === corpo.tela) || corpo.tela === 'jornada')) {
+                mpEstado.tela = corpo.tela;
+                history.replaceState(null, '', `${location.pathname}${location.search}#meu-painel&tela=${corpo.tela}`);
+            }
             return true;
         }
     } catch { /* cai no login normal */ }

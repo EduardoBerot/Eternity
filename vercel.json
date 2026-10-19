@@ -1,0 +1,5 @@
+{
+  "redirects": [
+    { "source": "/e/:codigo", "destination": "/?e=:codigo", "permanent": false }
+  ]
+}
