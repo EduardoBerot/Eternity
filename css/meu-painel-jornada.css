@@ -1,5 +1,5 @@
 /* Jornada dos 7 Dias (18/10/2026, js/home/meu-painel-jornada.js): cartao de
-   chamada no Inicio e a tela com as sete missoes. Mesma moldura chanfrada da
+   chamada no Inicio e a tela com o caminho das sete missoes. Mesma moldura chanfrada da
    ficha (meu-painel.css); feita em verde XP, liberada em aqua, trancada apagada. */
 
 /* ---------- Chamada no Inicio ---------- */
@@ -71,36 +71,148 @@
     b { font-family: var(--sans); color: var(--ficha-ouro); }
 }
 
-.jornada-premio {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    max-width: 760px;
-    padding: 10px 14px;
-    border: 1px solid rgba(245, 197, 66, 0.3);
-    background: rgba(245, 197, 66, 0.07);
-    font-family: var(--sans);
-    font-size: 0.88rem;
-    color: var(--nevoa);
+/* ---------- Caminho ---------- */
 
-    > i { margin-top: 2px; color: var(--ficha-ouro); }
+/* Trilha central com os nos; as missoes alternam de lado. Cada item desenha a
+   metade de cima (::before, chegando no no) e a de baixo (::after, saindo):
+   acesa em verde onde a pessoa ja passou, tracejada no resto. */
+.jornada-caminho {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.jornada-caminho > li {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 76px minmax(0, 1fr);
+    align-items: center;
+    padding: 14px 0;
+}
+
+.jornada-caminho > li::before,
+.jornada-caminho > li::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    width: 4px;
+    transform: translateX(-50%);
+    background: repeating-linear-gradient(to bottom, rgba(232, 244, 248, 0.16) 0 8px, transparent 8px 15px);
+}
+
+.jornada-caminho > li::before { top: 0; height: 50%; }
+.jornada-caminho > li::after { top: 50%; bottom: 0; }
+.jornada-caminho > li.entrada-feita::before,
+.jornada-caminho > li.saida-feita::after { background: var(--ficha-xp); box-shadow: 0 0 10px rgba(92, 240, 138, 0.4); }
+.jornada-caminho > .largada::before,
+.jornada-caminho > .chegada::after { display: none; }
+
+.caminho-no {
+    position: relative;
+    z-index: 1;
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: center;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border: 2px dashed var(--nevoa-escura);
+    border-radius: 50%;
+    background: #08111c;
+    color: var(--nevoa-escura);
+    font-size: 1.05rem;
+}
+
+/* Perninha ligando o no ao cartao. */
+.caminho-passo .caminho-no::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 14px;
+    height: 2px;
+    background: rgba(232, 244, 248, 0.14);
+}
+
+.lado-esq .caminho-no::after { right: 100%; }
+.lado-dir .caminho-no::after { left: 100%; }
+
+.caminho-passo.feita .caminho-no,
+.largada .caminho-no { border: 2px solid var(--ficha-xp); background: #0b2018; color: var(--ficha-xp); }
+.caminho-passo.feita .caminho-no::after { background: rgba(92, 240, 138, 0.45); }
+
+.caminho-passo.aberta .caminho-no {
+    border: 2px solid var(--aqua);
+    background: #071c24;
+    color: var(--aqua);
+    animation: caminho-pulso 2.2s ease-in-out infinite;
+}
+
+.caminho-passo.aberta .caminho-no::after { background: rgba(46, 230, 240, 0.5); }
+
+@keyframes caminho-pulso {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(46, 230, 240, 0.45); }
+    50% { box-shadow: 0 0 0 9px rgba(46, 230, 240, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .caminho-passo.aberta .caminho-no { animation: none; box-shadow: 0 0 0 4px rgba(46, 230, 240, 0.2); }
+}
+
+.chegada .caminho-no {
+    width: 58px;
+    height: 58px;
+    border: 2px solid rgba(245, 197, 66, 0.6);
+    background: #1c1708;
+    color: var(--ficha-ouro);
+    font-size: 1.3rem;
+}
+
+.chegada.feita .caminho-no { border-color: var(--ficha-ouro); box-shadow: 0 0 18px rgba(245, 197, 66, 0.45); }
+
+.lado-esq > .jornada-missao { grid-column: 1; grid-row: 1; }
+.lado-dir > .jornada-missao { grid-column: 3; grid-row: 1; }
+
+.caminho-marco-texto {
+    grid-column: 3;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-width: 440px;
+
+    small { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--nevoa-escura); }
+    p { margin: 0; font-size: 0.88rem; color: var(--nevoa); }
     b { color: var(--gelo); }
 }
 
-.jornada-premio.feito { border-color: rgba(92, 240, 138, 0.4); background: rgba(92, 240, 138, 0.08); }
-.jornada-premio.feito > i { color: var(--ficha-xp); }
+.chegada .caminho-marco-texto small { color: var(--ficha-ouro); }
 
-.jornada-missoes {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
-    gap: 16px;
-    align-items: start;
+.jornada-missao.trancada {
+    gap: 8px;
+    border-style: dashed;
+    background: rgba(10, 20, 33, 0.45);
+
+    h3 { color: var(--nevoa-escura); }
+    .jornada-dia { background: rgba(232, 244, 248, 0.04); color: var(--nevoa-escura); }
 }
+
+.jornada-trava { margin: 0; font-size: 0.82rem; color: var(--nevoa-escura); }
+.jornada-trava b { color: var(--nevoa); }
+
+/* Feita fica recolhida num details; o resumo e o proprio topo do cartao. */
+details.jornada-missao { display: block; }
+details.jornada-missao > summary { cursor: pointer; list-style: none; }
+details.jornada-missao > summary::-webkit-details-marker { display: none; }
+details.jornada-missao > :not(summary) { margin-top: 12px; }
+details.jornada-missao:not([open]) > summary h3 { color: var(--nevoa); }
 
 .jornada-missao { display: flex; flex-direction: column; gap: 12px; }
 .jornada-missao.feita { border-color: rgba(92, 240, 138, 0.35); }
 .jornada-missao.aberta { border-color: rgba(46, 230, 240, 0.45); box-shadow: 0 0 0 1px rgba(46, 230, 240, 0.15), inset 0 1px 0 rgba(232, 244, 248, 0.05); }
-.jornada-missao.trancada { opacity: 0.55; }
 
 .jornada-missao-topo {
     display: grid;
@@ -297,6 +409,18 @@
     b { color: var(--gelo); text-align: right; }
 }
 
+@media (max-width: 720px) {
+    .jornada-caminho > li { grid-template-columns: 58px minmax(0, 1fr); }
+    .jornada-caminho > li::before,
+    .jornada-caminho > li::after { left: 29px; }
+    .caminho-no { grid-column: 1; }
+    .lado-esq > .jornada-missao,
+    .lado-dir > .jornada-missao,
+    .caminho-marco-texto { grid-column: 2; }
+    .lado-esq .caminho-no::after { right: auto; left: 100%; width: 5px; }
+    .lado-dir .caminho-no::after { width: 5px; }
+}
+
 @media (max-width: 560px) {
     .jornada-chamada { grid-template-columns: auto minmax(0, 1fr); }
     .jornada-chamada > .mp-acao { grid-column: 1 / -1; justify-self: start; }
@@ -307,9 +431,7 @@
 
 /* Texto corrido em sans: a Conthrax fica nos titulos (e nos nomes de titulo). */
 .jornada-missao :is(p, li, span, b, small, code, a, button):not(.tit-nome):not(.tit-nome *):not(.jornada-dia),
-.jornada-premio, .jornada-premio b,
+.caminho-marco-texto :is(p, b, small), .jornada-trava,
 .jornada-chamada-texto p, .jornada-chamada-texto p b { font-family: var(--sans); }
 
-/* O dia 7 fecha a jornada: ocupa a linha toda. */
-.jornada-missao#jornada-dia-7 { grid-column: 1 / -1; }
 .jornada-farms { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); }

@@ -81,9 +81,6 @@ function mpTelaJornada() {
     if (!jornada) return mpTelaInicio();
     const feitas = jornada.missoes.filter(missao => missao.feita).length;
     const pct = Math.round(feitas / 7 * 100);
-    const premio = jornada.completa
-        ? `<div class="jornada-premio feito"><i class="fa-solid fa-gift" aria-hidden="true"></i><span><b>Jornada completa!</b> ${jornada.recompensa.pagaEm ? `100k pagos em ${escHtml(mpData(jornada.recompensa.pagaEm))}.` : 'A Eternity vai mandar os 100k em instantes.'} Subida para a ETY e confiável nas farms em <b>${mpDiaCurto(jornada.subida.data)}</b>.</span></div>`
-        : `<div class="jornada-premio"><i class="fa-solid fa-gift" aria-hidden="true"></i><span>Complete as 7 missões e ganhe <b>100k de ajuda inicial</b>, com a subida para a ETY aos <b>15 dias</b> de clã em vez de ${jornada.regraAntiga ? 20 : 30}.</span></div>`;
     return `<div class="jogo-cabeca jornada-cabeca">
             <h1>Jornada dos 7 Dias</h1>
             <p>Uma missão nova por dia para você conhecer a Eternity e se firmar no Apocalipse. As liberadas ficam abertas até você terminar.</p>
@@ -91,26 +88,70 @@ function mpTelaJornada() {
                 <div class="ficha-barra ficha-barra-ouro" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Missões concluídas"><span style="width:${pct}%"></span></div>
                 <b>${feitas}/7</b>
             </div>
-            ${premio}
         </div>
-        <div class="jornada-missoes">${jornada.missoes.map(missao => mpCartaoMissao(jornada, missao)).join('')}</div>`;
+        ${mpCaminhoJornada(jornada)}`;
 }
 
-function mpCartaoMissao(jornada, missao) {
+// O caminho: largada (entrada no cla), as sete missoes alternando de lado numa
+// trilha central e a chegada com a recompensa. A trilha acende em verde ate
+// onde a pessoa ja chegou; dali para a frente fica tracejada. Missao de dia que
+// ainda nao chegou aparece so como bloqueada, sem titulo nem etapas.
+function mpCaminhoJornada(jornada) {
+    const missoes = jornada.missoes;
+    const passos = missoes.map((missao, i) => mpPassoMissao(jornada, missao, {
+        veio: i === 0 || missoes[i - 1].feita,
+        lado: i % 2 ? 'dir' : 'esq',
+    })).join('');
+    const com = jornada.completa;
+    const chegada = com
+        ? `<b>Jornada completa!</b> ${jornada.recompensa.pagaEm ? `100k pagos em ${escHtml(mpData(jornada.recompensa.pagaEm))}.` : 'A Eternity vai mandar os 100k em instantes.'} Subida para a ETY e confiável nas farms em <b>${mpDiaCurto(jornada.subida.data)}</b>.`
+        : `<b>100k de ajuda inicial</b> e a subida para a ETY aos <b>15 dias</b> de clã em vez de ${jornada.regraAntiga ? 20 : 30}, com o confiável nas farms.`;
+    return `<ol class="jornada-caminho">
+        <li class="caminho-marco largada saida-feita">
+            <span class="caminho-no" aria-hidden="true"><i class="fa-solid fa-flag"></i></span>
+            <div class="caminho-marco-texto"><small>Largada</small><p><b>Você entrou no clã</b> em ${mpDiaCurto(jornada.dataEntrada)}.</p></div>
+        </li>
+        ${passos}
+        <li class="caminho-marco chegada ${missoes.at(-1).feita ? 'entrada-feita' : ''} ${com ? 'feita' : ''}">
+            <span class="caminho-no" aria-hidden="true"><i class="fa-solid ${com ? 'fa-trophy' : 'fa-gift'}"></i></span>
+            <div class="caminho-marco-texto"><small>Chegada</small><p>${chegada}</p></div>
+        </li>
+    </ol>`;
+}
+
+function mpDiasAte(data) {
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    return Math.round((new Date(`${data}T00:00:00`) - hoje) / 864e5);
+}
+
+function mpPassoMissao(jornada, missao, { veio, lado }) {
     const estado = missao.feita ? 'feita' : missao.liberada ? 'aberta' : 'trancada';
-    const selo = missao.feita
-        ? `<span class="jornada-selo feita"><i class="fa-solid fa-check" aria-hidden="true"></i> Concluída</span>`
-        : missao.liberada
-            ? '<span class="jornada-selo aberta">Liberada</span>'
-            : `<span class="jornada-selo"><i class="fa-solid fa-lock" aria-hidden="true"></i> Libera em ${mpDiaCurto(missao.liberaEm)}</span>`;
-    return `<section class="ficha-painel jornada-missao ${estado}" id="jornada-dia-${missao.dia}">
-        <header class="jornada-missao-topo">
-            <span class="jornada-dia"><i class="fa-solid ${MP_JORNADA_ICONES[missao.dia - 1]}" aria-hidden="true"></i><small>Dia ${missao.dia}</small></span>
-            <h3>${escHtml(missao.titulo)}</h3>
-            ${selo}
-        </header>
-        ${mpCorpoMissao(jornada, missao)}
-    </section>`;
+    const classes = ['caminho-passo', estado, `lado-${lado}`, veio ? 'entrada-feita' : '', missao.feita ? 'saida-feita' : ''].filter(Boolean).join(' ');
+    const icone = missao.feita ? 'fa-check' : missao.liberada ? MP_JORNADA_ICONES[missao.dia - 1] : 'fa-lock';
+    const dia = `<span class="jornada-dia"><i class="fa-solid ${missao.liberada ? MP_JORNADA_ICONES[missao.dia - 1] : 'fa-lock'}" aria-hidden="true"></i><small>Dia ${missao.dia}</small></span>`;
+    let cartao;
+    if (estado === 'trancada') {
+        const faltam = mpDiasAte(missao.liberaEm);
+        cartao = `<section class="ficha-painel jornada-missao trancada" id="jornada-dia-${missao.dia}">
+            <header class="jornada-missao-topo">${dia}<h3>Missão bloqueada</h3></header>
+            <p class="jornada-trava">Libera ${faltam <= 1 ? 'amanhã' : `em ${faltam} dias`}, em <b>${mpDiaCurto(missao.liberaEm)}</b>.</p>
+        </section>`;
+    } else if (estado === 'feita') {
+        // Feita fica recolhida: o titulo e a data bastam, as etapas abrem no clique.
+        cartao = `<details class="ficha-painel jornada-missao feita" id="jornada-dia-${missao.dia}">
+            <summary class="jornada-missao-topo">${dia}<h3>${escHtml(missao.titulo)}</h3>
+                <span class="jornada-selo feita"><i class="fa-solid fa-check" aria-hidden="true"></i> ${missao.concluidaEm ? mpDiaCurto(missao.concluidaEm) : 'Concluída'}</span>
+            </summary>
+            ${mpCorpoMissao(jornada, missao)}
+        </details>`;
+    } else {
+        cartao = `<section class="ficha-painel jornada-missao aberta" id="jornada-dia-${missao.dia}">
+            <header class="jornada-missao-topo">${dia}<h3>${escHtml(missao.titulo)}</h3><span class="jornada-selo aberta">Liberada</span></header>
+            ${mpCorpoMissao(jornada, missao)}
+        </section>`;
+    }
+    return `<li class="${classes}"><span class="caminho-no" aria-hidden="true"><i class="fa-solid ${icone}"></i></span>${cartao}</li>`;
 }
 
 function mpEtapas(missao, { semAjuda = false } = {}) {
