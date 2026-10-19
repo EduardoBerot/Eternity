@@ -489,7 +489,7 @@ function mpDesenhar() {
         <header class="hud">
             <a class="hud-marca" href="#inicio" title="Voltar ao site">Eternity</a>
             <nav class="hud-nav" aria-label="Painel">${telas.map(tela => botao(tela, 'hud-item')).join('')}</nav>
-            <button type="button" class="hud-jogador" onclick="mpIr('perfil')" title="Meu perfil">
+            <button type="button" class="hud-jogador ${mpEstado.tela === 'perfil' ? 'ativa' : ''}" onclick="mpIr('perfil')" title="Meu perfil">
                 <img src="https://mc-heads.net/avatar/${encodeURIComponent(nickSkin)}/40" alt="" width="34" height="34">
                 <span class="hud-jogador-texto">
                     <b>${escHtml(perfil.nick)}</b>
@@ -500,7 +500,7 @@ function mpDesenhar() {
             <button type="button" class="hud-sair" onclick="mpSair(event)" aria-label="Sair" title="Sair"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i></button>
         </header>
         <main class="jogo-tela" id="jogo-tela">${mpConteudoTela()}</main>
-        <nav class="jogo-abas-baixo" aria-label="Painel">${telas.map(tela => botao(tela, 'jogo-aba')).join('')}</nav>
+        <nav class="jogo-abas-baixo" aria-label="Painel">${telas.filter(([id]) => id !== 'perfil').map(tela => botao(tela, 'jogo-aba')).join('')}</nav>
         </div>
     </div>`;
     mpDepoisDaTela();

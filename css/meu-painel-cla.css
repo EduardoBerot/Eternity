@@ -393,7 +393,7 @@ body.modo-jogo .page-meu-painel { padding: 0; }
     img { image-rendering: pixelated; }
 }
 
-.hud-jogador:hover { background: rgba(245, 197, 66, 0.14); }
+.hud-jogador:hover, .hud-jogador.ativa { background: rgba(245, 197, 66, 0.14); border-color: rgba(245, 197, 66, 0.65); }
 
 .hud-jogador-texto {
     display: flex;
