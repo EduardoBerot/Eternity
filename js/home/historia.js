@@ -3,8 +3,9 @@
 //
 // Os marcos saem dos livros da Primeira e da Segunda Era, escritos pelo
 // Fundador (PDFs em docs/historia/, revisados a partir das paginas da
-// biblioteca do cla). A Terceira Era ainda nao tem livro: os marcos dela sao os
-// do proprio site e dos bots. Marco novo e uma linha nesta lista.
+// biblioteca do cla). A Terceira Era ainda nao tem livro e
+// e escrita agora: no lugar dos marcos, um convite que leva ao Guia (o
+// recrutamento), pedido do Fundador. Marco novo e uma linha nesta lista.
 //
 // `tipo` escolhe o icone; `nicks` vira as cabecas do marco, com link para o
 // perfil de quem ainda esta no cla (os outros aparecem sem link).
@@ -47,8 +48,9 @@ const HISTORIA_ERAS = [
         nome: 'Terceira Era',
         periodo: '2025 – hoje',
         lema: 'Em escrita',
-        resumo: 'A era que estamos vivendo: um clã organizado, conectado e de portas abertas.',
+        resumo: 'A era que estamos vivendo, e que ainda está sendo escrita por quem joga hoje.',
         pdf: null,
+        gancho: true,
         livros: 'Livro em escrita',
     },
 ];
@@ -107,24 +109,6 @@ const HISTORIA_MARCOS = [
       texto: 'Nascem os cargos de PvP, e Sir_Felipee se torna o primeiro Heika, a quem passam as decisões sobre alianças e rivalidades.' },
     { era: 'segunda', data: '31/12/2024', titulo: 'O fim planejado', tipo: 'fundacao', livro: 'VII',
       texto: 'Pela primeira vez, uma era termina sem inatividade: o Ano da Integridade fecha a Segunda Era, o primeiro ano em que o clã jogou todos os meses.' },
-
-    // ---------- Terceira Era ----------
-    { era: 'terceira', data: '01/01/2025', titulo: 'Começa a Terceira Era', tipo: 'fundacao', nicks: ['Ducred22'],
-      texto: 'A Eternity entra na nova era consciente do seu papel no futuro da história do Apocalipse.' },
-    { era: 'terceira', data: 'Ago 2026', titulo: 'Os bots da Eternity', tipo: 'sistema',
-      texto: 'O clã ganha bots próprios, ativos o dia todo: recrutamento guiado, sincronização das listas com o site e cuidado com a inatividade.' },
-    { era: 'terceira', data: 'Ago 2026', titulo: 'Discord integrado', tipo: 'sistema',
-      texto: 'O vínculo com o Discord passa a fazer parte da entrada, e os cargos do jogo aparecem sozinhos no servidor.' },
-    { era: 'terceira', data: 'Ago 2026', titulo: 'Liga e pódios automáticos', tipo: 'guerra',
-      texto: 'Torneios e Liga passam a ser acompanhados de perto, e os pódios são pagos automaticamente, com conferência contra o banco do clã.' },
-    { era: 'terceira', data: 'Set 2026', titulo: 'A Eternity no Genesis', tipo: 'cidade',
-      texto: 'O clã passa a atender os dois servidores, com recrutamento próprio no Genesis.' },
-    { era: 'terceira', data: 'Set 2026', titulo: 'Livre circulação', tipo: 'alianca',
-      texto: 'Aos domingos, membros podem sair para eventos e voltar sem perder nada. Os aniversários passam a ser celebrados no Discord.' },
-    { era: 'terceira', data: 'Out 2026', titulo: 'Painel do membro', tipo: 'sistema',
-      texto: 'Cada membro ganha o seu painel, com login pelo Discord, a Jornada dos 7 Dias para os novatos e pedidos feitos direto pelo site.' },
-    { era: 'terceira', data: 'Out 2026', titulo: 'Metas e Copa de Duelos', tipo: 'guerra',
-      texto: 'A meta semanal do banco desbloqueia recompensas coletivas, como o Quiz do Clã e a Copa de Duelos.' },
 ];
 
 function historiaCapaHtml(era) {
@@ -139,7 +123,9 @@ function historiaCapaHtml(era) {
 }
 
 function historiaVolumeHtml(era) {
-    const acoes = era.pdf
+    const acoes = era.gancho
+        ? '<a class="hist-botao hist-botao-cheio" href="#guia"><i class="fa-solid fa-feather-pointed" aria-hidden="true"></i>Faça parte</a>'
+        : era.pdf
         ? `<a class="hist-botao" href="${era.pdf}" target="_blank" rel="noopener"><i class="fa-solid fa-book-open" aria-hidden="true"></i>Ler</a>
            <a class="hist-botao hist-botao-cheio" href="${era.pdf}" download><i class="fa-solid fa-download" aria-hidden="true"></i>Baixar PDF</a>`
         : '<span class="hist-em-breve"><i class="fa-solid fa-feather-pointed" aria-hidden="true"></i>Em breve</span>';
@@ -177,6 +163,17 @@ function historiaMarcoHtml(marco, era) {
         </li>`;
 }
 
+// A era em aberto: convite para entrar na historia pelo recrutamento.
+function historiaGanchoHtml() {
+    return `
+        <div class="hist-gancho">
+            <span class="hist-gancho-icone"><i class="fa-solid fa-feather-pointed" aria-hidden="true"></i></span>
+            <h4>Esta era está sendo escrita agora</h4>
+            <p>A Terceira Era começou em 2025 e ainda não tem livro. Os próximos capítulos serão contados por quem está jogando hoje, e o seu nome pode estar neles.</p>
+            <a class="hist-botao hist-botao-cheio" href="#guia"><i class="fa-solid fa-feather-pointed" aria-hidden="true"></i>Faça parte da história</a>
+        </div>`;
+}
+
 function historiaWikiHtml() {
     const legenda = Object.values(HISTORIA_TIPOS).map(tipo => `
         <span><i class="fa-solid ${tipo.icone}" aria-hidden="true"></i>${tipo.nome}</span>`).join('');
@@ -186,9 +183,7 @@ function historiaWikiHtml() {
                 <span class="hist-era-num">${era.numero}</span>
                 <div><strong>${escHtml(era.nome)}</strong><span>${escHtml(era.periodo)} · ${escHtml(era.lema)}</span></div>
             </header>
-            <ol class="hist-linha">
-                ${HISTORIA_MARCOS.filter(marco => marco.era === era.id).map(marco => historiaMarcoHtml(marco, era)).join('')}
-            </ol>
+            ${era.gancho ? historiaGanchoHtml() : `<ol class="hist-linha">${HISTORIA_MARCOS.filter(marco => marco.era === era.id).map(marco => historiaMarcoHtml(marco, era)).join('')}</ol>`}
         </section>`).join('');
     return `
         <section class="secao-wiki" id="wiki-historia">
