@@ -37,8 +37,10 @@ async function mpCarregarJornada() {
     } catch { return; }
     if (!location.hash.startsWith('#meu-painel') || !mpEstado.dados) return;
     // A aba da Jornada entra no HUD quando a jornada chega.
-    if (Boolean(mpEstado.jornada) !== antes) return mpDesenhar();
-    if (['inicio', 'jornada'].includes(mpEstado.tela)) mpRedesenharTela();
+    if (Boolean(mpEstado.jornada) !== antes) mpDesenhar();
+    else if (['inicio', 'jornada'].includes(mpEstado.tela)) mpRedesenharTela();
+    // Primeira entrada do recruta: o tour do painel (meu-painel-tutorial.js).
+    if (mpTutorialPendente() && ['inicio', 'jornada'].includes(mpEstado.tela)) setTimeout(mpTutorialIniciar, 300);
 }
 
 function mpDiaCurto(data) {
@@ -83,7 +85,7 @@ function mpTelaJornada() {
     const pct = Math.round(feitas / 7 * 100);
     return `<div class="jogo-cabeca jornada-cabeca">
             <h1>Jornada dos 7 Dias</h1>
-            <p>Uma missão nova por dia para você conhecer a Eternity e se firmar no Apocalipse. As liberadas ficam abertas até você terminar.</p>
+            <p>Uma missão nova por dia para você conhecer a Eternity e se firmar no Apocalipse. As liberadas ficam abertas até você terminar. <button type="button" class="mp-link" onclick="mpTutorialIniciar()"><i class="fa-solid fa-circle-question" aria-hidden="true"></i> Rever o tutorial</button></p>
             <div class="jornada-progresso">
                 <div class="ficha-barra ficha-barra-ouro" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Missões concluídas"><span style="width:${pct}%"></span></div>
                 <b>${feitas}/7</b>

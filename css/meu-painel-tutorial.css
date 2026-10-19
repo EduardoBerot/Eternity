@@ -1,0 +1,135 @@
+/* Tutorial do painel (18/10/2026, js/home/meu-painel-tutorial.js): veu escuro,
+   o foco recortado em volta do alvo (a sombra gigante escurece o resto) e o
+   balao chanfrado no mesmo molde dos cards do painel. */
+
+body.tutorial-aberto { overflow: hidden; }
+
+.tutorial {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    --ficha-ouro: #f5c542;
+}
+
+/* O veu so pega os cliques; quem escurece e a sombra do foco. Sem alvo, ele
+   mesmo escurece a tela inteira. */
+.tutorial-veu { position: absolute; inset: 0; }
+.tutorial.sem-alvo .tutorial-veu { background: rgba(2, 5, 10, 0.78); backdrop-filter: blur(2px); }
+.tutorial.sem-alvo .tutorial-foco { display: none; }
+
+.tutorial-foco {
+    position: fixed;
+    border: 2px solid var(--aqua);
+    border-radius: 6px;
+    box-shadow: 0 0 0 9999px rgba(2, 5, 10, 0.78), 0 0 24px rgba(46, 230, 240, 0.55);
+    pointer-events: none;
+    transition: left 0.25s ease, top 0.25s ease, width 0.25s ease, height 0.25s ease;
+    animation: tutorial-pulso 1.8s ease-in-out infinite;
+}
+
+@keyframes tutorial-pulso {
+    0%, 100% { border-color: var(--aqua); }
+    50% { border-color: rgba(46, 230, 240, 0.45); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tutorial-foco { transition: none; animation: none; }
+}
+
+.tutorial-balao {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: min(380px, calc(100vw - 32px));
+    padding: 20px;
+    box-sizing: border-box;
+    border: 1px solid rgba(46, 230, 240, 0.35);
+    background:
+        linear-gradient(180deg, rgba(46, 230, 240, 0.08), transparent 140px),
+        #0a1421;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+    clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+    transition: left 0.25s ease, top 0.25s ease;
+
+    h3 { margin: 0; font-size: 1.05rem; color: var(--gelo); }
+    p { margin: 0; font-family: var(--sans); font-size: 0.9rem; line-height: 1.5; color: var(--nevoa); }
+    p b { font-family: var(--sans); color: var(--gelo); }
+}
+
+/* Sem alvo: no meio da tela. */
+.tutorial.sem-alvo .tutorial-balao {
+    left: 50%;
+    top: 50%;
+    width: min(440px, calc(100vw - 32px));
+    transform: translate(-50%, -50%);
+    border-color: rgba(245, 197, 66, 0.4);
+}
+
+.tutorial-topo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    small { font-family: var(--sans); font-size: 0.75rem; color: var(--nevoa-escura); }
+}
+
+.tutorial-icone {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    background: rgba(46, 230, 240, 0.12);
+    color: var(--aqua);
+    font-size: 1.05rem;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+
+.tutorial.sem-alvo .tutorial-icone { background: rgba(245, 197, 66, 0.14); color: var(--ficha-ouro); }
+
+.tutorial-pular {
+    margin-left: auto;
+    padding: 4px 8px;
+    border: 0;
+    background: none;
+    color: var(--nevoa-escura);
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.tutorial-pular:hover { color: var(--gelo); text-decoration: underline; }
+
+.tutorial-pontos {
+    display: flex;
+    gap: 6px;
+
+    span { width: 18px; height: 4px; background: rgba(232, 244, 248, 0.12); transition: background 0.2s ease; }
+    span.feito { background: rgba(46, 230, 240, 0.45); }
+    span.ativo { background: var(--aqua); box-shadow: 0 0 8px rgba(46, 230, 240, 0.6); }
+}
+
+.tutorial-botoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* Celular: o balao e uma faixa no pe da tela (ou no topo, se o alvo esta
+   embaixo, como a barra de abas). */
+@media (max-width: 640px) {
+    .tutorial:not(.sem-alvo) .tutorial-balao {
+        left: 12px !important;
+        right: 12px;
+        top: auto !important;
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        width: auto;
+    }
+
+    .tutorial.balao-em-cima:not(.sem-alvo) .tutorial-balao {
+        top: 12px !important;
+        bottom: auto;
+    }
+
+    .tutorial-botoes .mp-acao { flex: 1; justify-content: center; }
+}
