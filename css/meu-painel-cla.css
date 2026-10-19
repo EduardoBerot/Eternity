@@ -1525,3 +1525,6 @@ body.modo-jogo .page-meu-painel { padding: 0; }
 .semana-mais { margin: 6px 0 0; font-family: var(--sans); font-size: 0.76rem; color: var(--nevoa-escura); }
 .semana-mais b { font-weight: 400; color: var(--nevoa); }
 .semana-todos li > span .eu { color: var(--ficha-ouro); }
+
+/* "Você": o cartao do jogador abre o grupo e a Jornada vem logo abaixo. */
+.lateral-voce .lateral-jogador { margin-bottom: 4px; }

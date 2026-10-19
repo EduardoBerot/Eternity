@@ -413,10 +413,10 @@ function mpResumo(alvo = mpAlvo()) {
 // esquerda, agrupadas, com o jogador no topo; recolhida, sobra so a coluna de
 // icones. A escolha fica no navegador. No celular continua a barra de baixo.
 const MP_LATERAL_CHAVE = 'eternity-painel-lateral';
+// "Você" vem antes: o cartao do jogador (que abre o Meu perfil) e, logo abaixo,
+// a Jornada. Os outros grupos seguem a lista.
 const MP_LATERAL_GRUPOS = [
     ['Clã', ['inicio', 'ranking', 'cidade']],
-    // Meu perfil abre pelo cartao do jogador, no topo do menu.
-    ['Você', ['jornada']],
     ['Staff', ['staff']],
 ];
 
@@ -457,6 +457,9 @@ function mpLateral(telas, { perfil, nivel, nickSkin }) {
             <a class="lateral-marca" href="#inicio" title="Voltar ao site"><span class="lateral-marca-cheia">Eternity</span><span class="lateral-marca-curta" aria-hidden="true">E</span></a>
             <button type="button" class="lateral-recolher" onclick="mpAlternarLateral()" aria-expanded="${!recolhida}" title="${recolhida ? 'Abrir o menu' : 'Recolher o menu'}"><i class="fa-solid fa-angles-left" aria-hidden="true"></i></button>
         </div>
+        <nav class="lateral-nav" aria-label="Painel">
+        <div class="lateral-grupo lateral-voce">
+        <small class="lateral-grupo-nome">Você</small>
         <button type="button" class="lateral-jogador ${mpEstado.tela === 'perfil' ? 'ativa' : ''}" onclick="mpIr('perfil')" title="${escHtml(perfil.nick)} · NV ${nivel.nivel}">
             <img src="https://mc-heads.net/avatar/${encodeURIComponent(nickSkin)}/40" alt="" width="36" height="36">
             <span class="lateral-jogador-texto">
@@ -465,7 +468,10 @@ function mpLateral(telas, { perfil, nivel, nickSkin }) {
             </span>
             <span class="niv-nv">NV ${nivel.nivel}</span>
         </button>
-        <nav class="lateral-nav" aria-label="Painel">${grupos}</nav>
+        ${porId.has('jornada') ? item(porId.get('jornada')) : ''}
+        </div>
+        ${grupos}
+        </nav>
         <div class="lateral-pe">
             <a class="lateral-item" href="#inicio" title="Voltar ao site"><i class="fa-solid fa-globe" aria-hidden="true"></i><span>Voltar ao site</span></a>
             <button type="button" class="lateral-item lateral-sair" onclick="mpSair(event)" title="Sair"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Sair</span></button>
