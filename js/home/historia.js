@@ -169,7 +169,7 @@ function historiaGanchoHtml() {
         <div class="hist-gancho">
             <span class="hist-gancho-icone"><i class="fa-solid fa-feather-pointed" aria-hidden="true"></i></span>
             <h4>Esta era está sendo escrita agora</h4>
-            <p>A Terceira Era começou em 2025 e ainda não tem livro. Os próximos capítulos serão contados por quem está jogando hoje, e o seu nome pode estar neles.</p>
+            <p>A Terceira Era começou em 1º de janeiro de 2025, com uma nova bandeira, os valores de <b>União, Justiça e Honestidade</b> e as primeiras obras da Nova Eternity. Ela ainda não tem livro: os próximos capítulos serão contados por quem está jogando hoje, e o seu nome pode estar neles.</p>
             <a class="hist-botao hist-botao-cheio" href="#guia"><i class="fa-solid fa-feather-pointed" aria-hidden="true"></i>Faça parte da história</a>
         </div>`;
 }
