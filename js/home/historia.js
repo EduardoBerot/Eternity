@@ -11,7 +11,7 @@
 // `tipo` escolhe o icone; `nicks` vira as cabecas do marco, com link para o
 // perfil de quem ainda esta no cla (os outros aparecem sem link). `foto` e a
 // data de um print do Fundador daquele momento (20/10/2026, das pastas de
-// screenshots de 2018-2021 e 2022-2024): imgs/historia/marcos/<data>.webp e a
+// screenshots de 2018-2021 e 2022-2024 e da pasta do jogo, 2024 em diante): imgs/historia/marcos/<data>.webp e a
 // miniatura 16:9 sem a barra de itens, <data>-g.webp o print inteiro.
 
 const HISTORIA_TIPOS = {
@@ -106,13 +106,13 @@ const HISTORIA_MARCOS = [
       texto: 'A HGT domina os torneios e a XOX desafia no PvP. A Eternity reafirma o seu propósito: mais do que vencer, manter uma comunidade ativa.' },
     { era: 'segunda', data: 'Jul 2024', titulo: 'Novos aliados', tipo: 'alianca', livro: 'V', nicks: ['Jiraiya', 'MerpIsHere'],
       texto: 'A HGT se dissolve, Jiraiya e MerpIsHere chegam à Eternity e as alianças com a FUN e a uwu equilibram a disputa com a XOX.' },
-    { era: 'segunda', data: '2024', titulo: 'O vácuo de rival', tipo: 'sistema', livro: 'VI', nicks: ['DMonte1122', 'Coxiinha'],
+    { era: 'segunda', data: '2024', titulo: 'O vácuo de rival', tipo: 'sistema', livro: 'VI', foto: '2024-09-03', nicks: ['DMonte1122', 'Coxiinha'],
       texto: 'Pódios passam a render 50% a mais, nasce o canal do clã no YouTube, a XOX cai por trapaça e começa a praça da Eternity no Genesis.' },
     { era: 'segunda', data: 'Out 2024', titulo: 'As alianças se rompem', tipo: 'crise', livro: 'VI', nicks: ['Zixul'],
       texto: 'Em pouco tempo, uwu, ETK e FUN rompem com a Eternity, e a ETK é debandada.' },
-    { era: 'segunda', data: 'Fim de 2024', titulo: 'O primeiro Heika', tipo: 'lideranca', livro: 'VII', nicks: ['Sir_Felipee'],
+    { era: 'segunda', data: 'Fim de 2024', titulo: 'O primeiro Heika', tipo: 'lideranca', livro: 'VII', foto: '2024-11-16', nicks: ['Sir_Felipee'],
       texto: 'Nascem os cargos de PvP, e Sir_Felipee se torna o primeiro Heika, a quem passam as decisões sobre alianças e rivalidades.' },
-    { era: 'segunda', data: '31/12/2024', titulo: 'O fim planejado', tipo: 'fundacao', livro: 'VII',
+    { era: 'segunda', data: '31/12/2024', titulo: 'O fim planejado', tipo: 'fundacao', livro: 'VII', foto: '2024-12-28',
       texto: 'Pela primeira vez, uma era termina sem inatividade: o Ano da Integridade fecha a Segunda Era, o primeiro ano em que o clã jogou todos os meses.' },
 ];
 
