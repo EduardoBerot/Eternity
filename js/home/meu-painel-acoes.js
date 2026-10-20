@@ -57,6 +57,7 @@ async function mpCarregarAcoes() {
 
 async function mpPedirAcao(tipo, dados, botao) {
     if (mpAcaoAberta()) return mpAviso('Espere a Eternity terminar o pedido em andamento.', 'aviso');
+    window.etyTelemetria?.acao(`acao_${tipo}`);
     if (botao) { botao.disabled = true; botao.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Enviando'; }
     try {
         const resposta = await fetch(`${URL_PAINEL_MEMBRO}/acoes`, {

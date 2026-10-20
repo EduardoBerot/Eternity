@@ -1,0 +1,102 @@
+/* Indicadores > Site (20/10/2026, js/painel/uso-site.js). Aproveita o .an-root
+   e os cartoes da aba Liga (analises.css). No computador cabe na janela e as
+   tabelas rolam por dentro; no celular (<=900px) a pagina volta a rolar e os
+   cartoes empilham. */
+
+.us-grade {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.9fr);
+    grid-template-rows: auto minmax(0, 1fr) minmax(0, 1.25fr);
+    grid-template-areas:
+        "tiles tiles tiles tiles"
+        "diario diario paginas lado"
+        "pessoas pessoas staff nunca";
+    gap: 10px;
+    min-height: 0;
+}
+
+.us-tiles { grid-area: tiles; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.us-c-diario { grid-area: diario; }
+.us-c-paginas { grid-area: paginas; }
+.us-c-lado { grid-area: lado; overflow-y: auto; }
+.us-c-pessoas { grid-area: pessoas; }
+.us-c-staff { grid-area: staff; }
+.us-c-nunca { grid-area: nunca; }
+
+.us-root .an-plot { flex: 1; min-height: 0; margin-top: 6px; overflow: hidden; }
+.us-c-paginas .an-plot { overflow-y: auto; }
+.us-root .an-card header span { color: var(--an-ink-3); font-size: 0.7rem; white-space: nowrap; }
+.us-root svg text { fill: var(--an-ink-2); font-size: 10.5px; }
+.us-root svg .an-forte { fill: var(--an-ink); font-weight: 600; }
+.us-root svg .an-grid { stroke: var(--an-grid); stroke-width: 1; }
+
+/* ---------- Numeros do topo ---------- */
+.us-tile { display: flex; flex-direction: column; gap: 2px; padding: 9px 14px; }
+.us-tile__rotulo { color: var(--an-ink-3); font-size: 0.7rem; letter-spacing: 0.02em; }
+.us-root .us-tile__valor { font-family: Conthax, var(--sans); font-size: clamp(1.2rem, 2.6vh, 1.7rem); font-variant-numeric: tabular-nums; color: var(--an-ink); }
+.us-tile__valor small { font-family: var(--sans); font-size: 0.8rem; color: var(--an-ink-3); }
+.us-tile__nota { color: var(--an-ink-2); font-size: 0.72rem; }
+
+.us-legenda { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.us-legenda span { display: inline-flex; align-items: center; gap: 6px; color: var(--an-ink-2); font-size: 0.72rem; }
+.us-legenda i { width: 10px; height: 10px; border-radius: 3px; }
+
+/* ---------- Listas curtas (origem, acoes) ---------- */
+.us-lista { list-style: none; margin: 4px 0 10px; padding: 0; display: grid; gap: 2px; }
+.us-lista li { display: flex; justify-content: space-between; gap: 8px; padding: 3px 4px; border-radius: 6px; color: var(--an-ink-2); font-size: 0.74rem; }
+.us-lista li:hover { background: rgba(232, 244, 248, 0.04); }
+.us-lista b { color: var(--an-ink); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.us-lista .us-vazio { color: var(--an-ink-3); }
+
+/* ---------- Tabelas ---------- */
+.us-tabela { flex: 1; min-height: 0; margin-top: 6px; overflow: auto; }
+.us-tabela table { width: 100%; border-collapse: collapse; font-size: 0.74rem; }
+.us-tabela th {
+    position: sticky; top: 0; z-index: 1;
+    padding: 4px 6px;
+    background: var(--an-surface);
+    color: var(--an-ink-3);
+    font-weight: 500;
+    text-align: left;
+    white-space: nowrap;
+}
+.us-tabela td { padding: 4px 6px; border-top: 1px solid var(--an-grid); color: var(--an-ink-2); vertical-align: middle; }
+.us-tabela tr:hover td { background: rgba(232, 244, 248, 0.03); }
+.us-tabela .us-num { text-align: right; font-variant-numeric: tabular-nums; color: var(--an-ink); }
+.us-tabela .us-paginas { color: var(--an-ink-3); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.us-nick { display: flex; align-items: center; gap: 8px; min-width: 120px; }
+.us-nick img, .us-chips img { border-radius: 4px; image-rendering: pixelated; flex-shrink: 0; }
+.us-nick span, .us-chips span { display: flex; flex-direction: column; color: var(--an-ink); line-height: 1.2; }
+.us-nick small, .us-chips small { color: var(--an-ink-3); font-size: 0.66rem; }
+.us-apagado td { opacity: 0.55; }
+
+.us-chips { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; }
+.us-chips li { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border: 1px solid var(--an-grid); border-radius: 8px; font-size: 0.74rem; }
+
+.us-filtro button { padding: 3px 10px; font-size: 0.72rem; }
+
+/* Notebook baixo: os numeros do topo se apertam. */
+@media (min-width: 901px) and (max-height: 700px) {
+    .us-tile { padding: 6px 12px; }
+    .us-tile__nota { display: none; }
+}
+
+/* Celular: a pagina rola e os cartoes empilham na altura do conteudo. */
+@media (max-width: 900px) {
+    body.painel--uso { overflow: auto; }
+    /* A aba Liga vira abas no celular e esconde todo .an-card fora da aba
+       ativa (analises.css); aqui todos aparecem. */
+    .us-root .an-card { display: flex; }
+    .painel.painel--analises.painel--uso .content { height: auto; overflow: visible; }
+    .us-root { height: auto; }
+    .us-grade {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: none;
+        grid-template-areas: "tiles" "diario" "paginas" "lado" "pessoas" "staff" "nunca";
+    }
+    .us-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .us-c-diario .an-plot { height: 200px; flex: none; }
+    .us-c-paginas .an-plot { height: 220px; flex: none; }
+    .us-tabela { max-height: 360px; flex: none; }
+    .us-c-lado { overflow: visible; }
+}

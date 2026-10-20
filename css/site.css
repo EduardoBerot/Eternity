@@ -594,6 +594,7 @@ main { padding-top: var(--nav); }
 
     .miolo { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
     .brand { font-size: 1.6rem; color: var(--nevoa); }
+    .rodape-nota { flex-basis: 100%; font-size: 0.72rem; opacity: 0.8; }
 }
 
 /* ---------- Membros ---------- */

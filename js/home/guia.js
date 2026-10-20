@@ -281,6 +281,7 @@ function guiaMascaraData(campo) {
 
 async function guiaEntrarDiscord(event) {
     event.preventDefault();
+    window.etyTelemetria?.acao('guia_discord');
     const msg = document.getElementById('guia-msg');
     const botao = document.getElementById('guia-entrar-discord');
     const nascimento = document.getElementById('guia-nascimento').value.trim();

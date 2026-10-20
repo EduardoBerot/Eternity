@@ -189,6 +189,8 @@ function rodapeSite() {
             <div class="miolo">
                 <span class="brand">Eternity</span>
                 <span>Clã da rede Armageddon, desde 01/08/2020.</span>
+                <!-- Uso do site (20/10/2026, js/telemetria.js): o aviso que o plano pediu. -->
+                <span class="rodape-nota">O site registra as páginas visitadas, sem IP e sem cookies de terceiros, para a liderança do clã acompanhar o uso.</span>
             </div>
         </footer>`;
 }

@@ -2,16 +2,6 @@
 <html lang="pt-BR">
 
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-X0KJ8S6DW1"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-
-        gtag('config', 'G-X0KJ8S6DW1');
-    </script>
-
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#8ea4c8">
@@ -65,7 +55,7 @@
         <a class="brand" href="#inicio" aria-label="Eternity - Início">Eternity</a>
         <nav id="main-menu" class="nav-links" aria-label="Navegação principal">
             <a class="itens" id="inicio" href="#inicio">Início</a>
-            <a class="itens" id="join" href="#guia">Juntar-se</a>
+            <a class="itens" id="join" href="#guia" onclick="window.etyTelemetria?.acao('juntar_se')">Juntar-se</a>
             <a class="itens" id="hall" href="#membros">Membros</a>
             <a class="itens" id="wiki" href="#wiki">Wiki</a>
             <a class="itens" id="city" href="#cidade">Cidade</a>
@@ -102,6 +92,7 @@
     <script src="js/plugins/lg-zoom.js"></script>
     <script src="js/plugins/lg-autoplay.js"></script>
     <script src="js/global.js"></script>
+    <script src="js/telemetria.js"></script>
     <script src="js/titulos.js"></script>
     <script src="js/home/index.js"></script>
     <script src="js/meta-banco.js"></script>

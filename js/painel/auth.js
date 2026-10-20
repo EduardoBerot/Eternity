@@ -27,7 +27,9 @@ async function authenticate() {
                 throw new Error('Erro na requisição');
             }
 
-            const {valid, lider, cidade} = await response.json();
+            const {valid, lider, cidade, usoSite} = await response.json();
+            // Quem ve o que dentro de Indicadores (indicadores.js).
+            window.painelPermissoes = { lider: Boolean(valid && lider), usoSite: Boolean(valid && usoSite) };
 
             // A aba Cidade e do nivel de Supervisor para cima (10/10/2026):
             // Estagiario, Auxiliar e Daimyo nao a veem. So some quando o backend
@@ -41,14 +43,14 @@ async function authenticate() {
             // conversa privada de jogador e so lideres a enxergam. Esconder o
             // menu e conveniencia de interface -- quem autoriza de verdade e o
             // middleware do backend em cada requisicao.
-            if (valid && lider) {
+            if (valid && (lider || usoSite)) {
                 for (const id of ['indicadores']) {
                     const item = document.getElementById(id);
                     if (item) item.hidden = false;
                 }
                 // Quem depende de saber que e lider (link da conversa vindo do
                 // Telegram) espera este sinal.
-                document.dispatchEvent(new Event('painel:lider'));
+                if (lider) document.dispatchEvent(new Event('painel:lider'));
             }
 
             if (!valid) voltarAoLogin();

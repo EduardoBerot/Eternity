@@ -14,6 +14,7 @@ function render(event) {
     // janela; qualquer outra aba devolve.
     anSairDaAba();
     rcSairDaAba();
+    usSairDaAba();
     cidadeSairDaAba();
     APP.innerHTML = '';
     const id = event.target.id;

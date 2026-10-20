@@ -140,7 +140,7 @@ function historiaVolumeHtml(era) {
         ? '<a class="hist-botao hist-botao-cheio" href="#guia"><i class="fa-solid fa-feather-pointed" aria-hidden="true"></i>Faça parte</a>'
         : era.pdf
         ? `<button type="button" class="hist-botao hist-botao-cheio" data-ler="${era.id}" onclick="abrirLeitorHistoria('${era.id}')"><i class="fa-solid fa-book-open" aria-hidden="true"></i><span>Ler no site</span></button>
-           <a class="hist-botao" href="${era.pdf}" download><i class="fa-solid fa-download" aria-hidden="true"></i>PDF</a>`
+           <a class="hist-botao" href="${era.pdf}" download onclick="window.etyTelemetria?.acao('historia_pdf')"><i class="fa-solid fa-download" aria-hidden="true"></i>PDF</a>`
         : '<span class="hist-em-breve"><i class="fa-solid fa-feather-pointed" aria-hidden="true"></i>Em breve</span>';
     const livro = HISTORIA_LIVROS[era.id];
     const sumario = livro ? `
@@ -338,7 +338,10 @@ function abrirLeitorHistoria(era, indice) {
     }
     const dialogo = leitorHistoria();
     mostrarLivroHistoria(era, indice);
-    if (!dialogo.open) dialogo.showModal();
+    if (!dialogo.open) {
+        window.etyTelemetria?.acao('historia_ler');
+        dialogo.showModal();
+    }
     // O showModal foca o primeiro botao; o foco volta para o texto.
     dialogo.querySelector('.hist-leitor-corpo').focus({ preventScroll: true });
 }
@@ -408,7 +411,7 @@ function mostrarLivroHistoria(era, indice) {
             </div>
             <div class="hist-leitor-ferramentas">
                 <button type="button" onclick="trocarLetraHistoria()" title="Tamanho da letra" aria-label="Tamanho da letra"><i class="fa-solid fa-text-height" aria-hidden="true"></i></button>
-                <a href="${dadosEra.pdf}" download title="Baixar o PDF" aria-label="Baixar o PDF"><i class="fa-solid fa-download" aria-hidden="true"></i></a>
+                <a href="${dadosEra.pdf}" download onclick="window.etyTelemetria?.acao('historia_pdf')" title="Baixar o PDF" aria-label="Baixar o PDF"><i class="fa-solid fa-download" aria-hidden="true"></i></a>
                 <button type="button" onclick="document.getElementById('hist-leitor').close()" title="Fechar" aria-label="Fechar"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
             </div>
             <span class="hist-leitor-progresso" aria-hidden="true"><span></span></span>

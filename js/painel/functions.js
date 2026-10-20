@@ -90,6 +90,9 @@ function replaceInTableHeader(searchString, replaceString) {
 }
 
 function selectItem(itemSelect) {
+    // Uso do site (telemetria.js): cada aba do painel e uma pagina. A de
+    // Indicadores conta pela sub-aba, em renderIndicadores.
+    if (itemSelect?.id && itemSelect.id !== 'indicadores') window.etyTelemetria?.pagina(`painel/${itemSelect.id}`);
     const itens = document.querySelectorAll(".itens");
     for (const item of itens) {
         if (item != itemSelect) {

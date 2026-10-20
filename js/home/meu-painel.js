@@ -155,6 +155,7 @@ async function mpPrepararLink() {
 
 // Retorno imediato no clique: no celular o Discord (ou o app dele) demora a abrir.
 function mpClicouEntrar(botao) {
+    window.etyTelemetria?.acao('login_discord');
     if (!mpLinkDiscord || Date.now() - mpLinkDiscord.em > MP_LINK_VALIDO_MS) botao.href = `${URL_PAINEL_MEMBRO}/entrar`;
     botao.classList.add('carregando');
     botao.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> <span>Abrindo o Discord...</span>';
@@ -165,7 +166,7 @@ function mpTelaLogin(erro) {
         ${erro ? `<p class="mp-erro">${escHtml(MP_ERROS[erro] || MP_ERROS.discord)}</p>` : ''}
         <p>Entre com a conta do Discord vinculada ao seu nick para ver a sua Liga, os seus depósitos no banco, os prêmios que recebeu e quanto falta para cada título.</p>
         ${mpBotaoEntrar()}
-        <p class="mp-sub">Só pedimos o seu nome no Discord. Nada é publicado em seu nome.</p>
+        <p class="mp-sub">Só pedimos o seu nome no Discord. Nada é publicado em seu nome. Com o login, as páginas que você visita no site ficam registradas para a liderança do clã acompanhar o uso.</p>
         <p class="mp-sub"><i class="fa-solid fa-bolt" aria-hidden="true"></i> Atalho: use <code>/painel</code> no Discord, ou mande <b>painel</b> para a Eternity no privado do jogo, e entre já logado.</p>`);
     mpPrepararLink();
 }
@@ -1013,6 +1014,7 @@ async function mpAbrirAdmin() {
         else app.innerHTML = mpCartao('fa-solid fa-user-shield', 'Administração', `<p>${escHtml(mensagem)}</p>`, { tipo: 'aviso' });
     };
     if (!token) return mpTelaLogin(null);
+    window.etyTelemetria?.acao('staff_entrar');
     try {
         const resposta = await fetch(`${URL_PAINEL_MEMBRO}/staff`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
         const corpo = await resposta.json().catch(() => ({}));
