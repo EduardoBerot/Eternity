@@ -9,7 +9,10 @@
 // recrutamento), pedido do Fundador. Marco novo e uma linha nesta lista.
 //
 // `tipo` escolhe o icone; `nicks` vira as cabecas do marco, com link para o
-// perfil de quem ainda esta no cla (os outros aparecem sem link).
+// perfil de quem ainda esta no cla (os outros aparecem sem link). `foto` e a
+// data de um print do Fundador daquele momento (20/10/2026, das pastas de
+// screenshots de 2018-2021 e 2022-2024): imgs/historia/marcos/<data>.webp e a
+// miniatura 16:9 sem a barra de itens, <data>-g.webp o print inteiro.
 
 const HISTORIA_TIPOS = {
     fundacao: { icone: 'fa-landmark', nome: 'Fundação' },
@@ -59,47 +62,47 @@ const HISTORIA_ERAS = [
 
 const HISTORIA_MARCOS = [
     // ---------- Primeira Era ----------
-    { era: 'primeira', data: '2020', titulo: 'A Origem', tipo: 'fundacao', livro: 'I', nicks: ['Ducred22'],
+    { era: 'primeira', data: '2020', titulo: 'A Origem', tipo: 'fundacao', livro: 'I', foto: '2020-07-25', nicks: ['Ducred22'],
       texto: 'Cansado de ver as vilas dos amigos surgirem e ruírem, o fundador entra no Apocalipse decidido a criar algo que fosse eterno.' },
-    { era: 'primeira', data: '01/08/2020', titulo: 'Nasce a Eternity', tipo: 'fundacao', livro: 'II', nicks: ['Ducred22'],
+    { era: 'primeira', data: '01/08/2020', titulo: 'Nasce a Eternity', tipo: 'fundacao', livro: 'II', foto: '2020-08-01', nicks: ['Ducred22'],
       texto: 'O clã é fundado com o azul-água como cor e a primeira bandeira. A cidade nasce em estilo moderno, a partir de um parque cercado de ruas.' },
-    { era: 'primeira', data: 'Ago 2020', titulo: 'O primeiro recruta', tipo: 'cidade', livro: 'II', nicks: ['Zeki', 'Krenzif_Korvat'],
+    { era: 'primeira', data: 'Ago 2020', titulo: 'O primeiro recruta', tipo: 'cidade', livro: 'II', foto: '2020-08-20', nicks: ['Zeki', 'Krenzif_Korvat'],
       texto: 'Zeki ergue a terceira casa da cidade. Vêm as primeiras relações diplomáticas, com a TsK, e as primeiras lições sobre as wars.' },
-    { era: 'primeira', data: 'Set 2020', titulo: 'A Grande Migração', tipo: 'crise', livro: 'III',
+    { era: 'primeira', data: 'Set 2020', titulo: 'A Grande Migração', tipo: 'crise', livro: 'III', foto: '2020-09-13',
       texto: 'Os grandes clãs partem para o Genesis e o Apocalipse esvazia. A Eternity abre as portas a todos e firma seus valores: União, Respeito e Honestidade.' },
-    { era: 'primeira', data: 'Fim de 2020', titulo: 'A Primeira Divisão', tipo: 'crise', livro: 'IV', nicks: ['nemowtg', 'Shindeiku', 'lucao_br1', 'VRSz'],
+    { era: 'primeira', data: 'Fim de 2020', titulo: 'A Primeira Divisão', tipo: 'crise', livro: 'IV', foto: '2020-10-24', nicks: ['nemowtg', 'Shindeiku', 'lucao_br1', 'VRSz'],
       texto: 'O conflito do castelo divide o clã e dá origem à DAS. A liderança é refeita com lucao_br1 e VRSz como sublíderes.' },
-    { era: 'primeira', data: 'Dez 2020', titulo: 'O Renascimento', tipo: 'alianca', livro: 'V', nicks: ['oPedroSales', 'Emy_Fortune'],
+    { era: 'primeira', data: 'Dez 2020', titulo: 'O Renascimento', tipo: 'alianca', livro: 'V', foto: '2020-12-29', nicks: ['oPedroSales', 'Emy_Fortune'],
       texto: 'As férias trazem o servidor de volta. Chegam oPedroSales e Emy_Fortune, a NEX vira a primeira grande aliada, a TOP a primeira rival, e surgem a ETYIgreja e a ETYShop.' },
-    { era: 'primeira', data: 'Dez 2020', titulo: 'Nasce a ETK', tipo: 'alianca', livro: 'VII', nicks: ['DiguinhoLNS'],
+    { era: 'primeira', data: 'Dez 2020', titulo: 'Nasce a ETK', tipo: 'alianca', livro: 'VII', foto: '2021-02-24', nicks: ['DiguinhoLNS'],
       texto: 'Um acordo com DiguinhoLNS cria a ETK, o clã da vila medieval, primeiro membro da família que chamaríamos de Eternidade.' },
-    { era: 'primeira', data: 'Jan 2021', titulo: 'O Ápice', tipo: 'lideranca', livro: 'VI', nicks: ['blocaonf', 'bloquin11', 'aiZendi', 'artgigante', 'sinagame25', 'XeKeMaTe', 'Sir_Felipee'],
+    { era: 'primeira', data: 'Jan 2021', titulo: 'O Ápice', tipo: 'lideranca', livro: 'VI', foto: '2021-01-17', nicks: ['blocaonf', 'bloquin11', 'aiZendi', 'artgigante', 'sinagame25', 'XeKeMaTe', 'Sir_Felipee'],
       texto: 'Entra a regra dos 10 dias de inatividade e chega uma geração memorável de membros. Nasce também o Jornal do Apocalipse, em frente à praia da cidade.' },
-    { era: 'primeira', data: 'Início de 2021', titulo: 'O primeiro troféu de war', tipo: 'guerra', livro: 'VI',
+    { era: 'primeira', data: 'Início de 2021', titulo: 'O primeiro troféu de war', tipo: 'guerra', livro: 'VI', foto: '2020-12-05',
       texto: 'Com as wars do Genesis e do Apocalipse no mesmo horário, a Eternity conquista o seu primeiro troféu. A rivalidade com a TkA chega ao extremo.' },
     { era: 'primeira', data: 'Mar 2021', titulo: 'Os cargos da Eternity', tipo: 'lideranca', livro: 'VI',
       texto: 'Nasce a hierarquia de Dono, Coordenador, Supervisor e Auxiliar: simples e funcional, como é até hoje.' },
-    { era: 'primeira', data: '21/08/2021', titulo: 'A Segunda Divisão', tipo: 'guerra', livro: 'VII', nicks: ['Haruzinha'],
+    { era: 'primeira', data: '21/08/2021', titulo: 'A Segunda Divisão', tipo: 'guerra', livro: 'VII', foto: '2021-08-22', nicks: ['Haruzinha'],
       texto: 'Unidos uma última vez, os membros vencem a war que passaria a TkA na liga. Logo depois, muitos deixam o clã, e o fundador entende que o fim também faz parte do ciclo.' },
-    { era: 'primeira', data: '2021 – 2022', titulo: 'O longo silêncio', tipo: 'crise', livro: 'VII',
+    { era: 'primeira', data: '2021 – 2022', titulo: 'O longo silêncio', tipo: 'crise', livro: 'VII', foto: '2021-08-28',
       texto: 'O clã entra em inatividade, o antigo Discord é apagado e cerca de 40% dos terrenos da cidade se perdem.' },
 
     // ---------- Segunda Era ----------
-    { era: 'segunda', data: '2022', titulo: 'A Reestruturação', tipo: 'fundacao', livro: 'I', nicks: ['Ducred22'],
+    { era: 'segunda', data: '2022', titulo: 'A Reestruturação', tipo: 'fundacao', livro: 'I', foto: '2023-01-30', nicks: ['Ducred22'],
       texto: 'O fundador volta, uma nova bandeira é criada e ergue-se a Torre da Staff, num bioma gélido que inspira a lore do clã. Nasce também um novo Discord.' },
     { era: 'segunda', data: '2022', titulo: 'Nasce a ETZ', tipo: 'alianca', livro: 'II', nicks: ['T14G0865', 'XeKeMaTe'],
       texto: 'A ETZ — Eternal Citizens surge como novo clã da Eternidade. T14G0865 assume como Coordenador e XeKeMaTe como Dono.' },
-    { era: 'segunda', data: '2022', titulo: 'O Bunker e os Paladinos', tipo: 'cidade', livro: 'II',
+    { era: 'segunda', data: '2022', titulo: 'O Bunker e os Paladinos', tipo: 'cidade', livro: 'II', foto: '2023-01-17',
       texto: 'Ao redor de um portal do End nasce o ETYBunker, com a galeria dos Paladinos da Segunda Era. A cidade avança ao oeste com o metrô.' },
-    { era: 'segunda', data: '2022 – 2023', titulo: 'A comunidade efêmera', tipo: 'crise', livro: 'II',
+    { era: 'segunda', data: '2022 – 2023', titulo: 'A comunidade efêmera', tipo: 'crise', livro: 'II', foto: '2023-01-21',
       texto: 'A pequena comunidade desanima da noite para o dia. O fundador também se afasta e passa um ano inteiro longe do jogo.' },
     { era: 'segunda', data: 'Meados de 2023', titulo: 'A Esperança', tipo: 'lideranca', livro: 'III', nicks: ['ov3r5y5t3m'],
       texto: 'Um jogador encantado com a cidade, ov3r5y5t3m, assume o clã vazio. Ao confiar nele por completo, o fundador decide voltar de vez.' },
-    { era: 'segunda', data: 'Início de 2024', titulo: 'O Ano da Integridade', tipo: 'lideranca', livro: 'IV', nicks: ['XeKeMaTe', 'ov3r5y5t3m', 'Sir_Felipee'],
+    { era: 'segunda', data: 'Início de 2024', titulo: 'O Ano da Integridade', tipo: 'lideranca', livro: 'IV', foto: '2024-01-16', nicks: ['XeKeMaTe', 'ov3r5y5t3m', 'Sir_Felipee'],
       texto: 'Recrutamentos em massa, títulos de McMMO e o retorno de nomes da Primeira Era levam o clã a uma ascensão nunca vista.' },
     { era: 'segunda', data: 'Mai 2024', titulo: 'O site da ETY', tipo: 'sistema', livro: 'IV', nicks: ['trogro9'],
       texto: 'Começa o projeto do site da Eternity, para apoiar a organização e as novas mecânicas do clã.' },
-    { era: 'segunda', data: 'Abr – jul 2024', titulo: 'As Duas Frentes', tipo: 'guerra', livro: 'V',
+    { era: 'segunda', data: 'Abr – jul 2024', titulo: 'As Duas Frentes', tipo: 'guerra', livro: 'V', foto: '2024-04-06',
       texto: 'A HGT domina os torneios e a XOX desafia no PvP. A Eternity reafirma o seu propósito: mais do que vencer, manter uma comunidade ativa.' },
     { era: 'segunda', data: 'Jul 2024', titulo: 'Novos aliados', tipo: 'alianca', livro: 'V', nicks: ['Jiraiya', 'MerpIsHere'],
       texto: 'A HGT se dissolve, Jiraiya e MerpIsHere chegam à Eternity e as alianças com a FUN e a uwu equilibram a disputa com a XOX.' },
@@ -171,16 +174,46 @@ function historiaMarcoHtml(marco, era) {
     const livro = capitulo >= 0
         ? `<button type="button" class="hist-livro" onclick="abrirLeitorHistoria('${era.id}', ${capitulo})" title="Ler o Livro ${marco.livro}"><i class="fa-solid fa-book" aria-hidden="true"></i>Livro ${marco.livro}</button>`
         : '';
+    const foto = marco.foto ? `
+                <button type="button" class="hist-foto" onclick="abrirFotoHistoria(this)" data-foto="${marco.foto}" data-titulo="${escHtml(marco.titulo)}" aria-label="Ampliar o print de ${escHtml(marco.titulo)}">
+                    <img src="./imgs/historia/marcos/${marco.foto}.webp" alt="" width="720" height="405" loading="lazy">
+                    <span><i class="fa-solid fa-camera" aria-hidden="true"></i>${historiaDataFoto(marco.foto)}</span>
+                </button>` : '';
     return `
-        <li class="hist-marco hist-tipo-${marco.tipo}">
+        <li class="hist-marco hist-tipo-${marco.tipo}${marco.foto ? ' com-foto' : ''}">
             <span class="hist-ponto" title="${escHtml(tipo.nome)}"><i class="fa-solid ${tipo.icone}" aria-hidden="true"></i></span>
-            <div class="hist-cartao">
+            <div class="hist-cartao">${foto}
                 <time class="hist-data">${escHtml(marco.data)}</time>
                 <h4>${escHtml(marco.titulo)}</h4>
                 <p>${escHtml(marco.texto)}</p>
                 ${rostos || livro ? `<div class="hist-rodape"><div class="hist-rostos">${rostos}</div>${livro}</div>` : ''}
             </div>
         </li>`;
+}
+
+function historiaDataFoto(data) {
+    return data.split('-').reverse().join('/');
+}
+
+// O print ampliado: o arquivo inteiro (com o chat e a barra do jogo), num
+// <dialog> que fecha com qualquer clique.
+function abrirFotoHistoria(botao) {
+    let dialogo = document.getElementById('hist-foto-dialog');
+    if (!dialogo) {
+        dialogo = document.createElement('dialog');
+        dialogo.id = 'hist-foto-dialog';
+        dialogo.className = 'hist-foto-dialog';
+        dialogo.addEventListener('click', () => dialogo.close());
+        document.body.append(dialogo);
+    }
+    const { foto, titulo } = botao.dataset;
+    dialogo.innerHTML = `
+        <figure>
+            <img src="./imgs/historia/marcos/${foto}-g.webp" alt="${escHtml(titulo)}">
+            <figcaption><b>${escHtml(titulo)}</b> · print de ${historiaDataFoto(foto)}</figcaption>
+        </figure>
+        <button type="button" class="hist-foto-fechar" aria-label="Fechar"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>`;
+    dialogo.showModal();
 }
 
 // A era em aberto: convite para entrar na historia pelo recrutamento.

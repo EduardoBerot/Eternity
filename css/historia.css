@@ -418,3 +418,62 @@ button.hist-livro { padding: 0; border: 0; background: none; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
     .hist-capa-botao, .hist-leitor[open] { transition: none; animation: none; }
 }
+
+/* Print do marco (20/10/2026): no topo do cartao, clica para ver inteiro. */
+.hist-foto {
+    position: relative;
+    display: block;
+    width: 100%;
+    margin: 0 0 12px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--noite-funda);
+    cursor: zoom-in;
+    box-shadow: 0 0 0 1px rgba(46, 230, 240, 0.14);
+}
+.hist-foto img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; image-rendering: auto; transition: transform 0.5s ease, filter 0.3s ease; filter: saturate(0.9); }
+.hist-foto:hover img, .hist-foto:focus-visible img { transform: scale(1.04); filter: saturate(1.05); }
+.hist-foto span {
+    position: absolute; left: 8px; bottom: 8px;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(4, 8, 15, 0.72);
+    font-family: var(--sans); font-size: 0.68rem; letter-spacing: 0.04em; color: var(--gelo);
+}
+.hist-foto span i { color: var(--aqua); }
+@media (min-width: 900px) {
+    .hist-marco:nth-child(odd) .hist-foto span { left: auto; right: 8px; }
+}
+
+.hist-foto-dialog {
+    width: min(1180px, calc(100vw - 32px));
+    max-width: none; max-height: calc(100dvh - 32px);
+    margin: auto; padding: 0;
+    border: 1px solid rgba(46, 230, 240, 0.2);
+    border-radius: 14px;
+    background: #050a10;
+    color: var(--gelo);
+    overflow: hidden;
+    cursor: zoom-out;
+}
+.hist-foto-dialog[open] { animation: abrirDialogo 0.2s ease-out; }
+.hist-foto-dialog::backdrop { background: rgba(2, 5, 10, 0.85); backdrop-filter: blur(4px); }
+.hist-foto-dialog figure { margin: 0; }
+.hist-foto-dialog img { display: block; width: 100%; height: auto; max-height: calc(100dvh - 90px); object-fit: contain; }
+.hist-foto-dialog figcaption { padding: 10px 16px 12px; font-family: var(--sans); font-size: 0.85rem; color: var(--nevoa); }
+.hist-foto-dialog figcaption b { color: var(--gelo); }
+.hist-foto-fechar {
+    position: absolute; top: 10px; right: 10px;
+    width: 36px; height: 36px;
+    display: grid; place-items: center;
+    border: 0; border-radius: 50%;
+    background: rgba(4, 8, 15, 0.7);
+    color: var(--gelo);
+    cursor: pointer;
+}
+@media (prefers-reduced-motion: reduce) {
+    .hist-foto img, .hist-foto-dialog[open] { transition: none; animation: none; }
+}
