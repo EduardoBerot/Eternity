@@ -64,7 +64,8 @@
 .us-tabela tr:hover td { background: rgba(232, 244, 248, 0.03); }
 .us-tabela .us-num { text-align: right; font-variant-numeric: tabular-nums; color: var(--an-ink); }
 .us-tabela .us-paginas { color: var(--an-ink-3); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.us-nick { display: flex; align-items: center; gap: 8px; min-width: 120px; }
+.us-nick { display: flex; align-items: center; gap: 8px; min-width: 110px; }
+.us-tabela td:not(.us-nick):not(.us-paginas) { white-space: nowrap; }
 .us-nick img, .us-chips img { border-radius: 4px; image-rendering: pixelated; flex-shrink: 0; }
 .us-nick span, .us-chips span { display: flex; flex-direction: column; color: var(--an-ink); line-height: 1.2; }
 .us-nick small, .us-chips small { color: var(--an-ink-3); font-size: 0.66rem; }

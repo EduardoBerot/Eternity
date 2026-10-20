@@ -35,11 +35,15 @@ const US_ACOES = {
 const us = { dados: null, dias: 30, filtro: 'todos', observador: null, quadro: 0 };
 
 function usRota(rota) {
-    if (rota.startsWith('painel/')) {
-        const partes = rota.split('/').slice(1);
-        return `Painel · ${partes.join(' › ')}`;
-    }
+    if (rota.startsWith('painel/indicadores/')) return `Indicadores › ${rota.split('/')[2]}`;
+    if (rota.startsWith('painel/')) return `Painel › ${rota.split('/').slice(1).join(' › ')}`;
     return US_ROTAS[rota] || rota;
+}
+
+// Rotulo que cabe na largura (texto de 10.5px: ~6px por letra).
+function usCabe(texto, largura) {
+    const max = Math.max(6, Math.floor(largura / 6));
+    return texto.length > max ? `${texto.slice(0, max - 1)}…` : texto;
 }
 
 function usQuando(iso) {
@@ -206,7 +210,8 @@ function usDesenharDiario() {
     const diario = us.dados.diario;
     const tipos = Object.keys(US_TIPOS);
     const total = dia => tipos.reduce((soma, tipo) => soma + dia[tipo], 0);
-    const maximo = Math.max(...diario.map(total), 1);
+    // Contagem de pessoas: o eixo nunca passa por 0,5.
+    const maximo = Math.max(...diario.map(total), 4);
     const ticks = anTicks(maximo);
     const topo = ticks[ticks.length - 1];
     const m = { t: 14, r: 6, b: 22, l: 34 };
@@ -270,7 +275,7 @@ function usDesenharPaginas() {
             <div class="an-tt-linha"><span>Visitantes</span><b>${anNum(pagina.visitantes)}</b></div>
             <div class="an-tt-linha"><span>Tempo médio</span><b>${pagina.tempoMedioS >= 60 ? `${Math.round(pagina.tempoMedioS / 60)} min` : `${pagina.tempoMedioS} s`}</b></div>`;
         return `
-            <text x="${rotuloW - 8}" y="${y + 15}" text-anchor="end">${anEsc(usRota(pagina.rota))}</text>
+            <text x="${rotuloW - 8}" y="${y + 15}" text-anchor="end">${anEsc(usCabe(usRota(pagina.rota), rotuloW - 12))}</text>
             <path d="${anBarraDireita(rotuloW, y + 5, w, linha - 10)}" fill="var(--an-acento)"></path>
             <text x="${rotuloW + w + 6}" y="${y + 15}" class="an-forte">${anNum(pagina.visitas)}</text>
             <rect class="an-hit" x="0" y="${y}" width="${caixa.w}" height="${linha}" data-dica="${anEsc(dica)}"></rect>`;
@@ -323,13 +328,12 @@ function usDesenharStaff() {
     document.getElementById('us_s_staff').textContent = `${usaram} de ${staff.length} no período`;
     document.getElementById('us_staff').innerHTML = staff.length ? `
         <table>
-            <thead><tr><th>Nick</th><th>Último no painel</th><th>Visitas</th><th>Abas</th></tr></thead>
+            <thead><tr><th>Nick</th><th>Último no painel</th><th>Visitas</th></tr></thead>
             <tbody>${staff.map(item => `
-                <tr class="${item.visitasPainel ? '' : 'us-apagado'}">
+                <tr class="${item.visitasPainel ? '' : 'us-apagado'}"${item.abas.length ? ` data-dica="${anEsc(`<strong>${anEsc(item.nick)}</strong><div class="an-tt-nota">Mais usa: ${item.abas.map(aba => anEsc(aba)).join(', ')}</div>`)}"` : ''}>
                     <td class="us-nick">${usCabeca(item.nick)}<span>${anEsc(item.nick)}<small>${anEsc(item.cargo)}</small></span></td>
                     <td>${item.ultimoPainel ? usQuando(item.ultimoPainel) : 'não abriu'}</td>
                     <td class="us-num">${anNum(item.visitasPainel)}</td>
-                    <td class="us-paginas">${item.abas.map(aba => anEsc(aba)).join(', ')}</td>
                 </tr>`).join('')}
             </tbody>
         </table>` : '<div class="an-vazio">Sem staff no cadastro.</div>';
