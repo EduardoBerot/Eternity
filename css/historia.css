@@ -10,7 +10,7 @@
 
 .hist-volumes {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 18px;
     margin: 28px 0 40px;
 }
@@ -28,6 +28,7 @@
 
 .hist-capa {
     flex: none;
+    align-self: flex-start;
     width: 96px;
     aspect-ratio: 148 / 210;
     border-radius: 4px 8px 8px 4px;
@@ -239,4 +240,181 @@
 
 @media (prefers-reduced-motion: reduce) {
     .hist-ponto, .hist-cartao, .hist-volume { transition: none; }
+}
+
+/* Capa de verdade (a 1a pagina do PDF, 20/10/2026): clicar abre o leitor. */
+.hist-capa-botao {
+    flex: none;
+    align-self: flex-start;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    border-radius: 4px 8px 8px 4px;
+    transition: transform 0.25s ease, filter 0.25s ease;
+}
+.hist-capa-botao:hover, .hist-capa-botao:focus-visible { transform: translateY(-3px) rotate(-1.5deg); filter: drop-shadow(0 0 14px rgba(46, 230, 240, 0.3)); }
+.hist-capa-img { display: block; width: 104px; height: auto; object-fit: cover; }
+
+/* Sumario do volume: os sete livros, cada um abre o leitor no lugar certo. */
+.hist-sumario { margin-top: 10px; font-family: var(--sans); }
+.hist-sumario summary {
+    display: inline-flex; align-items: center; gap: 7px;
+    cursor: pointer;
+    list-style: none;
+    font-size: 0.78rem;
+    color: var(--nevoa);
+}
+.hist-sumario summary::-webkit-details-marker { display: none; }
+.hist-sumario summary::after { content: '\f107'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 0.7rem; transition: transform 0.2s ease; }
+.hist-sumario[open] summary::after { transform: rotate(180deg); }
+.hist-sumario summary:hover { color: var(--aqua); }
+.hist-sumario ol, .hist-leitor-sumario ol { font-family: var(--sans); list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 2px; }
+.hist-sumario button, .hist-leitor-sumario button {
+    display: flex; align-items: baseline; gap: 8px;
+    width: 100%;
+    padding: 5px 8px;
+    border: 0; border-radius: 6px;
+    background: none;
+    color: var(--nevoa);
+    font: 0.82rem/1.4 var(--sans);
+    text-align: left;
+    cursor: pointer;
+}
+.hist-sumario button span, .hist-leitor-sumario button span {
+    flex: none; width: 26px;
+    font-family: 'Cinzel', serif; font-size: 0.72rem;
+    color: var(--nevoa-escura);
+}
+.hist-sumario button:hover, .hist-leitor-sumario button:hover { background: var(--aqua-suave); color: var(--gelo); }
+.hist-sumario button:hover span, .hist-leitor-sumario button:hover span { color: var(--aqua); }
+
+button.hist-livro { padding: 0; border: 0; background: none; cursor: pointer; }
+
+/* ---------- Leitor ---------- */
+.hist-leitor {
+    --letra: 1.14rem;
+    width: min(820px, calc(100vw - 32px));
+    height: calc(100dvh - 48px);
+    max-width: none; max-height: none;
+    margin: auto;
+    padding: 0;
+    border: 1px solid rgba(46, 230, 240, 0.2);
+    border-radius: 18px;
+    background: radial-gradient(ellipse at 50% 0%, #10303a 0%, #08161b 45%, #060e12 100%);
+    color: #dcebed;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+}
+.hist-leitor[open] { display: flex; flex-direction: column; animation: abrirDialogo 0.22s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.hist-leitor::backdrop { background: rgba(2, 5, 10, 0.78); backdrop-filter: blur(4px); }
+.hist-leitor[data-letra="pequena"] { --letra: 1rem; }
+.hist-leitor[data-letra="grande"] { --letra: 1.32rem; }
+
+.hist-leitor-topo {
+    position: relative;
+    flex: none;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 14px 12px 22px;
+    border-bottom: 1px solid var(--linha);
+    background: rgba(4, 8, 15, 0.55);
+    font-family: var(--sans);
+}
+.hist-leitor-onde span { display: block; font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--aqua); }
+.hist-leitor-onde b { font-size: 0.9rem; font-weight: 600; color: var(--gelo); }
+.hist-leitor-ferramentas { display: flex; gap: 6px; }
+.hist-leitor-ferramentas > * {
+    width: 38px; height: 38px;
+    display: grid; place-items: center;
+    border: 1px solid var(--linha); border-radius: 10px;
+    background: transparent;
+    color: var(--nevoa);
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+.hist-leitor-ferramentas > *:hover { color: var(--aqua); border-color: rgba(46, 230, 240, 0.4); }
+.hist-leitor-progresso { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; }
+.hist-leitor-progresso span { display: block; width: 0; height: 100%; background: var(--aqua); box-shadow: 0 0 8px rgba(46, 230, 240, 0.6); }
+
+.hist-leitor-corpo { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 18px 28px 36px; outline: none; }
+
+.hist-leitor-sumario { max-width: 62ch; margin: 0 auto; font-family: var(--sans); }
+.hist-leitor-sumario summary {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid var(--linha); border-radius: 999px;
+    list-style: none;
+    font-size: 0.78rem; color: var(--nevoa);
+    cursor: pointer;
+}
+.hist-leitor-sumario summary::-webkit-details-marker { display: none; }
+.hist-leitor-sumario summary:hover, .hist-leitor-sumario[open] summary { color: var(--aqua); border-color: rgba(46, 230, 240, 0.4); }
+.hist-leitor-sumario-eras {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px;
+    margin-top: 10px; padding: 14px;
+    border: 1px solid var(--linha); border-radius: 12px;
+    background: rgba(4, 8, 15, 0.45);
+}
+.hist-leitor-sumario strong { font-family: 'Cinzel', serif; font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--aqua); }
+.hist-leitor-sumario button[aria-current] { background: var(--aqua-suave); color: var(--gelo); }
+.hist-leitor-sumario button[aria-current] span { color: var(--aqua); }
+
+/* O texto na fonte do livro, com a capitular em Cinzel como no PDF. */
+.hist-leitor-texto {
+    max-width: 62ch;
+    margin: 0 auto;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: var(--letra);
+    line-height: 1.72;
+    color: #dcebed;
+}
+.hist-leitor-texto header { text-align: center; margin: 34px 0 30px; }
+.hist-leitor-livro { font-family: 'Cinzel', serif; font-size: 0.8rem; letter-spacing: 0.34em; color: var(--aqua); }
+.hist-leitor-texto h2 { margin: 8px 0 10px; font-family: 'Cinzel', serif; font-weight: 700; font-size: clamp(1.45rem, 4.4vw, 2.1rem); line-height: 1.2; color: var(--gelo); }
+.hist-leitor-ornamento { font-size: 0.8rem; color: var(--aqua); opacity: 0.7; }
+.hist-leitor-texto p { font-family: inherit; margin: 0 0 1em; text-align: justify; hyphens: auto; }
+.hist-leitor-texto header + p::first-letter {
+    float: left;
+    margin: 0.08em 0.1em 0 0;
+    font-family: 'Cinzel', serif; font-weight: 700;
+    font-size: 3.5em; line-height: 0.82;
+    color: var(--aqua);
+}
+.hist-leitor-texto .hist-leitor-fim { margin-top: 2.2em; text-align: center; font-family: 'Cinzel', serif; font-size: 0.8rem; letter-spacing: 0.3em; color: var(--aqua); }
+
+.hist-leitor-passos { max-width: 62ch; margin: 36px auto 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-family: var(--sans); }
+.hist-leitor-passo {
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 12px 14px;
+    border: 1px solid var(--linha); border-radius: 12px;
+    background: rgba(15, 28, 43, 0.6);
+    color: var(--gelo);
+    font: inherit; text-align: left; text-decoration: none;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+.hist-leitor-passo.proximo { grid-column: 2; text-align: right; align-items: flex-end; }
+.hist-leitor-passo small { display: inline-flex; align-items: center; gap: 6px; font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--nevoa-escura); }
+.hist-leitor-passo.proximo small { flex-direction: row-reverse; }
+.hist-leitor-passo span { font-size: 0.92rem; }
+.hist-leitor-passo:hover { border-color: rgba(46, 230, 240, 0.4); background: rgba(46, 230, 240, 0.06); }
+.hist-leitor-passo:hover small { color: var(--aqua); }
+.hist-leitor-terceira { border-style: dashed; border-color: rgba(46, 230, 240, 0.4); }
+.hist-leitor-terceira span { color: var(--aqua); font-weight: 600; }
+
+/* Celular: o leitor ocupa a tela toda e o texto deixa de ser justificado. */
+@media (max-width: 640px) {
+    .hist-leitor { width: 100vw; height: 100dvh; border: 0; border-radius: 0; }
+    .hist-leitor-topo { padding: 10px 10px 10px 16px; }
+    .hist-leitor-corpo { padding: 14px 18px 28px; }
+    .hist-leitor-texto p { text-align: left; }
+    .hist-leitor-texto header { margin: 24px 0 22px; }
+    .hist-leitor-passos { grid-template-columns: 1fr; }
+    .hist-leitor-passo.proximo { grid-column: auto; }
+    .hist-capa-img { width: 88px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hist-capa-botao, .hist-leitor[open] { transition: none; animation: none; }
 }

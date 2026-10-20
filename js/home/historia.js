@@ -1,9 +1,10 @@
-// Historia na Wiki (19/10/2026): os tres volumes (as Eras) com os livros em
-// PDF para ler e baixar, e a linha do tempo com os marcos de cada Era.
+// Historia na Wiki (19/10/2026): os tres volumes (as Eras) com os livros para
+// ler no site e baixar em PDF, e a linha do tempo com os marcos de cada Era.
 //
 // Os marcos saem dos livros da Primeira e da Segunda Era, escritos pelo
-// Fundador (PDFs em docs/historia/, revisados a partir das paginas da
-// biblioteca do cla). A Terceira Era ainda nao tem livro e
+// Fundador (PDFs em docs/historia/, publicados em 20/10/2026, revisados a
+// partir das paginas da biblioteca do cla; o texto do leitor fica em
+// historia-livros.js). A Terceira Era ainda nao tem livro e
 // e escrita agora: no lugar dos marcos, um convite que leva ao Guia (o
 // recrutamento), pedido do Fundador. Marco novo e uma linha nesta lista.
 //
@@ -28,8 +29,8 @@ const HISTORIA_ERAS = [
         periodo: '2020 – 2021',
         lema: 'A fundação',
         resumo: 'Da ideia de algo que fosse eterno à cidade, às primeiras guerras e ao longo silêncio que encerrou a era.',
-        // PDF ainda em revisao pelo Fundador (19/10/2026): entra em docs/historia/.
-        pdf: null,
+        pdf: './docs/historia/eternity-primeira-era.pdf',
+        capa: './imgs/historia/capa-primeira-era.webp',
         livros: 'Sete livros',
     },
     {
@@ -39,7 +40,8 @@ const HISTORIA_ERAS = [
         periodo: '2022 – 2024',
         lema: 'A reestruturação',
         resumo: 'A volta, as comunidades que vieram e se foram, a esperança e o Ano da Integridade.',
-        pdf: null,
+        pdf: './docs/historia/eternity-segunda-era.pdf',
+        capa: './imgs/historia/capa-segunda-era.webp',
         livros: 'Sete livros',
     },
     {
@@ -111,7 +113,15 @@ const HISTORIA_MARCOS = [
       texto: 'Pela primeira vez, uma era termina sem inatividade: o Ano da Integridade fecha a Segunda Era, o primeiro ano em que o clã jogou todos os meses.' },
 ];
 
+// A capa dos volumes com livro e a primeira pagina do PDF; a da Terceira Era,
+// sem livro, e desenhada em CSS no mesmo estilo.
 function historiaCapaHtml(era) {
+    if (era.capa) {
+        return `
+        <button type="button" class="hist-capa-botao" onclick="abrirLeitorHistoria('${era.id}')" aria-label="Ler a ${escHtml(era.nome)}">
+            <img class="hist-capa hist-capa-img" src="${era.capa}" alt="" width="300" height="425" loading="lazy">
+        </button>`;
+    }
     return `
         <div class="hist-capa hist-capa-${era.id}" aria-hidden="true">
             <span class="hist-capa-selo">ETY</span>
@@ -126,17 +136,26 @@ function historiaVolumeHtml(era) {
     const acoes = era.gancho
         ? '<a class="hist-botao hist-botao-cheio" href="#guia"><i class="fa-solid fa-feather-pointed" aria-hidden="true"></i>Faça parte</a>'
         : era.pdf
-        ? `<a class="hist-botao" href="${era.pdf}" target="_blank" rel="noopener"><i class="fa-solid fa-book-open" aria-hidden="true"></i>Ler</a>
-           <a class="hist-botao hist-botao-cheio" href="${era.pdf}" download><i class="fa-solid fa-download" aria-hidden="true"></i>Baixar PDF</a>`
+        ? `<button type="button" class="hist-botao hist-botao-cheio" data-ler="${era.id}" onclick="abrirLeitorHistoria('${era.id}')"><i class="fa-solid fa-book-open" aria-hidden="true"></i><span>Ler no site</span></button>
+           <a class="hist-botao" href="${era.pdf}" download><i class="fa-solid fa-download" aria-hidden="true"></i>PDF</a>`
         : '<span class="hist-em-breve"><i class="fa-solid fa-feather-pointed" aria-hidden="true"></i>Em breve</span>';
+    const livro = HISTORIA_LIVROS[era.id];
+    const sumario = livro ? `
+                <details class="hist-sumario">
+                    <summary><i class="fa-solid fa-list-ul" aria-hidden="true"></i>Sumário</summary>
+                    <ol>${livro.capitulos.map((cap, i) => `
+                        <li><button type="button" onclick="abrirLeitorHistoria('${era.id}', ${i})"><span>${cap.livro}</span>${escHtml(cap.titulo)}</button></li>`).join('')}
+                    </ol>
+                </details>` : '';
     return `
         <article class="hist-volume">
             ${historiaCapaHtml(era)}
             <div class="hist-volume-texto">
-                <span class="hist-volume-num">Volume ${era.numero} · ${escHtml(era.livros)}</span>
+                <span class="hist-volume-num">Volume ${era.numero} · ${livro ? `${livro.paginas} páginas` : escHtml(era.livros)}</span>
                 <h3>${escHtml(era.nome)}</h3>
                 <p class="hist-volume-lema">${escHtml(era.lema)} · ${escHtml(era.periodo)}</p>
                 <p>${escHtml(era.resumo)}</p>
+                ${sumario}
                 <div class="hist-acoes">${acoes}</div>
             </div>
         </article>`;
@@ -148,8 +167,9 @@ function historiaMarcoHtml(marco, era) {
         <span class="hist-rosto" data-nick="${escHtml(nick)}" title="${escHtml(nick)}">
             <img src="https://mc-heads.net/avatar/${encodeURIComponent(nick)}/24" alt="" loading="lazy">${escHtml(nick)}
         </span>`).join('');
-    const livro = marco.livro && era.pdf
-        ? `<a class="hist-livro" href="${era.pdf}" target="_blank" rel="noopener"><i class="fa-solid fa-book" aria-hidden="true"></i>Livro ${marco.livro}</a>`
+    const capitulo = (HISTORIA_LIVROS[era.id]?.capitulos || []).findIndex(cap => cap.livro === marco.livro);
+    const livro = capitulo >= 0
+        ? `<button type="button" class="hist-livro" onclick="abrirLeitorHistoria('${era.id}', ${capitulo})" title="Ler o Livro ${marco.livro}"><i class="fa-solid fa-book" aria-hidden="true"></i>Livro ${marco.livro}</button>`
         : '';
     return `
         <li class="hist-marco hist-tipo-${marco.tipo}">
@@ -189,7 +209,7 @@ function historiaWikiHtml() {
         <section class="secao-wiki" id="wiki-historia">
             <div class="miolo">
                 <h2>História</h2>
-                <p class="texto">Desde 1º de agosto de 2020, a Eternity atravessou três eras. As duas primeiras foram contadas pelo fundador em livros que ficam na biblioteca do clã, no <code>/go ETYHistoria</code>${HISTORIA_ERAS.some(era => era.pdf) ? ', e que você pode ler ou baixar aqui' : '; em breve, eles também poderão ser lidos aqui'}.</p>
+                <p class="texto">Desde 1º de agosto de 2020, a Eternity atravessou três eras. As duas primeiras foram contadas pelo fundador em livros que ficam na biblioteca do clã, no <code>/go ETYHistoria</code>, e agora também podem ser lidos aqui, livro a livro, ou baixados em PDF.</p>
                 <div class="hist-volumes">${HISTORIA_ERAS.map(historiaVolumeHtml).join('')}</div>
                 <div class="hist-legenda" aria-label="Tipos de marco">${legenda}</div>
                 <div class="hist-tempo">${eras}</div>
@@ -233,3 +253,187 @@ function acenderMarcosHistoria() {
     }, { rootMargin: '0px 0px -12% 0px' });
     marcos.forEach(marco => historiaObservador.observe(marco));
 }
+
+// Leitor dos livros (20/10/2026): um livro (capitulo) por vez num <dialog>,
+// na fonte dos PDFs. O texto vem de HISTORIA_LIVROS porque o PDF embutido nao
+// abre no celular (o Chrome do Android so baixa); o PDF fica para baixar. O
+// ultimo livro aberto e o tamanho da letra ficam guardados no aparelho, e
+// #historia?ler=segunda-4 abre direto o Livro IV da Segunda Era.
+const HISTORIA_CHAVE_LEITURA = 'eternity-historia-leitura';
+const HISTORIA_CHAVE_LETRA = 'eternity-historia-letra';
+const HISTORIA_LETRAS = ['media', 'grande', 'pequena'];
+
+// Os livros das duas Eras em sequencia, para o "proximo" atravessar de uma
+// Era para a outra.
+function historiaSequencia() {
+    return Object.keys(HISTORIA_LIVROS).flatMap(era => HISTORIA_LIVROS[era].capitulos.map((_, i) => ({ era, i })));
+}
+
+function historiaGuardado(chave) {
+    try { return JSON.parse(localStorage.getItem(chave)); } catch { return null; }
+}
+
+function historiaGuardar(chave, valor) {
+    try { localStorage.setItem(chave, JSON.stringify(valor)); } catch { /* sem storage */ }
+}
+
+function leitorHistoria() {
+    let dialogo = document.getElementById('hist-leitor');
+    if (dialogo) return dialogo;
+    dialogo = document.createElement('dialog');
+    dialogo.id = 'hist-leitor';
+    dialogo.className = 'hist-leitor';
+    dialogo.setAttribute('aria-labelledby', 'hist-leitor-titulo');
+    dialogo.dataset.letra = historiaGuardado(HISTORIA_CHAVE_LETRA) || 'media';
+    // Clique no fundo escurecido fecha (o alvo e o proprio <dialog>).
+    dialogo.addEventListener('click', event => { if (event.target === dialogo) dialogo.close(); });
+    dialogo.addEventListener('keydown', event => {
+        if (event.altKey || event.ctrlKey || event.metaKey) return;
+        if (event.key === 'ArrowRight') passoLeitorHistoria(1);
+        else if (event.key === 'ArrowLeft') passoLeitorHistoria(-1);
+    });
+    dialogo.addEventListener('close', marcarLeituraHistoria);
+    document.body.append(dialogo);
+    return dialogo;
+}
+
+function abrirLeitorHistoria(era, indice) {
+    if (!HISTORIA_LIVROS[era]) return;
+    if (indice === undefined) {
+        const guardada = historiaGuardado(HISTORIA_CHAVE_LEITURA);
+        indice = guardada?.era === era ? guardada.i : 0;
+    }
+    const dialogo = leitorHistoria();
+    mostrarLivroHistoria(era, indice);
+    if (!dialogo.open) dialogo.showModal();
+    // O showModal foca o primeiro botao; o foco volta para o texto.
+    dialogo.querySelector('.hist-leitor-corpo').focus({ preventScroll: true });
+}
+
+function passoLeitorHistoria(delta) {
+    const dialogo = document.getElementById('hist-leitor');
+    if (!dialogo?.open) return;
+    const sequencia = historiaSequencia();
+    const atual = sequencia.findIndex(pos => pos.era === dialogo.dataset.era && pos.i === Number(dialogo.dataset.livro));
+    const destino = sequencia[atual + delta];
+    if (destino) mostrarLivroHistoria(destino.era, destino.i);
+}
+
+function trocarLetraHistoria() {
+    const dialogo = leitorHistoria();
+    const proxima = HISTORIA_LETRAS[(HISTORIA_LETRAS.indexOf(dialogo.dataset.letra) + 1) % HISTORIA_LETRAS.length];
+    dialogo.dataset.letra = proxima;
+    historiaGuardar(HISTORIA_CHAVE_LETRA, proxima);
+}
+
+function historiaPassoHtml(pos, lado) {
+    const era = HISTORIA_ERAS.find(e => e.id === pos.era);
+    const cap = HISTORIA_LIVROS[pos.era].capitulos[pos.i];
+    const icone = lado === 'anterior' ? 'fa-arrow-left' : 'fa-arrow-right';
+    return `
+        <button type="button" class="hist-leitor-passo ${lado}" onclick="passoLeitorHistoria(${lado === 'anterior' ? -1 : 1})">
+            <small><i class="fa-solid ${icone}" aria-hidden="true"></i>${escHtml(era.nome)} · Livro ${cap.livro}</small>
+            <span>${escHtml(cap.titulo)}</span>
+        </button>`;
+}
+
+function mostrarLivroHistoria(era, indice) {
+    const dialogo = leitorHistoria();
+    const livro = HISTORIA_LIVROS[era];
+    const i = Math.min(Math.max(0, Number(indice) || 0), livro.capitulos.length - 1);
+    const cap = livro.capitulos[i];
+    const dadosEra = HISTORIA_ERAS.find(e => e.id === era);
+    const sequencia = historiaSequencia();
+    const posicao = sequencia.findIndex(pos => pos.era === era && pos.i === i);
+    const anterior = sequencia[posicao - 1];
+    const proximo = sequencia[posicao + 1];
+    const ultimoDaEra = i === livro.capitulos.length - 1;
+    dialogo.dataset.era = era;
+    dialogo.dataset.livro = i;
+    historiaGuardar(HISTORIA_CHAVE_LEITURA, { era, i });
+
+    const sumario = Object.keys(HISTORIA_LIVROS).map(id => `
+        <div>
+            <strong>${escHtml(HISTORIA_ERAS.find(e => e.id === id).nome)}</strong>
+            <ol>${HISTORIA_LIVROS[id].capitulos.map((c, n) => `
+                <li><button type="button" onclick="mostrarLivroHistoria('${id}', ${n})"${id === era && n === i ? ' aria-current="true"' : ''}><span>${c.livro}</span>${escHtml(c.titulo)}</button></li>`).join('')}
+            </ol>
+        </div>`).join('');
+    // Depois do ultimo livro da Segunda Era, o convite da Terceira, como na linha do tempo.
+    const seguinte = proximo
+        ? historiaPassoHtml(proximo, 'proximo')
+        : `<a class="hist-leitor-passo proximo hist-leitor-terceira" href="#guia" onclick="document.getElementById('hist-leitor').close()">
+               <small><i class="fa-solid fa-feather-pointed" aria-hidden="true"></i>Terceira Era · em escrita</small>
+               <span>Faça parte da história</span>
+           </a>`;
+
+    dialogo.innerHTML = `
+        <div class="hist-leitor-topo">
+            <div class="hist-leitor-onde">
+                <span>${escHtml(dadosEra.nome)}</span>
+                <b>Livro ${cap.livro} de ${livro.capitulos.at(-1).livro}</b>
+            </div>
+            <div class="hist-leitor-ferramentas">
+                <button type="button" onclick="trocarLetraHistoria()" title="Tamanho da letra" aria-label="Tamanho da letra"><i class="fa-solid fa-text-height" aria-hidden="true"></i></button>
+                <a href="${dadosEra.pdf}" download title="Baixar o PDF" aria-label="Baixar o PDF"><i class="fa-solid fa-download" aria-hidden="true"></i></a>
+                <button type="button" onclick="document.getElementById('hist-leitor').close()" title="Fechar" aria-label="Fechar"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+            </div>
+            <span class="hist-leitor-progresso" aria-hidden="true"><span></span></span>
+        </div>
+        <div class="hist-leitor-corpo" tabindex="-1">
+            <details class="hist-leitor-sumario">
+                <summary><i class="fa-solid fa-list-ul" aria-hidden="true"></i>Sumário</summary>
+                <div class="hist-leitor-sumario-eras">${sumario}</div>
+            </details>
+            <article class="hist-leitor-texto" lang="pt-BR">
+                <header>
+                    <span class="hist-leitor-livro">Livro ${cap.livro}</span>
+                    <h2 id="hist-leitor-titulo">${escHtml(cap.titulo)}</h2>
+                    <span class="hist-leitor-ornamento" aria-hidden="true">◆</span>
+                </header>
+                ${cap.paragrafos.map(p => `<p>${escHtml(p)}</p>`).join('')}
+                ${ultimoDaEra ? `<p class="hist-leitor-fim">◆ Fim da ${escHtml(dadosEra.nome)} ◆</p>` : ''}
+            </article>
+            <nav class="hist-leitor-passos" aria-label="Outros livros">
+                ${anterior ? historiaPassoHtml(anterior, 'anterior') : '<span></span>'}
+                ${seguinte}
+            </nav>
+        </div>`;
+
+    // A barra fina embaixo do topo acompanha a leitura do livro aberto.
+    const corpo = dialogo.querySelector('.hist-leitor-corpo');
+    const barra = dialogo.querySelector('.hist-leitor-progresso span');
+    corpo.addEventListener('scroll', () => {
+        const total = corpo.scrollHeight - corpo.clientHeight;
+        barra.style.width = `${total > 0 ? Math.min(100, (corpo.scrollTop / total) * 100) : 100}%`;
+    }, { passive: true });
+    // O foco vai para o texto: as setas do teclado rolam e trocam de livro.
+    corpo.focus({ preventScroll: true });
+}
+
+// O botao "Ler no site" do volume vira "Continuar" no livro onde a pessoa parou.
+function marcarLeituraHistoria() {
+    const guardada = historiaGuardado(HISTORIA_CHAVE_LEITURA);
+    for (const botao of document.querySelectorAll('#wiki-historia [data-ler]')) {
+        const cap = guardada?.era === botao.dataset.ler && guardada.i > 0
+            ? HISTORIA_LIVROS[guardada.era]?.capitulos[guardada.i]
+            : null;
+        botao.querySelector('span').textContent = cap ? `Continuar · Livro ${cap.livro}` : 'Ler no site';
+    }
+}
+
+// Chamado pelo renderWiki depois de montar a pagina.
+function iniciarHistoria() {
+    acenderMarcosHistoria();
+    marcarLeituraHistoria();
+    const pedido = new URLSearchParams(location.hash.split('?')[1] || '').get('ler');
+    const [, era, livro] = /^(primeira|segunda)(?:-(\d))?$/.exec(pedido || '') || [];
+    if (era) abrirLeitorHistoria(era, livro ? Number(livro) - 1 : 0);
+}
+
+// Trocar de pagina (inclusive pelo voltar do celular) fecha o leitor. Este
+// ouvinte roda depois do route() (index.js carrega antes), entao poupa o
+// leitor que o proprio link ?ler= acabou de abrir.
+window.addEventListener('hashchange', () => {
+    if (!/[?&]ler=/.test(location.hash)) document.getElementById('hist-leitor')?.close();
+});

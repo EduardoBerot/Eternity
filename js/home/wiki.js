@@ -178,7 +178,7 @@ function renderWiki(secaoFixa) {
         ${rodapeSite()}`;
     inclinarTorre();
     acompanharSecaoWiki();
-    acenderMarcosHistoria();
+    iniciarHistoria();
     // Link direto para uma secao (anuncio dos titulos, 10/10/2026):
     // #wiki?secao=titulos. O route() rola para o topo logo depois do render,
     // entao a ida a secao espera o proximo quadro; e repete quando as cabecas
