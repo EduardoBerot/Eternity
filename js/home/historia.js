@@ -25,7 +25,7 @@ const HISTORIA_ERAS = [
         id: 'primeira',
         numero: 'I',
         nome: 'Primeira Era',
-        periodo: '2020 – 2022',
+        periodo: '2020 – 2021',
         lema: 'A fundação',
         resumo: 'Da ideia de algo que fosse eterno à cidade, às primeiras guerras e ao longo silêncio que encerrou a era.',
         // PDF ainda em revisao pelo Fundador (19/10/2026): entra em docs/historia/.
