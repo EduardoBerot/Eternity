@@ -76,10 +76,10 @@ const HISTORIA_MARCOS = [
       texto: 'As férias trazem o servidor de volta. Chegam oPedroSales e Emy_Fortune, a NEX vira a primeira grande aliada, a TOP a primeira rival, e surgem a ETYIgreja e a ETYShop.' },
     { era: 'primeira', data: 'Dez 2020', titulo: 'Nasce a ETK', tipo: 'alianca', livro: 'VII', foto: '2021-02-24', nicks: ['DiguinhoLNS'],
       texto: 'Um acordo com DiguinhoLNS cria a ETK, o clã da vila medieval, primeiro membro da família que chamaríamos de Eternidade.' },
-    { era: 'primeira', data: 'Jan 2021', titulo: 'O Ápice', tipo: 'lideranca', livro: 'VI', foto: '2021-01-17', nicks: ['blocaonf', 'bloquin11', 'aiZendi', 'artgigante', 'sinagame25', 'XeKeMaTe', 'Sir_Felipee'],
-      texto: 'Entra a regra dos 10 dias de inatividade e chega uma geração memorável de membros. Nasce também o Jornal do Apocalipse, em frente à praia da cidade.' },
-    { era: 'primeira', data: 'Início de 2021', titulo: 'O primeiro troféu de war', tipo: 'guerra', livro: 'VI', foto: '2020-12-05',
+    { era: 'primeira', data: 'Dez 2020', titulo: 'O primeiro troféu de war', tipo: 'guerra', livro: 'VI', foto: '2020-12-05',
       texto: 'Com as wars do Genesis e do Apocalipse no mesmo horário, a Eternity conquista o seu primeiro troféu. A rivalidade com a TkA chega ao extremo.' },
+    { era: 'primeira', data: 'Jan 2021', titulo: 'O Ápice', tipo: 'lideranca', livro: 'VI', foto: '2021-03-28', nicks: ['blocaonf', 'bloquin11', 'aiZendi', 'artgigante', 'sinagame25', 'XeKeMaTe', 'Sir_Felipee'],
+      texto: 'Entra a regra dos 10 dias de inatividade e chega uma geração memorável de membros. Nasce também o Jornal do Apocalipse, em frente à praia da cidade.' },
     { era: 'primeira', data: 'Mar 2021', titulo: 'Os cargos da Eternity', tipo: 'lideranca', livro: 'VI',
       texto: 'Nasce a hierarquia de Dono, Coordenador, Supervisor e Auxiliar: simples e funcional, como é até hoje.' },
     { era: 'primeira', data: '21/08/2021', titulo: 'A Segunda Divisão', tipo: 'guerra', livro: 'VII', foto: '2021-08-22', nicks: ['Haruzinha'],
@@ -112,7 +112,7 @@ const HISTORIA_MARCOS = [
       texto: 'Em pouco tempo, uwu, ETK e FUN rompem com a Eternity, e a ETK é debandada.' },
     { era: 'segunda', data: 'Fim de 2024', titulo: 'O primeiro Heika', tipo: 'lideranca', livro: 'VII', foto: '2024-11-16', nicks: ['Sir_Felipee'],
       texto: 'Nascem os cargos de PvP, e Sir_Felipee se torna o primeiro Heika, a quem passam as decisões sobre alianças e rivalidades.' },
-    { era: 'segunda', data: '31/12/2024', titulo: 'O fim planejado', tipo: 'fundacao', livro: 'VII', foto: '2024-12-28',
+    { era: 'segunda', data: '31/12/2024', titulo: 'O fim planejado', tipo: 'fundacao', livro: 'VII', foto: '2024-09-28',
       texto: 'Pela primeira vez, uma era termina sem inatividade: o Ano da Integridade fecha a Segunda Era, o primeiro ano em que o clã jogou todos os meses.' },
 ];
 
