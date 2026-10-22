@@ -3,10 +3,12 @@
 // locais importantes, e o pedido de trust, ficam na tela Cidade do painel do
 // membro (meu-painel.js chama cidadeMiolo/cidadeMontarMapa). Clicar numa marca
 // da zoom nela e abre um card ao lado; numa casa ou terreno aberto para
-// ocupacao, "Solicitar trust" pede a confirmacao (o nick ja vem do login).
-// Marcadores em js/cidade-marcas.js. O bot ainda manda DM para o Discord
-// vinculado ao nick, e so a confirmacao la faz o pedido chegar aos lideres. Um
-// lider da o /trust no jogo e aprova no painel.
+// ocupacao, "Solicitar trust" manda o pedido com a sessao do painel (o nick
+// vem do login). Desde 22/10/2026 nao ha mais DM de confirmacao: o login do
+// Discord ja prova que o nick e de quem pede, e o pedido vai direto aos lideres
+// (POST /api/cidade/painel/solicitar). Um lider da o /trust no jogo e aprova no
+// painel; o bot avisa o membro por DM quando o trust sai.
+// Marcadores em js/cidade-marcas.js.
 //
 // Leaflet com CRS.Simple, como no painel (js/painel/cidade.js): lat = -linha,
 // lng = coluna, e o bloco do mundo e (x0 + coluna, z0 + linha).
@@ -115,9 +117,8 @@ function cidadeMiolo() {
                         <h2>Como pedir o seu</h2>
                         <ol class="cidade-passos">
                             <li><span>Clique numa casa ou num terreno <b>livre</b> no mapa.</span></li>
-                            <li><span>Toque em <b>Solicitar trust</b> e envie o pedido.</span></li>
-                            <li><span>Confirme pela DM do bot no seu Discord.</span></li>
-                            <li><span>Um líder dá o trust no jogo.</span></li>
+                            <li><span>Toque em <b>Solicitar trust</b> e envie o pedido. Ele vai direto para os líderes.</span></li>
+                            <li><span>Um líder dá o trust no jogo e o bot te avisa no Discord.</span></li>
                         </ol>
                     </div>
                     <div class="cidade-bloco">
@@ -276,7 +277,7 @@ function abrirSolicitacao(id) {
         <form class="cidade-form" onsubmit="enviarSolicitacao(event, ${casa.id})">
             <label><span>Seu nick no Minecraft</span><input name="nick" required maxlength="17" autocomplete="off" spellcheck="false" placeholder="Ex.: Ducred22"${cidadePub.nick ? ` value="${escHtml(cidadePub.nick)}" readonly` : ''}></label>
             <label><span>Observação <small>(opcional)</small></span><textarea name="observacao" maxlength="500" rows="2" placeholder="Ex.: vou morar com o meu duo"></textarea></label>
-            <p class="cidade-aviso">Você vai receber uma DM do bot da Eternity no Discord vinculado ao nick para confirmar o pedido.</p>
+            <p class="cidade-aviso">${cidadePub.nick ? 'O pedido vai direto para os líderes; quando o trust sair, o bot te avisa no Discord.' : 'Você vai receber uma DM do bot da Eternity no Discord vinculado ao nick para confirmar o pedido.'}</p>
             <p class="cidade-erro" hidden></p>
             <button class="botao botao-principal" type="submit">Enviar pedido</button>
         </form>`));
@@ -292,13 +293,20 @@ async function enviarSolicitacao(event, casaId) {
     botao.disabled = true;
     erro.hidden = true;
     try {
-        const { nick } = await lerResposta(await fetch(`${URL_CIDADE_PUBLICA}/publico/solicitar`, {
+        // Logado no painel: o pedido vai com a sessao e direto aos lideres. Sem
+        // sessao (rota antiga), o nick digitado e confirmado por DM.
+        const sessao = cidadePub.nick && typeof mpLerSessao === 'function' ? mpLerSessao() : null;
+        const { nick, status } = await lerResposta(await fetch(`${URL_CIDADE_PUBLICA}/${sessao ? 'painel' : 'publico'}/solicitar`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...(sessao ? { Authorization: `Bearer ${sessao}` } : {}) },
             body: JSON.stringify({ casa_id: casaId, nick: String(dados.get('nick') || '').trim(), observacao: dados.get('observacao') || '' }),
         }));
         const casa = cidadePub.dados.casas.find(c => c.id === casaId);
-        abrirCard(cartaoCasa(casa, `
+        abrirCard(cartaoCasa(casa, status === 'Pendente' ? `
+            <div class="cidade-enviado">
+                <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                <div><p><b>Pedido enviado!</b> O pedido de <b>${escHtml(nick)}</b> já está com os líderes. Assim que um líder der o trust no jogo, o bot da Eternity te avisa por DM no Discord.</p></div>
+            </div>` : `
             <div class="cidade-enviado">
                 <i class="fa-brands fa-discord" aria-hidden="true"></i>
                 <div><p><b>Confira o seu Discord.</b> Em instantes o bot da Eternity manda uma DM para <b>${escHtml(nick)}</b>. Confirme por lá em até 30 minutos para o pedido chegar aos líderes.</p>
