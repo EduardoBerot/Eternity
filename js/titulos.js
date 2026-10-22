@@ -90,6 +90,56 @@ const TITULOS_CATEGORIAS = [
             ] },
         ],
     },
+    // Eventos, nivel da conta e outros (22/10/2026).
+    {
+        id: 'eventos',
+        nome: 'Eventos semanais',
+        icone: 'fa-flag-checkered',
+        texto: 'Vitórias nos eventos semanais individuais e quantos eventos diferentes você já venceu.',
+        familias: [
+            { grupo: 'vitorias', de: '#a855f7', ate: '#ec4899', escada: true, icone: '✠', titulos: [
+                { nome: 'Desafiante', requisito: '5 vitórias em eventos semanais' },
+                { nome: 'Conquistador', fem: 'Conquistadora', requisito: '15 vitórias em eventos semanais' },
+                { nome: 'Imbatível', requisito: '30 vitórias em eventos semanais' },
+            ] },
+            { grupo: 'versatilidade', de: '#f472b6', ate: '#facc15', escada: true, icone: '✺', titulos: [
+                { nome: 'Versátil', requisito: 'Venceu 3 eventos semanais diferentes' },
+                { nome: 'Polivalente', requisito: 'Venceu 5 eventos semanais diferentes' },
+                { nome: 'Absoluto', fem: 'Absoluta', requisito: 'Venceu os 7 eventos semanais' },
+            ] },
+        ],
+    },
+    {
+        id: 'nivel',
+        nome: 'Nível da conta',
+        icone: 'fa-star',
+        texto: 'O nível do seu painel e o topo do clã. Estes títulos não somam XP no próprio nível.',
+        familias: [
+            // `semXp`: nao contam como conquista no XP do nivel (subiriam o
+            // nivel que os da). O bot faz o mesmo (member-level.js).
+            { grupo: 'nivel', de: '#e2e8f0', ate: '#818cf8', escada: true, semXp: true, icone: '✸', titulos: [
+                { nome: 'Prodígio', requisito: 'Nível 5 da conta' },
+                { nome: 'Exaltado', fem: 'Exaltada', requisito: 'Nível 10 da conta' },
+                { nome: 'Transcendente', requisito: 'Nível 15 da conta' },
+            ] },
+            { grupo: 'nivel-top', de: '#fde047', ate: '#a855f7', escada: true, posicao: true, semXp: true, icone: '♜', titulos: [
+                { nome: 'Notável', requisito: 'Top 3 de nível do clã' },
+                { nome: 'Ilustre', requisito: 'Top 2 de nível do clã' },
+                { nome: 'Supremo', fem: 'Suprema', requisito: 'Top 1 de nível do clã' },
+            ] },
+        ],
+    },
+    {
+        id: 'outros',
+        nome: 'Outros',
+        icone: 'fa-compass',
+        texto: 'Marcos da sua caminhada no clã.',
+        familias: [
+            { grupo: 'outros', de: '#fef3c7', ate: '#ea580c', titulos: [
+                { nome: 'Desbravador', fem: 'Desbravadora', icone: '⚐', requisito: 'Completar a Jornada dos 7 Dias' },
+            ] },
+        ],
+    },
 ];
 
 // Tempo de cla: a escada de sempre, com o desenho proprio da Wiki.

@@ -266,6 +266,9 @@ const MP_ATRIBUTOS = [
     ['ofensiva', 'Ofensiva', 'fa-fire'],
     ['banco', 'Apoio ao banco', 'fa-coins'],
     ['poder', 'Poder mcMMO', 'fa-hand-fist'],
+    // Eventos semanais (22/10/2026).
+    ['vitorias', 'Eventos vencidos', 'fa-flag-checkered'],
+    ['versatilidade', 'Eventos diferentes', 'fa-shuffle'],
 ];
 
 let mpViewer = null;
@@ -293,10 +296,13 @@ const MP_XP = {
 // O nivel N pede 50 x N^2 de XP no total, sem teto.
 const MP_XP_BASE = 50;
 
-function mpContarConquistas(perfil, dias) {
+// `paraXp`: os titulos de nivel da conta (`semXp`) nao contam no XP, so no
+// contador da aba Conquistas.
+function mpContarConquistas(perfil, dias, { paraXp = false } = {}) {
     const conquistados = mpConquistados(perfil);
     let acesas = 0;
     for (const familia of TITULOS_CATEGORIAS.flatMap(categoria => categoria.familias)) {
+        if (paraXp && familia.semXp) continue;
         const indices = familia.titulos.map((t, i) => (conquistados.has(t.nome) ? i : -1)).filter(i => i >= 0);
         acesas += familia.escada ? (indices.length ? Math.max(...indices) + 1 : 0) : indices.length;
     }
@@ -312,7 +318,7 @@ function mpXp(perfil, dias) {
         prata: total.prata + (Number(mes?.podios?.prata) || 0),
         bronze: total.bronze + (Number(mes?.podios?.bronze) || 0),
     }), { ouro: 0, prata: 0, bronze: 0 });
-    const conquistas = mpContarConquistas(perfil, dias);
+    const conquistas = mpContarConquistas(perfil, dias, { paraXp: true });
     const eventos = Number(perfil.eventos?.total) || 0;
     const banco = Number(perfil.banco?.total) || 0;
     const ofensiva = Number(perfil.liga?.dominio) || 0;
@@ -832,7 +838,7 @@ function mpConquistasGrade(perfil, dias) {
                 ${TITULOS_TEMPO.map(([nome, rotulo], i) => tile(nome, '✧', `${rotulo} de clã`, dias !== null && dias >= MP_NIVEIS_DIAS[i], tempo, 1)).join('')}
             </div>
         </div>`;
-    // No celular so as acesas aparecem; o botao abre as bloqueadas (a grade inteira tem 36).
+    // No celular so as acesas aparecem; o botao abre as bloqueadas (a grade inteira tem 49).
     const corpo = `<div class="ficha-conquistas">${blocos}${blocoTempo}</div>
         <button type="button" class="ficha-ver-todas" onclick="this.previousElementSibling.classList.toggle('todas'); this.textContent = this.previousElementSibling.classList.contains('todas') ? 'Mostrar só as conquistadas' : 'Ver todas as conquistas'">Ver todas as conquistas</button>`;
     return mpPainel('fa-award', 'Conquistas', corpo, { classe: 'ficha-conquistas-painel', extra: `${acesas} de ${total}` });

@@ -115,7 +115,7 @@ const GUIA_REGRAS = `
         <section class="guia-card">
             <h3><i class="fa-solid fa-crown"></i> Cargos e títulos</h3>
             <p>A cor define a hierarquia e o cargo define a função. Dono conduz os ciclos e as promoções da staff; Coordenador acompanha a gestão; Supervisor zela pela cidade e pelas farms; Auxiliar é mentor dos novatos.</p>
-            <p>Títulos vêm do mcMMO, dos desafios, dos torneios e da Liga, do banco do clã e do tempo de clã (Tyrael aos 120 dias até Raziel aos 5 anos). A lista completa está na Wiki; peça a sua tag à Eternity no jogo.</p>
+            <p>Títulos vêm do mcMMO, dos desafios, dos torneios e da Liga, do banco do clã, dos eventos semanais, do nível da conta, da Jornada dos 7 Dias e do tempo de clã (Tyrael aos 120 dias até Raziel aos 5 anos). A lista completa está na Wiki; peça a sua tag à Eternity no jogo.</p>
         </section>
     </div>`;
 
