@@ -19,6 +19,7 @@ const MP_JORNADA_ETAPAS = {
     herbalismo: { icone: 'fa-seedling', texto: 'Chegue ao nível 20 em Herbalismo' },
     banco: { icone: 'fa-coins', texto: 'Deposite 30k no banco do clã', ajuda: 'No jogo: <code>/clan banco depositar</code> e o valor. Pode ser em partes.' },
     liga: { icone: 'fa-trophy', texto: 'Faça 1 ponto para a Eternity na Liga' },
+    acrobacia: { icone: 'fa-person-falling', texto: 'Chegue ao nível 20 em Acrobacia', ajuda: 'Acrobacia sobe caindo de alturas e desviando de golpes.' },
     dias: { icone: 'fa-calendar-check', texto: 'Jogue em 10 dias diferentes' },
 };
 const MP_CIDADE_ESCOLHAS = [
@@ -26,7 +27,7 @@ const MP_CIDADE_ESCOLHAS = [
     ['terreno', 'fa-map', 'Quero um terreno'],
     ['agora_nao', 'fa-clock', 'Agora não'],
 ];
-const MP_JORNADA_ICONES = ['fa-door-open', 'fa-users', 'fa-robot', 'fa-seedling', 'fa-coins', 'fa-shirt', 'fa-gift'];
+const MP_JORNADA_ICONES = ['fa-door-open', 'fa-users', 'fa-robot', 'fa-seedling', 'fa-coins', 'fa-person-falling', 'fa-gift'];
 
 async function mpCarregarJornada() {
     const antes = Boolean(mpEstado.jornada);
@@ -186,7 +187,9 @@ function mpCorpoMissao(jornada, missao) {
             + mpBarraJornada(Math.min(p.banco, m.banco), m.banco, `${mpDinheiro(Math.min(p.banco, m.banco))} de ${mpDinheiro(m.banco)}`)
             + mpMetaNaJornada();
     }
-    if (missao.dia === 6) return mpEtapas(missao) + mpCorpoLiga(jornada);
+    // Dia 6 desde 12/11/2026: Acrobacia 20 pelo Conferir (era 1 ponto na Liga, que
+    // nao fechava para quem esta na ETZ). A Liga segue como gancho, sem progresso.
+    if (missao.dia === 6) return mpEtapas(missao) + mpConferirSkill(jornada, 'acrobacia', aberta) + mpCorpoLiga();
     if (missao.dia === 7) return mpEtapas(missao) + mpBarraJornada(Math.min(p.dias, m.dias), m.dias, `${Math.min(p.dias, m.dias)} de ${m.dias} dias jogados`) + mpCorpoRecompensa(jornada);
     return mpEtapas(missao);
 }
@@ -226,14 +229,21 @@ async function mpEscolherCidade(escolha, botao) {
 
 // Dia 4: o botao Conferir pede para a Eternity ler o mcMMO (fila de acoes) e o
 // gancho dos titulos -- os mais perto de serem conquistados.
-function mpCorpoRaizes(jornada, missao, aberta) {
-    const nivel = jornada.progresso.herbalismo;
-    const meta = jornada.meta.herbalismo;
+// A barra do nivel lido e o botao Conferir de uma skill do mcMMO (dias 4 e 6).
+function mpConferirSkill(jornada, skill, aberta) {
+    const nivel = jornada.progresso[skill];
+    const meta = jornada.meta[skill];
     const pedido = mpAcaoAberta();
     const conferindo = pedido?.tipo === 'conferir';
-    const botao = aberta
-        ? `<button type="button" class="mp-acao" ${pedido ? 'disabled' : ''} onclick="mpPedirAcao('conferir', { skill: 'herbalismo' }, this)">${conferindo ? '<i class="fa-solid fa-gear fa-spin" aria-hidden="true"></i> Conferindo' : '<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Conferir'}</button>`
-        : '';
+    const botao = `<button type="button" class="mp-acao" ${pedido ? 'disabled' : ''} onclick="mpPedirAcao('conferir', { skill: '${skill}' }, this)">${conferindo ? '<i class="fa-solid fa-gear fa-spin" aria-hidden="true"></i> Conferindo' : '<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Conferir'}</button>`;
+    return `${nivel ? mpBarraJornada(Math.min(nivel, meta), meta, `Última leitura: nível ${nivel} de ${meta}`) : ''}
+        ${aberta ? `<div class="jornada-conferir">
+            <p class="mp-nota"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Você precisa estar <b>online no servidor</b> para a Eternity conferir. Com o perfil trancado, vá até o <code>/go ETY</code> antes.</p>
+            ${botao}
+        </div>` : ''}`;
+}
+
+function mpCorpoRaizes(jornada, missao, aberta) {
     const proximos = (mpEstado.dados?.perfil?.privado?.proximosTitulos || []).slice(0, 4);
     const titulos = proximos.length
         ? `<ul class="jornada-titulos">${proximos.map(item => {
@@ -243,11 +253,7 @@ function mpCorpoRaizes(jornada, missao, aberta) {
             return `<li style="${cor}"><span class="tit-nome">${info ? tituloHtml(item.nome, info) : `<b>${escHtml(item.nome)}</b>`}</span><small>${escHtml(item.requisito || '')}</small><div class="ficha-barra"><span style="width:${pct}%"></span></div></li>`;
         }).join('')}</ul>`
         : '';
-    return `${nivel ? mpBarraJornada(Math.min(nivel, meta), meta, `Última leitura: nível ${nivel} de ${meta}`) : ''}
-        ${aberta ? `<div class="jornada-conferir">
-            <p class="mp-nota"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Você precisa estar <b>online no servidor</b> para a Eternity conferir. Com o perfil trancado, vá até o <code>/go ETY</code> antes.</p>
-            ${botao}
-        </div>` : ''}
+    return `${mpConferirSkill(jornada, 'herbalismo', aberta)}
         <div class="jornada-gancho">
             <h4><i class="fa-solid fa-crown" aria-hidden="true"></i> Títulos do clã</h4>
             <p>O mcMMO conta para os títulos: cada skill tem uma escada, e o título aparece no seu nick na ETY. ${proximos.length ? 'Os mais perto de você:' : ''}</p>
@@ -275,19 +281,19 @@ function mpMetaNaJornada() {
     </div>`;
 }
 
-// Dia 6: os tres jeitos de pontuar na Liga num lugar so.
-function mpCorpoLiga(jornada) {
+// Gancho do dia 6: os tres jeitos de pontuar na Liga num lugar so. Desde
+// 12/11/2026 e so conteudo; a etapa do dia e a Acrobacia.
+function mpCorpoLiga() {
     const s = mpCla()?.cla?.servidores?.find(item => item.servidor === 'apocalipse') || mpCla()?.cla?.servidores?.[0];
     const posicao = s?.liga?.posicao ? `A Eternity está em <b>${s.liga.posicao}º lugar</b> na Liga de ${MP_MESES_LONGOS[(Number(String(s.mes).slice(5, 7)) || 1) - 1] || 'este mês'}.` : 'Todo mês os clãs disputam a Liga, e cada ponto de membro conta.';
-    const origem = MP_ORIGENS[jornada.progresso.ligaOrigem]?.nome;
     return `<div class="jornada-gancho">
+        <h4><i class="fa-solid fa-shirt" aria-hidden="true"></i> Vista a camisa</h4>
         <p>${posicao}</p>
         <ul class="jornada-jeitos">
             <li><i class="fa-solid fa-check-to-slot" aria-hidden="true"></i><span><code>/votar</code><small>Vote no servidor todo dia</small></span></li>
             <li><i class="fa-solid fa-bullseye" aria-hidden="true"></i><span><code>/desafios</code><small>Cumpra os desafios do dia</small></span></li>
             <li><i class="fa-solid fa-trophy" aria-hidden="true"></i><span><code>/torneio</code><small>Dispute os torneios entre clãs</small></span></li>
         </ul>
-        <p class="mp-nota">Seus pontos na jornada: <b>${jornada.progresso.liga.toLocaleString('pt-BR')}</b>${origem ? ` (o primeiro veio de ${escHtml(origem.toLowerCase())})` : ''}. O ponto pode levar até 30 min para aparecer. <button type="button" class="mp-link" onclick="mpEstado.aba = 'liga'; mpIr('perfil')">Ver meus pontos na Liga</button></p>
     </div>`;
 }
 
