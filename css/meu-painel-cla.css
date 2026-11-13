@@ -475,16 +475,6 @@ body.modo-jogo .page-meu-painel { padding: 0; }
     .ficha-barra { height: 8px; }
 }
 
-.inicio-grade {
-    display: grid;
-    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
-    gap: 16px;
-    align-items: start;
-
-}
-
-.inicio-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-
 .inicio-servidores { margin-left: auto; }
 .inicio-servidores .mp-chip { padding: 0.25em 0.8em; font-size: 0.72rem; letter-spacing: 0; text-transform: none; }
 
@@ -808,7 +798,6 @@ body.modo-jogo .page-meu-painel { padding: 0; }
     .jogo-aba.ativa { color: var(--gelo); }
     .jogo-aba.ativa i { color: var(--aqua); text-shadow: 0 0 10px var(--aqua); }
 
-    .inicio-grade { grid-template-columns: minmax(0, 1fr); }
     .inicio-cla-topo { grid-template-columns: minmax(0, 1fr); justify-items: center; }
     .inicio-cla-numeros { width: 100%; }
     .inicio-cla-baixo { grid-template-columns: minmax(0, 1fr); }
@@ -1583,3 +1572,350 @@ body.modo-jogo .page-meu-painel { padding: 0; }
     .semana-destaques a { flex-direction: row; justify-content: flex-start; gap: 10px; padding: 6px 8px; text-align: left; }
     .semana-destaques .semana-destaque-nick { flex: 1; }
 }
+
+/* ================= Inicio em cartoes (13/11/2026) =================
+   Faixa "Hoje", tres cartoes grandes (Liga, Torneios, Meta do banco) e dois
+   menores (Top niveis, Farms). Cada cartao e um botao que abre o detalhe numa
+   tela propria (js/home/meu-painel-cla.js, MP_SUBTELAS). O foco visivel fica
+   por dentro (outline-offset negativo) porque o clip-path cortaria o de fora. */
+
+.detalhe { display: flex; flex-direction: column; gap: 16px; }
+
+/* ---------- Faixa Hoje ---------- */
+
+.hoje {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 12px 18px;
+    border: 1px solid rgba(46, 230, 240, 0.16);
+    background: rgba(10, 20, 33, 0.82);
+    clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+}
+
+.hoje-resumo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+    padding-right: 18px;
+    border-right: 1px solid var(--linha);
+
+    h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gelo); }
+    h2 i { color: var(--aqua); }
+}
+
+.hoje-contagem { font-family: var(--sans); font-size: 0.8rem; color: var(--nevoa); }
+.hoje-contagem b { font-size: 1.05rem; font-weight: 800; color: var(--aqua); }
+.hoje-contagem.completo b { color: var(--ficha-xp); }
+
+.hoje-lista {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    min-width: 0;
+}
+
+.hoje-lista li { display: flex; min-width: 0; }
+
+.hoje-item {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 40px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    padding: 6px 14px 6px 7px;
+    border: 1px solid var(--linha);
+    border-radius: 999px;
+    background: rgba(4, 8, 15, 0.45);
+    font-family: var(--sans);
+    font-size: 0.84rem;
+    color: var(--gelo);
+    white-space: nowrap;
+}
+
+.hoje-marca {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid rgba(46, 230, 240, 0.4);
+    color: var(--aqua);
+    font-size: 0.72rem;
+}
+
+.hoje-item:hover, .hoje-item:focus-visible { border-color: rgba(46, 230, 240, 0.6); background: rgba(46, 230, 240, 0.1); }
+.hoje-item:focus-visible { outline: 2px solid var(--aqua); outline-offset: 2px; }
+.hoje-item.feito:hover, .hoje-item.feito:focus-visible { border-color: rgba(92, 240, 138, 0.6); background: rgba(92, 240, 138, 0.12); }
+.hoje-item.feito { border-color: rgba(92, 240, 138, 0.35); background: rgba(92, 240, 138, 0.07); color: var(--nevoa); }
+.hoje-item.feito .hoje-marca { background: var(--ficha-xp); border-color: var(--ficha-xp); color: #062311; }
+
+.hoje-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* ---------- Cartoes grandes ---------- */
+
+.inicio-tiles {
+    display: grid;
+    grid-template-columns: repeat(var(--colunas, 3), minmax(0, 1fr));
+    gap: 16px;
+}
+
+.tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    min-width: 0;
+    padding: 20px 22px 18px;
+    --bd: rgba(46, 230, 240, 0.2);
+    --ch: 18px;
+    border: 1px solid var(--bd);
+    background:
+        linear-gradient(180deg, rgba(46, 230, 240, 0.08), transparent 150px),
+        rgba(10, 20, 33, 0.9);
+    clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px);
+    box-shadow: inset 0 1px 0 rgba(232, 244, 248, 0.06);
+    color: var(--gelo);
+    font: inherit;
+    text-align: left;
+}
+
+button.tile { cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease; }
+
+button.tile:hover,
+button.tile:focus-visible {
+    --bd: rgba(46, 230, 240, 0.6);
+    background:
+        linear-gradient(180deg, rgba(46, 230, 240, 0.16), transparent 170px),
+        rgba(14, 28, 45, 0.95);
+    transform: translateY(-2px);
+}
+
+.tile:focus-visible, .tile-sec:focus-visible { outline: 2px solid var(--aqua); outline-offset: -5px; }
+
+.tile-rotulo {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    margin: 0;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--nevoa);
+
+    > i { color: var(--aqua); }
+    small { margin-left: auto; font-family: var(--sans); font-size: 0.78rem; letter-spacing: 0; text-transform: none; color: var(--ficha-ouro); }
+}
+
+.tile-valor {
+    margin-top: 10px;
+    font-size: clamp(2.8rem, 5vw, 3.8rem);
+    line-height: 1;
+    color: var(--gelo);
+
+    small { margin-left: 10px; font-family: var(--sans); font-size: 1rem; font-weight: 400; color: var(--nevoa); }
+}
+
+.tile-valor.podio-1 { color: var(--ficha-ouro); text-shadow: 0 0 22px rgba(245, 197, 66, 0.5); }
+.tile-valor.podio-2 { color: #c8d6e5; }
+.tile-valor.podio-3 { color: #e09a5a; }
+.tile-banco .tile-valor { color: var(--ficha-ouro); }
+
+.tile-linhas span, .tile-texto, .hoje-texto, .hoje-contagem, .hoje-contagem b { font-family: var(--sans); }
+.tile-legenda { font-family: var(--sans); font-size: 0.8rem; color: var(--nevoa); }
+.tile-banco .tile-valor.neutro { color: var(--gelo); }
+
+/* A diagonal do chanfro: o clip-path corta a borda de 1px, entao ela e
+   desenhada aqui (canto de baixo a direita e de cima a esquerda). */
+.tile::before, .tile::after, .tile-sec::before, .tile-sec::after {
+    content: "";
+    position: absolute;
+    width: var(--ch);
+    height: var(--ch);
+    pointer-events: none;
+}
+
+.tile::after, .tile-sec::after {
+    right: -1px;
+    bottom: -1px;
+    background: linear-gradient(to bottom right, transparent calc(50% - 1.5px), var(--bd) calc(50% - 1.5px), var(--bd) 50%, transparent 50%);
+}
+
+.tile::before, .tile-sec::before {
+    left: -1px;
+    top: -1px;
+    background: linear-gradient(to bottom right, transparent 50%, var(--bd) 50%, var(--bd) calc(50% + 1.5px), transparent calc(50% + 1.5px));
+}
+
+.tile-barra { width: 100%; height: 9px; margin-top: 6px; }
+
+.tile-linhas {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 8px;
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    line-height: 1.4;
+    color: var(--nevoa);
+
+    b { color: var(--gelo); font-size: 0.95rem; }
+    i { margin-right: 4px; color: var(--nevoa-escura); }
+}
+
+.tile-abrir {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: auto;
+    padding-top: 12px;
+    align-self: flex-end;
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--aqua);
+
+    i { font-size: 0.7rem; transition: transform 0.2s ease; }
+}
+
+button.tile:hover .tile-abrir i,
+button.tile:focus-visible .tile-abrir i,
+button.tile-sec:hover .tile-abrir i,
+button.tile-sec:focus-visible .tile-abrir i { transform: translateX(4px); }
+
+.tile-estado { justify-content: flex-start; min-height: 190px; }
+.tile-texto { margin: 10px 0 0; font-family: var(--sans); font-size: 0.9rem; color: var(--nevoa); }
+
+/* ---------- Cartoes menores ---------- */
+
+.inicio-tiles-sec {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 16px;
+}
+
+.tile-sec {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    --bd: rgba(232, 244, 248, 0.12);
+    --ch: 12px;
+    padding: 14px 18px 12px;
+    border: 1px solid var(--bd);
+    background: rgba(10, 20, 33, 0.7);
+    clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+    color: var(--gelo);
+    font: inherit;
+    text-align: left;
+}
+
+button.tile-sec { cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease; }
+button.tile-sec:hover, button.tile-sec:focus-visible { --bd: rgba(46, 230, 240, 0.5); background: rgba(14, 28, 45, 0.9); }
+
+.tile-sec .tile-rotulo { font-size: 0.72rem; }
+.tile-resumo { color: var(--gelo) !important; font-weight: 700; }
+.tile-sec .tile-abrir { padding-top: 4px; }
+
+.farms-mini { display: flex; flex-direction: column; gap: 4px; }
+
+.farm-linha {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 8px;
+    min-height: 36px;
+    background: rgba(4, 8, 15, 0.4);
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    color: var(--gelo);
+
+    > i { text-align: center; color: var(--nevoa-escura); }
+}
+
+.farm-linha .farm-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.farm-estado { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--aqua); white-space: nowrap; }
+.farm-linha.liberada .farm-estado { color: var(--ficha-xp); }
+.farm-linha.aberto .farm-estado { color: var(--ficha-ouro); }
+
+.tile-selo {
+    display: inline-grid;
+    place-items: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--ficha-ouro);
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    color: #1a1204;
+}
+
+.topo-lista { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
+
+.topo-lista li a {
+    display: grid;
+    grid-template-columns: 30px 32px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 8px;
+    background: rgba(4, 8, 15, 0.4);
+    color: var(--gelo);
+    text-decoration: none;
+}
+
+.topo-lista li a:hover, .topo-lista li a:focus-visible { background: rgba(46, 230, 240, 0.1); }
+.topo-lista li.eu a { background: rgba(92, 240, 138, 0.08); box-shadow: inset 3px 0 0 var(--ficha-xp); }
+.topo-lista .niv-cabeca { width: 28px; height: 28px; }
+.topo-nick { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.88rem; }
+
+.tile-abrir-link { align-self: flex-end; padding: 2px 0 0; border: 0; background: none; cursor: pointer; }
+.tile-abrir-link:hover i, .tile-abrir-link:focus-visible i { transform: translateX(4px); }
+
+.jogo-corpo, .jogo-tela, .hoje { min-width: 0; }
+.jogo-tela > * { max-width: 100%; }
+
+/* ---------- Telas de detalhe ---------- */
+
+.detalhe-tela { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 980px; }
+.jogo-voltar { min-height: 44px; }
+.ficha-titulo-solo { margin-bottom: 10px; }
+.ficha-titulo-solo .inicio-servidores { margin-left: 0; }
+
+@media (max-width: 760px) {
+    .hoje { flex-direction: column; align-items: stretch; gap: 10px; }
+    .hoje-resumo { flex-direction: row; align-items: center; justify-content: space-between; padding: 0 0 8px; border-right: 0; border-bottom: 1px solid var(--linha); }
+    .hoje-lista li { flex: 1 1 calc(50% - 5px); }
+    .hoje-item { width: 100%; min-height: 44px; white-space: normal; border-radius: 22px; line-height: 1.25; }
+    .hoje-marca { flex-shrink: 0; }
+
+    .inicio-tiles { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    .tile { padding: 14px 16px 12px; }
+    .tile-valor { margin-top: 6px; font-size: 2.6rem; }
+    .tile-rotulo { padding-right: 70px; }
+    .tile .tile-abrir { position: absolute; top: 14px; right: 16px; margin: 0; padding: 0; }
+}
+
+.tile-sec .tile-rotulo { flex-wrap: wrap; row-gap: 2px; }
+.tile-resumo { white-space: nowrap; }

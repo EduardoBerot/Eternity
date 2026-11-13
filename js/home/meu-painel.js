@@ -55,7 +55,7 @@ function mpLerRetorno() {
             if (destino?.tela) ({ tela, nick } = destino);
         } catch { /* sem destino guardado */ }
     }
-    if (MP_TELAS.some(([id]) => id === tela) || tela === 'jornada') mpEstado.tela = tela;
+    if (mpTelaValida(tela)) mpEstado.tela = tela;
     // Perfil de outro membro aberto no painel: volta a ele ao recarregar.
     if (tela === 'jogador' && nick) { mpEstado.tela = 'jogador'; mpEstado.jogadorNick = nick; }
     const sessao = params.get('sessao');
@@ -90,7 +90,7 @@ async function mpTrocarEntrada(token) {
         if (resposta.ok && corpo.sessao) {
             mpGuardarSessao(corpo.sessao);
             // O link curto do jogo guarda a tela na API (ex.: a Jornada no aceite).
-            if (corpo.tela && (MP_TELAS.some(([id]) => id === corpo.tela) || corpo.tela === 'jornada')) {
+            if (corpo.tela && mpTelaValida(corpo.tela)) {
                 mpEstado.tela = corpo.tela;
                 history.replaceState(null, '', `${location.pathname}${location.search}#meu-painel&tela=${corpo.tela}`);
             }
@@ -394,6 +394,23 @@ const MP_TELAS = [
     ['cidade', 'fa-city', 'Cidade'],
     ['perfil', 'fa-user', 'Meu perfil'],
 ];
+// Telas de detalhe do Inicio (abertas pelos cartoes grandes): ficam fora do menu
+// e mantem "Inicio" aceso (mpTelaMenu).
+const MP_SUBTELAS = {
+    liga: ['Liga do clã', 'Como a Eternity está na Liga do mês e quanto você contribuiu.'],
+    torneios: ['Torneios da semana', 'A corrida dos clãs, os seus pódios e quem mais pontua.'],
+    banco: ['Meta do banco', 'O quanto o clã já depositou e quanto os pódios pagam de adicional.'],
+    farms: ['Farms e pedidos', 'Peça trust nas farms da ETY e acompanhe seus pedidos.'],
+};
+
+function mpTelaMenu() {
+    return MP_SUBTELAS[mpEstado.tela] ? 'inicio' : mpEstado.tela;
+}
+
+function mpTelaValida(tela) {
+    return MP_TELAS.some(([id]) => id === tela) || tela === 'jornada' || Object.hasOwn(MP_SUBTELAS, tela);
+}
+
 const MP_ABAS_PERFIL = [
     ['geral', 'fa-chart-simple', 'Visão geral'],
     ['liga', 'fa-trophy', 'Liga'],
@@ -455,7 +472,7 @@ function mpLateral(telas, { perfil, nivel, nickSkin }) {
     const selo = id => id === 'jornada' && jornada && !jornada.completa
         ? `<small class="lateral-selo">${jornada.missoes.filter(missao => missao.feita).length}/7</small>`
         : '';
-    const item = ([id, icone, rotulo]) => `<button type="button" class="lateral-item ${mpEstado.tela === id ? 'ativa' : ''}" ${mpEstado.tela === id ? 'aria-current="page"' : ''} onclick="mpIr('${id}')" title="${rotulo}">
+    const item = ([id, icone, rotulo]) => `<button type="button" class="lateral-item ${mpTelaMenu() === id ? 'ativa' : ''}" ${mpTelaMenu() === id ? 'aria-current="page"' : ''} onclick="mpIr('${id}')" title="${rotulo}">
             <i class="fa-solid ${icone}" aria-hidden="true"></i><span>${rotulo}</span>${selo(id)}
         </button>`;
     const grupos = MP_LATERAL_GRUPOS
@@ -500,7 +517,7 @@ function mpDesenhar() {
         ...MP_TELAS.slice(1),
         ...(mpEstado.dados.staff ? [['staff', 'fa-user-shield', 'Staff']] : []),
     ];
-    const botao = ([id, icone, rotulo], classe) => `<button type="button" class="${classe} ${mpEstado.tela === id ? 'ativa' : ''}" ${mpEstado.tela === id ? 'aria-current="page"' : ''} onclick="mpIr('${id}')"><i class="fa-solid ${icone}" aria-hidden="true"></i><span>${rotulo}</span></button>`;
+    const botao = ([id, icone, rotulo], classe) => `<button type="button" class="${classe} ${mpTelaMenu() === id ? 'ativa' : ''}" ${mpTelaMenu() === id ? 'aria-current="page"' : ''} onclick="mpIr('${id}')"><i class="fa-solid ${icone}" aria-hidden="true"></i><span>${rotulo}</span></button>`;
     app.innerHTML = `<div class="jogo ${mpLateralRecolhida() ? 'lateral-recolhida' : ''}">
         ${mpLateral(telas, { perfil, nivel, nickSkin })}
         <div class="jogo-corpo">
@@ -529,6 +546,7 @@ function mpConteudoTela() {
     if (mpEstado.tela === 'perfil') return mpTelaPerfil();
     if (mpEstado.tela === 'jogador') return mpTelaJogador();
     if (mpEstado.tela === 'jornada') return mpTelaJornada();
+    if (MP_SUBTELAS[mpEstado.tela]) return mpTelaDetalhe(mpEstado.tela);
     if (mpEstado.tela === 'cidade') return `<div class="jogo-cabeca"><h1>Cidade</h1><p>Casas e terrenos gratuitos para os membros no Apocalipse. Escolha um lugar livre no mapa e peça o seu.</p></div>${cidadeMiolo()}`;
     return mpTelaInicio();
 }
@@ -547,6 +565,18 @@ function mpRedesenharTela() {
     if (!alvo) return;
     alvo.innerHTML = mpConteudoTela();
     mpDepoisDaTela();
+    // O tour guiado destaca um elemento que acabou de ser trocado: acha o novo.
+    if (typeof mpTutorialPosicionar === 'function') mpTutorialPosicionar();
+}
+
+// Abre o Meu perfil direto numa aba (ex.: a Liga ou as Conquistas).
+function mpIrPerfilAba(aba) {
+    mpEstado.aba = aba;
+    mpIr('perfil');
+}
+
+function mpTextoPuro(html) {
+    return String(html).replace(/<[^>]+>/g, '');
 }
 
 function mpIr(tela) {
@@ -762,11 +792,11 @@ function mpAtributos(perfil) {
 }
 
 // Missoes do dia: o que a pessoa consegue fazer agora, com o estado quando se sabe.
-function mpMissoes(perfil) {
+function mpListaMissoes(perfil) {
     const missoes = [];
     const dominio = Number(perfil.liga?.dominio) || 0;
     missoes.push({
-        estado: 'pendente', icone: 'fa-fire',
+        estado: 'pendente', icone: 'fa-fire', curto: dominio ? `Manter a ofensiva de ${escHtml(dominio)} dias` : 'Fazer os desafios de hoje', ir: "mpIrPerfilAba('liga')",
         texto: dominio ? `Mantenha a ofensiva de <b>${escHtml(dominio)} dias</b>: complete os desafios de hoje.` : 'Complete <b>todos os desafios</b> de hoje e comece uma ofensiva.',
     });
     const meta = mpEstado.meta;
@@ -775,28 +805,22 @@ function mpMissoes(perfil) {
         const chaves = new Set([perfil.nick, ...(perfil.alts || [])].map(n => String(n).toLowerCase()));
         const minha = (meta.apoiadores || []).filter(item => chaves.has(String(item.nick).toLowerCase())).reduce((soma, item) => soma + (Number(item.valor) || 0), 0);
         missoes.push(minha
-            ? { estado: 'feito', icone: 'fa-coins', texto: `Você já apoiou a meta da semana: <b>${escHtml(mpDinheiro(minha))}</b> (meta em ${pct}%).` }
-            : { estado: 'pendente', icone: 'fa-coins', texto: `Apoie a <b>meta do banco</b> da semana (em ${pct}%).` });
+            ? { estado: 'feito', icone: 'fa-coins', curto: 'Meta do banco apoiada', ir: "mpIr('banco')", texto: `Você já apoiou a meta da semana: <b>${escHtml(mpDinheiro(minha))}</b> (meta em ${pct}%).` }
+            : { estado: 'pendente', icone: 'fa-coins', curto: `Apoiar a meta do banco (${pct}%)`, ir: "mpIr('banco')", texto: `Apoie a <b>meta do banco</b> da semana (em ${pct}%).` });
     }
     const copa = mpEstado.copa;
     if (copa?.status === 'inscricoes') {
         const inscrito = (copa.inscritos || []).some(n => String(n).toLowerCase() === String(perfil.nick).toLowerCase());
         missoes.push(inscrito
-            ? { estado: 'feito', icone: 'fa-hand-fist', texto: 'Inscrito na <b>Copa de Duelos</b>.' }
-            : { estado: 'pendente', icone: 'fa-hand-fist', texto: `Inscreva-se na <b>Copa de Duelos</b> com <code>/copa</code>${copa.inscricoesAte ? ` até ${escHtml(mpData(copa.inscricoesAte))}` : ''}.` });
+            ? { estado: 'feito', icone: 'fa-hand-fist', curto: 'Inscrito na Copa de Duelos', ir: "mpIr('torneios')", texto: 'Inscrito na <b>Copa de Duelos</b>.' }
+            : { estado: 'pendente', icone: 'fa-hand-fist', curto: 'Inscrever na Copa de Duelos', ir: "mpIr('torneios')", texto: `Inscreva-se na <b>Copa de Duelos</b> com <code>/copa</code>${copa.inscricoesAte ? ` até ${escHtml(mpData(copa.inscricoesAte))}` : ''}.` });
     }
     const perto = (perfil.privado?.proximosTitulos || [])
         .map(item => ({ ...item, razao: item.atual / item.meta }))
         .filter(item => item.razao < 1)
         .sort((a, b) => b.razao - a.razao)[0];
-    if (perto) missoes.push({ estado: 'pendente', icone: 'fa-award', texto: `Faltam <b>${escHtml(mpFalta(perto))}</b> para ${mpNomeTitulo(perto.nome)}.` });
-    const feitas = missoes.filter(m => m.estado === 'feito').length;
-    return mpPainel('fa-scroll', 'Missões de hoje', `<ul class="ficha-missoes">
-        ${missoes.map(m => `<li class="ficha-missao ${m.estado}">
-            <span class="ficha-missao-marca" aria-label="${m.estado === 'feito' ? 'Feita' : 'Pendente'}"><i class="fa-solid ${m.estado === 'feito' ? 'fa-check' : m.icone}" aria-hidden="true"></i></span>
-            <span>${m.texto}</span>
-        </li>`).join('')}
-    </ul>`, { classe: 'ficha-missoes-painel', extra: `${feitas} de ${missoes.length}` });
+    if (perto) missoes.push({ estado: 'pendente', icone: 'fa-award', curto: `${escHtml(mpFalta(perto))} p/ ${mpTextoPuro(mpNomeTitulo(perto.nome))}`, ir: "mpIrPerfilAba('conquistas')", texto: `Faltam <b>${escHtml(mpFalta(perto))}</b> para ${mpNomeTitulo(perto.nome)}.` });
+    return missoes;
 }
 
 // Conquistas: todos os titulos do cla, por categoria. Escada acende ate o nivel

@@ -312,22 +312,227 @@ function mpTelaInicio() {
             </div>
         </section>
         ${mpCartaoJornadaInicio()}
-        <div class="inicio-grade">
-            <div class="inicio-col">
-                ${mpCartaoClaNaLiga()}
-                ${mpCartaoTorneios()}
-                ${mpCartaoFarms()}
-            </div>
-            <div class="inicio-col">
-                ${mpMissoes(perfil)}
-                ${mpCartaoMeta()}
-                ${mpCartaoTopo()}
-                ${mpCartaoPedidos()}
-            </div>
-        </div>`;
+        ${mpFaixaHoje(perfil)}
+        ${mpTilesPrincipais()}
+        ${mpTilesSecundarios()}`;
 }
 
-function mpCartaoClaNaLiga() {
+// ---------- Inicio em cartoes (13/11/2026) ----------
+// Pedido do Fundador: o Inicio tinha informacao demais. Agora e um resumo: as
+// missoes de hoje numa faixa, tres cartoes grandes (um numero cada) e dois
+// menores. Clicar num cartao abre o detalhe numa tela propria (MP_SUBTELAS em
+// meu-painel.js), que reaproveita os cartoes completos de antes.
+
+function mpFaixaHoje(perfil) {
+    const missoes = mpListaMissoes(perfil);
+    const feitas = missoes.filter(m => m.estado === 'feito').length;
+    return `<section class="hoje" aria-labelledby="hoje-titulo">
+        <div class="hoje-resumo">
+            <h2 id="hoje-titulo"><i class="fa-solid fa-scroll" aria-hidden="true"></i> Hoje</h2>
+            <span class="hoje-contagem ${feitas === missoes.length ? 'completo' : ''}"><b>${feitas}</b> de ${missoes.length}</span>
+        </div>
+        <ul class="hoje-lista">
+            ${missoes.map(m => `<li><button type="button" class="hoje-item ${m.estado}" onclick="${m.ir}" title="${mpTextoPuro(m.texto)}">
+                <span class="hoje-marca"><i class="fa-solid ${m.estado === 'feito' ? 'fa-check' : m.icone}" aria-hidden="true"></i></span>
+                <span class="hoje-texto" aria-hidden="true">${m.curto}</span>
+                <span class="hoje-sr">${m.estado === 'feito' ? 'Feita' : 'Pendente'}: ${mpTextoPuro(m.texto)}</span>
+            </button></li>`).join('')}
+        </ul>
+    </section>`;
+}
+
+// Cartao que ainda nao tem dado: carregando ou com erro (e "Tentar de novo").
+function mpTileEstado(classe, icone, rotulo, erro, nova, vazio = '') {
+    const texto = vazio
+        || (erro
+            ? `Não consegui carregar agora. <button type="button" class="mp-link" onclick="${nova}">Tentar de novo</button>`
+            : '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Carregando...');
+    return `<div class="tile tile-${classe} tile-estado">
+        <span class="tile-rotulo"><i class="fa-solid ${icone}" aria-hidden="true"></i> ${rotulo}</span>
+        <p class="tile-texto">${texto}</p>
+    </div>`;
+}
+
+// Os tres cartoes grandes tem o mesmo esqueleto: numero, legenda, barra e duas linhas.
+function mpTile(classe, icone, rotulo, tela, aria, miolo) {
+    return `<button type="button" class="tile tile-${classe}" onclick="mpIr('${tela}')" aria-label="${escHtml(aria)}">
+        <span class="tile-rotulo"><i class="fa-solid ${icone}" aria-hidden="true"></i> ${rotulo}</span>
+        ${miolo}
+        <span class="tile-abrir" aria-hidden="true">Abrir <i class="fa-solid fa-chevron-right"></i></span>
+    </button>`;
+}
+
+function mpTileLiga() {
+    const cla = mpCla();
+    const nova = 'mpEstado.cla = null; mpRedesenharTela(); mpCarregarCla()';
+    if (!cla) return mpTileEstado('liga', 'fa-shield-halved', 'Liga', mpEstado.cla === 'erro', nova);
+    const servidores = cla.cla?.servidores;
+    if (!servidores?.length) return mpTileEstado('liga', 'fa-shield-halved', 'Liga', false, nova, 'A Liga do mês aparece quando o clã pontuar.');
+    const s = servidores[Math.min(mpEstado.inicioServidor || 0, servidores.length - 1)];
+    const posicao = s.liga?.posicao;
+    const pontos = s.liga?.pontos ?? s.porOrigem.reduce((soma, v) => soma + Math.max(0, v), 0);
+    const participacao = s.membrosAtuais ? Math.min(100, Math.round(s.pontuaram / s.membrosAtuais * 100)) : 0;
+    const clas = `${pontos.toLocaleString('pt-BR')} pts · ${s.pontuaram}${s.membrosAtuais ? ` de ${s.membrosAtuais}` : ''} pontuaram`;
+    const meus = cla.liga?.servidores.find(item => item.servidor === s.servidor)?.meses?.[s.mes];
+    const voce = meus ? `Você: ${meus.pontos.toLocaleString('pt-BR')} pts${meus.posicao ? ` · ${meus.posicao}º do clã` : ''}` : 'Você ainda não pontuou neste mês';
+    const aria = `Liga: ${s.cla || 'o clã'} em ${posicao ? `${posicao}º lugar` : 'sem posição'}. ${clas}. ${voce}. Abrir detalhes.`;
+    return mpTile('liga', 'fa-shield-halved', 'Liga', 'liga', aria, `
+        <span class="tile-valor ${posicao && posicao <= 3 ? `podio-${posicao}` : ''}">${posicao ? `${posicao}º` : '—'}</span>
+        <span class="tile-legenda">${s.liga?.final ? 'resultado final do clã' : 'posição do clã agora'}</span>
+        <span class="ficha-barra tile-barra" aria-hidden="true"><span style="width:${participacao}%"></span></span>
+        <span class="tile-linhas">
+            <span>${escHtml(clas)}</span>
+            <span>${escHtml(voce)}</span>
+        </span>`);
+}
+
+function mpTileTorneios() {
+    const nova = 'mpEstado.torneios = null; mpRedesenharTela(); mpCarregarTorneios()';
+    if (mpEstado.torneios === 'erro') return mpTileEstado('torneios', 'fa-trophy', 'Torneios', true, nova);
+    const t = mpTorneios();
+    if (!t) return mpTileEstado('torneios', 'fa-trophy', 'Torneios', false, nova);
+    if (!t.torneios?.length) return mpTileEstado('torneios', 'fa-trophy', 'Torneios', false, nova, 'Nenhum torneio nesta semana.');
+    const { meus, ganho } = mpMeusPodios(t);
+    const pct = Math.round(t.comCla / t.torneios.length * 100);
+    const fecha = t.tempoRestante ? `fecha em ${t.tempoRestante.replace(/\s*\(.*\)\s*$/, '')}` : 'semana em andamento';
+    const seus = meus.length ? `Seus pódios: ${meus.length}${ganho ? ` · +${mbCompacto(ganho)}` : ''}` : 'Você ainda não está em nenhum pódio';
+    const aria = `Torneios da semana: o clã está no pódio de ${t.comCla} de ${t.torneios.length} torneios, ${fecha}. ${seus}. Abrir detalhes.`;
+    return mpTile('torneios', 'fa-trophy', 'Torneios', 'torneios', aria, `
+        <span class="tile-valor">${t.comCla}<small>de ${t.torneios.length}</small></span>
+        <span class="tile-legenda">torneios com o clã no pódio</span>
+        <span class="ficha-barra tile-barra" aria-hidden="true"><span style="width:${pct}%"></span></span>
+        <span class="tile-linhas">
+            <span>${escHtml(fecha)}</span>
+            <span>${escHtml(seus)}</span>
+        </span>`);
+}
+
+function mpTileBanco() {
+    const meta = mpEstado.meta;
+    if (!meta?.degraus?.length) return '';
+    const liquido = Math.max(0, Number(meta.liquido) || 0);
+    const pct = Math.min(100, Math.floor(liquido / meta.meta * 100));
+    const fecha = mpFechaEm(meta.semana.fim);
+    const valores = `${mpDinheiro(liquido)} de ${mpDinheiro(meta.meta)}`;
+    const { perfil } = mpResumo(mpEu());
+    const chaves = mpChavesNick(perfil);
+    const minha = (meta.apoiadores || []).filter(item => chaves.has(String(item.nick).toLowerCase())).reduce((soma, item) => soma + (Number(item.valor) || 0), 0);
+    const voce = minha ? `Você depositou ${mpDinheiro(minha)}` : 'Você ainda não depositou';
+    return mpTile('banco', 'fa-gem', 'Meta do banco', 'banco', `Meta do banco: ${pct}% concluída, ${valores}, ${fecha}. ${voce}. Abrir detalhes.`, `
+        <span class="tile-valor ${pct ? '' : 'neutro'}">${pct}%</span>
+        <span class="tile-legenda">da meta da semana</span>
+        <span class="ficha-barra ficha-barra-ouro tile-barra" aria-hidden="true"><span style="width:${pct}%"></span></span>
+        <span class="tile-linhas">
+            <span>${escHtml(valores)} · ${escHtml(fecha)}</span>
+            <span>${escHtml(voce)}</span>
+        </span>`);
+}
+
+function mpTilesPrincipais() {
+    const tiles = [mpTileLiga(), mpTileTorneios(), mpTileBanco()].filter(Boolean);
+    return `<div class="inicio-tiles" style="--colunas:${tiles.length}">${tiles.join('')}</div>`;
+}
+
+function mpTileTopo() {
+    const cla = mpCla();
+    if (!cla) {
+        return `<div class="tile-sec tile-topo tile-estado"><span class="tile-rotulo"><i class="fa-solid fa-ranking-star" aria-hidden="true"></i> Top níveis</span><p class="tile-texto">${mpEstado.cla === 'erro' ? 'Não consegui carregar agora.' : '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Carregando...'}</p></div>`;
+    }
+    const eu = mpMinhaLinha();
+    const topo = cla.ranking.slice(0, 3);
+    if (!topo.length) return '';
+    const fora = eu && eu.posicao > 3;
+    return `<section class="tile-sec tile-topo" aria-label="Top níveis do clã">
+        <h3 class="tile-rotulo"><i class="fa-solid fa-ranking-star" aria-hidden="true"></i> Top níveis${fora ? `<small>Você: ${eu.posicao}º</small>` : ''}</h3>
+        <ol class="topo-lista">${topo.map(linha => `<li class="${linha.nick === cla.eu ? 'eu' : ''}"><a ${mpLinkMembro(linha.nick)} title="Ver o perfil de ${escHtml(linha.nick)}">
+            <span class="niv-pos">${linha.posicao}º</span>
+            ${mpCabeca(linha.nick, 32)}
+            <span class="topo-nick">${escHtml(linha.nick)}</span>
+            <span class="niv-nv">NV ${linha.nivel}</span>
+        </a></li>`).join('')}</ol>
+        <button type="button" class="tile-abrir tile-abrir-link" onclick="mpIr('ranking')" aria-label="Ver o ranking completo">Ver ranking <i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
+    </section>`;
+}
+
+// Estado de cada farm a partir dos pedidos de trust: pedido aberto, liberada
+// (algum pedido ja concluido) ou ainda por pedir.
+function mpEstadoFarm(farm) {
+    const pedidos = (mpEstado.acoes || []).filter(acao => acao.tipo === 'trust' && acao.dados?.farm === farm);
+    if (pedidos.some(acao => ['pendente', 'executando'].includes(acao.status))) return 'aberto';
+    if (pedidos.some(acao => acao.status === 'feito')) return 'liberada';
+    return 'pedir';
+}
+
+const MP_ROTULO_FARM = { aberto: ['fa-hourglass-half', 'Pedido aberto'], liberada: ['fa-circle-check', 'Liberada'], pedir: ['fa-hand-pointer', 'Pedir trust'] };
+
+// Cartao de farms e pedidos. Tem id fixo (e um vazio escondido quando nao ha
+// o que mostrar) para o aviso dos pedidos trocar so ele (mpAtualizarAcoesNaTela).
+function mpTileFarms() {
+    const acoes = mpEstado.acoes || [];
+    if (!mpPodeAgir() && !acoes.length) return '<div id="mp-tile-farms" hidden></div>';
+    const abertos = acoes.filter(acao => ['pendente', 'executando'].includes(acao.status)).length;
+    let resumo;
+    let linhas;
+    let falado;
+    if (mpPodeAgir()) {
+        const estados = MP_FARMS.map(item => ({ item, estado: mpEstadoFarm(item.farm) }));
+        resumo = `${estados.filter(e => e.estado === 'liberada').length} de ${MP_FARMS.length} liberadas`;
+        linhas = estados.map(({ item, estado }) => ({ icone: item.icone, nome: item.nome, estado, icone2: MP_ROTULO_FARM[estado][0], texto: MP_ROTULO_FARM[estado][1] }));
+        falado = estados.map(({ item, estado }) => `${item.nome}: ${MP_ROTULO_FARM[estado][1].toLowerCase()}`).join('; ');
+    } else {
+        resumo = `${acoes.length} ${acoes.length === 1 ? 'pedido' : 'pedidos'}`;
+        const rotulo = acao => (['pendente', 'executando'].includes(acao.status) ? ['aberto', 'fa-hourglass-half', 'Em andamento'] : acao.status === 'feito' ? ['liberada', 'fa-circle-check', 'Feito'] : ['pedir', 'fa-circle-xmark', 'Não liberado']);
+        linhas = acoes.slice(0, 3).map(acao => {
+            const [estado, icone2, texto] = rotulo(acao);
+            return { icone: 'fa-list-check', nome: mpNomeAcao(acao), estado, icone2, texto };
+        });
+        falado = linhas.map(l => `${l.nome}: ${l.texto.toLowerCase()}`).join('; ');
+    }
+    return `<button type="button" id="mp-tile-farms" class="tile-sec tile-farms" onclick="mpIr('farms')" aria-label="${escHtml(`Farms e pedidos: ${resumo}. ${falado}. Abrir detalhes.`)}">
+        <span class="tile-rotulo"><i class="fa-solid fa-tractor" aria-hidden="true"></i> Farms e pedidos${abertos ? `<span class="tile-selo" aria-hidden="true">${abertos}</span>` : ''}<small class="tile-resumo">${escHtml(resumo)}</small></span>
+        <span class="farms-mini" aria-hidden="true">${linhas.map(l => `<span class="farm-linha ${l.estado}">
+            <i class="fa-solid ${l.icone}"></i>
+            <span class="farm-nome">${escHtml(l.nome)}</span>
+            <span class="farm-estado"><i class="fa-solid ${l.icone2}"></i> ${l.texto}</span>
+        </span>`).join('')}</span>
+        <span class="tile-abrir" aria-hidden="true">Abrir <i class="fa-solid fa-chevron-right"></i></span>
+    </button>`;
+}
+
+function mpTilesSecundarios() {
+    const farms = mpTileFarms();
+    mpEstado.tileFarmsHtml = farms;
+    return `<div class="inicio-tiles-sec">${mpTileTopo()}${farms}</div>`;
+}
+
+// Tela de detalhe de um cartao: o conteudo completo de antes, com a volta. Os
+// cartoes saem sem o proprio titulo (a tela ja tem o dela).
+function mpTelaDetalhe(tela) {
+    const [titulo, subtitulo] = MP_SUBTELAS[tela];
+    const aviso = texto => `<section class="ficha-painel"><p class="info-vazio">${texto}</p></section>`;
+    let corpo = '';
+    if (tela === 'liga') corpo = mpCartaoClaNaLiga(true) || aviso('A Liga do mês aparece quando o clã pontuar.');
+    if (tela === 'torneios') {
+        if (mpEstado.torneios === 'erro') corpo = aviso('Não consegui carregar os torneios agora. <button type="button" class="mp-link" onclick="mpEstado.torneios = null; mpRedesenharTela(); mpCarregarTorneios()">Tentar de novo</button>');
+        else if (!mpTorneios()) corpo = aviso('<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Carregando os torneios...');
+        else corpo = mpCartaoTorneios(true) || aviso('Nenhum torneio nesta semana.');
+    }
+    if (tela === 'banco') corpo = mpCartaoMeta(true) || aviso('Não há meta do banco aberta agora.');
+    if (tela === 'farms') {
+        // Sempre com o espaco dos pedidos (#mp-pedidos): eles aparecem quando chegam.
+        corpo = (mpPodeAgir() || (mpEstado.acoes || []).length ? '' : aviso('As farms são exclusivas de quem está na ETY.')) + mpCartaoFarms() + mpCartaoPedidos();
+    }
+    return `<div class="detalhe-tela">
+        <div class="jogo-voltar-barra">
+            <button type="button" class="jogo-voltar" onclick="mpIr('inicio')"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Início</button>
+        </div>
+        <div class="jogo-cabeca"><h1>${titulo}</h1><p>${subtitulo}</p></div>
+        <div class="detalhe">${corpo}</div>
+    </div>`;
+}
+
+// detalhe: na tela propria so ficam as abas de servidor (o titulo e da tela).
+function mpCartaoClaNaLiga(detalhe = false) {
     const cla = mpCla();
     if (!cla) {
         const texto = mpEstado.cla === 'erro'
@@ -353,7 +558,7 @@ function mpCartaoClaNaLiga() {
         .filter(item => item.valor > 0).sort((a, b) => b.valor - a.valor).slice(0, 4)
         .map(item => `<li><i style="background:${MP_ORIGENS[item.origem]?.cor || '#6b8193'}"></i>${MP_ORIGENS[item.origem]?.nome || escHtml(item.origem)} <b>${ganhos ? Math.round(item.valor / ganhos * 100) : 0}%</b></li>`).join('');
     return `<section class="ficha-painel inicio-cla">
-        <h3 class="ficha-titulo"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> ${escHtml(s.cla || 'Clã')} na Liga ${chips}</h3>
+        ${detalhe ? (chips ? `<h3 class="ficha-titulo ficha-titulo-solo">${chips}</h3>` : '') : `<h3 class="ficha-titulo"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> ${escHtml(s.cla || 'Clã')} na Liga ${chips}</h3>`}
         <div class="inicio-cla-topo">
             <div class="inicio-cla-pos ${s.liga?.posicao && s.liga.posicao <= 3 ? `podio-${s.liga.posicao}` : ''}">
                 <strong>${s.liga?.posicao ? `${s.liga.posicao}º` : '—'}</strong>
@@ -376,29 +581,6 @@ function mpCartaoClaNaLiga() {
             <ul class="inicio-origens">${origensHtml}</ul>
         </div>
         <button type="button" class="mp-link inicio-mais" onclick="mpEstado.aba = 'liga'; mpIr('perfil')">Ver meus pontos na Liga <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
-    </section>`;
-}
-
-function mpCartaoTopo() {
-    const cla = mpCla();
-    if (!cla) return '';
-    const eu = mpMinhaLinha();
-    const topo = cla.ranking.slice(0, 5);
-    const linhas = [...topo, ...(eu && eu.posicao > 5 ? [null, eu] : [])];
-    const emAlta = cla.ranking.filter(linha => linha.semana > 0).sort((a, b) => b.semana - a.semana).slice(0, 3);
-    const itens = linhas.map(linha => (linha === null
-        ? '<li class="inicio-ranking-pula" aria-hidden="true">⋯</li>'
-        : `<li class="${linha.nick === cla.eu ? 'eu' : ''}"><a ${mpLinkMembro(linha.nick)} title="Ver o perfil de ${escHtml(linha.nick)}">
-            <span class="niv-pos">${linha.posicao}º</span>
-            ${mpCabeca(linha.nick, 24)}
-            <span class="inicio-ranking-nick">${escHtml(linha.nick)}</span>
-            <span class="niv-nv">NV ${linha.nivel}</span>
-        </a></li>`)).join('');
-    return `<section class="ficha-painel inicio-topo">
-        <h3 class="ficha-titulo"><i class="fa-solid fa-ranking-star" aria-hidden="true"></i> Top níveis</h3>
-        <ol class="inicio-ranking">${itens}</ol>
-        ${emAlta.length ? `<div class="inicio-em-alta"><span><i class="fa-solid fa-fire" aria-hidden="true"></i> Em alta na semana</span>${emAlta.map(linha => `<a class="inicio-em-alta-item" ${mpLinkMembro(linha.nick)}>${escHtml(linha.nick)} <b>+${linha.semana.toLocaleString('pt-BR')}</b></a>`).join('')}</div>` : ''}
-        <button type="button" class="mp-link inicio-mais" onclick="mpIr('ranking')">Ver o ranking completo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
     </section>`;
 }
 
@@ -454,7 +636,7 @@ function mpAbrirJogador(nick) {
 
 function mpTelaJogador() {
     const voltar = mpEstado.voltar && mpEstado.voltar !== 'jogador' ? mpEstado.voltar : 'ranking';
-    const rotulo = { inicio: 'Início', ranking: 'Ranking', perfil: 'Meu perfil' }[voltar] || 'Ranking';
+    const rotulo = { inicio: 'Início', ranking: 'Ranking', perfil: 'Meu perfil', liga: 'Liga', torneios: 'Torneios', banco: 'Meta do banco', farms: 'Farms' }[voltar] || 'Ranking';
     const barra = `<div class="jogo-voltar-barra">
         <button type="button" class="jogo-voltar" onclick="mpIr('${voltar}')"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> ${rotulo}</button>
         <span>Perfil de membro</span>

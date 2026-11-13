@@ -134,6 +134,17 @@ function mpAtualizarAcoesNaTela() {
     if (lista) lista.outerHTML = mpCartaoPedidos();
     const farms = document.getElementById('mp-farms');
     if (farms) farms.outerHTML = mpCartaoFarms();
+    // Inicio: troca so o cartao de farms, e so se ele mudou (nao perde foco nem rolagem).
+    const tile = document.getElementById('mp-tile-farms');
+    if (tile) {
+        const novo = mpTileFarms();
+        if (novo !== mpEstado.tileFarmsHtml) {
+            mpEstado.tileFarmsHtml = novo;
+            tile.outerHTML = novo;
+        }
+    }
+    // Quem nao e da ETY nao tem a lista de farms: a tela redesenha quando os pedidos chegam.
+    if (mpEstado.tela === 'farms' && !mpPodeAgir()) mpRedesenharTela();
     if (mpEstado.tela === 'jornada') mpRedesenharTela();
     if (mpEstado.tela === 'perfil' && mpEstado.aba === 'titulos') {
         const alvo = document.getElementById('mp-aba');

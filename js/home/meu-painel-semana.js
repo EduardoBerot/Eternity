@@ -9,6 +9,12 @@
 
 const URL_TORNEIOS = `${URL_BASE}/api/torneios`;
 
+// "fecha em 2d 10h"; passada a hora, so "semana encerrada".
+function mpFechaEm(fimIso) {
+    const texto = mbFaltaTexto(fimIso);
+    return texto === 'semana encerrada' ? texto : `fecha em ${texto}`;
+}
+
 function mpNickChave(nick) {
     return String(nick || '').replace(/^\*+/, '').toLowerCase();
 }
@@ -23,7 +29,8 @@ function mpLugar(posicao) {
 
 // ---------- Meta do banco ----------
 
-function mpCartaoMeta() {
+// detalhe: na tela propria o titulo ja diz "Meta do banco"; sobra so o relogio.
+function mpCartaoMeta(detalhe = false) {
     const meta = mpEstado.meta;
     if (!meta?.degraus?.length) return '';
     const { perfil } = mpResumo(mpEu());
@@ -52,7 +59,7 @@ function mpCartaoMeta() {
     const apoiadores = (meta.apoiadores || []).slice(0, 3);
 
     return `<section class="ficha-painel semana-meta ${cheia ? 'cheia' : ''}">
-        <h3 class="ficha-titulo"><i class="fa-solid fa-gem" aria-hidden="true"></i> Meta do banco<small><i class="fa-regular fa-clock" aria-hidden="true"></i> fecha em ${escHtml(mbFaltaTexto(meta.semana.fim))}</small></h3>
+        <h3 class="ficha-titulo">${detalhe ? '' : '<i class="fa-solid fa-gem" aria-hidden="true"></i> Meta do banco'}<small><i class="fa-regular fa-clock" aria-hidden="true"></i> ${escHtml(mpFechaEm(meta.semana.fim))}</small></h3>
         <div class="semana-meta-numeros">
             <b>${escHtml(mpDinheiro(liquido))}</b>
             <span>de ${escHtml(mpDinheiro(meta.meta))}</span>
@@ -75,19 +82,28 @@ function mpCartaoMeta() {
 
 // ---------- Torneios da semana ----------
 
+// undefined/'carregando'; 'erro'; ou o corpo da API.
+let mpTorneiosPedindo = false;
 async function mpCarregarTorneios() {
+    if (mpTorneiosPedindo) return;
+    mpTorneiosPedindo = true;
+    if (!mpTorneios()) mpEstado.torneios = 'carregando';
     try {
         const resposta = await fetch(URL_TORNEIOS);
-        mpEstado.torneios = resposta.ok ? await resposta.json() : null;
+        mpEstado.torneios = resposta.ok ? await resposta.json() : (mpTorneios() || 'erro');
     } catch {
-        mpEstado.torneios = null;
+        mpEstado.torneios = mpTorneios() || 'erro';
     }
-    if (mpEstado.torneios && location.hash.startsWith('#meu-painel') && mpEstado.tela === 'inicio') mpRedesenharTela();
+    mpTorneiosPedindo = false;
+    if (location.hash.startsWith('#meu-painel') && mpEstado.dados && ['inicio', 'torneios'].includes(mpEstado.tela)) mpRedesenharTela();
 }
 
-function mpCartaoTorneios() {
-    const t = mpEstado.torneios;
-    if (!t?.torneios?.length) return '';
+function mpTorneios() {
+    return mpEstado.torneios && typeof mpEstado.torneios === 'object' ? mpEstado.torneios : null;
+}
+
+// Os podios do nick logado (e dos alts) e o adicional que eles rendem.
+function mpMeusPodios(t) {
     const { perfil } = mpResumo(mpEu());
     const chaves = mpChavesNick(perfil);
     const meus = t.torneios.flatMap(torneio => torneio.top
@@ -96,6 +112,14 @@ function mpCartaoTorneios() {
         .sort((a, b) => a.posicao - b.posicao);
     const taxa = Number(mpEstado.meta?.taxaAtual ?? t.taxaBase) || 0;
     const premio = lugar => (Number(t.premios?.[lugar]) || 0) * taxa;
+    const ganho = meus.reduce((soma, item) => soma + premio(item.posicao), 0);
+    return { chaves, meus, taxa, premio, ganho };
+}
+
+function mpCartaoTorneios(detalhe = false) {
+    const t = mpTorneios();
+    if (!t?.torneios?.length) return '';
+    const { chaves, meus, taxa, premio, ganho } = mpMeusPodios(t);
     const nosso = t.projecao.find(clan => clan.nosso);
     const pctPodio = Math.round(t.comCla / t.torneios.length * 100);
 
@@ -108,7 +132,6 @@ function mpCartaoTorneios() {
             <b>${clan.pontos.toLocaleString('pt-BR')}</b>
         </li>`).join('');
 
-    const ganho = meus.reduce((soma, item) => soma + premio(item.posicao), 0);
     const MOSTRAR = 4;
     const seus = meus.length
         ? `<ul class="semana-meus">${meus.slice(0, MOSTRAR).map(item => `<li>${mpLugar(item.posicao)}<span>${escHtml(item.nome)}</span>${premio(item.posicao) ? `<b>+${mbCompacto(premio(item.posicao))}</b>` : ''}</li>`).join('')}</ul>${meus.length > MOSTRAR ? `<p class="semana-mais">e mais ${meus.length - MOSTRAR} ${meus.length - MOSTRAR === 1 ? 'pódio' : 'pódios'} na lista de todos os torneios</p>` : ''}`
@@ -130,7 +153,7 @@ function mpCartaoTorneios() {
         </li>`).join('');
 
     return `<section class="ficha-painel semana-torneios">
-        <h3 class="ficha-titulo"><i class="fa-solid fa-trophy" aria-hidden="true"></i> Torneios da semana${t.tempoRestante ? `<small><i class="fa-regular fa-clock" aria-hidden="true"></i> fecha em ${escHtml(t.tempoRestante.replace(/\s*\(.*\)\s*$/, ''))}</small>` : ''}</h3>
+        <h3 class="ficha-titulo">${detalhe ? '' : '<i class="fa-solid fa-trophy" aria-hidden="true"></i> Torneios da semana'}${t.tempoRestante ? `<small><i class="fa-regular fa-clock" aria-hidden="true"></i> fecha em ${escHtml(t.tempoRestante.replace(/\s*\(.*\)\s*$/, ''))}</small>` : ''}</h3>
         <div class="inicio-cla-numeros">
             <div><span>Clã no pódio</span><b>${t.comCla} <small>de ${t.torneios.length}</small></b><div class="ficha-barra"><span style="width:${pctPodio}%"></span></div></div>
             <div><span>Pódios do clã</span><b>${t.presenca.posicoes}</b><small>${t.participacao.membros} ${t.participacao.membros === 1 ? 'membro' : 'membros'} no pódio</small></div>

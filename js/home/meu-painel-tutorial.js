@@ -26,10 +26,10 @@ const MP_TUTORIAL_PASSOS = [
         texto: 'Uma missão nova por dia para você se firmar no clã. Complete as 7 e ganhe <b>100k de ajuda inicial</b>, com a subida para a ETY aos <b>15 dias</b> em vez de 30.',
     },
     {
-        alvos: ['.inicio-cla'],
+        alvos: ['.inicio-tiles'],
         icone: 'fa-shield-halved',
         titulo: 'O clã em tempo real',
-        texto: 'A posição da Eternity na Liga do mês e quanto cada semana rendeu. Logo abaixo ficam os torneios da semana, a meta do banco e o ranking de níveis.',
+        texto: 'Estes cartões mostram a posição da Eternity na Liga, os torneios da semana e a meta do banco. Clique em um deles para ver tudo em detalhe.',
     },
     {
         alvos: ['.lateral-item[onclick="mpIr(\'cidade\')"]', '.jogo-aba[onclick="mpIr(\'cidade\')"]'],
@@ -112,7 +112,10 @@ function mpTutorialMostrar() {
 
 function mpTutorialPosicionar() {
     if (!mpTutorial) return;
-    const { camada, alvo } = mpTutorial;
+    const { camada } = mpTutorial;
+    // O alvo pode ter sido trocado por um redesenho da tela: procura de novo.
+    if (mpTutorial.alvo && !mpTutorial.alvo.isConnected) mpTutorial.alvo = mpTutorialAlvo(MP_TUTORIAL_PASSOS[mpTutorial.passo]);
+    const alvo = mpTutorial.alvo;
     const foco = camada.querySelector('.tutorial-foco');
     const balao = camada.querySelector('.tutorial-balao');
     camada.classList.toggle('sem-alvo', !alvo);
