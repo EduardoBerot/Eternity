@@ -4,13 +4,14 @@
 // analises.js) e so ganham este cabecalho. A ultima escolha fica no navegador.
 // So lideres (auth.js mostra o item do menu). O Site (uso do site, 20/10/2026)
 // e de todo lider, Coordenador para cima; Recrutamento e Liga seguem so da
-// allowlist (`lider`). O backend confere cada um.
+// allowlist (`lider`). O backend confere cada um. Controles (12/11/2026, liga e
+// desliga funcoes dos bots) segue a regra do Site; so o Fundador muda.
 
-const INDICADORES = { recrutamento: 'Recrutamento', liga: 'Liga', site: 'Site' };
+const INDICADORES = { recrutamento: 'Recrutamento', liga: 'Liga', site: 'Site', controles: 'Controles' };
 
 function indicadoresPermitidos() {
     const permissoes = window.painelPermissoes || {};
-    return Object.keys(INDICADORES).filter(chave => chave === 'site' ? permissoes.usoSite || permissoes.lider : permissoes.lider);
+    return Object.keys(INDICADORES).filter(chave => chave === 'site' || chave === 'controles' ? permissoes.usoSite || permissoes.lider : permissoes.lider);
 }
 const INDICADORES_CHAVE = 'ety-indicadores';
 
@@ -30,10 +31,11 @@ function renderIndicadores(qual) {
     anSairDaAba();
     rcSairDaAba();
     usSairDaAba();
+    ctSairDaAba();
     const aba = document.getElementById('indicadores');
     if (aba) selectItem(aba);
     window.etyTelemetria?.pagina(`painel/indicadores/${qual}`);
-    ({ liga: renderAnalises, site: renderUsoSite }[qual] || renderRecrutamento)();
+    ({ liga: renderAnalises, site: renderUsoSite, controles: renderControles }[qual] || renderRecrutamento)();
 }
 
 function indicadoresCabecalho(ativo) {

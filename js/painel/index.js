@@ -15,6 +15,7 @@ function render(event) {
     anSairDaAba();
     rcSairDaAba();
     usSairDaAba();
+    ctSairDaAba();
     cidadeSairDaAba();
     APP.innerHTML = '';
     const id = event.target.id;

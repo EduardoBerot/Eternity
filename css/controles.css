@@ -1,0 +1,140 @@
+/* Indicadores > Controles (12/11/2026, js/painel/controles.js). Reaproveita os
+   tokens do .an-root (analises.css); tudo escopado em .ct-root. Esta tela rola
+   com a pagina, entao desfaz a grade de altura fixa do .an-root. */
+
+.ct-root {
+    display: block;
+    height: auto;
+    max-width: 880px;
+    margin: 0 auto;
+}
+
+.ct-root .an-topo { margin-bottom: 12px; }
+.ct-root .an-titulo small { display: block; }
+
+.ct-root .ct-corpo,
+.ct-root .ct-grupos { display: grid; gap: 12px; min-width: 0; }
+.ct-root .ct-corpo[hidden] { display: none; }
+.ct-root .ct-grupo,
+.ct-root .ct-historico { overflow: visible; }
+.ct-root ul { list-style: none; margin: 0; padding: 0; }
+
+.ct-root .ct-aviso {
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    border: 1px dashed var(--an-borda);
+    border-radius: 8px;
+    color: var(--an-ink-2);
+    font-size: 0.76rem;
+}
+.ct-root .ct-aviso[hidden] { display: none; }
+
+/* ---------- Itens ---------- */
+
+.ct-root .ct-item { padding: 10px 0; border-top: 1px solid var(--an-grid); }
+.ct-root .ct-item:first-child { border-top: 0; }
+.ct-root .ct-item__linha { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.ct-root .ct-item__texto { min-width: 0; }
+.ct-root .ct-item__nome { display: block; font-size: 0.86rem; font-weight: 600; color: var(--an-ink); }
+.ct-root .ct-item__desc,
+.ct-root .ct-item__meta { margin: 2px 0 0; overflow-wrap: anywhere; }
+.ct-root .ct-item__desc { font-size: 0.76rem; color: var(--an-ink-2); }
+.ct-root .ct-item__meta { font-size: 0.7rem; color: var(--an-ink-3); }
+.ct-root .ct-item__estado { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.ct-root .ct-item__rotulo { min-width: 4.2em; text-align: right; font-size: 0.72rem; color: var(--an-ink-2); }
+.ct-root .ct-item.is-on .ct-item__rotulo { color: var(--an-desafios); }
+
+/* ---------- Interruptor ---------- */
+
+.ct-root .ct-switch {
+    position: relative;
+    flex-shrink: 0;
+    width: 48px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--an-borda);
+    border-radius: 999px;
+    background: var(--an-surface);
+    cursor: pointer;
+}
+/* Area de toque de pelo menos 44px sem mudar o desenho. */
+.ct-root .ct-switch::after { content: ''; position: absolute; inset: -8px -4px; }
+.ct-root .ct-switch__bola {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--an-ink-2);
+}
+.ct-root .ct-switch[aria-checked="true"] { background: var(--an-desafios); border-color: var(--an-desafios); }
+.ct-root .ct-switch[aria-checked="true"] .ct-switch__bola { transform: translateX(20px); background: #fff; }
+.ct-root .ct-switch:focus-visible { outline: 2px solid var(--an-acento); outline-offset: 2px; }
+.ct-root .ct-switch[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; }
+.ct-root .ct-item.is-pendente .ct-switch { opacity: 0.6; cursor: progress; }
+
+@media (prefers-reduced-motion: no-preference) {
+    .ct-root .ct-switch { transition: background-color 0.18s, border-color 0.18s; }
+    .ct-root .ct-switch__bola { transition: transform 0.18s, background-color 0.18s; }
+    .ct-root .ct-item.is-pendente .ct-switch { animation: ct-pulso 1s ease-in-out infinite; }
+    @keyframes ct-pulso { 50% { opacity: 0.35; } }
+}
+
+/* ---------- Confirmacao na propria linha ---------- */
+
+.ct-root .ct-confirma {
+    display: grid;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid var(--an-borda);
+    border-radius: 8px;
+    background: var(--an-surface);
+}
+.ct-root .ct-confirma label { font-size: 0.74rem; color: var(--an-ink-2); }
+.ct-root .ct-confirma input { width: 100%; box-sizing: border-box; font-size: 16px; }
+.ct-root .ct-confirma__aviso { margin: 0; color: var(--c-fundador); font-size: 0.74rem; }
+.ct-root .ct-confirma__conta { justify-self: end; color: var(--an-ink-3); font-size: 0.7rem; }
+.ct-root .ct-confirma__acoes { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+
+/* ---------- Historico ---------- */
+
+.ct-root .ct-hist__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 8px;
+    padding: 8px 0;
+    border-top: 1px solid var(--an-grid);
+    font-size: 0.76rem;
+    color: var(--an-ink);
+}
+.ct-root .ct-hist__item:first-child { border-top: 0; }
+.ct-root .ct-hist__quando { font-variant-numeric: tabular-nums; color: var(--an-ink-3); }
+.ct-root .ct-hist__motivo { flex-basis: 100%; color: var(--an-ink-2); overflow-wrap: anywhere; }
+.ct-root .ct-tag { padding: 1px 8px; border: 1px solid; border-radius: 999px; font-size: 0.68rem; }
+.ct-root .ct-tag.is-on { color: var(--an-desafios); border-color: var(--an-desafios); }
+.ct-root .ct-tag.is-off { color: var(--c-fundador); border-color: var(--c-fundador); }
+.ct-root .ct-vazio { padding: 8px 0; color: var(--an-ink-3); font-size: 0.76rem; }
+
+.ct-root .ct-status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+/* Os .btn globais (painel.css) tem 34px e tiram o outline no foco. */
+.ct-root .btn { min-height: 44px; }
+.ct-root .btn:focus-visible { outline: 2px solid var(--an-acento); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+    .ct-root .btn, .ct-root .btn:hover, .ct-root .btn:focus { transform: none; transition: none; }
+}
+.ct-root .ct-erro { height: auto; gap: 10px; padding: 24px 0; }
+
+@media (max-width: 900px) {
+    .ct-root .an-topo { flex-direction: column; align-items: stretch; }
+    .ct-root .ct-item__linha { align-items: flex-start; }
+}

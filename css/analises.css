@@ -466,3 +466,10 @@ body.painel--analises main { margin: 0; }
 }
 
 .an-root .ind-troca button { padding: 4px 12px; font-size: 0.74rem; }
+
+/* Com quatro opcoes (Controles, 12/11/2026) a troca nao cabe ao lado do titulo no celular. */
+@media (max-width: 900px) {
+    .an-root .ind-cab { flex-wrap: wrap; row-gap: 6px; }
+    .an-root .ind-troca { display: flex; width: 100%; }
+    .an-root .ind-troca button { flex: 1 1 auto; min-width: 0; padding: 6px 8px; }
+}
