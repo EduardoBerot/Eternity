@@ -866,6 +866,14 @@ body.modo-jogo .page-meu-painel { padding: 0; }
 
 .farms-lista, .pedidos-lista { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
 
+/* Farm ja liberada (13/11/2026): selo no lugar do botao, pedido de novo discreto. */
+.farms-lista li > .farm-acoes { flex-direction: row; align-items: center; gap: 10px; }
+.farm-liberada { display: inline-flex; align-items: center; gap: 6px; font-family: var(--sans); font-size: 0.8rem; font-weight: 700; color: var(--ficha-xp); white-space: nowrap; }
+.farms-lista li.liberada { box-shadow: inset 3px 0 0 var(--ficha-xp); }
+@media (max-width: 760px) {
+    .farms-lista li > .farm-acoes { flex-direction: column; align-items: flex-end; gap: 4px; }
+}
+
 .farms-lista li, .pedidos-lista li {
     display: grid;
     grid-template-columns: 22px minmax(0, 1fr) auto;

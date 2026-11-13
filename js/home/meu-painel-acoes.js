@@ -160,10 +160,18 @@ function mpCartaoFarms() {
         <ul class="farms-lista">
             ${MP_FARMS.map(item => {
                 const esta = aberta?.tipo === 'trust' && aberta.dados?.farm === item.farm;
-                return `<li>
+                // Mesmo estado do cartao do Inicio (mpEstadoFarm, 13/11/2026):
+                // farm ja liberada mostra o selo, e o pedido de novo fica discreto
+                // para o caso de o trust ter sido perdido.
+                const liberada = !esta && mpEstadoFarm(item.farm) === 'liberada';
+                const acao = liberada
+                    ? `<span class="farm-liberada"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Liberada</span>
+                       <button type="button" class="mp-acao mp-acao-fraca" ${aberta ? 'disabled' : ''} onclick="mpPedirTrust('${item.farm}', this)" aria-label="Pedir trust de novo na ${item.nome}">Pedir de novo</button>`
+                    : `<button type="button" class="mp-acao" ${aberta ? 'disabled' : ''} onclick="mpPedirTrust('${item.farm}', this)">${esta ? '<i class="fa-solid fa-gear fa-spin" aria-hidden="true"></i> Liberando' : 'Pedir trust'}</button>`;
+                return `<li class="${liberada ? 'liberada' : ''}">
                     <i class="fa-solid ${item.icone}" aria-hidden="true"></i>
                     <span><b>${item.nome}</b><small>${item.acesso} · ${item.requisito}</small></span>
-                    <button type="button" class="mp-acao" ${aberta ? 'disabled' : ''} onclick="mpPedirTrust('${item.farm}', this)">${esta ? '<i class="fa-solid fa-gear fa-spin" aria-hidden="true"></i> Liberando' : 'Pedir trust'}</button>
+                    <span class="farm-acoes">${acao}</span>
                 </li>`;
             }).join('')}
         </ul>
