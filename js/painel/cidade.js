@@ -735,7 +735,7 @@ function linhaPedido(p, lider) {
             <button class="botao" type="button" onclick="mostrarRecusa(${p.id})">Recusar</button>
         </div>
         <form class="cidade-recusa" id="recusa_${p.id}" hidden onsubmit="decidirPedidoCidade(${p.id}, false, event)">
-            <input name="motivo" maxlength="500" placeholder="Motivo da recusa (o membro vê no site)">
+            <input name="motivo" maxlength="500" required placeholder="Motivo da recusa (o membro recebe por DM)">
             <button class="botao" type="submit">Confirmar recusa</button>
         </form>` : '';
     return `
