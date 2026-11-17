@@ -6,11 +6,12 @@
 .us-grade {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.9fr);
-    grid-template-rows: auto minmax(0, 1fr) minmax(0, 1.25fr);
+    grid-template-rows: auto minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 0.9fr);
     grid-template-areas:
         "tiles tiles tiles tiles"
         "diario diario paginas lado"
-        "pessoas pessoas staff nunca";
+        "pessoas pessoas staff nunca"
+        "mod mod mod mod";
     gap: 10px;
     min-height: 0;
 }
@@ -22,6 +23,8 @@
 .us-c-pessoas { grid-area: pessoas; }
 .us-c-staff { grid-area: staff; }
 .us-c-nunca { grid-area: nunca; }
+.us-c-mod { grid-area: mod; }
+.us-mod-velho { color: #e8a33d; }
 
 .us-root .an-plot { flex: 1; min-height: 0; margin-top: 6px; overflow: hidden; }
 .us-c-paginas .an-plot { overflow-y: auto; }
@@ -93,7 +96,7 @@
     .us-grade {
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: none;
-        grid-template-areas: "tiles" "diario" "paginas" "lado" "pessoas" "staff" "nunca";
+        grid-template-areas: "tiles" "diario" "paginas" "lado" "pessoas" "staff" "nunca" "mod";
     }
     .us-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .us-c-diario .an-plot { height: 200px; flex: none; }
