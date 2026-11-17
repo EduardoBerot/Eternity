@@ -135,6 +135,9 @@
 .ct-root .ct-erro { height: auto; gap: 10px; padding: 24px 0; }
 
 @media (max-width: 900px) {
+    /* A aba Liga esconde no celular todo .an-card fora da aba ativa
+       (analises.css); aqui todos os cartoes aparecem. */
+    .ct-root .an-card { display: flex; }
     .ct-root .an-topo { flex-direction: column; align-items: stretch; }
     .ct-root .ct-item__linha { align-items: flex-start; }
 }
