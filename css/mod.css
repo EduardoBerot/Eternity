@@ -241,3 +241,6 @@
 .mod-tela .mod-opcao-link.secundario:hover { background: var(--aqua-suave); }
 .mod-requisitos { margin: 4px 0 0; padding-left: 1.2em; display: grid; gap: 5px; color: var(--nevoa); font-size: 0.82rem; line-height: 1.45; }
 .mod-requisitos b { color: var(--gelo); }
+/* o texto do botao do instalador fica escuro sobre o ciano: estilos de link do painel nao sobrescrevem */
+.mod-tela .mod-opcao-link:not(.secundario), .mod-tela .mod-opcao-link:not(.secundario) i { color: #03141c !important; }
+.mod-tela .mod-opcao-link.secundario, .mod-tela .mod-opcao-link.secundario i, .mod-tela .mod-opcao-link.secundario span { color: var(--aqua) !important; }
