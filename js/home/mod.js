@@ -44,8 +44,8 @@ function mpTelaMod() {
                 <p>O clã dentro do Minecraft: painel, textura, ajudas de PvP e mais FPS, num instalador só.</p>
                 <div class="mod-heroi-acoes">
                     <a class="mod-baixar" href="${MOD_LATEST}Eternity-Instalador.exe" onclick="window.etyTelemetria?.acao('baixar_mod')">
-                        <i class="fa-solid fa-download" aria-hidden="true"></i>
-                        <span><b>Baixar o instalador</b><small>Windows · 40 KB</small></span>
+                        <span class="mod-baixar-icone"><i class="fa-solid fa-download" aria-hidden="true"></i></span>
+                        <span class="mod-baixar-texto"><b>Baixar o instalador</b><small>Windows · grátis · 40 KB</small></span>
                     </a>
                     <span class="mod-chip" id="mod-versao"><i class="fa-solid fa-code-branch" aria-hidden="true"></i> Minecraft 26.3 · Fabric</span>
                 </div>

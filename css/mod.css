@@ -46,20 +46,34 @@
 .mod-baixar {
     display: inline-flex;
     align-items: center;
-    gap: 14px;
-    padding: 12px 22px 12px 18px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #2ee6f0, #21a9d6);
-    color: #04121a;
-    text-decoration: none;
-    box-shadow: 0 8px 28px rgba(46, 230, 240, 0.35);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    gap: 16px;
+    padding: 16px 30px 16px 16px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #5ff3ff 0%, #2ee6f0 45%, #1fb6e0 100%);
+    border: 2px solid rgba(255, 255, 255, 0.55);
+    text-decoration: none !important;
+    box-shadow: 0 0 0 4px rgba(46, 230, 240, 0.18), 0 10px 36px rgba(46, 230, 240, 0.55);
+    animation: mod-chamar 2.4s ease-in-out infinite;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
-.mod-baixar:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(46, 230, 240, 0.5); }
-.mod-baixar > i { font-size: 1.4rem; }
-.mod-baixar span { display: grid; line-height: 1.2; }
-.mod-baixar b { font-size: 1.05rem; }
-.mod-baixar small { font-size: 0.78rem; opacity: 0.75; letter-spacing: 0; text-transform: none; color: inherit; }
+@keyframes mod-chamar { 50% { box-shadow: 0 0 0 8px rgba(46, 230, 240, 0.10), 0 14px 46px rgba(46, 230, 240, 0.8); } }
+.mod-baixar:hover { transform: translateY(-3px) scale(1.02); filter: brightness(1.08); }
+.mod-baixar:focus-visible { outline: 3px solid var(--ficha-ouro, #f5c542); outline-offset: 4px; }
+/* o texto do botao fica sempre escuro: nada do painel sobrescreve */
+.mod-tela .mod-baixar, .mod-tela .mod-baixar :is(span, b, small) { color: #03141c !important; font-family: var(--sans) !important; letter-spacing: 0 !important; text-transform: none !important; }
+.mod-baixar-icone {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #03141c;
+    flex-shrink: 0;
+}
+.mod-tela .mod-baixar .mod-baixar-icone i { color: #5ff3ff !important; font-size: 1.25rem; }
+.mod-baixar span.mod-baixar-texto { display: grid; line-height: 1.15; text-align: left; }
+.mod-baixar b { font-size: 1.3rem; font-weight: 800; }
+.mod-baixar small { font-size: 0.82rem; font-weight: 600; opacity: 0.8; }
 .mod-chip {
     display: inline-flex;
     align-items: center;
@@ -84,7 +98,6 @@
 .mod-bloco h2 i { color: var(--aqua); font-size: 1rem; }
 .mod-dica { display: block; margin-top: 10px; color: var(--nevoa); font-size: 0.85rem; }
 .mod-tela a { color: var(--aqua); }
-.mod-tela .mod-baixar { color: #04121a; }
 
 /* passos */
 .mod-passos { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
@@ -171,9 +184,9 @@
 @media (max-width: 620px) {
     .mod-heroi { flex-direction: column; text-align: center; }
     .mod-heroi-acoes { justify-content: center; }
-    .mod-baixar { width: 100%; justify-content: center; }
+    .mod-baixar { width: 100%; justify-content: center; box-sizing: border-box; }
 }
 @media (prefers-reduced-motion: reduce) {
-    .mod-heroi-brilho, .mod-heroi-icone, .mod-ss-alvo { animation: none; }
+    .mod-heroi-brilho, .mod-heroi-icone, .mod-ss-alvo, .mod-baixar { animation: none; }
 }
 .mod-smartscreen, .mod-smartscreen * { font-family: "Segoe UI", system-ui, sans-serif !important; letter-spacing: 0 !important; }
