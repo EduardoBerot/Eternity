@@ -52,6 +52,26 @@ function mpTelaMod() {
             </div>
         </section>
 
+        <section class="mod-opcoes" aria-label="Formas de baixar">
+            <article class="mod-opcao recomendada">
+                <span class="mod-opcao-selo">Recomendado</span>
+                <h3><i class="fa-solid fa-box-open" aria-hidden="true"></i> Instalador completo</h3>
+                <p>Para quem está começando: instala o Fabric, o mod Eternity com a textura e os mods de desempenho no seu launcher.</p>
+                <a class="mod-opcao-link" href="${MOD_LATEST}Eternity-Instalador.exe" onclick="window.etyTelemetria?.acao('baixar_mod')"><i class="fa-solid fa-download" aria-hidden="true"></i> Eternity-Instalador.exe</a>
+            </article>
+            <article class="mod-opcao">
+                <h3><i class="fa-solid fa-puzzle-piece" aria-hidden="true"></i> Só o mod Eternity</h3>
+                <p>Já tem o seu Fabric com mods? Baixe só o <b>.jar</b> do clã e coloque na pasta <code>mods</code>, junto com os seus.</p>
+                <a class="mod-opcao-link secundario" id="mod-jar" href="https://github.com/${MOD_REPO}/releases/latest" target="_blank" rel="noopener" onclick="window.etyTelemetria?.acao('baixar_mod_jar')"><i class="fa-solid fa-download" aria-hidden="true"></i> <span id="mod-jar-nome">eternity-mod.jar</span></a>
+                <ul class="mod-requisitos">
+                    <li>Minecraft <b>26.3</b> com <b>Fabric Loader 0.19.5</b> ou mais novo</li>
+                    <li><a href="https://modrinth.com/mod/fabric-api/versions?g=26.3" target="_blank" rel="noopener">Fabric API</a> para 26.3 na mesma pasta</li>
+                    <li>Apague o jar antigo do Eternity ao atualizar (só pode ter um)</li>
+                    <li>A textura já vem dentro do mod: tire os packs Eternity antigos da lista</li>
+                </ul>
+            </article>
+        </section>
+
         <section class="mod-bloco">
             <h2><i class="fa-solid fa-list-check" aria-hidden="true"></i> Como instalar</h2>
             <ol class="mod-passos">
@@ -129,6 +149,14 @@ function mpModDepois() {
             if (!rel || !el) return;
             const data = new Date(rel.published_at).toLocaleDateString('pt-BR');
             el.innerHTML = `<i class="fa-solid fa-code-branch" aria-hidden="true"></i> Versão ${escHtml(String(rel.tag_name).replace(/^v/, ''))} · ${data} · Minecraft 26.3`;
+            // o jar tem a versao no nome: o link "so o mod" aponta direto para o da release nova
+            const jar = (rel.assets || []).find(a => /^eternity-mod-.+\.jar$/.test(a.name));
+            const link = document.getElementById('mod-jar');
+            if (jar && link) {
+                link.href = jar.browser_download_url;
+                link.removeAttribute('target');
+                document.getElementById('mod-jar-nome').textContent = `${jar.name} · ${(jar.size / 1048576).toFixed(1)} MB`;
+            }
         })
         .catch(() => {});
 }

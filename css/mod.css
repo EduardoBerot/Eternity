@@ -190,3 +190,54 @@
     .mod-heroi-brilho, .mod-heroi-icone, .mod-ss-alvo, .mod-baixar { animation: none; }
 }
 .mod-smartscreen, .mod-smartscreen * { font-family: "Segoe UI", system-ui, sans-serif !important; letter-spacing: 0 !important; }
+
+/* ---------- Duas formas de baixar (17/11/2026) ---------- */
+.mod-opcoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.mod-opcao {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid var(--linha);
+    background: linear-gradient(180deg, rgba(22, 40, 59, 0.55), rgba(15, 28, 43, 0.55));
+}
+.mod-opcao.recomendada { border-color: rgba(46, 230, 240, 0.45); box-shadow: inset 0 0 0 1px rgba(46, 230, 240, 0.12); }
+.mod-opcao-selo {
+    position: absolute;
+    top: -10px;
+    right: 16px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--aqua);
+    color: #03141c;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.mod-opcao h3 { margin: 0; font-size: 1.05rem; color: var(--gelo); display: flex; align-items: center; gap: 9px; }
+.mod-opcao h3 i { color: var(--aqua); }
+.mod-opcao p { margin: 0; color: var(--nevoa); line-height: 1.55; font-size: 0.9rem; }
+.mod-opcao p b { color: var(--gelo); }
+.mod-opcao code { background: var(--noite); padding: 1px 6px; border-radius: 5px; color: var(--aqua); }
+.mod-tela .mod-opcao-link {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    background: var(--aqua);
+    color: #03141c;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+.mod-tela .mod-opcao-link:hover { transform: translateY(-2px); filter: brightness(1.08); }
+.mod-tela .mod-opcao-link.secundario { background: transparent; color: var(--aqua); border: 2px solid var(--aqua); }
+.mod-tela .mod-opcao-link.secundario:hover { background: var(--aqua-suave); }
+.mod-requisitos { margin: 4px 0 0; padding-left: 1.2em; display: grid; gap: 5px; color: var(--nevoa); font-size: 0.82rem; line-height: 1.45; }
+.mod-requisitos b { color: var(--gelo); }
