@@ -137,7 +137,8 @@
 @media (max-width: 900px) {
     /* A aba Liga esconde no celular todo .an-card fora da aba ativa
        (analises.css); aqui todos os cartoes aparecem. */
-    .ct-root .an-card { display: flex; }
+    .ct-root .an-card { display: flex; grid-area: auto; }
+    .ct-root, .ct-root .an-topo, .ct-root .an-titulo, .ct-root .ct-corpo { min-width: 0; max-width: 100%; }
     .ct-root .an-topo { flex-direction: column; align-items: stretch; }
     .ct-root .ct-item__linha { align-items: flex-start; }
 }
