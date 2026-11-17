@@ -71,6 +71,8 @@ const ROTAS = {
     // Link direto da Historia (19/10/2026): a Wiki aberta na secao.
     historia: { menu: 'wiki', render: () => renderWiki('historia') },
     cidade: { menu: 'city', render: () => renderCidadePublica() },
+    // Mod do cla: instalador e passo a passo (16/11/2026).
+    mod: { menu: 'mod-link', render: () => renderMod() },
     atualizar: { menu: null, render: () => openAtualizar() },
     // Painel do membro, com login do Discord (meu-painel.js). E o unico login do
     // site: a administracao e uma aba dele para quem tem cargo (16/10/2026).

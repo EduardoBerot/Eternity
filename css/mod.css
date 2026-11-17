@@ -1,0 +1,28 @@
+/* Pagina do mod (#mod, 16/11/2026) */
+.mod-pagina { padding: clamp(32px, 6vw, 64px) var(--lado) clamp(56px, 8vw, 96px); display: grid; gap: clamp(40px, 6vw, 64px); }
+.mod-pagina h2 { margin: 0 0 18px; }
+.mod-baixar { text-align: center; display: grid; justify-items: center; gap: 12px; }
+.mod-botao { font-size: 1.15rem; padding: 16px 32px; }
+.mod-versao { color: var(--nevoa); margin: 0; font-size: 0.95rem; }
+.mod-inclui { max-width: 620px; margin: 0; }
+
+.mod-passos { margin: 0; padding-left: 1.4em; display: grid; gap: 14px; color: var(--gelo); line-height: 1.6; }
+.mod-passos code { background: var(--aco-claro); padding: 1px 6px; border-radius: 4px; }
+
+.mod-launchers { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.mod-launchers span { border: 1px solid var(--linha); background: var(--aco); border-radius: 999px; padding: 6px 14px; font-size: 0.9rem; color: var(--gelo); }
+.mod-launchers span i { color: var(--aqua); margin-right: 6px; }
+.mod-launchers span.nao { color: var(--nevoa); }
+.mod-launchers span.nao i { color: var(--c-fundador); }
+
+.mod-recursos { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.mod-recurso { background: var(--aco); border: 1px solid var(--linha); border-radius: 12px; padding: 20px; }
+.mod-recurso i { color: var(--aqua); font-size: 1.4rem; }
+.mod-recurso h3 { margin: 12px 0 6px; font-size: 1.05rem; color: var(--gelo); }
+.mod-recurso p { margin: 0; color: var(--nevoa); line-height: 1.55; }
+
+.mod-manual a, .mod-passos a { color: var(--aqua); }
+
+@media (max-width: 560px) {
+    .mod-botao { width: 100%; justify-content: center; }
+}
