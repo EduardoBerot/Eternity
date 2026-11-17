@@ -6,6 +6,60 @@
 const MOD_REPO = 'EduardoBerot/eternity-instalador';
 const MOD_LATEST = `https://github.com/${MOD_REPO}/releases/latest/download/`;
 
+// ---------- Convite aos novatos (17/11/2026, Fundador) ----------
+// O mod e opcional, mas todo membro precisa saber que ele existe. Quem ainda nao
+// abriu o jogo com ele ve um cartao no Inicio (com "Agora nao", que some de vez
+// neste navegador) e uma etapa bonus no dia 1 da Jornada, que nao conta para
+// completar. "Ja usa" vem da API: login no painel do J ou o nick que o mod
+// 0.16.1+ manda ao abrir o jogo.
+const MOD_CHAVE_DISPENSA = 'ety-mod-convite-dispensado';
+
+async function mpCarregarMod() {
+    try {
+        const resposta = await fetch(`${URL_PAINEL_MEMBRO}/mod`, { headers: { Authorization: `Bearer ${mpLerSessao()}` } });
+        if (!resposta.ok) return;
+        mpEstado.mod = await resposta.json();
+    } catch { return; }
+    if (location.hash.startsWith('#meu-painel') && mpEstado.dados && ['inicio', 'jornada'].includes(mpEstado.tela)) mpRedesenharTela();
+}
+
+function mpModDispensado() {
+    try { return localStorage.getItem(MOD_CHAVE_DISPENSA) === '1'; } catch { return false; }
+}
+
+function mpDispensarMod() {
+    try { localStorage.setItem(MOD_CHAVE_DISPENSA, '1'); } catch { /* some so nesta visita */ }
+    mpEstado.modDispensado = true;
+    window.etyTelemetria?.acao('mod_agora_nao');
+    mpRedesenharTela();
+}
+
+function mpCartaoModInicio() {
+    if (!mpEstado.mod || mpEstado.mod.usa || mpEstado.modDispensado || mpModDispensado()) return '';
+    return `<section class="ficha-painel jornada-chamada mod-convite" onclick="window.etyTelemetria?.acao('mod_convite'); mpIr('mod')">
+        <div class="jornada-chamada-selo"><img src="imgs/mod-icone.png" alt="" width="40" height="40"></div>
+        <div class="jornada-chamada-texto">
+            <h3>Mod Eternity <small>opcional</small></h3>
+            <p>O clã dentro do Minecraft: aperte <b>J</b> e veja a Liga, o banco, a Jornada e o seu perfil sem sair do jogo. Vem com a textura do clã e mais FPS.</p>
+        </div>
+        <div class="mod-convite-acoes">
+            <button type="button" class="mp-acao" onclick="event.stopPropagation(); window.etyTelemetria?.acao('mod_convite'); mpIr('mod')"><i class="fa-solid fa-download" aria-hidden="true"></i> Conhecer o mod</button>
+            <button type="button" class="mp-link" onclick="event.stopPropagation(); mpDispensarMod()">Agora não</button>
+        </div>
+    </section>`;
+}
+
+/** Etapa bonus do dia 1: opcional, fica de fora da contagem da missao. */
+function mpBonusMod() {
+    const usa = Boolean(mpEstado.mod?.usa);
+    return `<ul class="jornada-etapas jornada-bonus">
+        <li class="${usa ? 'feita' : ''}">
+            <i class="fa-solid ${usa ? 'fa-circle-check' : 'fa-download'}" aria-hidden="true"></i>
+            <span><em class="jornada-bonus-selo">Bônus</em> Instale o mod do clã${usa ? '' : `<small>Opcional, não conta para a missão. <a href="#meu-painel&tela=mod" onclick="event.preventDefault(); window.etyTelemetria?.acao('mod_convite'); mpIr('mod')">Ver o mod</a></small>`}</span>
+        </li>
+    </ul>`;
+}
+
 const MOD_RECURSOS = [
     ['fa-table-columns', 'Painel do clã', 'Aperte J no jogo: Liga, torneios, banco, ranking, agenda, anúncios e o seu perfil com os títulos.'],
     ['fa-shield-halved', 'Armadura por cor', 'Verde, amarelo e vermelho pela durabilidade, na sua e na dos outros. Bigorna quando ficar vermelha.'],

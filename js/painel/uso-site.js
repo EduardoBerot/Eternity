@@ -31,6 +31,7 @@ const US_ACOES = {
     guia_discord: 'Entrou com Discord no Guia', staff_entrar: 'Abriu a Administração', acao_titulo: 'Pediu um título',
     acao_trust: 'Pediu trust numa farm', acao_conferir: 'Pediu conferência da Jornada', juntar_se: 'Clicou em Juntar-se',
     baixar_mod: 'Baixou o instalador do mod', baixar_mod_jar: 'Baixou só o jar do mod',
+    mod_convite: 'Abriu o convite do mod', mod_agora_nao: 'Dispensou o convite do mod',
 };
 
 const us = { dados: null, dias: 30, filtro: 'todos', observador: null, quadro: 0 };

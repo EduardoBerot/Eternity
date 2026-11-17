@@ -237,11 +237,13 @@ async function renderMeuPainel() {
     mpEstado.mes = 0;
     mpEstado.cla = null;
     mpEstado.jornada = null;
+    mpEstado.mod = null;
     if (mpPedidoAdmin() && corpo.staff) return mpAbrirAdmin();
     mpDesenhar();
     mpCarregarCla();
     mpCarregarAcoes();
     mpCarregarJornada();
+    mpCarregarMod();
     mpCarregarTorneios();
     if (mpEstado.tela === 'jogador') mpAbrirJogador(mpEstado.jogadorNick);
 }

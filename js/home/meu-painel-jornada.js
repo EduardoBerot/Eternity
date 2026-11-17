@@ -180,7 +180,7 @@ function mpCorpoMissao(jornada, missao) {
     const p = jornada.progresso;
     const m = jornada.meta;
     const aberta = missao.liberada && !missao.feita;
-    if (missao.dia === 1) return mpEtapas(missao) + (missao.liberada ? mpEscolhaCidade(jornada) : '');
+    if (missao.dia === 1) return mpEtapas(missao) + (missao.liberada ? mpEscolhaCidade(jornada) + mpBonusMod() : '');
     if (missao.dia === 4) return mpEtapas(missao, { semAjuda: true }) + mpCorpoRaizes(jornada, missao, aberta);
     if (missao.dia === 5) {
         return mpEtapas(missao)

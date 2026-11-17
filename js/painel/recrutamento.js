@@ -771,7 +771,7 @@ function rcDesenharFila() {
             <i style="background:${cor}"></i>
             <div class="rc-item__quem">
                 <strong>${textoSeguro(item.nick)}</strong>
-                <span>${item.servidor === 'genesis' ? 'Gênesis' : 'Apocalipse'} · ${origem}</span>
+                <span>${item.servidor === 'genesis' ? 'Gênesis' : 'Apocalipse'} · ${origem}${item.mod ? ` · <b class="rc-item__mod" title="Já abriu o jogo com o mod da Eternity"><i class="fa-solid fa-puzzle-piece" aria-hidden="true"></i> Mod ${textoSeguro(item.mod.versao === '0.0.0' ? 'antigo' : item.mod.versao)}</b>` : ''}</span>
             </div>
             <div class="rc-item__passo">${passo === '—' ? textoSeguro(rotuloEtapa(item.desfecho === 'entrou' ? 'complete' : item.etapa, item.retorno)) : textoSeguro(passo)}</div>
             <span class="rc-item__dias${quente ? ' is-quente' : ''}" title="Parado há">${parado}</span>

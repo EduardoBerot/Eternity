@@ -209,3 +209,6 @@ body.painel--recrutamento main { margin: 0; }
     .rc-guia small { display: none; }
     .rc-c-desf .an-origem li button { padding: 0 6px; font-size: 0.66rem; }
 }
+
+/* Ja abriu o jogo com o mod (17/11/2026). */
+.rc-item__mod { font-weight: 600; color: #58d6e6; white-space: nowrap; }

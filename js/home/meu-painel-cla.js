@@ -312,6 +312,7 @@ function mpTelaInicio() {
             </div>
         </section>
         ${mpCartaoJornadaInicio()}
+        ${mpCartaoModInicio()}
         ${mpFaixaHoje(perfil)}
         ${mpTilesPrincipais()}
         ${mpTilesSecundarios()}`;

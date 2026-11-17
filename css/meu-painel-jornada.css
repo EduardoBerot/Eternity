@@ -435,3 +435,33 @@ details.jornada-missao:not([open]) > summary h3 { color: var(--nevoa); }
 .jornada-chamada-texto p, .jornada-chamada-texto p b { font-family: var(--sans); }
 
 .jornada-farms { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); }
+
+/* Convite do mod no Inicio e etapa bonus do dia 1 (17/11/2026, js/home/mod.js).
+   Mesma moldura da chamada da Jornada, em aqua: o ouro e da Jornada. */
+.mod-convite {
+    border-color: rgba(88, 214, 230, 0.35);
+    background: linear-gradient(100deg, rgba(88, 214, 230, 0.1), transparent 60%), rgba(10, 20, 33, 0.85);
+}
+.mod-convite:hover { border-color: rgba(88, 214, 230, 0.6); }
+.mod-convite .jornada-chamada-selo { background: rgba(88, 214, 230, 0.12); }
+.mod-convite .jornada-chamada-selo img { width: 40px; height: 40px; image-rendering: pixelated; }
+.mod-convite h3 { flex-wrap: wrap; }
+.mod-convite h3 small { color: var(--nevoa); }
+.mod-convite-acoes { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.mod-convite-acoes .mp-link { font-family: var(--sans); font-size: 0.8rem; }
+
+.jornada-bonus { margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(255, 255, 255, 0.12); }
+.jornada-bonus-selo {
+    font-style: normal;
+    font-size: 0.7rem;
+    padding: 1px 6px;
+    margin-right: 4px;
+    border: 1px solid rgba(88, 214, 230, 0.5);
+    color: #58d6e6;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+@media (max-width: 560px) {
+    .mod-convite-acoes { grid-column: 1 / -1; flex-direction: row; justify-content: flex-start; gap: 14px; }
+}
