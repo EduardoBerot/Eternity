@@ -1,28 +1,179 @@
-/* Pagina do mod (#mod, 16/11/2026) */
-.mod-pagina { padding: clamp(32px, 6vw, 64px) var(--lado) clamp(56px, 8vw, 96px); display: grid; gap: clamp(40px, 6vw, 64px); }
-.mod-pagina h2 { margin: 0 0 18px; }
-.mod-baixar { text-align: center; display: grid; justify-items: center; gap: 12px; }
-.mod-botao { font-size: 1.15rem; padding: 16px 32px; }
-.mod-versao { color: var(--nevoa); margin: 0; font-size: 0.95rem; }
-.mod-inclui { max-width: 620px; margin: 0; }
+/* Tela "Mod" do painel do membro (16/11/2026) */
+.mod-tela { display: grid; gap: 22px; font-family: var(--sans); }
 
-.mod-passos { margin: 0; padding-left: 1.4em; display: grid; gap: 14px; color: var(--gelo); line-height: 1.6; }
-.mod-passos code { background: var(--aco-claro); padding: 1px 6px; border-radius: 4px; }
-
-.mod-launchers { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
-.mod-launchers span { border: 1px solid var(--linha); background: var(--aco); border-radius: 999px; padding: 6px 14px; font-size: 0.9rem; color: var(--gelo); }
-.mod-launchers span i { color: var(--aqua); margin-right: 6px; }
-.mod-launchers span.nao { color: var(--nevoa); }
-.mod-launchers span.nao i { color: var(--c-fundador); }
-
-.mod-recursos { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
-.mod-recurso { background: var(--aco); border: 1px solid var(--linha); border-radius: 12px; padding: 20px; }
-.mod-recurso i { color: var(--aqua); font-size: 1.4rem; }
-.mod-recurso h3 { margin: 12px 0 6px; font-size: 1.05rem; color: var(--gelo); }
-.mod-recurso p { margin: 0; color: var(--nevoa); line-height: 1.55; }
-
-.mod-manual a, .mod-passos a { color: var(--aqua); }
-
-@media (max-width: 560px) {
-    .mod-botao { width: 100%; justify-content: center; }
+/* ---------- Heroi ---------- */
+.mod-heroi {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: clamp(18px, 4vw, 40px);
+    padding: clamp(22px, 4vw, 40px);
+    border-radius: 18px;
+    border: 1px solid rgba(46, 230, 240, 0.25);
+    background:
+        radial-gradient(120% 140% at 0% 0%, rgba(46, 230, 240, 0.16), transparent 55%),
+        radial-gradient(90% 120% at 100% 100%, rgba(245, 197, 66, 0.10), transparent 60%),
+        linear-gradient(160deg, var(--aco-claro), var(--noite));
 }
+.mod-heroi-brilho {
+    position: absolute;
+    inset: -40% auto auto -10%;
+    width: 340px;
+    height: 340px;
+    background: radial-gradient(circle, rgba(46, 230, 240, 0.25), transparent 65%);
+    filter: blur(10px);
+    pointer-events: none;
+    animation: mod-pulso 6s ease-in-out infinite;
+}
+@keyframes mod-pulso { 50% { transform: translate(30px, 20px) scale(1.1); opacity: 0.7; } }
+.mod-heroi-icone {
+    position: relative;
+    width: clamp(84px, 14vw, 128px);
+    height: auto;
+    border-radius: 22px;
+    image-rendering: pixelated;
+    box-shadow: 0 0 0 1px rgba(46, 230, 240, 0.35), 0 12px 40px rgba(46, 230, 240, 0.25);
+    animation: mod-flutua 5s ease-in-out infinite;
+}
+@keyframes mod-flutua { 50% { transform: translateY(-6px); } }
+.mod-heroi-texto { position: relative; display: grid; gap: 8px; }
+.mod-heroi-texto > small { font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ficha-ouro, #f5c542); }
+.mod-heroi-texto h1 { margin: 0; font-size: clamp(1.7rem, 4.4vw, 2.6rem); color: var(--gelo); }
+.mod-heroi-texto p { margin: 0; color: var(--nevoa); max-width: 560px; line-height: 1.55; }
+.mod-heroi-acoes { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-top: 10px; }
+
+.mod-baixar {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 22px 12px 18px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2ee6f0, #21a9d6);
+    color: #04121a;
+    text-decoration: none;
+    box-shadow: 0 8px 28px rgba(46, 230, 240, 0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.mod-baixar:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(46, 230, 240, 0.5); }
+.mod-baixar > i { font-size: 1.4rem; }
+.mod-baixar span { display: grid; line-height: 1.2; }
+.mod-baixar b { font-size: 1.05rem; }
+.mod-baixar small { font-size: 0.78rem; opacity: 0.75; letter-spacing: 0; text-transform: none; color: inherit; }
+.mod-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--linha);
+    background: rgba(4, 8, 15, 0.45);
+    color: var(--nevoa);
+    font-size: 0.85rem;
+}
+.mod-chip i { color: var(--aqua); }
+
+/* ---------- Blocos ---------- */
+.mod-bloco {
+    padding: clamp(18px, 3vw, 26px);
+    border-radius: 16px;
+    border: 1px solid var(--linha);
+    background: linear-gradient(180deg, rgba(22, 40, 59, 0.55), rgba(15, 28, 43, 0.55));
+}
+.mod-bloco h2 { margin: 0 0 16px; font-size: 1.15rem; color: var(--gelo); display: flex; align-items: center; gap: 10px; }
+.mod-bloco h2 i { color: var(--aqua); font-size: 1rem; }
+.mod-dica { display: block; margin-top: 10px; color: var(--nevoa); font-size: 0.85rem; }
+.mod-tela a { color: var(--aqua); }
+.mod-tela .mod-baixar { color: #04121a; }
+
+/* passos */
+.mod-passos { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+.mod-passos li { display: grid; grid-template-columns: 34px 1fr; gap: 14px; color: var(--gelo); line-height: 1.55; }
+.mod-passo-num {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-weight: 700;
+    color: var(--aqua);
+    background: var(--aqua-suave);
+    border: 1px solid rgba(46, 230, 240, 0.4);
+}
+.mod-passos code { background: var(--noite); padding: 1px 6px; border-radius: 5px; color: var(--aqua); }
+
+/* o aviso do SmartScreen desenhado (para a pessoa reconhecer) */
+.mod-smartscreen {
+    margin-top: 12px;
+    max-width: 360px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #0b5aa8;
+    color: #fff;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    letter-spacing: 0;
+    font-size: 0.78rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.mod-ss-topo { padding: 12px 14px 6px; font-size: 1rem; font-weight: 600; }
+.mod-ss-corpo { padding: 0 14px 12px; line-height: 1.45; opacity: 0.95; }
+.mod-ss-botoes { display: flex; justify-content: flex-end; gap: 8px; padding: 10px 14px; background: #0a4f94; }
+.mod-ss-botoes span { padding: 5px 12px; border: 1px solid rgba(255, 255, 255, 0.6); }
+.mod-ss-alvo { outline: 2px solid var(--ficha-ouro, #f5c542); outline-offset: 2px; border-radius: 2px; animation: mod-alvo 1.6s ease-in-out infinite; }
+@keyframes mod-alvo { 50% { outline-color: transparent; } }
+
+/* launchers */
+.mod-launchers { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-top: 20px; }
+.mod-launcher { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--noite); border: 1px solid var(--linha); }
+.mod-launcher i { color: #3ddc84; font-size: 1.1rem; }
+.mod-launcher span { display: grid; line-height: 1.25; }
+.mod-launcher b { color: var(--gelo); font-size: 0.92rem; }
+.mod-launcher small { color: var(--nevoa); font-size: 0.78rem; }
+.mod-launcher.nao { opacity: 0.7; }
+.mod-launcher.nao i { color: var(--c-fundador, #ff4d5e); }
+
+/* recursos */
+.mod-recursos { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+.mod-recurso {
+    padding: 16px;
+    border-radius: 12px;
+    background: var(--noite);
+    border: 1px solid var(--linha);
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.mod-recurso:hover { border-color: rgba(46, 230, 240, 0.4); transform: translateY(-2px); }
+.mod-recurso-icone { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; background: var(--aqua-suave); color: var(--aqua); }
+.mod-recurso h3 { margin: 12px 0 5px; font-size: 0.98rem; color: var(--gelo); }
+.mod-recurso p { margin: 0; color: var(--nevoa); font-size: 0.86rem; line-height: 1.5; }
+
+/* atalhos e ajuda */
+.mod-duas { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px; }
+.mod-atalhos, .mod-ajuda { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.mod-atalhos li { display: flex; align-items: center; gap: 14px; color: var(--gelo); font-size: 0.9rem; }
+.mod-teclas { display: inline-flex; align-items: center; gap: 4px; min-width: 76px; }
+.mod-teclas i { color: var(--nevoa); font-style: normal; font-size: 0.8rem; }
+.mod-tela kbd {
+    display: inline-grid;
+    place-items: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(232, 244, 248, 0.25);
+    border-bottom-width: 3px;
+    background: var(--aco-claro);
+    color: var(--gelo);
+    font: 600 0.8rem var(--sans);
+}
+.mod-ajuda li { color: var(--nevoa); font-size: 0.9rem; line-height: 1.5; }
+.mod-ajuda b { color: var(--gelo); }
+
+@media (max-width: 620px) {
+    .mod-heroi { flex-direction: column; text-align: center; }
+    .mod-heroi-acoes { justify-content: center; }
+    .mod-baixar { width: 100%; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .mod-heroi-brilho, .mod-heroi-icone, .mod-ss-alvo { animation: none; }
+}
+.mod-smartscreen, .mod-smartscreen * { font-family: "Segoe UI", system-ui, sans-serif !important; letter-spacing: 0 !important; }

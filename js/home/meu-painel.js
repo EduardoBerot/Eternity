@@ -392,6 +392,8 @@ const MP_TELAS = [
     // O mapa da cidade e o pedido de trust (18/10/2026; o site publico ficou so
     // com a vitrine 3D e a galeria). Montado por js/home/cidade.js.
     ['cidade', 'fa-city', 'Cidade'],
+    // O mod do jogo: instalador e passo a passo, so para membros (js/home/mod.js).
+    ['mod', 'fa-download', 'Mod'],
     ['perfil', 'fa-user', 'Meu perfil'],
 ];
 // Telas de detalhe do Inicio (abertas pelos cartoes grandes): ficam fora do menu
@@ -445,7 +447,7 @@ const MP_LATERAL_CHAVE = 'eternity-painel-lateral';
 // "Você" vem antes: o cartao do jogador (que abre o Meu perfil) e, logo abaixo,
 // a Jornada. Os outros grupos seguem a lista.
 const MP_LATERAL_GRUPOS = [
-    ['Clã', ['inicio', 'ranking', 'cidade']],
+    ['Clã', ['inicio', 'ranking', 'cidade', 'mod']],
     ['Staff', ['staff']],
 ];
 
@@ -547,6 +549,7 @@ function mpConteudoTela() {
     if (mpEstado.tela === 'jogador') return mpTelaJogador();
     if (mpEstado.tela === 'jornada') return mpTelaJornada();
     if (MP_SUBTELAS[mpEstado.tela]) return mpTelaDetalhe(mpEstado.tela);
+    if (mpEstado.tela === 'mod') return mpTelaMod();
     if (mpEstado.tela === 'cidade') return `<div class="jogo-cabeca"><h1>Cidade</h1><p>Casas e terrenos gratuitos para os membros no Apocalipse. Escolha um lugar livre no mapa e peça o seu.</p></div>${cidadeMiolo()}`;
     return mpTelaInicio();
 }
@@ -554,6 +557,7 @@ function mpConteudoTela() {
 function mpDepoisDaTela() {
     if (mpEstado.tela === 'perfil' || (mpEstado.tela === 'jogador' && mpEstado.jogador?.perfil)) mpSkin3d(app.querySelector('.ficha-skin'), mpResumo().nickSkin);
     else { mpViewer?.dispose(); mpViewer = null; }
+    if (mpEstado.tela === 'mod') mpModDepois();
     if (mpEstado.tela === 'cidade') cidadeMontarMapa(mpEu().perfil.nick);
     else cidadeLimpar();
     mpAtualizarHeroiCla();
