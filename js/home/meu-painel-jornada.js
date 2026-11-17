@@ -9,7 +9,7 @@
 // So aparece para quem esta fazendo a jornada.
 
 const MP_JORNADA_ETAPAS = {
-    chegada: { icone: 'fa-location-dot', texto: 'Use <code>/go ETY</code> e mande um oi no chat local', ajuda: 'A Eternity fica na cidade e ouve o chat local de quem chega.' },
+    chegada: { icone: 'fa-location-dot', texto: 'Use <code>/go ETY</code> e mande <code>/l oi</code> no chat local', ajuda: 'Tem que ser no chat local (<code>/l</code>): o chat normal é o global e a Eternity, que fica na cidade, não conta ele.' },
     painel: { icone: 'fa-display', texto: 'Abra o seu painel', ajuda: 'Pronto: você já está nele.' },
     cidade: { icone: 'fa-house-chimney', texto: 'Decida se vai morar na cidade', ajuda: 'Casa ou terreno: escolha e veja os lugares livres no mapa da cidade.' },
     cla: { icone: 'fa-comments', texto: 'Mande uma mensagem no chat da aliança com <code>/a</code>', ajuda: 'É o chat que a ETZ e a ETY dividem com os clãs aliados.' },
