@@ -1,7 +1,7 @@
 // Jornada dos 7 Dias (18/10/2026): o caminho do novato da ETZ no painel. Uma
 // missao libera por dia e as liberadas ficam abertas ate o fim. Completar nao e
-// obrigatorio: adianta a subida para a ETY (15 dias de cla em vez de 30), traz o
-// confiavel nas farms junto com a subida e paga 100k de ajuda inicial.
+// obrigatorio: paga 100k de ajuda inicial. Ate 19/11/2026 tambem adiantava a
+// subida para a ETY; desde entao a subida e decisao da staff (pelo mod).
 //
 // A API (jornada.service.js no eternity-crud) diz o que esta liberado e o que
 // foi cumprido; quem confere cada etapa sao os bots (chat do jogo, Discord,
@@ -62,7 +62,7 @@ function mpCartaoJornadaInicio() {
     const atual = mpMissaoAtual(jornada);
     const proxima = jornada.missoes.find(missao => !missao.liberada);
     const chamada = jornada.completa
-        ? `Jornada completa! ${jornada.recompensa.pagaEm ? 'Os 100k já foram pagos.' : 'Os 100k saem em instantes.'} Sua subida para a ETY libera em <b>${mpDiaCurto(jornada.subida.data)}</b>.`
+        ? `Jornada completa! ${jornada.recompensa.pagaEm ? 'Os 100k já foram pagos.' : 'Os 100k saem em instantes.'}`
         : atual
             ? `Dia ${atual.dia} liberado: <b>${escHtml(atual.titulo)}</b>`
             : proxima ? `Tudo em dia! A próxima missão libera em <b>${mpDiaCurto(proxima.liberaEm)}</b>.` : '';
@@ -107,8 +107,8 @@ function mpCaminhoJornada(jornada) {
     })).join('');
     const com = jornada.completa;
     const chegada = com
-        ? `<b>Jornada completa!</b> ${jornada.recompensa.pagaEm ? `100k pagos em ${escHtml(mpData(jornada.recompensa.pagaEm))}.` : 'A Eternity vai mandar os 100k em instantes.'} Subida para a ETY e confiável nas farms em <b>${mpDiaCurto(jornada.subida.data)}</b>.`
-        : `<b>100k de ajuda inicial</b> e a subida para a ETY aos <b>15 dias</b> de clã em vez de ${jornada.regraAntiga ? 20 : 30}, com o confiável nas farms.`;
+        ? `<b>Jornada completa!</b> ${jornada.recompensa.pagaEm ? `100k pagos em ${escHtml(mpData(jornada.recompensa.pagaEm))}.` : 'A Eternity vai mandar os 100k em instantes.'}`
+        : `<b>100k de ajuda inicial</b>, pagos pelo banco do clã.`;
     return `<ol class="jornada-caminho">
         <li class="caminho-marco largada saida-feita">
             <span class="caminho-no" aria-hidden="true"><i class="fa-solid fa-flag"></i></span>
@@ -305,15 +305,12 @@ function mpCorpoRecompensa(jornada) {
         <h4><i class="fa-solid fa-gift" aria-hidden="true"></i> Complete a Jornada e ganhe</h4>
         <ul class="jornada-recompensas">
             <li><i class="fa-solid fa-coins" aria-hidden="true"></i> 100k de ajuda inicial</li>
-            <li><i class="fa-solid fa-forward" aria-hidden="true"></i> Subida para a ETY aos 15 dias (em vez de ${jornada.regraAntiga ? 20 : 30})</li>
-            <li><i class="fa-solid fa-key" aria-hidden="true"></i> Confiável nas farms junto com a subida</li>
         </ul>
         <h4><i class="fa-solid fa-tractor" aria-hidden="true"></i> O que te espera na ETY</h4>
         <ul class="farms-lista jornada-farms">${farms}</ul>
         <ol class="jornada-linha">
             <li class="feita"><span>Entrou no clã</span><b>${mpDiaCurto(jornada.dataEntrada)}</b></li>
             <li class="${com ? 'feita' : ''}"><span>Jornada completa</span><b>${com ? mpDiaCurto(jornada.completaEm) : `faltam ${Math.max(0, jornada.meta.dias - jornada.progresso.dias)} dias jogados`}</b></li>
-            <li><span>Subida para a ETY + confiável</span><b>${com ? mpDiaCurto(jornada.subida.comJornada) : `${mpDiaCurto(jornada.subida.comJornada)} com a Jornada · ${mpDiaCurto(jornada.subida.semJornada)} sem`}</b></li>
         </ol>
     </div>`;
 }

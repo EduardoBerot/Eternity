@@ -23,7 +23,7 @@ const MP_TUTORIAL_PASSOS = [
         alvos: ['.jornada-chamada', '.lateral-item[onclick="mpIr(\'jornada\')"]', '.jogo-aba[onclick="mpIr(\'jornada\')"]'],
         icone: 'fa-route',
         titulo: 'Sua Jornada dos 7 Dias',
-        texto: 'Uma missão nova por dia para você se firmar no clã. Complete as 7 e ganhe <b>100k de ajuda inicial</b>, com a subida para a ETY aos <b>15 dias</b> em vez de 30.',
+        texto: 'Uma missão nova por dia para você se firmar no clã. Complete as 7 e ganhe <b>100k de ajuda inicial</b>, pagos pelo banco do clã.',
     },
     {
         alvos: ['.inicio-tiles'],
