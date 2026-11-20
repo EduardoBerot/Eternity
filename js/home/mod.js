@@ -72,9 +72,9 @@ const MOD_RECURSOS = [
 
 const MOD_LAUNCHERS = [
     ['Oficial', 'perfil “Eternity”', true],
-    ['SKLauncher', 'versão fabric-loader 26.3', true],
+    ['SKLauncher', 'versão fabric-loader do instalador', true],
     ['Prism', 'instância “Eternity”', true],
-    ['Dawn', 'seu perfil Fabric 26.3', true],
+    ['Dawn', 'seu perfil Fabric', true],
     ['Lunar / Badlion', 'não aceitam mods de fora', false],
 ];
 
@@ -101,7 +101,7 @@ function mpTelaMod() {
                         <span class="mod-baixar-icone"><i class="fa-solid fa-download" aria-hidden="true"></i></span>
                         <span class="mod-baixar-texto"><b>Baixar o instalador</b><small>Windows · grátis · 40 KB</small></span>
                     </a>
-                    <span class="mod-chip" id="mod-versao"><i class="fa-solid fa-code-branch" aria-hidden="true"></i> Minecraft 26.3 · Fabric</span>
+                    <span class="mod-chip" id="mod-versao"><i class="fa-solid fa-code-branch" aria-hidden="true"></i> Fabric</span>
                 </div>
             </div>
         </section>
@@ -115,11 +115,11 @@ function mpTelaMod() {
             </article>
             <article class="mod-opcao">
                 <h3><i class="fa-solid fa-puzzle-piece" aria-hidden="true"></i> Só o mod Eternity</h3>
-                <p>Já tem o seu Fabric com mods? Baixe só o <b>.jar</b> do clã e coloque na pasta <code>mods</code>, junto com os seus.</p>
-                <a class="mod-opcao-link secundario" id="mod-jar" href="https://github.com/${MOD_REPO}/releases/latest" target="_blank" rel="noopener" onclick="window.etyTelemetria?.acao('baixar_mod_jar')"><i class="fa-solid fa-download" aria-hidden="true"></i> <span id="mod-jar-nome">eternity-mod.jar</span></a>
+                <p>Já tem o seu Fabric com mods? Baixe só o <b>.jar</b> do clã da sua versão do Minecraft e coloque na pasta <code>mods</code>, junto com os seus.</p>
+                <a class="mod-opcao-link secundario" href="#meu-painel&tela=mod-versoes" onclick="event.preventDefault(); mpIr('mod-versoes')"><i class="fa-solid fa-list" aria-hidden="true"></i> Ver as versões</a>
                 <ul class="mod-requisitos">
-                    <li>Minecraft <b>26.3</b> com <b>Fabric Loader 0.19.5</b> ou mais novo</li>
-                    <li><a href="https://modrinth.com/mod/fabric-api/versions?g=26.3" target="_blank" rel="noopener">Fabric API</a> para 26.3 na mesma pasta</li>
+                    <li>Pegue o jar com a sua versão do Minecraft no nome, com <b>Fabric Loader 0.19.5</b> ou mais novo</li>
+                    <li><a href="https://modrinth.com/mod/fabric-api/versions" target="_blank" rel="noopener">Fabric API</a> da mesma versão do Minecraft na mesma pasta</li>
                     <li>Apague o jar antigo do Eternity ao atualizar (só pode ter um)</li>
                     <li>A textura já vem dentro do mod: tire os packs Eternity antigos da lista</li>
                 </ul>
@@ -147,7 +147,7 @@ function mpTelaMod() {
                 </li>
                 <li>
                     <span class="mod-passo-num">3</span>
-                    <div><b>Escolha o seu launcher</b> (ele já marca os que achou no PC) e clique em <b>Instalar</b>.</div>
+                    <div><b>Escolha a versão do Minecraft e o seu launcher</b> (ele já marca os que achou no PC) e clique em <b>Instalar</b>.</div>
                 </li>
                 <li>
                     <span class="mod-passo-num">4</span>
@@ -186,7 +186,7 @@ function mpTelaMod() {
             <section class="mod-bloco">
                 <h2><i class="fa-solid fa-life-ring" aria-hidden="true"></i> Ajuda</h2>
                 <ul class="mod-ajuda">
-                    <li><b>Já tenho Fabric 26.3.</b> Importe o <a href="${MOD_LATEST}Eternity.mrpack">Eternity.mrpack</a> no Prism ou Modrinth App, ou pegue o jar nas <a href="https://github.com/${MOD_REPO}/releases" target="_blank" rel="noopener">versões</a>.</li>
+                    <li><b>Já tenho Fabric.</b> Em <a href="#meu-painel&tela=mod-versoes" onclick="event.preventDefault(); mpIr('mod-versoes')">Versões do mod</a>, pegue o jar ou o <code>.mrpack</code> (Prism ou Modrinth App) da sua versão do Minecraft.</li>
                     <li><b>Atualizar.</b> Rode o instalador de novo: ele troca só o que mudou.</li>
                     <li><b>Deu erro?</b> Mande um print da janela do instalador para a staff no <a href="https://discord.gg/vj4eNDJqct" target="_blank" rel="noopener">Discord</a>.</li>
                 </ul>
@@ -202,15 +202,96 @@ function mpModDepois() {
             const el = document.getElementById('mod-versao');
             if (!rel || !el) return;
             const data = new Date(rel.published_at).toLocaleDateString('pt-BR');
-            el.innerHTML = `<i class="fa-solid fa-code-branch" aria-hidden="true"></i> Versão ${escHtml(String(rel.tag_name).replace(/^v/, ''))} · ${data} · Minecraft 26.3`;
-            // o jar tem a versao no nome: o link "so o mod" aponta direto para o da release nova
-            const jar = (rel.assets || []).find(a => /^eternity-mod-.+\.jar$/.test(a.name));
-            const link = document.getElementById('mod-jar');
-            if (jar && link) {
-                link.href = jar.browser_download_url;
-                link.removeAttribute('target');
-                document.getElementById('mod-jar-nome').textContent = `${jar.name} · ${(jar.size / 1048576).toFixed(1)} MB`;
-            }
+            el.innerHTML = `<i class="fa-solid fa-code-branch" aria-hidden="true"></i> Versão ${escHtml(String(rel.tag_name).replace(/^v/, ''))} · ${data}`;
         })
         .catch(() => {});
+}
+
+// ---------- Versoes do mod (20/11/2026) ----------
+// Para quem instala so o mod: um cartao por versao do Minecraft com o jar, o
+// .mrpack e a Fabric API certa, sem mandar para o GitHub. Le a release mais nova
+// pela API do GitHub (a unica fonte com CORS; o instalador.json nao tem). Os
+// jars tem a versao do jogo no nome (eternity-mod-0.19.0+26.2.jar); o mrpack sem
+// sufixo (Eternity.mrpack) e o da versao que nao tem um com sufixo.
+
+function mpTelaModVersoes() {
+    return `
+    <div class="mod-tela">
+        <a class="mod-voltar" href="#meu-painel&tela=mod" onclick="event.preventDefault(); mpIr('mod')"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Mod</a>
+        <div class="jogo-cabeca">
+            <h1>Versões do mod</h1>
+            <p>Para quem já tem o Fabric e quer instalar só o mod do clã. Escolha a versão do Minecraft em que você joga.</p>
+        </div>
+        <div class="mod-versoes" id="mod-versoes" aria-live="polite">
+            <div class="mod-versoes-aviso"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Buscando as versões...</div>
+        </div>
+        <section class="mod-bloco">
+            <h2><i class="fa-solid fa-list-check" aria-hidden="true"></i> Como instalar só o mod</h2>
+            <ol class="mod-passos">
+                <li><span class="mod-passo-num">1</span><div>Baixe o <b>mod</b> e a <b>Fabric API</b> da sua versão do Minecraft.</div></li>
+                <li><span class="mod-passo-num">2</span><div>Coloque os dois na pasta <code>mods</code> do seu perfil Fabric (<b>Fabric Loader 0.19.5</b> ou mais novo).</div></li>
+                <li><span class="mod-passo-num">3</span><div>Ao atualizar, apague o jar antigo do Eternity: só pode ter um. Depois disso o mod se atualiza sozinho.</div></li>
+            </ol>
+            <small class="mod-dica">No Prism ou no Modrinth App, importe o <b>modpack</b>: ele já traz o mod, a Fabric API e os mods de desempenho. A textura do clã vem dentro do mod; tire os packs Eternity antigos da lista.</small>
+        </section>
+    </div>`;
+}
+
+function mpModVersoesDe(rel) {
+    const assets = rel.assets || [];
+    const versoes = [];
+    for (const a of assets) {
+        const m = /^eternity-mod-(.+?)\+(\d+(?:\.\d+)*)\.jar$/.exec(a.name);
+        if (m) versoes.push({ mc: m[2], mod: m[1], jar: a });
+    }
+    // release antiga, de antes do sufixo: um jar so, sem a versao do jogo no nome
+    if (!versoes.length) {
+        const jar = assets.find(a => /^eternity-mod-[^+]+\.jar$/.test(a.name) && !a.name.includes('-sources'));
+        if (jar) versoes.push({ mc: null, mod: jar.name.replace(/^eternity-mod-|\.jar$/g, ''), jar });
+    }
+    const semDono = versoes.filter(v => !assets.some(a => a.name === `Eternity-${v.mc}.mrpack`));
+    for (const v of versoes) {
+        v.mrpack = assets.find(a => a.name === `Eternity-${v.mc}.mrpack`)
+            || (semDono.length === 1 && semDono[0] === v ? assets.find(a => a.name === 'Eternity.mrpack') : null);
+    }
+    const num = s => String(s || '').split('.').map(n => Number(n) || 0);
+    versoes.sort((a, b) => {
+        const x = num(a.mc), y = num(b.mc);
+        for (let i = 0; i < Math.max(x.length, y.length); i++) if ((y[i] || 0) !== (x[i] || 0)) return (y[i] || 0) - (x[i] || 0);
+        return 0;
+    });
+    return { versoes };
+}
+
+function mpModVersoesDepois() {
+    const alvo = document.getElementById('mod-versoes');
+    const mb = bytes => `${(bytes / 1048576).toFixed(1)} MB`;
+    fetch(`https://api.github.com/repos/${MOD_REPO}/releases/latest`)
+        .then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
+        .then(rel => {
+            if (!alvo?.isConnected) return;
+            const { versoes } = mpModVersoesDe(rel);
+            if (!versoes.length) throw new Error('release sem jar');
+            const data = new Date(rel.published_at).toLocaleDateString('pt-BR');
+            alvo.innerHTML = versoes.map((v, i) => {
+                const mc = v.mc ? escHtml(v.mc) : '';
+                const fabricApi = `https://modrinth.com/mod/fabric-api/versions${v.mc ? `?g=${encodeURIComponent(v.mc)}&l=fabric` : ''}`;
+                return `
+                <article class="mod-opcao mod-versao ${i === 0 ? 'recomendada' : ''}">
+                    ${i === 0 && versoes.length > 1 ? '<span class="mod-opcao-selo">Mais nova</span>' : ''}
+                    <h3><i class="fa-solid fa-cube" aria-hidden="true"></i> ${mc ? `Minecraft ${mc}` : 'Minecraft'}</h3>
+                    <p>Eternity <b>${escHtml(v.mod)}</b> · publicado em ${data}</p>
+                    <div class="mod-versao-links">
+                        <a class="mod-opcao-link" href="${escHtml(v.jar.browser_download_url)}" onclick="window.etyTelemetria?.acao('baixar_mod_jar')"><i class="fa-solid fa-download" aria-hidden="true"></i> Mod <small>${mb(v.jar.size)}</small></a>
+                        <a class="mod-opcao-link secundario" href="${fabricApi}" target="_blank" rel="noopener"><i class="fa-solid fa-puzzle-piece" aria-hidden="true"></i> Fabric API</a>
+                        ${v.mrpack ? `<a class="mod-opcao-link secundario" href="${escHtml(v.mrpack.browser_download_url)}" onclick="window.etyTelemetria?.acao('baixar_mod_mrpack')"><i class="fa-solid fa-box" aria-hidden="true"></i> Modpack <small>.mrpack</small></a>` : ''}
+                    </div>
+                    <code class="mod-versao-arquivo">${escHtml(v.jar.name)}</code>
+                </article>`;
+            }).join('');
+        })
+        .catch(() => {
+            if (!alvo?.isConnected) return;
+            alvo.innerHTML = `<div class="mod-versoes-aviso erro"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Não consegui buscar as versões agora. Tente de novo em instantes ou use o <a href="${MOD_LATEST}Eternity-Instalador.exe">instalador</a>.</div>`;
+        });
 }

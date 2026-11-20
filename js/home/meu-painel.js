@@ -408,11 +408,13 @@ const MP_SUBTELAS = {
 };
 
 function mpTelaMenu() {
+    // Versoes do mod (20/11/2026): fora do menu, aberta pela tela do Mod
+    if (mpEstado.tela === 'mod-versoes') return 'mod';
     return MP_SUBTELAS[mpEstado.tela] ? 'inicio' : mpEstado.tela;
 }
 
 function mpTelaValida(tela) {
-    return MP_TELAS.some(([id]) => id === tela) || tela === 'jornada' || Object.hasOwn(MP_SUBTELAS, tela);
+    return MP_TELAS.some(([id]) => id === tela) || tela === 'jornada' || tela === 'mod-versoes' || Object.hasOwn(MP_SUBTELAS, tela);
 }
 
 const MP_ABAS_PERFIL = [
@@ -552,6 +554,7 @@ function mpConteudoTela() {
     if (mpEstado.tela === 'jornada') return mpTelaJornada();
     if (MP_SUBTELAS[mpEstado.tela]) return mpTelaDetalhe(mpEstado.tela);
     if (mpEstado.tela === 'mod') return mpTelaMod();
+    if (mpEstado.tela === 'mod-versoes') return mpTelaModVersoes();
     if (mpEstado.tela === 'cidade') return `<div class="jogo-cabeca"><h1>Cidade</h1><p>Casas e terrenos gratuitos para os membros no Apocalipse. Escolha um lugar livre no mapa e peça o seu.</p></div>${cidadeMiolo()}`;
     return mpTelaInicio();
 }
@@ -560,6 +563,7 @@ function mpDepoisDaTela() {
     if (mpEstado.tela === 'perfil' || (mpEstado.tela === 'jogador' && mpEstado.jogador?.perfil)) mpSkin3d(app.querySelector('.ficha-skin'), mpResumo().nickSkin);
     else { mpViewer?.dispose(); mpViewer = null; }
     if (mpEstado.tela === 'mod') mpModDepois();
+    if (mpEstado.tela === 'mod-versoes') mpModVersoesDepois();
     if (mpEstado.tela === 'cidade') cidadeMontarMapa(mpEu().perfil.nick);
     else cidadeLimpar();
     mpAtualizarHeroiCla();

@@ -244,3 +244,21 @@
 /* o texto do botao do instalador fica escuro sobre o ciano: estilos de link do painel nao sobrescrevem */
 .mod-tela .mod-opcao-link:not(.secundario), .mod-tela .mod-opcao-link:not(.secundario) i { color: #03141c !important; }
 .mod-tela .mod-opcao-link.secundario, .mod-tela .mod-opcao-link.secundario i, .mod-tela .mod-opcao-link.secundario span { color: var(--aqua) !important; }
+
+/* Versoes do mod (20/11/2026): um cartao por versao do Minecraft */
+.mod-tela .mod-voltar { justify-self: start; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; text-decoration: none; }
+.mod-tela .mod-voltar:hover { text-decoration: underline; }
+.mod-tela .jogo-cabeca { margin: 0; }
+.mod-versoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.mod-versao-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.mod-tela .mod-versao-links .mod-opcao-link { padding: 9px 14px; }
+.mod-versao-links .mod-opcao-link small { font-weight: 600; opacity: 0.75; font-size: 0.78rem; }
+.mod-tela .mod-versao-arquivo { align-self: flex-start; max-width: 100%; overflow-wrap: anywhere; font-size: 0.75rem; color: var(--nevoa); background: transparent; padding: 0; }
+.mod-versoes-aviso { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; padding: 16px 18px; border-radius: 12px; border: 1px dashed var(--linha); color: var(--nevoa); font-size: 0.9rem; }
+.mod-versoes-aviso.erro { border-style: solid; border-color: rgba(255, 77, 94, 0.45); }
+.mod-versoes-aviso.erro i { color: #ff4d5e; }
+@media (max-width: 420px) {
+    .mod-versoes { grid-template-columns: 1fr; }
+}
+.mod-tela .mod-versao-links .mod-opcao-link:not(.secundario) small { color: #03141c !important; }
+.mod-tela .mod-versao-links .mod-opcao-link.secundario small { color: var(--aqua) !important; }
