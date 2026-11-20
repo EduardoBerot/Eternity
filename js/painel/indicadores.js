@@ -7,11 +7,12 @@
 // allowlist (`lider`). O backend confere cada um. Controles (12/11/2026, liga e
 // desliga funcoes dos bots) segue a regra do Site; so o Fundador muda.
 
-const INDICADORES = { recrutamento: 'Recrutamento', liga: 'Liga', site: 'Site', controles: 'Controles' };
+// Mod (20/11/2026): uso do mod e crash reports, mesma regra do Site.
+const INDICADORES = { recrutamento: 'Recrutamento', liga: 'Liga', site: 'Site', mod: 'Mod', controles: 'Controles' };
 
 function indicadoresPermitidos() {
     const permissoes = window.painelPermissoes || {};
-    return Object.keys(INDICADORES).filter(chave => chave === 'site' || chave === 'controles' ? permissoes.usoSite || permissoes.lider : permissoes.lider);
+    return Object.keys(INDICADORES).filter(chave => chave === 'site' || chave === 'mod' || chave === 'controles' ? permissoes.usoSite || permissoes.lider : permissoes.lider);
 }
 const INDICADORES_CHAVE = 'ety-indicadores';
 
@@ -31,11 +32,12 @@ function renderIndicadores(qual) {
     anSairDaAba();
     rcSairDaAba();
     usSairDaAba();
+    umSairDaAba();
     ctSairDaAba();
     const aba = document.getElementById('indicadores');
     if (aba) selectItem(aba);
     window.etyTelemetria?.pagina(`painel/indicadores/${qual}`);
-    ({ liga: renderAnalises, site: renderUsoSite, controles: renderControles }[qual] || renderRecrutamento)();
+    ({ liga: renderAnalises, site: renderUsoSite, mod: renderUsoMod, controles: renderControles }[qual] || renderRecrutamento)();
 }
 
 function indicadoresCabecalho(ativo) {

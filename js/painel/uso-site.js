@@ -30,7 +30,7 @@ const US_ACOES = {
     historia_ler: 'Abriu um livro da História', historia_pdf: 'Baixou um PDF da História', login_discord: 'Clicou em Entrar com Discord',
     guia_discord: 'Entrou com Discord no Guia', staff_entrar: 'Abriu a Administração', acao_titulo: 'Pediu um título',
     acao_trust: 'Pediu trust numa farm', acao_conferir: 'Pediu conferência da Jornada', juntar_se: 'Clicou em Juntar-se',
-    baixar_mod: 'Baixou o instalador do mod', baixar_mod_jar: 'Baixou só o jar do mod',
+    baixar_mod: 'Baixou o instalador do mod', baixar_mod_jar: 'Baixou só o jar do mod', baixar_mod_mrpack: 'Baixou o modpack do mod',
     mod_convite: 'Abriu o convite do mod', mod_agora_nao: 'Dispensou o convite do mod',
 };
 
@@ -106,10 +106,6 @@ function renderUsoSite() {
                     <header><h2>Nunca entraram</h2><span id="us_s_nunca"></span></header>
                     <div class="us-tabela" id="us_nunca"></div>
                 </section>
-                <section class="an-card us-c-mod">
-                    <header><h2>Mod Eternity</h2><span id="us_s_mod"></span></header>
-                    <div class="us-tabela" id="us_mod"></div>
-                </section>
             </div>
             <div class="an-tooltip" id="an_tooltip" hidden></div>
         </div>`;
@@ -180,7 +176,6 @@ function usDesenharTudo() {
     usDesenharPessoas();
     usDesenharStaff();
     usDesenharNunca();
-    usDesenharMod();
     usDesenharGraficos();
 }
 
@@ -354,34 +349,4 @@ function usDesenharNunca() {
         : '<div class="an-vazio">Todo o cadastro já entrou no site.</div>';
 }
 
-// Quem usa o mod (17/11/2026): a API anota nick e versao quando o mod chama com
-// login no painel do J; sem login conta so o total (30 dias). Nao segue o
-// periodo do topo: e o retrato de agora.
-function usModVersao(versao) {
-    return versao === '0.0.0' ? '0.15.2 ou antes' : versao;
-}
-
-function usDesenharMod() {
-    const mod = us.dados.mod;
-    const resumo = document.getElementById('us_s_mod');
-    const alvo = document.getElementById('us_mod');
-    if (!mod) {
-        resumo.textContent = '';
-        alvo.innerHTML = '<div class="an-vazio">Não foi possível ler o uso do mod agora.</div>';
-        return;
-    }
-    const velhos = mod.pessoas.filter(item => item.desatualizado).length;
-    resumo.textContent = `${mod.pessoas.length} com login${velhos ? ` · ${velhos} desatualizado${velhos > 1 ? 's' : ''}` : ''} · ${mod.semLogin} sem login em 30 dias${mod.minima ? ` · mínima ${mod.minima}` : ''}`;
-    alvo.innerHTML = mod.pessoas.length ? `
-        <table>
-            <thead><tr><th>Nick</th><th>Versão</th><th>Último uso</th><th>Usa desde</th></tr></thead>
-            <tbody>${mod.pessoas.map(item => `
-                <tr>
-                    <td class="us-nick">${usCabeca(item.nick)}<span>${anEsc(item.nick)}${item.cargo ? `<small>${anEsc(item.cargo)}</small>` : '<small>fora do clã</small>'}</span></td>
-                    <td class="${item.desatualizado ? 'us-mod-velho' : ''}">${anEsc(usModVersao(item.versao))}${item.desatualizado ? ' · desatualizado' : ''}</td>
-                    <td>${usQuando(item.visto)}</td>
-                    <td>${usQuando(item.primeiro)}</td>
-                </tr>`).join('')}
-            </tbody>
-        </table>` : '<div class="an-vazio">Ninguém abriu o painel do mod com login ainda.</div>';
-}
+// O uso do mod saiu daqui para a aba propria (Indicadores > Mod, uso-mod.js, 20/11/2026).

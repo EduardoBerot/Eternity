@@ -6,12 +6,11 @@
 .us-grade {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.9fr);
-    grid-template-rows: auto minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 0.9fr);
+    grid-template-rows: auto minmax(0, 1fr) minmax(0, 1.25fr);
     grid-template-areas:
         "tiles tiles tiles tiles"
         "diario diario paginas lado"
-        "pessoas pessoas staff nunca"
-        "mod mod mod mod";
+        "pessoas pessoas staff nunca";
     gap: 10px;
     min-height: 0;
 }
@@ -23,7 +22,6 @@
 .us-c-pessoas { grid-area: pessoas; }
 .us-c-staff { grid-area: staff; }
 .us-c-nunca { grid-area: nunca; }
-.us-c-mod { grid-area: mod; }
 .us-mod-velho { color: #e8a33d; }
 
 .us-root .an-plot { flex: 1; min-height: 0; margin-top: 6px; overflow: hidden; }
@@ -96,11 +94,84 @@
     .us-grade {
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: none;
-        grid-template-areas: "tiles" "diario" "paginas" "lado" "pessoas" "staff" "nunca" "mod";
+        grid-template-areas: "tiles" "diario" "paginas" "lado" "pessoas" "staff" "nunca";
     }
     .us-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .us-c-diario .an-plot { height: 200px; flex: none; }
     .us-c-paginas .an-plot { height: 220px; flex: none; }
     .us-tabela { max-height: 360px; flex: none; }
     .us-c-lado { overflow: visible; }
+}
+
+/* ---------- Indicadores > Mod (20/11/2026, js/painel/uso-mod.js) ---------- */
+.um-grade {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+        "tiles tiles"
+        "pessoas versoes"
+        "crashes crashes";
+    gap: 10px;
+    min-height: 0;
+}
+.um-tiles { grid-area: tiles; }
+.um-c-pessoas { grid-area: pessoas; }
+.um-c-versoes { grid-area: versoes; overflow-y: auto; }
+.um-c-crashes { grid-area: crashes; }
+.um-recarregar {
+    align-self: center; display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 8px; border: 1px solid var(--an-grid);
+    background: transparent; color: var(--an-ink-2); font-size: 0.75rem; cursor: pointer;
+}
+.um-recarregar:hover { color: var(--an-ink); border-color: var(--an-ink-3); }
+
+/* versoes em barras */
+.um-barras { list-style: none; margin: 6px 0 12px; padding: 0; display: grid; gap: 5px; }
+.um-barras li { display: grid; grid-template-columns: 92px minmax(0, 1fr) 28px; align-items: center; gap: 8px; font-size: 0.74rem; color: var(--an-ink-2); }
+.um-barras li i { height: 10px; border-radius: 3px; background: #3987e5; }
+.um-barras li.velha i { background: #e8a33d; }
+.um-barras li.velha span { color: #e8a33d; }
+.um-barras li b { text-align: right; color: var(--an-ink); font-variant-numeric: tabular-nums; }
+
+/* etapa do atualizador */
+.um-etapa { max-width: 230px; overflow: hidden; text-overflow: ellipsis; }
+.um-etapa--ok { color: #3ddc84; }
+.um-etapa--andamento { color: #5fb8ff; }
+.um-etapa--problema { color: #ff4d5e; }
+.um-etapa--sem { color: var(--an-ink-3); }
+.us-lista .um-ponto { display: inline-block; width: 8px; height: 8px; margin-right: 7px; border-radius: 50%; background: currentColor; }
+.us-lista li span { display: inline-flex; align-items: center; }
+
+/* crashes */
+.um-crash { cursor: pointer; }
+.um-crash:focus-visible td { outline: 1px solid var(--an-ink-3); }
+.us-tabela td.um-oque { white-space: normal; min-width: 220px; color: var(--an-ink); }
+.um-culpa { display: inline-block; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--an-grid); color: var(--an-ink-3); font-size: 0.68rem; }
+.um-culpa--nossa { border-color: rgba(255, 77, 94, 0.5); color: #ff7a86; }
+.um-apagado { color: var(--an-ink-3); }
+
+/* texto completo do crash */
+.um-modal { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 24px; background: rgba(3, 10, 16, 0.72); }
+.um-modal[hidden] { display: none; }
+.um-modal__caixa {
+    width: min(1000px, 100%); max-height: 100%; display: flex; flex-direction: column; gap: 10px;
+    padding: 16px 18px; border-radius: 14px; border: 1px solid var(--an-grid); background: var(--an-surface);
+}
+.um-modal__caixa header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.um-modal__caixa h2 { margin: 0; font-size: 1rem; color: var(--an-ink); }
+.um-modal__acoes { display: flex; gap: 6px; }
+.um-modal__acoes button { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 8px; border: 1px solid var(--an-grid); background: transparent; color: var(--an-ink-2); font-size: 0.75rem; cursor: pointer; }
+.um-modal__acoes button:hover { color: var(--an-ink); }
+.um-modal__resumo { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.74rem; color: var(--an-ink-2); }
+.um-modal__resumo b { color: var(--an-ink-3); font-weight: 500; margin-right: 4px; }
+.um-modal pre {
+    flex: 1; min-height: 200px; margin: 0; overflow: auto; padding: 12px; border-radius: 10px;
+    background: rgba(0, 0, 0, 0.35); color: var(--an-ink-2); font-size: 0.72rem; line-height: 1.45; white-space: pre; tab-size: 4;
+}
+
+@media (max-width: 900px) {
+    .um-grade { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: "tiles" "pessoas" "versoes" "crashes"; }
+    .um-c-versoes { overflow: visible; }
+    .um-modal { padding: 10px; }
 }
